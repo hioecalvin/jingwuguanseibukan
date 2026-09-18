@@ -7,9 +7,9 @@ const activeDirectory = new URL('../supabase/migrations/', import.meta.url);
 const legacyDirectory = new URL('../migrations/', import.meta.url);
 
 const legacyHashes = new Map([
-  ['004_finance_module.sql', '8B5CB74B92388660A036378B40D6EA9A0A2A07093BBCD4558DE86166C4FB0F1E'],
-  ['004_subscription_module.sql', 'A16B218DC1C1D2D4B3DDF5494DEAEBD6A197775B1856E1583B03628656EED609'],
-  ['005_settlement_module.sql', 'C5E5979C24DDDB2DFED4B110DBA9775F913030B44F5C61C6D66E24D4BB56C3C0'],
+  ['004_finance_module.sql', '1E665CB5BF0E0D300FA65178F0E228129CC75D6F3F1D7B92C31A5BCBA5DAC40C'],
+  ['004_subscription_module.sql', '92DE1713B61887B5B0A6C1E5EC5F5DAAD9E245B0E3C1506E37EC642FE0E4478D'],
+  ['005_settlement_module.sql', '992FF1B45364F3D75F7FF863212379B47B2C50D18DE6F4F058D5923B7E99635D'],
 ]);
 
 test('only the ordered Supabase directory is active and versions 006-039 are contiguous', async () => {
@@ -29,8 +29,9 @@ test('legacy finance and settlement drafts remain immutable and explicitly non-e
   assert.deepEqual(files, [...legacyHashes.keys()]);
 
   for (const [name, expectedHash] of legacyHashes) {
-    const bytes = await readFile(new URL(name, legacyDirectory));
-    const actualHash = createHash('sha256').update(bytes).digest('hex').toUpperCase();
+    const text = await readFile(new URL(name, legacyDirectory), 'utf8');
+    const canonicalText = text.replace(/\r\n?/g, '\n');
+    const actualHash = createHash('sha256').update(canonicalText, 'utf8').digest('hex').toUpperCase();
     assert.equal(actualHash, expectedHash, `${name} changed without baseline reconciliation`);
   }
 
