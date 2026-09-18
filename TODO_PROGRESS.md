@@ -2774,3 +2774,28 @@ Evidence is under `release-evidence-20260918-source-publication-preflight`. The
 earlier `failed-v1` generator output is retained and explicitly marked unusable.
 No Git index, commit, branch, remote, CI, hosting, database or production state was
 changed. A reviewed commit/push decision is now the next publication gate.
+
+### Milestone 108 — release branch published and remote CI passed (19/09/2026)
+
+Verified the sealed 182-file publication manifest against the source tree with zero
+missing, unexpected or hash-mismatched files, then created and pushed
+`release/v1-readiness-20260918`. The release-candidate commit is
+`f7eed8a4b9b77b02ded5bfd6a80ad155bfc2d117`. Draft pull request #1 was opened only
+to register and trigger the new pull-request workflow; it was not merged or deployed.
+
+The first remote run exposed a platform-dependent CRLF/LF hash in the immutable
+legacy-migration regression. Commit
+`3ebb8772a225196d4a58a05f01b3ee2c39299da7` now hashes canonical LF text while
+retaining exact content pins for all three legacy drafts. The next run passed checks,
+Chromium/Linux and Firefox/Linux, then exposed two WebKit-specific gates: disabled
+Register-button contrast on Linux and the macOS Playwright keyboard-navigation host
+preference. Commit `7d2500024a88e5d36b3178e5f970afe89e93c424` replaced opacity-based disabled styling
+with explicit accessible colors and enabled `AppleKeyboardUIMode` only for the
+macOS WebKit CI job; no browser assertion was suppressed.
+
+Local verification after the fixes passed lint, TypeScript, all 150 Node tests, the
+41-route production build and all 23 WebKit-mobile tests. GitHub Actions run
+`35395933998` then passed every job: checks, Chromium/Linux, Firefox/Linux,
+WebKit/Linux and WebKit/macOS. The draft PR remains open and unmerged. No deployment,
+database connection, provider call or production contact occurred during this
+milestone.
