@@ -406,7 +406,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading || !catalogReady}
-            className="w-full rounded-lg bg-sky-700 py-3 font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"
+            className="w-full rounded-lg bg-sky-700 py-3 font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-sky-950 disabled:text-neutral-300 disabled:opacity-100"
           >
             {loading ? "Registering..." : "Register"}
           </button>
