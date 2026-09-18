@@ -332,15 +332,6 @@ export default function SubscriptionPage() {
 
 
   const [
-    assignments,
-    setAssignments,
-  ] =
-    useState<
-      AdminAssignment[]
-    >([]);
-
-
-  const [
     dojos,
     setDojos,
   ] =
@@ -849,14 +840,78 @@ export default function SubscriptionPage() {
     membershipId:
       string
   ) {
-    return overrides.find(
-      (
-        override
-      ) =>
-        override.membership_id ===
-          membershipId &&
-        override.active
-    );
+    const today =
+      todayString();
+
+
+    return overrides
+      .filter(
+        (
+          override
+        ) =>
+          override.membership_id ===
+            membershipId &&
+          override.active &&
+          (
+            (
+              override.effective_from <=
+                today &&
+              (
+                override.effective_until ===
+                  null ||
+                override.effective_until >=
+                  today
+              )
+            ) ||
+            override.effective_from >
+              today
+          )
+      )
+      .sort(
+        (
+          left,
+          right
+        ) => {
+          const leftIsCurrent =
+            left.effective_from <=
+              today;
+
+          const rightIsCurrent =
+            right.effective_from <=
+              today;
+
+
+          if (
+            leftIsCurrent !==
+            rightIsCurrent
+          ) {
+            return leftIsCurrent
+              ? -1
+              : 1;
+          }
+
+
+          const dateOrder =
+            left.effective_from.localeCompare(
+              right.effective_from
+            );
+
+
+          if (
+            dateOrder !==
+            0
+          ) {
+            return leftIsCurrent
+              ? -dateOrder
+              : dateOrder;
+          }
+
+
+          return left.id.localeCompare(
+            right.id
+          );
+        }
+      )[0];
   }
 
 
@@ -1041,11 +1096,6 @@ export default function SubscriptionPage() {
           AdminAssignment[];
 
 
-      setAssignments(
-        loadedAssignments
-      );
-
-
       if (
         loadedAssignments.length ===
         0
@@ -1099,6 +1149,9 @@ export default function SubscriptionPage() {
 
 
     loadPage();
+    // The loader declarations close over the stable client and state setters;
+    // including their per-render identities would turn this into a load loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     router,
     supabase,
@@ -1291,6 +1344,9 @@ export default function SubscriptionPage() {
 
 
     loadSelectedDojo();
+    // Each loader intentionally reads this render's selected dojo/month data.
+    // Their declaration identities are not triggers for refreshing the panel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedDojoId,
     billingMonth,
@@ -2329,7 +2385,7 @@ export default function SubscriptionPage() {
   ) {
     const confirmed =
       window.confirm(
-        `Remove the special rate for ${member.full_name}?\n\nThe member will return to the dojo default rate.`
+        `End or cancel the special rate for ${member.full_name}?\n\nA rate already in effect remains valid through today. Scheduled future rates will be cancelled, and the dojo default rate applies from tomorrow.`
       );
 
 
@@ -2381,7 +2437,7 @@ export default function SubscriptionPage() {
 
 
     showSuccess(
-      `${member.full_name}'s special rate was removed.`
+      `${member.full_name}'s current special rate now ends today, and scheduled future rates were cancelled.`
     );
 
 
@@ -3023,6 +3079,8 @@ export default function SubscriptionPage() {
         confirmationFilter
       );
     }
+    // loadConfirmations is intentionally driven by these filter inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -3039,6 +3097,8 @@ export default function SubscriptionPage() {
     ) {
       loadReport();
     }
+    // loadReport is intentionally driven by these report inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -4066,7 +4126,7 @@ export default function SubscriptionPage() {
                                   }
                                   className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-300 hover:bg-red-950/30 disabled:opacity-50"
                                 >
-                                  Remove
+                                  End / Cancel
                                 </button>
 
                               )}
@@ -4433,7 +4493,9 @@ export default function SubscriptionPage() {
 
 
               <p className="mt-2 text-sm text-neutral-400">
-                Record full or partial payments against each monthly charge.
+                Mark a charge paid or record a partial payment without waiting for
+                a Member confirmation request. Your Admin account is retained in
+                the payment audit record.
               </p>
 
 
@@ -4616,7 +4678,7 @@ export default function SubscriptionPage() {
                             }
                             className="rounded-lg border border-green-800 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-950/30 disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            Record Payment
+                            Mark Paid / Record Partial
                           </button>
 
                         </div>
@@ -4738,7 +4800,7 @@ export default function SubscriptionPage() {
                                 {processing ===
                                 key
                                   ? "Saving..."
-                                  : "Save Payment"}
+                                  : "Confirm Direct Payment"}
                               </button>
 
 

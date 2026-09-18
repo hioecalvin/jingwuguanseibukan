@@ -2,6 +2,7 @@
 
 import {
   ChangeEvent,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -13,11 +14,17 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { exportToExcel } from "@/lib/exportExcel";
 
+type TitleSystem =
+  | "japanese"
+  | "chinese"
+  | "none";
+
 type ClassRecord = {
   id: string;
   name: string;
   logo_url: string | null;
   is_active: boolean;
+  title_system: TitleSystem;
 };
 
 type Profile = {
@@ -52,6 +59,20 @@ export default function ClassManagementPage() {
     newClassName,
     setNewClassName,
   ] = useState("");
+
+  const [
+    newTitleSystem,
+    setNewTitleSystem,
+  ] = useState<TitleSystem>(
+    "none"
+  );
+
+  const [
+    titleSystemDrafts,
+    setTitleSystemDrafts,
+  ] = useState<
+    Record<string, TitleSystem>
+  >({});
 
   const [
     selectedFiles,
@@ -90,6 +111,40 @@ export default function ClassManagementPage() {
   ] = useState<
     "success" | "error" | ""
   >("");
+
+  const loadClasses = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from("classes")
+        .select(`
+          id,
+          name,
+          logo_url,
+          is_active,
+          title_system
+        `)
+        .order("name");
+
+    if (error) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+    setClasses(
+      (data ??
+        []) as ClassRecord[]
+    );
+  }, [supabase]);
 
   useEffect(() => {
     async function loadPage() {
@@ -161,42 +216,10 @@ export default function ClassManagementPage() {
 
     loadPage();
   }, [
+    loadClasses,
     router,
     supabase,
   ]);
-
-  async function loadClasses() {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from("classes")
-        .select(`
-          id,
-          name,
-          logo_url,
-          is_active
-        `)
-        .order("name");
-
-    if (error) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      return;
-    }
-
-    setClasses(
-      (data ??
-        []) as ClassRecord[]
-    );
-  }
 
   async function createClass() {
     const cleanedName =
@@ -228,6 +251,9 @@ export default function ClassManagementPage() {
           {
             new_class_name:
               cleanedName,
+
+            new_title_system:
+              newTitleSystem,
           }
         );
 
@@ -236,6 +262,9 @@ export default function ClassManagementPage() {
       }
 
       setNewClassName("");
+      setNewTitleSystem(
+        "none"
+      );
 
       await loadClasses();
 
@@ -707,6 +736,124 @@ export default function ClassManagementPage() {
     }
   }
 
+  function titleSystemLabel(
+    value: TitleSystem
+  ) {
+    if (
+      value === "japanese"
+    ) {
+      return "Japanese";
+    }
+
+    if (
+      value === "chinese"
+    ) {
+      return "Chinese";
+    }
+
+    return "None";
+  }
+
+  function titleProgression(
+    value: TitleSystem
+  ) {
+    if (
+      value === "japanese"
+    ) {
+      return [
+        "Fuku Kiyoshi",
+        "Kiyoshi",
+        "Daishi",
+      ];
+    }
+
+    if (
+      value === "chinese"
+    ) {
+      return [
+        "Fujiaoshi",
+        "Jiaoshi",
+        "Dashi",
+      ];
+    }
+
+    return [];
+  }
+
+  async function saveTitleSystem(
+    classRecord: ClassRecord
+  ) {
+    const nextValue =
+      titleSystemDrafts[
+        classRecord.id
+      ] ??
+      classRecord.title_system;
+
+    if (
+      nextValue ===
+      classRecord.title_system
+    ) {
+      return;
+    }
+
+    setProcessingClassId(
+      classRecord.id
+    );
+
+    setMessage("");
+    setMessageType("");
+
+    try {
+      const {
+        error,
+      } =
+        await supabase.rpc(
+          "set_class_title_system",
+          {
+            target_class_id:
+              classRecord.id,
+
+            new_title_system:
+              nextValue,
+          }
+        );
+
+      if (
+        error
+      ) {
+        throw error;
+      }
+
+      await loadClasses();
+
+      setMessage(
+        `${classRecord.name} title system updated to ${titleSystemLabel(
+          nextValue
+        )}.`
+      );
+
+      setMessageType(
+        "success"
+      );
+    } catch (
+      error: unknown
+    ) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to update title system."
+      );
+
+      setMessageType(
+        "error"
+      );
+    } finally {
+      setProcessingClassId(
+        null
+      );
+    }
+  }
+
   function exportClassesExcel() {
     if (classes.length === 0) {
       setMessage("There are no classes to export.");
@@ -720,6 +867,38 @@ export default function ClassManagementPage() {
       title: "Jingwuguan Seibukan Classes",
       columns: [
         { header: "Class Name", key: "name" },
+        {
+          header: "Title System",
+          key: "title_system",
+          value: (row) =>
+            titleSystemLabel(
+              row.title_system
+            ),
+        },
+        {
+          header: "Title Level 1",
+          key: "title_level_1",
+          value: (row) =>
+            titleProgression(
+              row.title_system
+            )[0] ?? "",
+        },
+        {
+          header: "Title Level 2",
+          key: "title_level_2",
+          value: (row) =>
+            titleProgression(
+              row.title_system
+            )[1] ?? "",
+        },
+        {
+          header: "Title Level 3",
+          key: "title_level_3",
+          value: (row) =>
+            titleProgression(
+              row.title_system
+            )[2] ?? "",
+        },
         {
           header: "Status",
           key: "is_active",
@@ -833,31 +1012,68 @@ export default function ClassManagementPage() {
             Add another discipline. The fixed rank and tier progression will be used automatically.
           </p>
 
-          <div className="mt-5 flex max-w-2xl flex-col gap-3 sm:flex-row">
+          <div className="mt-5 grid max-w-4xl gap-4 md:grid-cols-[1fr_260px_auto] md:items-end">
 
-            <input
-              type="text"
-              value={
-                newClassName
-              }
-              onChange={(e) =>
-                setNewClassName(
-                  e.target.value
-                )
-              }
-              onKeyDown={(e) => {
-                if (
-                  e.key ===
-                    "Enter" &&
-                  !creating
-                ) {
-                  createClass();
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Class Name
+              </label>
+
+              <input
+                type="text"
+                value={
+                  newClassName
                 }
-              }}
-              placeholder="Example: Judo"
-              maxLength={100}
-              className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-sky-600"
-            />
+                onChange={(e) =>
+                  setNewClassName(
+                    e.target.value
+                  )
+                }
+                onKeyDown={(e) => {
+                  if (
+                    e.key ===
+                      "Enter" &&
+                    !creating
+                  ) {
+                    createClass();
+                  }
+                }}
+                placeholder="Example: Judo"
+                maxLength={100}
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-sky-600"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Title System
+              </label>
+
+              <select
+                value={
+                  newTitleSystem
+                }
+                onChange={(e) =>
+                  setNewTitleSystem(
+                    e.target.value as
+                      TitleSystem
+                  )
+                }
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-white outline-none focus:border-sky-600"
+              >
+                <option value="none">
+                  None
+                </option>
+
+                <option value="japanese">
+                  Japanese
+                </option>
+
+                <option value="chinese">
+                  Chinese
+                </option>
+              </select>
+            </div>
 
             <button
               type="button"
@@ -874,6 +1090,26 @@ export default function ClassManagementPage() {
                 : "Create Class"}
             </button>
 
+          </div>
+
+          <div className="mt-4 max-w-4xl rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              Title Preview
+            </p>
+
+            {titleProgression(
+              newTitleSystem
+            ).length > 0 ? (
+              <p className="mt-2 text-sm text-neutral-300">
+                {titleProgression(
+                  newTitleSystem
+                ).join(" → ")}
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-neutral-500">
+                This class will not use the title appointment system.
+              </p>
+            )}
           </div>
 
         </section>
@@ -969,6 +1205,8 @@ export default function ClassManagementPage() {
 
                       {displayedLogo ? (
 
+                        // The editable logo preview may be a temporary blob URL.
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={
                             displayedLogo
@@ -1087,6 +1325,100 @@ export default function ClassManagementPage() {
                       <p className="mt-2 text-sm text-neutral-400">
                         Used for member records, class identity and official certificates.
                       </p>
+
+                      <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
+
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
+                          <div className="min-w-0 flex-1">
+
+                            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                              Title System
+                            </p>
+
+                            <select
+                              value={
+                                titleSystemDrafts[
+                                  classRecord.id
+                                ] ??
+                                classRecord.title_system
+                              }
+                              onChange={(e) =>
+                                setTitleSystemDrafts(
+                                  (
+                                    current
+                                  ) => ({
+                                    ...current,
+                                    [classRecord.id]:
+                                      e.target.value as
+                                        TitleSystem,
+                                  })
+                                )
+                              }
+                              className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-white"
+                            >
+                              <option value="none">
+                                None
+                              </option>
+
+                              <option value="japanese">
+                                Japanese
+                              </option>
+
+                              <option value="chinese">
+                                Chinese
+                              </option>
+                            </select>
+
+                            <p className="mt-2 text-xs text-neutral-500">
+                              {titleProgression(
+                                titleSystemDrafts[
+                                  classRecord.id
+                                ] ??
+                                classRecord.title_system
+                              ).length > 0
+                                ? titleProgression(
+                                    titleSystemDrafts[
+                                      classRecord.id
+                                    ] ??
+                                    classRecord.title_system
+                                  ).join(
+                                    " → "
+                                  )
+                                : "No title appointments for this class."}
+                            </p>
+
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={
+                              processing ||
+                              (
+                                titleSystemDrafts[
+                                  classRecord.id
+                                ] ??
+                                classRecord.title_system
+                              ) ===
+                                classRecord.title_system
+                            }
+                            onClick={() =>
+                              saveTitleSystem(
+                                classRecord
+                              )
+                            }
+                            className="rounded-lg border border-amber-800 px-4 py-2 text-sm font-medium text-amber-300 hover:bg-amber-950/30 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Save Title System
+                          </button>
+
+                        </div>
+
+                        <p className="mt-3 text-[11px] leading-5 text-neutral-600">
+                          Once title appointment history exists for this class, the backend will block changing the title system to protect historical records.
+                        </p>
+
+                      </div>
 
                     </div>
 

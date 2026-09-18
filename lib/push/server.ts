@@ -1,37 +1,6 @@
 import webpush from "web-push";
 
 
-const publicKey =
-  process.env
-    .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-
-const privateKey =
-  process.env
-    .VAPID_PRIVATE_KEY;
-
-const subject =
-  process.env
-    .VAPID_SUBJECT;
-
-
-if (
-  !publicKey ||
-  !privateKey ||
-  !subject
-) {
-  throw new Error(
-    "VAPID configuration is incomplete."
-  );
-}
-
-
-webpush.setVapidDetails(
-  subject,
-  publicKey,
-  privateKey
-);
-
-
 export type PushPayload = {
   title: string;
   body: string;
@@ -53,6 +22,37 @@ export async function sendWebPush(
   payload:
     PushPayload
 ) {
+  const publicKey =
+    process.env
+      .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+  const privateKey =
+    process.env
+      .VAPID_PRIVATE_KEY;
+
+  const subject =
+    process.env
+      .VAPID_SUBJECT;
+
+
+  if (
+    !publicKey ||
+    !privateKey ||
+    !subject
+  ) {
+    throw new Error(
+      "VAPID configuration is incomplete."
+    );
+  }
+
+
+  webpush.setVapidDetails(
+    subject,
+    publicKey,
+    privateKey
+  );
+
+
   return webpush.sendNotification(
     {
       endpoint:

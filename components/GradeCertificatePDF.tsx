@@ -9,6 +9,13 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 
+
+/*
+ * ============================================================
+ * TYPES
+ * ============================================================
+ */
+
 export type CertificateRecord = {
   promotion_history_id: string;
   membership_id: string;
@@ -16,6 +23,7 @@ export type CertificateRecord = {
 
   member_id: string | null;
   aikikai_registration_number: string | null;
+
   full_name: string;
 
   class_id: string;
@@ -32,10 +40,20 @@ export type CertificateRecord = {
   promoted_by: string | null;
   promoted_by_name: string | null;
 
-  assessor_type: "member" | "external" | null;
-  assessor_member_id: string | null;
-  assessor_name: string | null;
+  assessor_type:
+    | "member"
+    | "external"
+    | null;
+
+  assessor_member_id:
+    | string
+    | null;
+
+  assessor_name:
+    | string
+    | null;
 };
+
 
 export type CertificateAudit = {
   certificate_id: string;
@@ -52,6 +70,7 @@ export type CertificateAudit = {
     | "reprint";
 };
 
+
 type Props = {
   record: CertificateRecord;
   audit: CertificateAudit;
@@ -63,50 +82,77 @@ type Props = {
     | null;
 };
 
+
+/*
+ * ============================================================
+ * STYLES
+ * ============================================================
+ */
+
 const styles =
   StyleSheet.create({
     page: {
-      padding: 38,
+      padding: 34,
+
       backgroundColor:
         "#ffffff",
-      color: "#111111",
+
+      color:
+        "#111111",
+
       fontFamily:
         "Helvetica",
     },
 
+
     borderOuter: {
       position:
         "absolute",
+
       top: 18,
       bottom: 18,
       left: 18,
       right: 18,
 
       borderWidth: 2,
+
       borderColor:
         "#222222",
     },
 
+
     borderInner: {
       position:
         "absolute",
+
       top: 24,
       bottom: 24,
       left: 24,
       right: 24,
 
       borderWidth: 0.8,
+
       borderColor:
         "#888888",
     },
 
+
     body: {
       flex: 1,
+
       alignItems:
         "center",
+
       justifyContent:
         "center",
     },
+
+
+    /*
+     * ========================================================
+     * LOGOS
+     * ========================================================
+     */
 
     logoRow: {
       flexDirection:
@@ -118,46 +164,59 @@ const styles =
       justifyContent:
         "center",
 
-      marginBottom: 14,
+      marginBottom: 8,
     },
 
+
     organisationLogo: {
-      width: 82,
-      height: 82,
+      width: 60,
+      height: 60,
 
       objectFit:
         "contain",
     },
 
+
     logoDivider: {
       width: 1,
-      height: 62,
+      height: 44,
 
       backgroundColor:
         "#cccccc",
 
-      marginHorizontal: 20,
+      marginHorizontal: 14,
     },
 
+
     categoryLogo: {
-      width: 82,
-      height: 82,
+      width: 60,
+      height: 60,
 
       objectFit:
         "contain",
     },
 
+
+    /*
+     * ========================================================
+     * HEADER
+     * ========================================================
+     */
+
     organisation: {
-      fontSize: 17,
+      fontSize: 15,
+
       fontFamily:
         "Helvetica-Bold",
+
       letterSpacing: 1,
     },
 
-    discipline: {
-      marginTop: 5,
 
-      fontSize: 10,
+    discipline: {
+      marginTop: 3,
+
+      fontSize: 8.5,
 
       fontFamily:
         "Helvetica-Bold",
@@ -165,56 +224,70 @@ const styles =
       letterSpacing: 0.8,
     },
 
+
     certificateTitle: {
-      fontSize: 24,
+      fontSize: 19,
+
       fontFamily:
         "Helvetica-Bold",
 
-      marginTop: 20,
+      marginTop: 10,
 
       letterSpacing: 1.4,
     },
 
+
+    /*
+     * ========================================================
+     * MEMBER / AWARD
+     * ========================================================
+     */
+
     certify: {
-      marginTop: 28,
-      fontSize: 11,
+      marginTop: 13,
+
+      fontSize: 9.5,
     },
 
-    memberName: {
-      marginTop: 15,
 
-      fontSize: 25,
+    memberName: {
+      marginTop: 8,
+
+      fontSize: 21,
 
       fontFamily:
         "Helvetica-Bold",
     },
 
+
     line: {
-      width: 330,
+      width: 370,
 
       borderBottomWidth: 1,
 
       borderBottomColor:
         "#555555",
 
-      marginTop: 5,
+      marginTop: 4,
     },
 
-    statement: {
-      marginTop: 25,
 
-      fontSize: 11,
+    statement: {
+      marginTop: 11,
+
+      fontSize: 9.5,
 
       textAlign:
         "center",
 
-      lineHeight: 1.6,
+      lineHeight: 1.3,
     },
 
-    rank: {
-      marginTop: 16,
 
-      fontSize: 29,
+    rank: {
+      marginTop: 8,
+
+      fontSize: 23,
 
       fontFamily:
         "Helvetica-Bold",
@@ -222,26 +295,37 @@ const styles =
       letterSpacing: 1,
     },
 
+
+    /*
+     * ========================================================
+     * DETAILS
+     * ========================================================
+     */
+
     details: {
       width: "80%",
-      marginTop: 30,
+
+      marginTop: 14,
     },
+
 
     row: {
       flexDirection:
         "row",
 
-      marginBottom: 7,
+      marginBottom: 3,
     },
 
+
     label: {
-      width: 130,
+      width: 170,
 
       color:
         "#555555",
 
-      fontSize: 9,
+      fontSize: 8.5,
     },
+
 
     value: {
       flex: 1,
@@ -249,13 +333,14 @@ const styles =
       fontFamily:
         "Helvetica-Bold",
 
-      fontSize: 9,
+      fontSize: 8.5,
     },
 
-    reprintNotice: {
-      marginTop: 12,
 
-      paddingVertical: 5,
+    reprintNotice: {
+      marginTop: 6,
+
+      paddingVertical: 4,
 
       paddingHorizontal: 10,
 
@@ -270,10 +355,17 @@ const styles =
         "Helvetica-Bold",
     },
 
+
+    /*
+     * ========================================================
+     * SIGNATURES
+     * ========================================================
+     */
+
     signatures: {
       width: "80%",
 
-      marginTop: 38,
+      marginTop: 14,
 
       flexDirection:
         "row",
@@ -282,12 +374,14 @@ const styles =
         "space-between",
     },
 
+
     signature: {
       width: "42%",
 
       alignItems:
         "center",
     },
+
 
     signatureLine: {
       width: "100%",
@@ -300,12 +394,20 @@ const styles =
       marginBottom: 5,
     },
 
+
     signatureText: {
       fontSize: 8,
 
       textAlign:
         "center",
     },
+
+
+    /*
+     * ========================================================
+     * AUDIT FOOTER
+     * ========================================================
+     */
 
     footer: {
       position:
@@ -329,6 +431,12 @@ const styles =
   });
 
 
+/*
+ * ============================================================
+ * DATE HELPERS
+ * ============================================================
+ */
+
 function formatDate(
   value: string
 ) {
@@ -337,9 +445,14 @@ function formatDate(
   ).toLocaleDateString(
     "en-AU",
     {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+      day:
+        "2-digit",
+
+      month:
+        "2-digit",
+
+      year:
+        "numeric",
     }
   );
 }
@@ -353,9 +466,14 @@ function formatDateTime(
   ).toLocaleString(
     "en-AU",
     {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+      day:
+        "2-digit",
+
+      month:
+        "2-digit",
+
+      year:
+        "numeric",
 
       hour:
         "2-digit",
@@ -367,12 +485,77 @@ function formatDateTime(
 }
 
 
+/*
+ * ============================================================
+ * CERTIFICATE
+ * ============================================================
+ */
+
 export default function GradeCertificatePDF({
   record,
   audit,
   organisationLogoUrl,
   categoryLogoUrl,
 }: Props) {
+
+  /*
+   * ==========================================================
+   * MEMBER IDENTIFICATION
+   *
+   * Aikido Members with an Aikikai registration number use:
+   *
+   * Member ID / Aikikai Registration Number
+   *
+   * Everyone else uses the normal Member ID.
+   * ==========================================================
+   */
+
+  const hasAikikaiNumber =
+    record.class_name
+      .trim()
+      .toLowerCase() ===
+      "aikido" &&
+    Boolean(
+      record.aikikai_registration_number
+        ?.trim()
+    );
+
+
+  const identificationLabel =
+    hasAikikaiNumber
+      ? "Member ID / Aikikai Registration Number"
+      : "Member ID";
+
+
+  const identificationValue =
+    hasAikikaiNumber
+      ? `${
+          record.member_id ??
+          "-"
+        } / ${
+          record.aikikai_registration_number
+        }`
+      : record.member_id ??
+        "-";
+
+
+  /*
+   * ==========================================================
+   * ASSESSOR
+   *
+   * assessor_name is a historical snapshot.
+   *
+   * Do not resolve the current profile name here because the
+   * historical grading record must remain unchanged.
+   * ==========================================================
+   */
+
+  const assessorName =
+    record.assessor_name
+      ?.trim() ||
+    "Not recorded";
+
+
   return (
     <Document
       title={`${record.rank_name} Certificate - ${record.full_name}`}
@@ -382,8 +565,16 @@ export default function GradeCertificatePDF({
       <Page
         size="A4"
         orientation="landscape"
-        style={styles.page}
+        style={
+          styles.page
+        }
       >
+
+        {/*
+         * ====================================================
+         * BORDERS
+         * ====================================================
+         */}
 
         <View
           style={
@@ -391,6 +582,7 @@ export default function GradeCertificatePDF({
           }
           fixed
         />
+
 
         <View
           style={
@@ -401,21 +593,27 @@ export default function GradeCertificatePDF({
 
 
         <View
-          style={styles.body}
+          style={
+            styles.body
+          }
         >
 
-          {/* LOGOS */}
+          {/*
+           * ==================================================
+           * LOGOS
+           * ==================================================
+           */}
 
           <View
             style={
               styles.logoRow
             }
           >
-
             <Image
               src={
                 organisationLogoUrl
               }
+
               style={
                 styles.organisationLogo
               }
@@ -430,19 +628,26 @@ export default function GradeCertificatePDF({
                   }
                 />
 
+
                 <Image
                   src={
                     categoryLogoUrl
                   }
+
                   style={
                     styles.categoryLogo
                   }
                 />
               </>
             )}
-
           </View>
 
+
+          {/*
+           * ==================================================
+           * ORGANISATION
+           * ==================================================
+           */}
 
           <Text
             style={
@@ -471,6 +676,12 @@ export default function GradeCertificatePDF({
           </Text>
 
 
+          {/*
+           * ==================================================
+           * MEMBER
+           * ==================================================
+           */}
+
           <Text
             style={
               styles.certify
@@ -490,7 +701,9 @@ export default function GradeCertificatePDF({
 
 
           <View
-            style={styles.line}
+            style={
+              styles.line
+            }
           />
 
 
@@ -505,20 +718,34 @@ export default function GradeCertificatePDF({
 
 
           <Text
-            style={styles.rank}
+            style={
+              styles.rank
+            }
           >
             {record.rank_name}
           </Text>
 
 
-          {/* DETAILS */}
+          {/*
+           * ==================================================
+           * CERTIFICATE DETAILS
+           * ==================================================
+           */}
 
           <View
-            style={styles.details}
+            style={
+              styles.details
+            }
           >
 
+            {/*
+             * DISCIPLINE
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
@@ -527,6 +754,7 @@ export default function GradeCertificatePDF({
               >
                 Discipline
               </Text>
+
 
               <Text
                 style={
@@ -538,53 +766,45 @@ export default function GradeCertificatePDF({
             </View>
 
 
+            {/*
+             * MEMBER ID
+             *
+             * Aikikai number is combined with Member ID when
+             * available.
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
                   styles.label
                 }
               >
-                Member ID
+                {identificationLabel}
               </Text>
+
 
               <Text
                 style={
                   styles.value
                 }
               >
-                {record.member_id ??
-                  "-"}
+                {identificationValue}
               </Text>
             </View>
 
 
-            {record.aikikai_registration_number && (
-              <View
-                style={styles.row}
-              >
-                <Text
-                  style={
-                    styles.label
-                  }
-                >
-                  Aikikai Registration No.
-                </Text>
-
-                <Text
-                  style={
-                    styles.value
-                  }
-                >
-                  {record.aikikai_registration_number}
-                </Text>
-              </View>
-            )}
-
+            {/*
+             * PROMOTION DATE
+             */}
 
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
@@ -593,6 +813,7 @@ export default function GradeCertificatePDF({
               >
                 Promotion Date
               </Text>
+
 
               <Text
                 style={
@@ -606,8 +827,14 @@ export default function GradeCertificatePDF({
             </View>
 
 
+            {/*
+             * DOJO
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
@@ -616,6 +843,7 @@ export default function GradeCertificatePDF({
               >
                 Dojo
               </Text>
+
 
               <Text
                 style={
@@ -628,33 +856,42 @@ export default function GradeCertificatePDF({
             </View>
 
 
+            {/*
+             * GRADING ASSESSOR
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
                   styles.label
                 }
               >
-                Assessor
+                Grading Assessor
               </Text>
+
 
               <Text
                 style={
                   styles.value
                 }
               >
-                {record.assessor_name ??
-                  "Not recorded"}
-                {record.assessor_type
-                  ? ` (${record.assessor_type === "external" ? "External" : "Member"})`
-                  : ""}
+                {assessorName}
               </Text>
             </View>
 
 
+            {/*
+             * CERTIFICATE NUMBER
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
@@ -663,6 +900,7 @@ export default function GradeCertificatePDF({
               >
                 Certificate No.
               </Text>
+
 
               <Text
                 style={
@@ -676,8 +914,14 @@ export default function GradeCertificatePDF({
             </View>
 
 
+            {/*
+             * PRINT TYPE
+             */}
+
             <View
-              style={styles.row}
+              style={
+                styles.row
+              }
             >
               <Text
                 style={
@@ -686,6 +930,7 @@ export default function GradeCertificatePDF({
               >
                 Print Type
               </Text>
+
 
               <Text
                 style={
@@ -702,6 +947,12 @@ export default function GradeCertificatePDF({
           </View>
 
 
+          {/*
+           * ==================================================
+           * REPRINT NOTICE
+           * ==================================================
+           */}
+
           {audit.print_type ===
             "reprint" && (
 
@@ -710,13 +961,17 @@ export default function GradeCertificatePDF({
                 styles.reprintNotice
               }
             >
-              OFFICIAL REPRINT — ORIGINAL CERTIFICATE NUMBER RETAINED
+              OFFICIAL REPRINT - ORIGINAL CERTIFICATE NUMBER RETAINED
             </Text>
 
           )}
 
 
-          {/* SIGNATURES */}
+          {/*
+           * ==================================================
+           * SIGNATURES
+           * ==================================================
+           */}
 
           <View
             style={
@@ -729,21 +984,20 @@ export default function GradeCertificatePDF({
                 styles.signature
               }
             >
-
               <View
                 style={
                   styles.signatureLine
                 }
               />
 
+
               <Text
                 style={
                   styles.signatureText
                 }
               >
-                Authorised Instructor / Examiner
+                Grading Assessor
               </Text>
-
             </View>
 
 
@@ -752,12 +1006,12 @@ export default function GradeCertificatePDF({
                 styles.signature
               }
             >
-
               <View
                 style={
                   styles.signatureLine
                 }
               />
+
 
               <Text
                 style={
@@ -766,7 +1020,6 @@ export default function GradeCertificatePDF({
               >
                 Jingwuguan Seibukan
               </Text>
-
             </View>
 
           </View>
@@ -774,12 +1027,21 @@ export default function GradeCertificatePDF({
         </View>
 
 
-        {/* AUDIT FOOTER */}
+        {/*
+         * ====================================================
+         * AUDIT FOOTER
+         *
+         * This identifies who generated/printed the system
+         * certificate. It is intentionally separate from the
+         * grading assessor.
+         * ====================================================
+         */}
 
         <View
-          style={styles.footer}
+          style={
+            styles.footer
+          }
         >
-
           <Text>
             {
               audit.certificate_number
@@ -792,7 +1054,7 @@ export default function GradeCertificatePDF({
             {
               audit.generated_by_name
             }
-            {" · "}
+            {" - "}
             {
               audit.generated_by_role
             }
@@ -804,7 +1066,6 @@ export default function GradeCertificatePDF({
               audit.generated_at
             )}
           </Text>
-
         </View>
 
       </Page>

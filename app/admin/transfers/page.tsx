@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -293,9 +294,9 @@ export default function DojoTransferPage() {
    * =====================================================
    */
 
-  function showSuccess(
+  const showSuccess = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -303,12 +304,12 @@ export default function DojoTransferPage() {
     setMessageType(
       "success"
     );
-  }
+  }, []);
 
 
-  function showError(
+  const showError = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -316,13 +317,119 @@ export default function DojoTransferPage() {
     setMessageType(
       "error"
     );
-  }
+  }, []);
 
 
-  function clearMessage() {
+  const clearMessage = useCallback(() => {
     setMessage("");
     setMessageType("");
-  }
+  }, []);
+
+
+  const loadMemberTransfers = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "dojo_transfer_requests"
+        )
+        .select(`
+          id,
+          user_id,
+          class_id,
+          from_dojo_id,
+          to_dojo_id,
+          reason,
+          status,
+          created_at,
+
+          profiles:profiles!dojo_transfer_requests_user_id_fkey (
+            full_name,
+            registration_number
+          ),
+
+          from_dojo:dojos!dojo_transfer_requests_from_dojo_id_fkey (
+            name
+          ),
+
+          to_dojo:dojos!dojo_transfer_requests_to_dojo_id_fkey (
+            name
+          )
+        `)
+        .eq(
+          "status",
+          "pending"
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              true,
+          }
+        );
+
+
+    if (
+      error
+    ) {
+      showError(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setMemberTransfers(
+      (
+        data ??
+        []
+      ) as unknown as MemberTransferRequest[]
+    );
+  }, [showError, supabase]);
+
+
+  const loadAdminTransfers = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_admin_dojo_transfer_requests"
+      );
+
+
+    if (
+      error
+    ) {
+      showError(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setAdminTransfers(
+      (
+        data ??
+        []
+      ) as AdminTransferRow[]
+    );
+  }, [showError, supabase]);
+
+
+  const reloadAll = useCallback(async () => {
+    await Promise.all([
+      loadMemberTransfers(),
+      loadAdminTransfers(),
+    ]);
+  }, [
+    loadAdminTransfers,
+    loadMemberTransfers,
+  ]);
 
 
   /*
@@ -405,6 +512,7 @@ export default function DojoTransferPage() {
 
     loadPage();
   }, [
+    reloadAll,
     router,
     supabase,
   ]);
@@ -415,115 +523,6 @@ export default function DojoTransferPage() {
    * LOAD MEMBER TRANSFERS
    * =====================================================
    */
-
-  async function loadMemberTransfers() {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "dojo_transfer_requests"
-        )
-        .select(`
-          id,
-          user_id,
-          class_id,
-          from_dojo_id,
-          to_dojo_id,
-          reason,
-          status,
-          created_at,
-
-          profiles:profiles!dojo_transfer_requests_user_id_fkey (
-            full_name,
-            registration_number
-          ),
-
-          from_dojo:dojos!dojo_transfer_requests_from_dojo_id_fkey (
-            name
-          ),
-
-          to_dojo:dojos!dojo_transfer_requests_to_dojo_id_fkey (
-            name
-          )
-        `)
-        .eq(
-          "status",
-          "pending"
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              true,
-          }
-        );
-
-
-    if (
-      error
-    ) {
-      showError(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setMemberTransfers(
-      (
-        data ??
-        []
-      ) as unknown as MemberTransferRequest[]
-    );
-  }
-
-
-  /*
-   * =====================================================
-   * LOAD ADMIN TRANSFERS
-   * =====================================================
-   */
-
-  async function loadAdminTransfers() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_admin_dojo_transfer_requests"
-      );
-
-
-    if (
-      error
-    ) {
-      showError(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setAdminTransfers(
-      (
-        data ??
-        []
-      ) as AdminTransferRow[]
-    );
-  }
-
-
-  async function reloadAll() {
-    await Promise.all([
-      loadMemberTransfers(),
-      loadAdminTransfers(),
-    ]);
-  }
-
 
   /*
    * =====================================================
@@ -583,9 +582,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -722,9 +731,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -848,9 +867,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -2039,8 +2068,7 @@ export default function DojoTransferPage() {
    */
 
   const bulkGroups =
-    useMemo(
-      () => {
+    (() => {
         const map =
           new Map<
             string,
@@ -2086,11 +2114,7 @@ export default function DojoTransferPage() {
 
 
         return map;
-      },
-      [
-        filteredAdminRows,
-      ]
-    );
+      })();
 
 
   /*

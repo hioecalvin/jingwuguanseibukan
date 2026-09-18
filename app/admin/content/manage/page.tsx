@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
@@ -8,8 +8,8 @@ type ContentItem = {
   id: string;
   title: string;
   description: string | null;
-  video_provider: "youtube" | "vimeo";
-  video_id: string;
+  video_provider: "youtube";
+  video_id: string | null;
   status: "draft" | "published";
   sort_order: number;
   classes: {
@@ -33,7 +33,7 @@ export default function ManageContentPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  async function loadContent() {
+  const loadContent = useCallback(async () => {
     setLoading(true);
     setMessage("");
 
@@ -70,20 +70,28 @@ export default function ManageContentPage() {
 
     setItems((data ?? []) as unknown as ContentItem[]);
     setLoading(false);
-  }
+  }, [supabase]);
 
   useEffect(() => {
-    loadContent();
-  }, []);
+    void loadContent();
+  }, [loadContent]);
 
   async function toggleStatus(item: ContentItem) {
     const nextStatus =
       item.status === "published" ? "draft" : "published";
 
-    const { error } = await supabase
-      .from("content")
-      .update({ status: nextStatus })
-      .eq("id", item.id);
+    const { error } = await supabase.rpc(
+      "update_repository_content",
+      {
+        target_content: item.id,
+        content_title: item.title,
+        content_description: item.description ?? "",
+        provider: item.video_provider,
+        provider_video_id: item.video_id ?? "",
+        content_status: nextStatus,
+        content_sort_order: item.sort_order,
+      }
+    );
 
     if (error) {
       setMessage(error.message);
@@ -108,10 +116,12 @@ export default function ManageContentPage() {
       return;
     }
 
-    const { error } = await supabase
-      .from("content")
-      .delete()
-      .eq("id", item.id);
+    const { error } = await supabase.rpc(
+      "delete_repository_content",
+      {
+        target_content: item.id,
+      }
+    );
 
     if (error) {
       setMessage(error.message);
