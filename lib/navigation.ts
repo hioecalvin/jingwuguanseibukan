@@ -136,6 +136,50 @@ export const navigationItems:
   },
 
 
+  /*
+   * =====================================================
+   * BREAK REQUESTS
+   * =====================================================
+   */
+
+  {
+    label: "Break Requests",
+    href: "/admin/break-request",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+
+  /*
+   * =====================================================
+   * ENROLLMENT REQUESTS
+   * =====================================================
+   */
+
+  {
+    label: "Enrollment Requests",
+    href: "/admin/enrollment-requests",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+
+  /*
+   * =====================================================
+   * CLASS MANAGEMENT
+   * =====================================================
+   */
+
   {
     label: "Classes",
     href: "/admin/classes",
@@ -187,6 +231,24 @@ export const navigationItems:
   },
 
 
+  /*
+   * =====================================================
+   * FINANCE
+   * =====================================================
+   */
+
+  {
+    label: "Payments",
+    href: "/admin/payments",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
   {
     label: "Subscriptions",
     href: "/admin/subscriptions",
@@ -212,6 +274,12 @@ export const navigationItems:
     section: "management",
   },
 
+
+  /*
+   * =====================================================
+   * RECORDS / DOCUMENTS
+   * =====================================================
+   */
 
   {
     label: "Archive",
@@ -251,6 +319,12 @@ export const navigationItems:
     section: "management",
   },
 
+
+  /*
+   * =====================================================
+   * MEMBERSHIP MOVEMENT
+   * =====================================================
+   */
 
   {
     label: "Transfers",
@@ -302,7 +376,6 @@ export const navigationItems:
     href: "/admin/events",
 
     roles: [
-      "admin",
       "super_admin",
     ],
 
@@ -334,6 +407,7 @@ export const navigationItems:
     href: "/admin/applications",
 
     roles: [
+      "admin",
       "super_admin",
     ],
 
@@ -355,15 +429,17 @@ export const navigationItems:
 ];
 
 
+/*
+ * =====================================================
+ * ROLE NAVIGATION
+ * =====================================================
+ */
+
 export function getNavigationForRole(
   role: AppRole
 ) {
   return navigationItems.filter(
-    (
-      item
-    ) =>
-      item.roles.includes(
-        role
-      )
+    (item) =>
+      item.roles.includes(role)
   );
 }

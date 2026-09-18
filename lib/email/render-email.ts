@@ -34,6 +34,36 @@ function escapeHtml(
 }
 
 
+function safeWebUrl(
+  value: unknown
+) {
+  if (
+    typeof value !== "string"
+  ) {
+    return "";
+  }
+
+  try {
+    const parsed =
+      new URL(
+        value
+      );
+
+    if (
+      parsed.protocol !== "https:"
+    ) {
+      return "";
+    }
+
+    return escapeHtml(
+      parsed.toString()
+    );
+  } catch {
+    return "";
+  }
+}
+
+
 function layout(
   title: string,
   body: string
@@ -135,7 +165,7 @@ export function renderEmail(
         );
 
       const activationUrl =
-        escapeHtml(
+        safeWebUrl(
           data.activation_url
         );
 
@@ -254,40 +284,64 @@ export function renderEmail(
 
     case "password_reset_approved": {
 
+      const memberName =
+        escapeHtml(
+          data.member_name
+        );
+
+      const temporaryPassword =
+        escapeHtml(
+          data.temporary_password
+        );
+
+
       return layout(
         "Password Reset Approved",
         `
           <p>
-            Your password reset request
-            has been approved.
+            Hello ${memberName},
           </p>
 
           <p>
-            Your temporary password is
-            based on your Date of Birth
-            using this format:
+            Your Jingwuguan Seibukan
+            password reset request has
+            been approved.
           </p>
 
-          <p
+          <p>
+            Your temporary password is:
+          </p>
+
+          <div
             style="
-              font-size:20px;
+              margin:20px 0;
+              padding:16px;
+              background:#f5f5f5;
+              border-radius:8px;
+              font-size:22px;
               font-weight:700;
+              letter-spacing:1px;
+              text-align:center;
             "
           >
-            DDMmmYYYY
+            ${temporaryPassword}
+          </div>
+
+          <p>
+            Use this temporary password
+            to sign in.
           </p>
 
           <p>
-            Example:
-            <strong>
-              05Nov1996
-            </strong>
+            After signing in, you will
+            be required to create a new
+            password before continuing.
           </p>
 
           <p>
-            After logging in, you will
-            be required to choose a
-            new password immediately.
+            For security, do not share
+            this temporary password with
+            anyone.
           </p>
         `
       );
@@ -328,6 +382,168 @@ export function renderEmail(
             Administrator if you need
             assistance.
           </p>
+        `
+      );
+    }
+
+
+    /*
+     * ===============================================
+     * CLASS EVENT NOTIFICATION
+     * ===============================================
+     */
+
+    case "class_event_notification": {
+
+      const notificationNumber =
+        Number(
+          data.notification_number ??
+          1
+        );
+
+      const emailHeading =
+        notificationNumber === 1
+          ? "New Class Event"
+          : notificationNumber === 2
+            ? "Event Reminder"
+            : "Final Event Reminder";
+
+
+      return layout(
+        emailHeading,
+        `
+          <p>
+            A
+            <strong>
+              ${escapeHtml(
+                data.class_name
+              )}
+            </strong>
+            event has been scheduled.
+          </p>
+
+          <div
+            style="
+              margin:20px 0;
+              padding:20px;
+              background:#f5f5f5;
+              border-radius:8px;
+            "
+          >
+
+            <p
+              style="
+                margin:0 0 14px;
+                font-size:20px;
+                font-weight:700;
+              "
+            >
+              ${escapeHtml(
+                data.title
+              )}
+            </p>
+
+            ${
+              data.description
+                ? `
+                  <p
+                    style="
+                      margin:0 0 14px;
+                    "
+                  >
+                    ${escapeHtml(
+                      data.description
+                    )}
+                  </p>
+                `
+                : ""
+            }
+
+            ${
+              data.location
+                ? `
+                  <p
+                    style="
+                      margin:0 0 8px;
+                    "
+                  >
+                    <strong>
+                      Location:
+                    </strong>
+
+                    ${escapeHtml(
+                      data.location
+                    )}
+                  </p>
+                `
+                : ""
+            }
+
+            ${
+              data.starts_at
+                ? `
+                  <p
+                    style="
+                      margin:0 0 8px;
+                    "
+                  >
+                    <strong>
+                      Starts:
+                    </strong>
+
+                    ${escapeHtml(
+                      data.starts_at
+                    )}
+                  </p>
+                `
+                : ""
+            }
+
+            ${
+              data.end_at
+                ? `
+                  <p
+                    style="
+                      margin:0;
+                    "
+                  >
+                    <strong>
+                      Ends:
+                    </strong>
+
+                    ${escapeHtml(
+                      data.end_at
+                    )}
+                  </p>
+                `
+                : ""
+            }
+
+          </div>
+
+          ${
+            notificationNumber === 2
+              ? `
+                <p>
+                  This is a reminder
+                  about the upcoming
+                  event.
+                </p>
+              `
+              : ""
+          }
+
+          ${
+            notificationNumber >= 3
+              ? `
+                <p>
+                  This is the final
+                  reminder for this
+                  event.
+                </p>
+              `
+              : ""
+          }
         `
       );
     }
@@ -395,8 +611,8 @@ export function renderEmail(
         "Settlement Approved",
         `
           <p>
-            Your dojo settlement has
-            been approved.
+            Your dojo settlement has been
+            approved.
           </p>
 
           <p>

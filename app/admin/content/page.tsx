@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  extractYouTubeVideoId,
+  getYouTubeEmbedUrl,
+} from "@/lib/video/youtube";
 
 type ClassItem = {
   id: string;
@@ -53,7 +57,6 @@ export default function AdminContentPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const [videoProvider, setVideoProvider] = useState("youtube");
   const [videoInput, setVideoInput] = useState("");
 
   const [status, setStatus] = useState("draft");
@@ -68,6 +71,78 @@ export default function AdminContentPage() {
   const [messageType, setMessageType] = useState<
     "success" | "error" | ""
   >("");
+
+  const loadRanks = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("ranks")
+      .select(`
+        id,
+        class_id,
+        name,
+        sort_order
+      `)
+      .order("sort_order", {
+        ascending: true,
+      });
+
+    if (error) {
+      setMessage(error.message);
+      setMessageType("error");
+      return;
+    }
+
+    setRanks((data ?? []) as Rank[]);
+  }, [supabase]);
+
+  const loadTiers = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("sub_ranks")
+      .select(`
+        id,
+        rank_id,
+        name,
+        sort_order
+      `)
+      .order("sort_order", {
+        ascending: true,
+      });
+
+    if (error) {
+      setMessage(error.message);
+      setMessageType("error");
+      return;
+    }
+
+    setTiers((data ?? []) as Tier[]);
+  }, [supabase]);
+
+  const loadContent = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("content")
+      .select(`
+        id,
+        class_id,
+        rank_id,
+        sub_rank_id,
+        title,
+        description,
+        video_provider,
+        video_id,
+        status,
+        sort_order
+      `)
+      .order("sort_order", {
+        ascending: true,
+      });
+
+    if (error) {
+      setMessage(error.message);
+      setMessageType("error");
+      return;
+    }
+
+    setContent((data ?? []) as ContentItem[]);
+  }, [supabase]);
 
   useEffect(() => {
     async function loadPage() {
@@ -111,79 +186,7 @@ export default function AdminContentPage() {
     }
 
     loadPage();
-  }, [router, supabase]);
-
-  async function loadRanks() {
-    const { data, error } = await supabase
-      .from("ranks")
-      .select(`
-        id,
-        class_id,
-        name,
-        sort_order
-      `)
-      .order("sort_order", {
-        ascending: true,
-      });
-
-    if (error) {
-      setMessage(error.message);
-      setMessageType("error");
-      return;
-    }
-
-    setRanks((data ?? []) as Rank[]);
-  }
-
-  async function loadTiers() {
-    const { data, error } = await supabase
-      .from("sub_ranks")
-      .select(`
-        id,
-        rank_id,
-        name,
-        sort_order
-      `)
-      .order("sort_order", {
-        ascending: true,
-      });
-
-    if (error) {
-      setMessage(error.message);
-      setMessageType("error");
-      return;
-    }
-
-    setTiers((data ?? []) as Tier[]);
-  }
-
-  async function loadContent() {
-    const { data, error } = await supabase
-      .from("content")
-      .select(`
-        id,
-        class_id,
-        rank_id,
-        sub_rank_id,
-        title,
-        description,
-        video_provider,
-        video_id,
-        status,
-        sort_order
-      `)
-      .order("sort_order", {
-        ascending: true,
-      });
-
-    if (error) {
-      setMessage(error.message);
-      setMessageType("error");
-      return;
-    }
-
-    setContent((data ?? []) as ContentItem[]);
-  }
+  }, [loadContent, loadRanks, loadTiers, router, supabase]);
 
   const filteredRanks = ranks.filter(
     (rank) =>
@@ -238,133 +241,6 @@ export default function AdminContentPage() {
     );
   }, [selectedRankId, tiers]);
 
-  function extractYouTubeId(
-    value: string
-  ) {
-    const trimmed = value.trim();
-
-    if (!trimmed) {
-      return "";
-    }
-
-    // Raw YouTube ID
-    if (
-      /^[A-Za-z0-9_-]{11}$/.test(trimmed)
-    ) {
-      return trimmed;
-    }
-
-    try {
-      const url = new URL(trimmed);
-
-      // youtube.com/watch?v=
-      if (
-        url.hostname.includes(
-          "youtube.com"
-        )
-      ) {
-        const watchId =
-          url.searchParams.get("v");
-
-        if (watchId) {
-          return watchId;
-        }
-
-        // youtube.com/shorts/VIDEO_ID
-        if (
-          url.pathname.startsWith(
-            "/shorts/"
-          )
-        ) {
-          const parts =
-            url.pathname.split("/");
-
-          return parts[2] ?? "";
-        }
-
-        // youtube.com/embed/VIDEO_ID
-        if (
-          url.pathname.startsWith(
-            "/embed/"
-          )
-        ) {
-          const parts =
-            url.pathname.split("/");
-
-          return parts[2] ?? "";
-        }
-      }
-
-      // youtu.be/VIDEO_ID
-      if (
-        url.hostname === "youtu.be" ||
-        url.hostname ===
-          "www.youtu.be"
-      ) {
-        return url.pathname
-          .replace("/", "")
-          .split("?")[0];
-      }
-
-      return "";
-    } catch {
-      return "";
-    }
-  }
-
-  function extractVimeoId(
-    value: string
-  ) {
-    const trimmed =
-      value.trim();
-
-    if (!trimmed) {
-      return "";
-    }
-
-    if (
-      /^\d+$/.test(trimmed)
-    ) {
-      return trimmed;
-    }
-
-    try {
-      const url =
-        new URL(trimmed);
-
-      if (
-        !url.hostname.includes(
-          "vimeo.com"
-        )
-      ) {
-        return "";
-      }
-
-      const parts =
-        url.pathname
-          .split("/")
-          .filter(Boolean);
-
-      const lastPart =
-        parts[
-          parts.length - 1
-        ];
-
-      if (
-        lastPart &&
-        /^\d+$/.test(
-          lastPart
-        )
-      ) {
-        return lastPart;
-      }
-
-      return "";
-    } catch {
-      return "";
-    }
-  }
-
   function getVideoId() {
     if (
       !videoInput.trim()
@@ -372,25 +248,7 @@ export default function AdminContentPage() {
       return "";
     }
 
-    if (
-      videoProvider ===
-      "youtube"
-    ) {
-      return extractYouTubeId(
-        videoInput
-      );
-    }
-
-    if (
-      videoProvider ===
-      "vimeo"
-    ) {
-      return extractVimeoId(
-        videoInput
-      );
-    }
-
-    return "";
+    return extractYouTubeVideoId(videoInput) ?? "";
   }
 
   const parsedVideoId =
@@ -401,21 +259,7 @@ export default function AdminContentPage() {
       return null;
     }
 
-    if (
-      videoProvider ===
-      "youtube"
-    ) {
-      return `https://www.youtube.com/embed/${parsedVideoId}`;
-    }
-
-    if (
-      videoProvider ===
-      "vimeo"
-    ) {
-      return `https://player.vimeo.com/video/${parsedVideoId}`;
-    }
-
-    return null;
+    return getYouTubeEmbedUrl(parsedVideoId);
   }
 
   const previewUrl =
@@ -426,10 +270,6 @@ export default function AdminContentPage() {
 
     setTitle("");
     setDescription("");
-
-    setVideoProvider(
-      "youtube"
-    );
 
     setVideoInput("");
 
@@ -464,10 +304,7 @@ export default function AdminContentPage() {
       !parsedVideoId
     ) {
       setMessage(
-        videoProvider ===
-        "youtube"
-          ? "The YouTube URL or video ID is invalid."
-          : "The Vimeo URL or video ID is invalid."
+        "The YouTube URL or video ID is invalid."
       );
 
       setMessageType(
@@ -498,7 +335,7 @@ export default function AdminContentPage() {
 
           provider:
             videoInput.trim()
-              ? videoProvider
+              ? "youtube"
               : "",
 
           provider_video_id:
@@ -555,7 +392,7 @@ export default function AdminContentPage() {
 
           provider:
             videoInput.trim()
-              ? videoProvider
+              ? "youtube"
               : "",
 
           provider_video_id:
@@ -623,11 +460,6 @@ export default function AdminContentPage() {
 
     setDescription(
       item.description ?? ""
-    );
-
-    setVideoProvider(
-      item.video_provider ??
-        "youtube"
     );
 
     setVideoInput(
@@ -1065,31 +897,9 @@ export default function AdminContentPage() {
                   Video Provider
                 </label>
 
-                <select
-                  value={
-                    videoProvider
-                  }
-                  onChange={(e) => {
-                    setVideoProvider(
-                      e.target.value
-                    );
-
-                    setVideoInput(
-                      ""
-                    );
-                  }}
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-                >
-
-                  <option value="youtube">
-                    YouTube
-                  </option>
-
-                  <option value="vimeo">
-                    Vimeo
-                  </option>
-
-                </select>
+                <div className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white">
+                  YouTube (Unlisted)
+                </div>
 
               </div>
 
@@ -1109,12 +919,7 @@ export default function AdminContentPage() {
                       e.target.value
                     )
                   }
-                  placeholder={
-                    videoProvider ===
-                    "youtube"
-                      ? "Paste YouTube URL or video ID"
-                      : "Paste Vimeo URL or video ID"
-                  }
+                  placeholder="Paste an unlisted YouTube URL or video ID"
                   className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
                 />
 
@@ -1159,6 +964,9 @@ export default function AdminContentPage() {
                       }
                       title="Video Preview"
                       className="h-full w-full"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     />

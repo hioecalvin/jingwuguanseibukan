@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -20,12 +21,24 @@ type CertificateRow = {
   membership_id: string;
 
   member_id: string | null;
+  aikikai_registration_number: string | null;
+
   member_name: string;
 
   class_name: string;
+  dojo_name: string | null;
+
   rank_name: string;
 
   promotion_date: string;
+
+  assessor_type:
+    | "member"
+    | "external"
+    | null;
+
+  assessor_member_id: string | null;
+  assessor_name: string | null;
 
   certificate_created_at: string;
   certificate_created_by_name: string | null;
@@ -155,6 +168,35 @@ export default function CertificateHistoryPage() {
       | "revoked"
     >("all");
 
+  const loadCertificates = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_certificate_history"
+      );
+
+
+    if (error) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+
+    setCertificates(
+      (data ??
+        []) as CertificateRow[]
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -184,37 +226,7 @@ export default function CertificateHistoryPage() {
 
 
     loadPage();
-  }, []);
-
-
-  async function loadCertificates() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_certificate_history"
-      );
-
-
-    if (error) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      return;
-    }
-
-
-    setCertificates(
-      (data ??
-        []) as CertificateRow[]
-    );
-  }
+  }, [loadCertificates, router, supabase]);
 
 
   async function loadPrintLog(
@@ -331,6 +343,14 @@ export default function CertificateHistoryPage() {
             .toLowerCase()
             .includes(query) ||
 
+          (
+            certificate
+              .aikikai_registration_number ??
+            ""
+          )
+            .toLowerCase()
+            .includes(query) ||
+
           certificate
             .rank_name
             .toLowerCase()
@@ -338,6 +358,22 @@ export default function CertificateHistoryPage() {
 
           certificate
             .class_name
+            .toLowerCase()
+            .includes(query) ||
+
+          (
+            certificate
+              .dojo_name ??
+            ""
+          )
+            .toLowerCase()
+            .includes(query) ||
+
+          (
+            certificate
+              .assessor_name ??
+            ""
+          )
             .toLowerCase()
             .includes(query);
 
@@ -399,8 +435,8 @@ export default function CertificateHistoryPage() {
     return date.toLocaleDateString(
       "en-AU",
       {
-        day: "numeric",
-        month: "short",
+        day: "2-digit",
+        month: "2-digit",
         year: "numeric",
       }
     );
@@ -435,8 +471,8 @@ export default function CertificateHistoryPage() {
     return date.toLocaleString(
       "en-AU",
       {
-        day: "numeric",
-        month: "short",
+        day: "2-digit",
+        month: "2-digit",
         year: "numeric",
 
         hour:
@@ -449,35 +485,354 @@ export default function CertificateHistoryPage() {
   }
 
 
+  function formatMemberId(
+    certificate: CertificateRow
+  ) {
+    const memberId =
+      certificate.member_id ??
+      "-";
+
+    const aikikaiNumber =
+      certificate
+        .aikikai_registration_number;
+
+
+    if (
+      certificate.class_name ===
+        "Aikido" &&
+      aikikaiNumber
+    ) {
+      return `${memberId} / ${aikikaiNumber}`;
+    }
+
+
+    return memberId;
+  }
+
+
+  function formatAssessorType(
+    value:
+      CertificateRow["assessor_type"]
+  ) {
+    if (
+      value ===
+      "external"
+    ) {
+      return "External";
+    }
+
+
+    if (
+      value ===
+      "member"
+    ) {
+      return "Member";
+    }
+
+
+    return "-";
+  }
+
+
   function exportCertificatesExcel() {
-    if (filteredCertificates.length === 0) {
-      setMessage("There are no certificates to export.");
-      setMessageType("error");
+    if (
+      filteredCertificates.length ===
+      0
+    ) {
+      setMessage(
+        "There are no certificates to export."
+      );
+
+      setMessageType(
+        "error"
+      );
+
       return;
     }
 
+
     exportToExcel({
-      filename: "Certificate-History",
-      sheetName: "Certificates",
-      title: "Certificate History",
+      filename:
+        "Certificate-History",
+
+      sheetName:
+        "Certificates",
+
+      title:
+        "Certificate History",
+
       columns: [
-        { header: "Certificate Number", key: "certificate_number" },
-        { header: "Member ID", key: "member_id", value: (row) => row.member_id ?? "" },
-        { header: "Member Name", key: "member_name" },
-        { header: "Class", key: "class_name" },
-        { header: "Rank", key: "rank_name" },
-        { header: "Promotion Date", key: "promotion_date", value: (row) => formatDate(row.promotion_date) },
-        { header: "Status", key: "certificate_status", value: (row) => row.certificate_status === "valid" ? "Valid" : "Revoked / Invalid" },
-        { header: "Certificate Created", key: "certificate_created_at", value: (row) => formatTimestamp(row.certificate_created_at) },
-        { header: "Created By", key: "certificate_created_by_name", value: (row) => row.certificate_created_by_name ?? "Unknown Administrator" },
-        { header: "Total Prints", key: "print_count" },
-        { header: "Latest Print", key: "latest_print_at", value: (row) => row.latest_print_at ? formatTimestamp(row.latest_print_at) : "" },
-        { header: "Latest Print By", key: "latest_print_by_name", value: (row) => row.latest_print_by_name ?? "" },
-        { header: "Revoked At", key: "revoked_at", value: (row) => row.revoked_at ? formatTimestamp(row.revoked_at) : "" },
-        { header: "Revoked By", key: "revoked_by_name", value: (row) => row.revoked_by_name ?? "" },
-        { header: "Revoke Reason", key: "revoke_reason", value: (row) => row.revoke_reason ?? "" },
+        {
+          header:
+            "Certificate Number",
+
+          key:
+            "certificate_number",
+        },
+
+        {
+          header:
+            "Member ID",
+
+          key:
+            "member_id",
+
+          value: (
+            row
+          ) =>
+            row.member_id ??
+            "",
+        },
+
+        {
+          header:
+            "Aikikai Registration Number",
+
+          key:
+            "aikikai_registration_number",
+
+          value: (
+            row
+          ) =>
+            row
+              .aikikai_registration_number ??
+            "",
+        },
+
+        {
+          header:
+            "Member ID / Aikikai Registration Number",
+
+          key:
+            "display_member_id",
+
+          value: (
+            row
+          ) =>
+            formatMemberId(
+              row
+            ),
+        },
+
+        {
+          header:
+            "Member Name",
+
+          key:
+            "member_name",
+        },
+
+        {
+          header:
+            "Class",
+
+          key:
+            "class_name",
+        },
+
+        {
+          header:
+            "Dojo",
+
+          key:
+            "dojo_name",
+
+          value: (
+            row
+          ) =>
+            row.dojo_name ??
+            "",
+        },
+
+        {
+          header:
+            "Rank",
+
+          key:
+            "rank_name",
+        },
+
+        {
+          header:
+            "Promotion Date",
+
+          key:
+            "promotion_date",
+
+          value: (
+            row
+          ) =>
+            formatDate(
+              row.promotion_date
+            ),
+        },
+
+        {
+          header:
+            "Assessor",
+
+          key:
+            "assessor_name",
+
+          value: (
+            row
+          ) =>
+            row.assessor_name ??
+            "",
+        },
+
+        {
+          header:
+            "Assessor Type",
+
+          key:
+            "assessor_type",
+
+          value: (
+            row
+          ) =>
+            formatAssessorType(
+              row.assessor_type
+            ),
+        },
+
+        {
+          header:
+            "Status",
+
+          key:
+            "certificate_status",
+
+          value: (
+            row
+          ) =>
+            row
+              .certificate_status ===
+            "valid"
+              ? "Valid"
+              : "Revoked / Invalid",
+        },
+
+        {
+          header:
+            "Certificate Created",
+
+          key:
+            "certificate_created_at",
+
+          value: (
+            row
+          ) =>
+            formatTimestamp(
+              row
+                .certificate_created_at
+            ),
+        },
+
+        {
+          header:
+            "Created By",
+
+          key:
+            "certificate_created_by_name",
+
+          value: (
+            row
+          ) =>
+            row
+              .certificate_created_by_name ??
+            "Unknown Administrator",
+        },
+
+        {
+          header:
+            "Total Prints",
+
+          key:
+            "print_count",
+        },
+
+        {
+          header:
+            "Latest Print",
+
+          key:
+            "latest_print_at",
+
+          value: (
+            row
+          ) =>
+            row.latest_print_at
+              ? formatTimestamp(
+                  row.latest_print_at
+                )
+              : "",
+        },
+
+        {
+          header:
+            "Latest Print By",
+
+          key:
+            "latest_print_by_name",
+
+          value: (
+            row
+          ) =>
+            row
+              .latest_print_by_name ??
+            "",
+        },
+
+        {
+          header:
+            "Revoked At",
+
+          key:
+            "revoked_at",
+
+          value: (
+            row
+          ) =>
+            row.revoked_at
+              ? formatTimestamp(
+                  row.revoked_at
+                )
+              : "",
+        },
+
+        {
+          header:
+            "Revoked By",
+
+          key:
+            "revoked_by_name",
+
+          value: (
+            row
+          ) =>
+            row
+              .revoked_by_name ??
+            "",
+        },
+
+        {
+          header:
+            "Revoke Reason",
+
+          key:
+            "revoke_reason",
+
+          value: (
+            row
+          ) =>
+            row.revoke_reason ??
+            "",
+        },
       ],
-      data: filteredCertificates,
+
+      data:
+        filteredCertificates,
     });
   }
 
@@ -529,7 +884,7 @@ export default function CertificateHistoryPage() {
 
 
               <p className="mt-1 text-sm text-neutral-400">
-                Official certificate numbers, validity status and complete print audit history.
+                Official certificate numbers, grading assessors, validity status and complete print audit history.
               </p>
 
             </div>
@@ -586,7 +941,7 @@ export default function CertificateHistoryPage() {
                   e.target.value
                 )
               }
-              placeholder="Certificate / Member / Rank / Class"
+              placeholder="Certificate / Member / Aikikai / Rank / Dojo / Assessor"
               className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
             />
 
@@ -666,60 +1021,66 @@ export default function CertificateHistoryPage() {
 
             <div className="flex flex-wrap gap-4 text-sm text-neutral-500">
 
-            <p>
-              Showing{" "}
-              <span className="text-neutral-300">
-                {
-                  filteredCertificates.length
-                }
-              </span>{" "}
-              of{" "}
-              <span className="text-neutral-300">
-                {
-                  certificates.length
-                }
-              </span>{" "}
-              certificates
-            </p>
+              <p>
+                Showing{" "}
+                <span className="text-neutral-300">
+                  {
+                    filteredCertificates.length
+                  }
+                </span>{" "}
+                of{" "}
+                <span className="text-neutral-300">
+                  {
+                    certificates.length
+                  }
+                </span>{" "}
+                certificates
+              </p>
 
 
-            <p>
-              Valid:{" "}
-              <span className="text-green-400">
-                {
-                  certificates.filter(
-                    (
-                      item
-                    ) =>
-                      item.certificate_status ===
-                      "valid"
-                  ).length
-                }
-              </span>
-            </p>
+              <p>
+                Valid:{" "}
+                <span className="text-green-400">
+                  {
+                    certificates.filter(
+                      (
+                        item
+                      ) =>
+                        item.certificate_status ===
+                        "valid"
+                    ).length
+                  }
+                </span>
+              </p>
 
 
-            <p>
-              Revoked:{" "}
-              <span className="text-red-400">
-                {
-                  certificates.filter(
-                    (
-                      item
-                    ) =>
-                      item.certificate_status ===
-                      "revoked"
-                  ).length
-                }
-              </span>
-            </p>
+              <p>
+                Revoked:{" "}
+                <span className="text-red-400">
+                  {
+                    certificates.filter(
+                      (
+                        item
+                      ) =>
+                        item.certificate_status ===
+                        "revoked"
+                    ).length
+                  }
+                </span>
+              </p>
 
             </div>
 
+
             <button
               type="button"
-              disabled={filteredCertificates.length === 0}
-              onClick={exportCertificatesExcel}
+              disabled={
+                filteredCertificates.length ===
+                0
+              }
+              onClick={
+                exportCertificatesExcel
+              }
               className="self-start rounded-lg border border-green-800 bg-green-950/10 px-5 py-2 text-sm font-semibold text-green-300 transition hover:bg-green-950/30 disabled:cursor-not-allowed disabled:opacity-40 sm:self-auto"
             >
               Export Excel
@@ -843,9 +1204,9 @@ export default function CertificateHistoryPage() {
                               Member ID:
                             </span>{" "}
 
-                            {certificate
-                              .member_id ??
-                              "-"}
+                            {formatMemberId(
+                              certificate
+                            )}
                           </p>
 
 
@@ -863,12 +1224,46 @@ export default function CertificateHistoryPage() {
 
                           <p>
                             <span className="text-neutral-500">
+                              Dojo:
+                            </span>{" "}
+
+                            {certificate
+                              .dojo_name ??
+                              "-"}
+                          </p>
+
+
+                          <p>
+                            <span className="text-neutral-500">
                               Promotion Date:
                             </span>{" "}
 
                             {formatDate(
                               certificate
                                 .promotion_date
+                            )}
+                          </p>
+
+
+                          <p>
+                            <span className="text-neutral-500">
+                              Assessor:
+                            </span>{" "}
+
+                            {certificate
+                              .assessor_name ??
+                              "-"}
+                          </p>
+
+
+                          <p>
+                            <span className="text-neutral-500">
+                              Assessor Type:
+                            </span>{" "}
+
+                            {formatAssessorType(
+                              certificate
+                                .assessor_type
                             )}
                           </p>
 

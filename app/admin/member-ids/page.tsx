@@ -186,7 +186,7 @@ export default function MemberIdManagementPage() {
               </h1>
 
               <p className="mt-1 text-sm text-neutral-400">
-                Assign and manage member identification numbers.
+                Assign and manage Member identification numbers.
               </p>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function MemberIdManagementPage() {
           />
 
           <p className="mt-3 text-sm text-neutral-500">
-            Showing {filteredProfiles.length} of {profiles.length} users
+            Showing {filteredProfiles.length} of {profiles.length} Members
           </p>
         </section>
 

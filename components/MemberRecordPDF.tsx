@@ -7,7 +7,12 @@ import {
   View,
   Image,
   StyleSheet,
+  Font,
 } from "@react-pdf/renderer";
+
+Font.registerHyphenationCallback(
+  (word) => [word]
+);
 
 export type PromotionRecord = {
   id: string;
@@ -557,6 +562,15 @@ function formatWhatsApp(
   return value;
 }
 
+function formatEmail(
+  value: string
+) {
+  return value.replace(
+    /([.@+_-])/g,
+    "$1\u200b"
+  );
+}
+
 function getStatusStyle(
   status: string
 ) {
@@ -921,9 +935,11 @@ export default function MemberRecordPDF({
                         styles.infoValue
                       }
                     >
-                      {record.member
-                        .email ||
-                        "-"}
+                      {record.member.email
+                        ? formatEmail(
+                            record.member.email
+                          )
+                        : "-"}
                     </Text>
                   </View>
 
@@ -1275,6 +1291,7 @@ export default function MemberRecordPDF({
             style={
               styles.sectionTitle
             }
+            minPresenceAhead={84}
           >
             OFFICIAL PROMOTION RECORD
           </Text>
@@ -1494,6 +1511,7 @@ export default function MemberRecordPDF({
               style={
                 styles.sectionTitle
               }
+              minPresenceAhead={84}
             >
               TITLE APPOINTMENT HISTORY
             </Text>

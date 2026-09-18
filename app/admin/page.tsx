@@ -26,16 +26,6 @@ type Profile = {
 };
 
 type Membership = {
-  role:
-    | "user"
-    | "admin";
-
-  status:
-    | "active"
-    | "break_1"
-    | "break_2"
-    | "inactive";
-
   classes: {
     name: string;
   } | null;
@@ -171,7 +161,7 @@ export default function AdminDashboardPage() {
       }
 
       /*
-       * CLASS MEMBERSHIPS
+       * ACTIVE ADMIN ASSIGNMENTS
        */
 
       const {
@@ -183,12 +173,9 @@ export default function AdminDashboardPage() {
       } =
         await supabase
           .from(
-            "class_memberships"
+            "dojo_admin_assignments"
           )
           .select(`
-            role,
-            status,
-
             classes (
               name
             ),
@@ -200,6 +187,10 @@ export default function AdminDashboardPage() {
           .eq(
             "user_id",
             user.id
+          )
+          .eq(
+            "active",
+            true
           );
 
       if (
@@ -209,28 +200,27 @@ export default function AdminDashboardPage() {
           "Admin membership load error:",
           membershipError
         );
+
+        if (
+          active
+        ) {
+          setMessage(
+            "Unable to load your current Admin scope."
+          );
+
+          setLoading(
+            false
+          );
+        }
+
+        return;
       }
 
       const adminMemberships =
         (
-          (
-            membershipData ??
-            []
-          ) as unknown as Membership[]
-        ).filter(
-          (
-            membership
-          ) =>
-            membership.role ===
-              "admin" &&
-            [
-              "active",
-              "break_1",
-              "break_2",
-            ].includes(
-              membership.status
-            )
-        );
+          membershipData ??
+          []
+        ) as unknown as Membership[];
 
       /*
        * ACCESS CHECK

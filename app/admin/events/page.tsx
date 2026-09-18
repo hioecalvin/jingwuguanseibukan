@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { exportToExcel } from "@/lib/exportExcel";
-import { FunctionsHttpError } from "@supabase/supabase-js";
 
 type ClassItem = {
   id: string;
@@ -50,6 +49,35 @@ export default function AdminEventsPage() {
   const [messageType, setMessageType] = useState<
     "success" | "error" | ""
   >("");
+
+  const loadEvents = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("events")
+      .select(`
+        id,
+        class_id,
+        title,
+        description,
+        location,
+        starts_at,
+        end_at,
+        email_send_count,
+        last_email_sent_at,
+
+        classes:classes!events_class_id_fkey (
+          name
+        )
+      `)
+      .order("starts_at", { ascending: true });
+
+    if (error) {
+      setMessage(error.message);
+      setMessageType("error");
+      return;
+    }
+
+    setEvents((data ?? []) as unknown as EventItem[]);
+  }, [supabase]);
 
   useEffect(() => {
     async function loadPage() {
@@ -105,36 +133,7 @@ export default function AdminEventsPage() {
     }
 
     loadPage();
-  }, [router, supabase]);
-
-  async function loadEvents() {
-    const { data, error } = await supabase
-      .from("events")
-      .select(`
-        id,
-        class_id,
-        title,
-        description,
-        location,
-        starts_at,
-        end_at,
-        email_send_count,
-        last_email_sent_at,
-
-        classes:classes!events_class_id_fkey (
-          name
-        )
-      `)
-      .order("starts_at", { ascending: true });
-
-    if (error) {
-      setMessage(error.message);
-      setMessageType("error");
-      return;
-    }
-
-    setEvents((data ?? []) as unknown as EventItem[]);
-  }
+  }, [loadEvents, router, supabase]);
 
   async function createEvent(e: React.FormEvent) {
     e.preventDefault();
@@ -280,113 +279,22 @@ This will email all eligible members enrolled in ${
       : 0;
 
   /*
-   * STEP 2
-   * Send queued notifications.
+   * Delivery is deliberately asynchronous. The database RPC writes to the
+   * durable email outbox and records this notification attempt atomically.
+   * A scheduler calls /api/system/email-worker with EMAIL_WORKER_SECRET;
+   * that worker claims rows and sends them through Resend idempotently.
    */
-  const {
-    data: sendData,
-    error: sendError,
-  } =
-    await supabase.functions.invoke(
-      "send-notifications",
-      {
-        body: {
-          event_id:
-            event.id,
-        },
-      }
-    );
-
-  if (sendError) {
-    console.error(
-      "Edge Function error:",
-      sendError
-    );
-
-    let detailedError =
-      sendError.message;
-
-    if (
-      sendError instanceof
-      FunctionsHttpError
-    ) {
-      try {
-        const errorBody =
-          await sendError.context.json();
-
-        console.error(
-          "Edge Function response:",
-          errorBody
-        );
-
-        detailedError =
-          errorBody?.error ||
-          errorBody?.message ||
-          JSON.stringify(
-            errorBody
-          );
-      } catch (
-        contextError
-      ) {
-        console.error(
-          "Could not read Edge Function response:",
-          contextError
-        );
-      }
-    }
-
-    setMessage(
-      `Email sender failed: ${detailedError}`
-    );
-
-    setMessageType("error");
-
-    await loadEvents();
-
-    setProcessingEventId(
-      null
-    );
-
-    return;
-  }
-
-  const sentCount =
-    typeof sendData?.sent ===
-    "number"
-      ? sendData.sent
-      : 0;
-
-  const failedCount =
-    typeof sendData?.failed ===
-    "number"
-      ? sendData.failed
-      : 0;
-
   await loadEvents();
 
-  if (failedCount > 0) {
-    setMessage(
-      `${sentCount} sent, ${failedCount} failed.`
-    );
-
-    setMessageType("error");
-  } else {
-    setMessage(
-      `${sentCount} email${
-        sentCount === 1
-          ? ""
-          : "s"
-      } sent successfully.`
-    );
-
-    setMessageType(
-      "success"
-    );
-  }
-
-  console.log(
-    `${queuedCount} queued`
+  setMessage(
+    `${queuedCount} email${
+      queuedCount === 1
+        ? ""
+        : "s"
+    } queued for secure delivery.`
   );
+
+  setMessageType("success");
 
   setProcessingEventId(
     null

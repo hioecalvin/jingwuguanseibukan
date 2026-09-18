@@ -1,0 +1,93 @@
+name: Browser smoke (isolated fixtures)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+  browser-smoke:
+    name: ${{ matrix.label }}
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Chromium / Linux
+            engine: chromium
+            projects: --project=chromium-desktop --project=chromium-tablet --project=chromium-mobile
+          - label: Firefox / Linux
+            engine: firefox
+            projects: --project=firefox-desktop
+          - label: WebKit / Linux
+            engine: webkit
+            projects: --project=webkit-desktop --project=webkit-tablet --project=webkit-mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.engine }}
+      # This command always builds with fixed placeholders. No repository secrets,
+      # production URL, storage state or authenticated account is passed to it.
+      - run: npm run test:browser -- ${{ matrix.projects }}
+      - name: Retain synthetic-only browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-smoke-${{ matrix.engine }}-linux
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  webkit-macos:
+    name: WebKit / macOS
+    needs: checks
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install webkit
+      # Playwright WebKit on macOS is a useful engine/OS gate, but it is not a
+      # substitute for final testing in release Safari on real macOS/iOS devices.
+      - run: npm run test:browser -- --project=webkit-desktop --project=webkit-tablet --project=webkit-mobile
+      - name: Retain synthetic-only browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-smoke-webkit-macos
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

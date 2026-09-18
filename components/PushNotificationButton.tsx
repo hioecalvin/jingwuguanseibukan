@@ -58,6 +58,50 @@ function urlBase64ToUint8Array(
 }
 
 
+async function persistPushSubscription(
+  method: "POST" | "DELETE",
+  body: Record<string, unknown>
+) {
+  const response =
+    await fetch(
+      "/api/subscribe",
+      {
+        method,
+        headers: {
+          "content-type":
+            "application/json",
+        },
+        body:
+          JSON.stringify(
+            body
+          ),
+      }
+    );
+
+
+  const result =
+    (
+      await response
+        .json()
+        .catch(
+          () => ({})
+        )
+    ) as {
+      error?: string;
+    };
+
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      result.error ??
+      "Unable to update push notification settings."
+    );
+  }
+}
+
+
 export default function PushNotificationButton() {
   const supabase =
     useMemo(
@@ -328,32 +372,24 @@ export default function PushNotificationButton() {
        * Save subscription to Supabase
        */
 
-      const {
-        error,
-      } =
-        await supabase.rpc(
-          "save_my_push_subscription",
-          {
-            subscription_endpoint:
-              json.endpoint,
+      await persistPushSubscription(
+        "POST",
+        {
+          endpoint:
+            json.endpoint,
 
-            subscription_p256dh:
+          keys: {
+            p256dh:
               json.keys.p256dh,
 
-            subscription_auth:
+            auth:
               json.keys.auth,
+          },
 
-            subscription_user_agent:
-              navigator.userAgent,
-          }
-        );
-
-
-      if (
-        error
-      ) {
-        throw error;
-      }
+          userAgent:
+            navigator.userAgent,
+        }
+      );
 
 
       setEnabled(
@@ -489,10 +525,10 @@ export default function PushNotificationButton() {
         oldSubscription
       ) {
         try {
-          await supabase.rpc(
-            "disable_my_push_subscription",
+          await persistPushSubscription(
+            "DELETE",
             {
-              subscription_endpoint:
+              endpoint:
                 oldSubscription.endpoint,
             }
           );
@@ -589,33 +625,24 @@ export default function PushNotificationButton() {
        * to Supabase
        */
 
-      const {
-        error:
-          saveError,
-      } =
-        await supabase.rpc(
-          "save_my_push_subscription",
-          {
-            subscription_endpoint:
-              json.endpoint,
+      await persistPushSubscription(
+        "POST",
+        {
+          endpoint:
+            json.endpoint,
 
-            subscription_p256dh:
+          keys: {
+            p256dh:
               json.keys.p256dh,
 
-            subscription_auth:
+            auth:
               json.keys.auth,
+          },
 
-            subscription_user_agent:
-              navigator.userAgent,
-          }
-        );
-
-
-      if (
-        saveError
-      ) {
-        throw saveError;
-      }
+          userAgent:
+            navigator.userAgent,
+        }
+      );
 
 
       setEnabled(

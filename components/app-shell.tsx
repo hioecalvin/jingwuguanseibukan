@@ -28,6 +28,7 @@ export default function AppShell({
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <a href="#main-content" tabIndex={0} className="skip-link">Skip to content</a>
       <MobileNav
         role={role}
         memberName={memberName}
@@ -62,6 +63,8 @@ export default function AppShell({
           </header>
 
           <main
+            id="main-content"
+            tabIndex={-1}
             className="
               min-w-0
               px-4

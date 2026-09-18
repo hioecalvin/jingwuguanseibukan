@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  type KeyboardEvent,
+  useEffect,
+  useId,
+  useRef,
   useState,
 } from "react";
 
@@ -23,6 +27,47 @@ export default function MobileNav({
   role,
   memberName,
 }: MobileNavProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogId = useId();
+  const titleId = useId();
+
+  function closeNavigation() {
+    dialogRef.current?.close();
+  }
+
+  function openNavigation() {
+    dialogRef.current?.showModal();
+    setOpen(true);
+    closeButtonRef.current?.focus();
+  }
+
+  function containDialogFocus(event: KeyboardEvent<HTMLDialogElement>) {
+    if (event.key !== "Tab") return;
+    const dialog = event.currentTarget;
+    const controls = Array.from(dialog.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]"))
+      .filter((element) => element.tabIndex >= 0 && element.getClientRects().length > 0);
+    const active = dialog.ownerDocument.activeElement;
+    // Retain native modal inertness while making every navigation control
+    // reachable even when a browser's default Tab order skips links.
+    if (!controls.length) return;
+    const index = controls.findIndex((element) => element === active);
+    const next = index < 0 ? 0 : (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+    event.preventDefault();
+    controls[next].focus();
+  }
+
+  useEffect(() => {
+    // Do not leave an invisible modal making the desktop page inert.
+    const desktop = window.matchMedia("(min-width: 64rem)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) dialogRef.current?.close();
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+
   const pathname =
     usePathname();
 
@@ -79,7 +124,7 @@ export default function MobileNav({
             className="
               truncate
               text-xs
-              text-neutral-500
+              text-neutral-400
             "
           >
             {memberName ??
@@ -89,12 +134,12 @@ export default function MobileNav({
 
 
         <button
+          ref={triggerRef}
           type="button"
-          onClick={() =>
-            setOpen(
-              true
-            )
-          }
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={dialogId}
+          onClick={openNavigation}
           className="
             rounded-lg
             border
@@ -112,23 +157,38 @@ export default function MobileNav({
       </header>
 
 
-      {open && (
-        <div
+        <dialog
+          ref={dialogRef}
+          id={dialogId}
+          aria-labelledby={titleId}
+          data-mobile-navigation
+          onClose={() => {
+            setOpen(false);
+            // Pointer activation does not focus buttons in every engine.
+            // Do not try to focus the hidden mobile trigger after a resize.
+            if (triggerRef.current?.getClientRects().length) triggerRef.current.focus();
+          }}
+          onKeyDown={containDialogFocus}
           className="
             fixed
             inset-0
             z-50
-            lg:hidden
+            m-0
+            h-dvh
+            max-h-none
+            w-full
+            max-w-none
+            border-0
+            bg-transparent
+            p-0
+            text-neutral-100
           "
         >
           <button
             type="button"
+            tabIndex={-1}
             aria-label="Close navigation"
-            onClick={() =>
-              setOpen(
-                false
-              )
-            }
+            onClick={closeNavigation}
             className="
               absolute
               inset-0
@@ -166,6 +226,7 @@ export default function MobileNav({
             >
               <div>
                 <div
+                  id={titleId}
                   className="
                     text-sm
                     font-semibold
@@ -180,7 +241,7 @@ export default function MobileNav({
                     mt-1
                     text-xs
                     capitalize
-                    text-neutral-500
+                    text-neutral-400
                   "
                 >
                   {role.replace(
@@ -192,12 +253,9 @@ export default function MobileNav({
 
 
               <button
+                ref={closeButtonRef}
                 type="button"
-                onClick={() =>
-                  setOpen(
-                    false
-                  )
-                }
+                onClick={closeNavigation}
                 className="
                   rounded-lg
                   border
@@ -215,6 +273,7 @@ export default function MobileNav({
 
 
             <nav
+              aria-label="Mobile primary"
               className="
                 flex-1
                 overflow-y-auto
@@ -249,11 +308,8 @@ export default function MobileNav({
                         href={
                           item.href
                         }
-                        onClick={() =>
-                          setOpen(
-                            false
-                          )
-                        }
+                        aria-current={active ? "page" : undefined}
+                        onClick={closeNavigation}
                         className={[
                           `
                             block
@@ -311,8 +367,7 @@ export default function MobileNav({
               </div>
             </div>
           </div>
-        </div>
-      )}
+        </dialog>
     </>
   );
 }

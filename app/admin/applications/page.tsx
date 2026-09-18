@@ -98,72 +98,21 @@ export default function ApplicationsPage() {
       selectedLevels[application.request_id] ?? "mudansha";
 
     /*
-     * Approve membership request.
+     * Approve the request and assign its membership level atomically.
      */
 
     const { error: approveError } = await supabase.rpc(
-      "review_class_request",
+      "review_class_request_with_level",
       {
-        request_id: application.request_id,
+        target_request_id: application.request_id,
         decision: "approved",
         reason: null,
+        selected_level: level,
       }
     );
 
     if (approveError) {
       setMessage(approveError.message);
-      setMessageType("error");
-      setProcessingId(null);
-
-      return;
-    }
-
-    /*
-     * Locate newly-created membership.
-     */
-
-    const { data: membership, error: membershipError } = await supabase
-      .from("class_memberships")
-      .select("id")
-      .eq("user_id", application.user_id)
-      .eq("class_id", application.class_id)
-      .single();
-
-    if (membershipError || !membership) {
-      console.error(
-        "Membership lookup after approval failed:",
-        membershipError
-      );
-
-      setMessage(
-        "The application was approved, but its membership level could not be updated. Please check the Member record."
-      );
-
-      setMessageType("error");
-      setProcessingId(null);
-
-      return;
-    }
-
-    /*
-     * Assign Mudansha / Yudansha.
-     */
-
-    const { error: levelError } = await supabase.rpc(
-      "set_membership_level",
-      {
-        membership_id: membership.id,
-        new_level: level,
-      }
-    );
-
-    if (levelError) {
-      console.error("Membership level update failed:", levelError);
-
-      setMessage(
-        "The application was approved, but its membership level could not be updated. Please check the Member record."
-      );
-
       setMessageType("error");
       setProcessingId(null);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -345,9 +346,9 @@ export default function DojoManagementPage() {
    * =====================================================
    */
 
-  function success(
+  const success = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -355,12 +356,12 @@ export default function DojoManagementPage() {
     setMessageType(
       "success"
     );
-  }
+  }, []);
 
 
-  function fail(
+  const fail = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -368,13 +369,95 @@ export default function DojoManagementPage() {
     setMessageType(
       "error"
     );
-  }
+  }, []);
 
 
-  function clearMessage() {
+  const clearMessage = useCallback(() => {
     setMessage("");
     setMessageType("");
-  }
+  }, []);
+
+
+  const loadClasses = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "classes"
+        )
+        .select(`
+          id,
+          name
+        `)
+        .order(
+          "name"
+        );
+
+
+    if (
+      error
+    ) {
+      fail(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setClasses(
+      (
+        data ??
+        []
+      ) as ClassRecord[]
+    );
+  }, [fail, supabase]);
+
+
+  const loadDojos = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "dojos"
+        )
+        .select(`
+          id,
+          class_id,
+          name,
+          active,
+
+          classes (
+            name
+          )
+        `)
+        .order(
+          "name"
+        );
+
+
+    if (
+      error
+    ) {
+      fail(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setDojos(
+      (
+        data ??
+        []
+      ) as unknown as DojoRecord[]
+    );
+  }, [fail, supabase]);
 
 
   /*
@@ -579,6 +662,8 @@ export default function DojoManagementPage() {
 
     loadPage();
   }, [
+    loadClasses,
+    loadDojos,
     router,
     supabase,
   ]);
@@ -589,94 +674,6 @@ export default function DojoManagementPage() {
    * LOAD CLASSES
    * =====================================================
    */
-
-  async function loadClasses() {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "classes"
-        )
-        .select(`
-          id,
-          name
-        `)
-        .order(
-          "name"
-        );
-
-
-    if (
-      error
-    ) {
-      fail(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setClasses(
-      (
-        data ??
-        []
-      ) as ClassRecord[]
-    );
-  }
-
-
-  /*
-   * =====================================================
-   * LOAD DOJOS
-   * =====================================================
-   */
-
-  async function loadDojos() {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "dojos"
-        )
-        .select(`
-          id,
-          class_id,
-          name,
-          active,
-
-          classes (
-            name
-          )
-        `)
-        .order(
-          "name"
-        );
-
-
-    if (
-      error
-    ) {
-      fail(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setDojos(
-      (
-        data ??
-        []
-      ) as unknown as DojoRecord[]
-    );
-  }
-
 
   /*
    * =====================================================
@@ -1165,7 +1162,7 @@ export default function DojoManagementPage() {
           []
         ).map(
           (
-            item: any
+            item: TransferMember
           ) => ({
             membership_id:
               item.membership_id,

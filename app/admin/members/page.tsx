@@ -201,6 +201,33 @@ type AvailableDojoAdminAssignment = {
 };
 
 
+type FeeAdjustmentMode =
+  | "this_month_only"
+  | "this_month_onward"
+  | "next_month_onward";
+
+
+type SubscriptionSummary = {
+  membership_id: string;
+  billing_month: string;
+  current_rate: number;
+  current_rate_currency: string;
+  current_rate_source: string;
+  charge_id: string | null;
+  charge_amount: number | null;
+  charge_currency: string | null;
+  charge_status: string | null;
+  total_paid: number;
+  remaining_balance: number | null;
+  has_pending_confirmation: boolean;
+  special_rate_amount: number | null;
+  special_rate_currency: string | null;
+  special_rate_effective_from: string | null;
+  special_rate_effective_until: string | null;
+  can_adjust_current_month: boolean;
+};
+
+
 type MessageType =
   | "success"
   | "error"
@@ -438,6 +465,52 @@ export default function MemberManagementPage() {
     );
 
 
+  /*
+   * SUBSCRIPTION FEE ADJUSTMENT
+   */
+
+  const [
+    feeAdjustmentOpen,
+    setFeeAdjustmentOpen,
+  ] =
+    useState<Record<string, boolean>>({});
+
+
+  const [
+    feeAmountDraft,
+    setFeeAmountDraft,
+  ] =
+    useState<Record<string, string>>({});
+
+
+  const [
+    feeModeDraft,
+    setFeeModeDraft,
+  ] =
+    useState<Record<string, FeeAdjustmentMode>>({});
+
+
+  const [
+    feeReasonDraft,
+    setFeeReasonDraft,
+  ] =
+    useState<Record<string, string>>({});
+
+
+  const [
+    subscriptionSummaries,
+    setSubscriptionSummaries,
+  ] =
+    useState<Record<string, SubscriptionSummary | null>>({});
+
+
+  const [
+    loadingSubscriptionSummary,
+    setLoadingSubscriptionSummary,
+  ] =
+    useState<Record<string, boolean>>({});
+
+
   const [
     loading,
     setLoading,
@@ -632,6 +705,10 @@ export default function MemberManagementPage() {
 
 
     loadPage();
+    // These loaders are function declarations in this legacy page. They only
+    // close over the stable Supabase client and state setters, so adding them
+    // would cause the initial-load effect to rerun on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     router,
     supabase,
@@ -1136,7 +1213,7 @@ export default function MemberManagementPage() {
       aikikaiDraft[member.membership_id] ?? ""
     )
       .trim()
-      .replace(/\\s+/g, " ");
+      .replace(/\s+/g, " ");
 
     setProcessingId(member.membership_id);
     clearMessage();
@@ -1417,6 +1494,227 @@ export default function MemberManagementPage() {
       setAdminAccessProcessing(
         null
       );
+    }
+  }
+
+
+  /*
+   * =====================================================
+   * SUBSCRIPTION FEE ADJUSTMENT
+   * =====================================================
+   */
+
+  async function loadSubscriptionSummary(
+    membershipId: string
+  ) {
+    setLoadingSubscriptionSummary((current) => ({
+      ...current,
+      [membershipId]: true,
+    }));
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_admin_member_subscription_summary",
+        {
+          target_membership_id: membershipId,
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+
+      const summary: SubscriptionSummary | null = row
+        ? {
+            membership_id: String(row.membership_id),
+            billing_month: String(row.billing_month),
+            current_rate: Number(row.current_rate ?? 0),
+            current_rate_currency: String(row.current_rate_currency ?? "IDR"),
+            current_rate_source: String(row.current_rate_source ?? "dojo_default"),
+            charge_id: row.charge_id ? String(row.charge_id) : null,
+            charge_amount: row.charge_amount == null ? null : Number(row.charge_amount),
+            charge_currency: row.charge_currency ? String(row.charge_currency) : null,
+            charge_status: row.charge_status ? String(row.charge_status) : null,
+            total_paid: Number(row.total_paid ?? 0),
+            remaining_balance:
+              row.remaining_balance == null ? null : Number(row.remaining_balance),
+            has_pending_confirmation: row.has_pending_confirmation === true,
+            special_rate_amount:
+              row.special_rate_amount == null ? null : Number(row.special_rate_amount),
+            special_rate_currency: row.special_rate_currency
+              ? String(row.special_rate_currency)
+              : null,
+            special_rate_effective_from: row.special_rate_effective_from
+              ? String(row.special_rate_effective_from)
+              : null,
+            special_rate_effective_until: row.special_rate_effective_until
+              ? String(row.special_rate_effective_until)
+              : null,
+            can_adjust_current_month: row.can_adjust_current_month === true,
+          }
+        : null;
+
+      setSubscriptionSummaries((current) => ({
+        ...current,
+        [membershipId]: summary,
+      }));
+
+      if (summary) {
+        setFeeAmountDraft((current) => ({
+          ...current,
+          [membershipId]:
+            current[membershipId] ?? String(summary.current_rate),
+        }));
+      }
+    } catch (error: unknown) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load the Member subscription summary."
+      );
+    } finally {
+      setLoadingSubscriptionSummary((current) => ({
+        ...current,
+        [membershipId]: false,
+      }));
+    }
+  }
+
+
+  async function toggleFeeAdjustment(
+    member: Member
+  ) {
+    const opening =
+      !(feeAdjustmentOpen[member.membership_id] ?? false);
+
+    setFeeAdjustmentOpen((current) => ({
+      ...current,
+      [member.membership_id]: opening,
+    }));
+
+    if (!opening) {
+      return;
+    }
+
+    setFeeModeDraft((current) => ({
+      ...current,
+      [member.membership_id]:
+        current[member.membership_id] ?? "this_month_only",
+    }));
+
+    await loadSubscriptionSummary(member.membership_id);
+  }
+
+
+  async function applyFeeAdjustment(
+    member: Member
+  ) {
+    const amountText =
+      (feeAmountDraft[member.membership_id] ?? "").trim();
+
+    const amount = Number(amountText);
+
+    const mode =
+      feeModeDraft[member.membership_id] ?? "this_month_only";
+
+    const reason =
+      (feeReasonDraft[member.membership_id] ?? "").trim();
+
+    if (!amountText || !Number.isFinite(amount) || amount < 0) {
+      showError("Enter a valid subscription fee of zero or greater.");
+      return;
+    }
+
+    if (!reason) {
+      showError("Enter a reason for the fee adjustment.");
+      return;
+    }
+
+    const modeLabel =
+      mode === "this_month_only"
+        ? "this month only"
+        : mode === "this_month_onward"
+        ? "this month and future months"
+        : "next month and future months";
+
+    const confirmed = window.confirm(
+      `Adjust ${member.full_name}'s subscription fee to ${amount} for ${modeLabel}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setProcessingId(member.membership_id);
+    clearMessage();
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "apply_membership_fee_adjustment",
+        {
+          target_membership_id: member.membership_id,
+          new_amount: amount,
+          adjustment_mode: mode,
+          adjustment_reason: reason,
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const result =
+        data && typeof data === "object" && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : {};
+
+      const appliedMode = String(result.mode ?? mode);
+      const effectiveFrom =
+        typeof result.effective_from === "string"
+          ? result.effective_from
+          : null;
+
+      await loadSubscriptionSummary(member.membership_id);
+
+      setFeeReasonDraft((current) => ({
+        ...current,
+        [member.membership_id]: "",
+      }));
+
+      if (
+        mode === "this_month_onward" &&
+        appliedMode === "next_month_onward"
+      ) {
+        showSuccess(
+          `${member.full_name}'s current month was left unchanged because payment activity already exists. The new fee will apply from ${
+            effectiveFrom ? formatDate(effectiveFrom) : "next month"
+          } onward.`
+        );
+      } else if (appliedMode === "this_month_only") {
+        showSuccess(
+          `${member.full_name}'s fee was adjusted for this month only. Future subscription rates are unchanged.`
+        );
+      } else if (appliedMode === "this_month_onward") {
+        showSuccess(
+          `${member.full_name}'s current month and future subscription rate were updated.`
+        );
+      } else {
+        showSuccess(
+          `${member.full_name}'s new subscription rate will apply from ${
+            effectiveFrom ? formatDate(effectiveFrom) : "next month"
+          } onward.`
+        );
+      }
+    } catch (error: unknown) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "Failed to adjust the subscription fee."
+      );
+    } finally {
+      setProcessingId(null);
     }
   }
 
@@ -4036,6 +4334,26 @@ export default function MemberManagementPage() {
                   [];
 
 
+                const feeOpen =
+                  feeAdjustmentOpen[
+                    member.membership_id
+                  ] ??
+                  false;
+
+
+                const subscriptionSummary =
+                  subscriptionSummaries[
+                    member.membership_id
+                  ];
+
+
+                const loadingRate =
+                  loadingSubscriptionSummary[
+                    member.membership_id
+                  ] ??
+                  false;
+
+
                 const groupedAdminOptions =
                   Array.from(
                     new Map(
@@ -4070,6 +4388,10 @@ export default function MemberManagementPage() {
 
                           {member.avatar_url ? (
 
+                            // Member avatars are user-managed storage URLs and
+                            // must render even before their host is configured
+                            // for image optimization.
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={
                                 member.avatar_url
@@ -5765,6 +6087,215 @@ export default function MemberManagementPage() {
                       </div>
 
                     )}
+
+
+                    {/* SUBSCRIPTION FEE */}
+
+                    <div className="mt-6 border-t border-neutral-800 pt-5">
+                      <div className="rounded-xl border border-emerald-900 bg-emerald-950/10 p-5">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold uppercase tracking-wider text-emerald-400">
+                              Subscription & Payment
+                            </p>
+                            <p className="mt-2 text-xs text-neutral-500">
+                              Current fee, monthly charge, official payments and Member-specific rate.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={processing || loadingRate}
+                            onClick={() => toggleFeeAdjustment(member)}
+                            className="self-start rounded-lg border border-emerald-800 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-950/30 disabled:opacity-50"
+                          >
+                            {loadingRate
+                              ? "Loading..."
+                              : feeOpen
+                              ? "Close Adjustment"
+                              : "Adjust Fee"}
+                          </button>
+                        </div>
+
+                        {subscriptionSummary ? (
+                          <>
+                            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-neutral-500">Current Rate</p>
+                                <p className="mt-2 text-lg font-bold">
+                                  {subscriptionSummary.current_rate_currency} {subscriptionSummary.current_rate.toLocaleString()}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  {subscriptionSummary.current_rate_source === "member_special"
+                                    ? "Member special rate"
+                                    : "Dojo default rate"}
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-neutral-500">Current Month Charge</p>
+                                <p className="mt-2 text-lg font-bold">
+                                  {subscriptionSummary.charge_amount == null
+                                    ? "No charge"
+                                    : `${subscriptionSummary.charge_currency ?? subscriptionSummary.current_rate_currency} ${subscriptionSummary.charge_amount.toLocaleString()}`}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  {formatDate(subscriptionSummary.billing_month)}
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-neutral-500">Paid / Remaining</p>
+                                <p className="mt-2 font-semibold text-green-300">
+                                  Paid: {subscriptionSummary.charge_currency ?? subscriptionSummary.current_rate_currency} {subscriptionSummary.total_paid.toLocaleString()}
+                                </p>
+                                <p className="mt-1 text-sm text-amber-300">
+                                  Remaining: {subscriptionSummary.charge_currency ?? subscriptionSummary.current_rate_currency} {(subscriptionSummary.remaining_balance ?? 0).toLocaleString()}
+                                </p>
+                              </div>
+
+                              <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
+                                <p className="text-xs uppercase tracking-wider text-neutral-500">Payment Status</p>
+                                <p className="mt-2 font-bold uppercase">
+                                  {subscriptionSummary.charge_status ?? "NO CHARGE"}
+                                </p>
+                                {subscriptionSummary.has_pending_confirmation && (
+                                  <p className="mt-2 text-xs font-semibold text-amber-300">
+                                    PAYMENT CONFIRMATION PENDING
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {subscriptionSummary.special_rate_amount != null && (
+                              <div className="mt-4 rounded-lg border border-sky-900 bg-sky-950/10 p-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
+                                  Member Special Rate
+                                </p>
+                                <p className="mt-2 font-semibold">
+                                  {subscriptionSummary.special_rate_currency ?? "IDR"} {subscriptionSummary.special_rate_amount.toLocaleString()}
+                                </p>
+                                <p className="mt-1 text-xs text-neutral-500">
+                                  Effective {subscriptionSummary.special_rate_effective_from
+                                    ? formatDate(subscriptionSummary.special_rate_effective_from)
+                                    : "-"}
+                                  {subscriptionSummary.special_rate_effective_until
+                                    ? ` → ${formatDate(subscriptionSummary.special_rate_effective_until)}`
+                                    : " → ongoing"}
+                                </p>
+                              </div>
+                            )}
+
+                            {!subscriptionSummary.can_adjust_current_month && (
+                              <div className="mt-4 rounded-lg border border-amber-900 bg-amber-950/20 p-4 text-sm text-amber-200">
+                                Current-month adjustment is locked because the charge has payment activity, a pending confirmation, or is already closed. Future fee changes can still start next month.
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="mt-4 text-sm text-neutral-500">
+                            Open Adjust Fee to load the current subscription and payment summary.
+                          </p>
+                        )}
+
+                        {feeOpen && (
+                          <div className="mt-5 border-t border-neutral-800 pt-5">
+                            <div className="grid gap-4 lg:grid-cols-2">
+                              <div>
+                                <label className="mb-2 block text-sm font-medium">New Fee Amount</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  value={feeAmountDraft[member.membership_id] ?? ""}
+                                  onChange={(e) =>
+                                    setFeeAmountDraft((current) => ({
+                                      ...current,
+                                      [member.membership_id]: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Enter new fee"
+                                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-3 text-white"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="mb-2 block text-sm font-medium">Apply Adjustment</label>
+                                <select
+                                  value={feeModeDraft[member.membership_id] ?? "this_month_only"}
+                                  onChange={(e) =>
+                                    setFeeModeDraft((current) => ({
+                                      ...current,
+                                      [member.membership_id]: e.target.value as FeeAdjustmentMode,
+                                    }))
+                                  }
+                                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-3 text-white"
+                                >
+                                  <option
+                                    value="this_month_only"
+                                    disabled={subscriptionSummary?.can_adjust_current_month === false}
+                                  >
+                                    This month only
+                                  </option>
+                                  <option value="this_month_onward">This month onward</option>
+                                  <option value="next_month_onward">Next month onward</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 rounded-lg border border-neutral-800 bg-neutral-950/50 p-4 text-sm text-neutral-400">
+                              {(feeModeDraft[member.membership_id] ?? "this_month_only") === "this_month_only" ? (
+                                <p><span className="font-semibold text-white">This month only:</span> changes only the unpaid current-month charge. Future recurring rates stay unchanged.</p>
+                              ) : (feeModeDraft[member.membership_id] ?? "this_month_only") === "this_month_onward" ? (
+                                <p><span className="font-semibold text-white">This month onward:</span> changes this month and the recurring rate. If this month is locked, the backend automatically starts the new rate next month.</p>
+                              ) : (
+                                <p><span className="font-semibold text-white">Next month onward:</span> leaves this month untouched and changes the recurring rate beginning next month.</p>
+                              )}
+                            </div>
+
+                            <div className="mt-4">
+                              <label className="mb-2 block text-sm font-medium">Adjustment Reason</label>
+                              <textarea
+                                rows={3}
+                                value={feeReasonDraft[member.membership_id] ?? ""}
+                                onChange={(e) =>
+                                  setFeeReasonDraft((current) => ({
+                                    ...current,
+                                    [member.membership_id]: e.target.value,
+                                  }))
+                                }
+                                placeholder="Example: Special member rate approved by Admin"
+                                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-3 text-white placeholder:text-neutral-600"
+                              />
+                            </div>
+
+                            <div className="mt-4 flex flex-wrap gap-3">
+                              <button
+                                type="button"
+                                disabled={processing || loadingRate}
+                                onClick={() => applyFeeAdjustment(member)}
+                                className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {processing ? "Applying..." : "Apply Fee Adjustment"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={processing}
+                                onClick={() =>
+                                  setFeeAdjustmentOpen((current) => ({
+                                    ...current,
+                                    [member.membership_id]: false,
+                                  }))
+                                }
+                                className="rounded-lg border border-neutral-700 px-5 py-2.5 text-sm text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
 
                     {/* STATUS */}

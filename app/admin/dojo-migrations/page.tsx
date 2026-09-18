@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -114,6 +115,39 @@ export default function DojoMigrationHistoryPage() {
       | ""
     >("");
 
+  const loadMigrations = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_dojo_migration_history"
+      );
+
+
+    if (
+      error
+    ) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+
+    setMigrations(
+      (
+        data ??
+        []
+      ) as MigrationRow[]
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -189,43 +223,10 @@ export default function DojoMigrationHistoryPage() {
 
     loadPage();
   }, [
+    loadMigrations,
     router,
     supabase,
   ]);
-
-
-  async function loadMigrations() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_dojo_migration_history"
-      );
-
-
-    if (
-      error
-    ) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      return;
-    }
-
-
-    setMigrations(
-      (
-        data ??
-        []
-      ) as MigrationRow[]
-    );
-  }
 
 
   const classes =
