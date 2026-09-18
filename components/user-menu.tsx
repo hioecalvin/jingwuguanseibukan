@@ -271,10 +271,11 @@ export default function UserMenu({
                   text-sm
                   font-medium
                   text-red-300
-                  transition
+                  transition-colors
                   hover:bg-red-950/40
                   disabled:cursor-not-allowed
-                  disabled:opacity-50
+                  disabled:bg-neutral-900
+                  disabled:text-red-200
                 "
               >
                 {signingOut

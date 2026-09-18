@@ -2799,3 +2799,9 @@ Local verification after the fixes passed lint, TypeScript, all 150 Node tests, 
 WebKit/Linux and WebKit/macOS. The draft PR remains open and unmerged. No deployment,
 database connection, provider call or production contact occurred during this
 milestone.
+
+A documentation-only branch-tip confirmation subsequently caught a timing-dependent
+3.24:1 contrast frame while the account-menu sign-out button transitioned out of
+`disabled:opacity-50`. The control now uses color-only transitions and explicit
+high-contrast disabled colors, preventing the accessibility result from depending on
+scan timing.
