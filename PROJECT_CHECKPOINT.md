@@ -88,6 +88,12 @@ name as a deterministic tie-breaker.
   audit, idempotency, role-boundary and ACL suite. Independent snapshots proved zero
   residue, database lint reports no errors, the ledger is exactly 006–046, the
   post-apply dry run is up to date and the authenticated role suite passes 12/12.
+- Deployment-readiness review found and closed one fail-closed configuration gap:
+  `DURABLE_RATE_LIMIT_SECRET` is now required by the offline provider validator,
+  covered by regression tests and present as a distinct generated value only in the
+  protected staging environment. The offline staging provider check passes without
+  exposing values. The existing Vercel project is still unlinked to Git and has no
+  project environment variables, so no staging deployment is claimed.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only

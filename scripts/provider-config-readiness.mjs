@@ -10,6 +10,7 @@ const SERVER_ONLY_NAMES = Object.freeze([
   "EMAIL_WORKER_SECRET",
   "VAPID_PRIVATE_KEY",
   "PUSH_API_SECRET",
+  "DURABLE_RATE_LIMIT_SECRET",
 ]);
 
 const PLACEHOLDER = /(?:change[-_ ]?me|example|dummy|fixture|local[-_ ]?only|test[-_ ]?only|unit[-_ ]?only)/i;
@@ -99,6 +100,7 @@ export function evaluateProviderConfiguration(env, options = {}) {
   const fromAddress = requireValue(blockers, env, "EMAIL_FROM_ADDRESS");
   const fromName = requireValue(blockers, env, "EMAIL_FROM_NAME");
   const workerSecret = requireValue(blockers, env, "EMAIL_WORKER_SECRET");
+  const durableRateLimitSecret = requireValue(blockers, env, "DURABLE_RATE_LIMIT_SECRET");
   if (fromAddress && !EMAIL.test(fromAddress)) add(blockers, "EMAIL_FROM_ADDRESS", "must be a valid mailbox address");
   if (fromName && /[\r\n<>]/.test(fromName)) add(blockers, "EMAIL_FROM_NAME", "must not contain header or address delimiters");
   if (resendKey && (!resendKey.startsWith("re_") || resendKey.length < 20)) add(blockers, "RESEND_API_KEY", "does not have the expected Resend key shape");
@@ -131,6 +133,7 @@ export function evaluateProviderConfiguration(env, options = {}) {
   const strongSecrets = {
     EMAIL_WORKER_SECRET: workerSecret,
     PUSH_API_SECRET: pushSecret,
+    DURABLE_RATE_LIMIT_SECRET: durableRateLimitSecret,
   };
   for (const [name, secret] of Object.entries(strongSecrets)) {
     if (secret && secret.length < 32) add(blockers, name, "must contain at least 32 characters");

@@ -25,6 +25,7 @@ npm run build
 
 Required browser-safe configuration:
 
+- `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
@@ -39,9 +40,21 @@ Required server-only configuration:
 - `VAPID_PRIVATE_KEY`
 - `VAPID_SUBJECT` (for example `mailto:admin@example.com`)
 - `PUSH_API_SECRET`
+- `DURABLE_RATE_LIMIT_SECRET`
 
 Never expose a Supabase secret/service-role key, Resend key, VAPID private key,
-or worker secret through a `NEXT_PUBLIC_` variable.
+worker secret, push secret, or durable rate-limit secret through a `NEXT_PUBLIC_`
+variable.
+
+Before staging deployment, run the offline configuration check against the protected
+staging environment. It validates required names, exact target/origin binding, key
+shapes and secret separation without printing values:
+
+```powershell
+node scripts/provider-config-readiness.mjs --environment=staging `
+  --expected-origin=$env:NEXT_PUBLIC_SITE_URL `
+  --expected-supabase-host=eomubndonbetszdbhsrj.supabase.co
+```
 
 ## Database release
 

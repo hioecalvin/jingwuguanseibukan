@@ -16,6 +16,7 @@ function validEnvironment() {
     EMAIL_FROM_ADDRESS: "membership@staging.example.org",
     EMAIL_FROM_NAME: "Jingwuguan Seibukan",
     EMAIL_WORKER_SECRET: "worker-1234567890-abcdefghijklmnopqrstuvwxyz",
+    DURABLE_RATE_LIMIT_SECRET: "rate-limit-1234567890-abcdefghijklmnop",
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: ecdh.getPublicKey().toString("base64url"),
     VAPID_PRIVATE_KEY: ecdh.getPrivateKey().toString("base64url"),
     VAPID_SUBJECT: "mailto:admin@example.org",
@@ -40,10 +41,12 @@ test("a coherent staging provider configuration passes without revealing values"
 test("missing configuration and the wrong Supabase target fail closed", () => {
   const env = validEnvironment();
   delete env.RESEND_API_KEY;
+  delete env.DURABLE_RATE_LIMIT_SECRET;
   env.NEXT_PUBLIC_SUPABASE_URL = "https://production-ref.supabase.co";
   const result = evaluateProviderConfiguration(env, options);
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "RESEND_API_KEY"));
+  assert.ok(result.blockers.some(({ path }) => path === "DURABLE_RATE_LIMIT_SECRET"));
   assert.ok(result.blockers.some(({ path }) => path === "NEXT_PUBLIC_SUPABASE_URL"));
 });
 

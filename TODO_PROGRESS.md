@@ -3312,3 +3312,29 @@ could not be re-executed through this CLI's prepared-statement query command; th
 previously documented platform-owned default-privilege finding therefore remains a
 separate release decision and was not weakened. The local gate remains TypeScript
 plus 230/230 Node tests, lint, `git diff --check` and a 44-route production build.
+
+### Milestone 126 — staging hosting readiness and missing runtime secret closed (25/09/2026)
+
+Ran parallel deployment, protected-environment and post-deploy browser audits. The
+existing Vercel team `js1-ccd7` contains project `jingwuguanseibukan`, but the project
+currently has no environment variables, no connected Git repository, no deploy hook
+and no deployed staging application at the configured fixed origin. The repository
+also has no Vercel configuration or external one-minute worker scheduler. Production
+was not contacted and no Vercel setting was changed.
+
+The audit found that the runtime requires `DURABLE_RATE_LIMIT_SECRET`, while the
+offline readiness validator and protected staging environment previously omitted it.
+The validator now requires the server-only value, checks its strength/separation and
+rejects a public-prefixed copy. A new distinct 64-character value was generated
+directly into the protected staging environment without printing it. Focused tests
+pass 9/9, the full TypeScript/Node gate passes 230/230, lint passes and the offline
+staging provider check reports ready with zero blockers. The first build attempt hit
+the known stale `.next` Windows lock; after removing only that ignored generated
+directory, a fresh optimized build compiled successfully and produced a build ID.
+
+The Vercel browser session is signed in, while Vercel CLI remains untrusted until the
+operator authorizes its device-login request. Do not upload `STAGING_DB_URL`, database
+passwords, `SECURITY_TEST_*` or backup paths. After CLI authorization, link only the
+existing staging project, upload the reviewed staging runtime variables to Preview
+scope, deploy the exact release commit, verify the fixed HTTPS alias and run the
+read-only host gate before any authenticated or provider mutation test.

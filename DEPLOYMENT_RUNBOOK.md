@@ -63,6 +63,9 @@ operator instructions.
   and out-of-scope memberships across at least two dojos/classes.
 - Staging and future-production secrets, VAPID keys, sender settings, provider
   ownership, scheduler ownership and redirect allowlists, kept in separate scopes.
+- Staging runtime configuration must include a distinct server-only
+  `DURABLE_RATE_LIMIT_SECRET` of at least 32 characters. Never upload database URLs,
+  database passwords, backup paths or `SECURITY_TEST_*` variables to Vercel.
 - Reviewed patch and migration hashes. Root 004/005 must not be replayed.
 
 ## Production region decision
