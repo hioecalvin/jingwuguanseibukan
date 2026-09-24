@@ -7,7 +7,8 @@ bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and dir
 database role-boundary acceptance passed. Migration 044's optional-Aikikai and
 automatic-JS-Member-ID acceptance passed against its persisted staging objects, the
 authenticated role suite passed 12/12, database lint is clean and the combined local
-gate remains 223/223 tests. Production was not contacted during that work.
+gate for the local migration-045 candidate is now 228/228 tests. Production was not
+contacted during that work.
 
 The strict database security verifier still stops at the known platform-owned
 `supabase_admin` future-object default-privilege finding. An unqualified production
@@ -33,8 +34,9 @@ operator instructions.
 ## Current release boundary — supersedes historical milestone notes
 
 - Staging is Sydney project `eomubndonbetszdbhsrj`, exact ledger 006–044. Do not
-  reapply those migrations. The explicit staging dry run currently reports no
-  pending migration.
+  reapply those migrations. Local migration 045 is the only reviewed pending file;
+  do not dry-run or apply it until the exposed staging database password is rotated
+  and a new explicit staging-only approval is given.
 - Production must be a separately created and dashboard-verified Singapore
   (`ap-southeast-1`) project. Its reference, host and recovery plan do not yet exist.
 - The repository migration directory begins at 006; it is not, by itself, a clean
@@ -179,23 +181,23 @@ flag does not authorize or perform production access.
 
 ## Current staging verification and future migration apply
 
-Staging currently has no pending repository migration. Before any future change,
+Staging currently remains at exact history 006–044 and local migration 045 is
+pending. Before contacting staging, rotate its exposed database password. Then
 review restored objects, ownership, grants, RLS, triggers, Auth/Storage behavior and
-extensions; confirm exact history 006–044; compare repository SQL
-hashes with the accepted evidence; and rerun the strict verifier. Do not apply a
-future migration without a new explicit staging approval and a dry run listing only
-the newly reviewed file or files.
+extensions; confirm exact history 006–044; record migration 045's reviewed hash;
+and obtain new explicit staging-only approval. Do not apply migration 045 without a
+dry run listing exactly that one file.
 
 ```powershell
 npx.cmd --yes supabase@2.117.0 migration list --db-url $env:STAGING_DB_URL
 npx.cmd --yes supabase@2.117.0 db push --db-url $env:STAGING_DB_URL --skip-vault --dry-run
 ```
 
-The current dry run must report the database up to date with no migration files.
-The former instructions that 011–016 or 044 may be pending are superseded. A dry run
-lists migrations; it does not execute or validate SQL. Review every future file and
-hash before an approved apply. `--skip-vault` avoids unrelated configured Vault
-updates.
+The next authorized dry run must list exactly
+`045_last_training_session.sql`. The former instructions that 011–016 or 044 may be
+pending are superseded. A dry run lists migrations; it does not execute or validate
+SQL. Review every future file and hash before an approved apply. `--skip-vault`
+avoids unrelated configured Vault updates.
 
 After a separately approved future apply, require an exact ledger, database lint,
 the strict SQL verifier, targeted rollback-contained acceptance, independent

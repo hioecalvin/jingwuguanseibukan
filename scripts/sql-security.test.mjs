@@ -241,6 +241,9 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "publish_initial_memorial",
     "record_prepared_assessment_certificate_print",
     "review_class_request_with_level",
+    "get_my_last_training_sessions",
+    "mark_membership_trained_today",
+    "set_membership_last_training_session",
     "set_member_deceased",
     "submit_bulk_assessment",
   ]);
@@ -504,7 +507,11 @@ test("database verifier rejects dangerous relation and server-worker grants", ()
     "utf8"
   );
 
-  assert.match(sql, /array\['011','012','013','014','015','016','017','018','040','041','042'\]/i);
+  assert.match(sql, /array\['011','012','013','014','015','016','017','018','040','041','042','043','044','045'\]/i);
+  assert.match(sql, /membership_training_session_audit/i);
+  assert.match(sql, /public\.get_my_last_training_sessions\(\)/i);
+  assert.match(sql, /public\.mark_membership_trained_today\(uuid\)/i);
+  assert.match(sql, /public\.set_membership_last_training_session\(uuid,date\)/i);
   assert.match(sql, /privilege\.privilege_type in \('TRUNCATE','REFERENCES','TRIGGER','MAINTAIN'\)/i);
   assert.match(sql, /acldefault\('S', sequence_data\.relowner\)/i);
   for (const signature of [

@@ -4,11 +4,12 @@ Last updated: 24/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `bc001b5`; its
+The published release branch is `release/v1-readiness-20260918` at `68252fd`; its
 local tracking ref matched the recorded origin ref at the start of this work, although
 no fresh remote fetch was made for this checkpoint. The uncommitted local candidate
-passes lint with no warnings, TypeScript, 223/223 Node regressions, and a fresh
-isolated production build generating 44 routes. The earlier dependency audit
+passes lint with no warnings, TypeScript and 228/228 Node regressions. The latest
+fresh migration-045 build attempt is temporarily blocked by a locked local Next.js
+trace; the immediately preceding candidate build generated all 44 routes. The earlier dependency audit
 reported zero known vulnerabilities. Sydney staging `eomubndonbetszdbhsrj` is
 verified at exact migration history 006–044. Migrations 040–044 are applied and the
 persisted rollback-contained memorial, annual-reminder, bulk-assessment,
@@ -3228,3 +3229,29 @@ any further live staging use. The value is not repeated and was not used after t
 event. No production service was contacted. The distinct Developer-role audit also
 confirmed it would require a new authorization boundary and migration; it remains a
 post-v1 feature rather than expanding the current release gate.
+
+### Milestone 123 — last-training-session candidate prepared locally (24/09/2026)
+
+Prepared migration 045 and the corresponding Admin/Member interfaces without
+contacting staging or production. Each class membership can now retain its latest
+instructor-recorded training date, the recorder and timestamp. Corrections append
+to a private forced-RLS audit table. Only an active Super Admin or the scoped Admin
+assigned to that class/dojo can record a non-future date on or after the membership
+join date; deceased-member updates are rejected. Members receive only their own
+per-membership values through a caller-bound read RPC.
+
+The one-click `Mark Trained Today` action uses the Asia/Jakarta server date through
+the same locked and audited write boundary; the separate date control remains for
+corrections or backdated sessions. The database, rather than the browser clock,
+calculates elapsed days against the Asia/Jakarta business date. The Admin member list and Member profile display Today,
+1 day ago or N days ago for 0–29 days; at 30 days or later they display the stored
+calendar date, and an empty value displays Not recorded. The Admin update keeps an
+audit trail while an idempotent repeat does not create duplicate history.
+
+Migration review corrected the replacement view before execution so the established
+`admin_visible_members` column order remains intact and the two new columns are
+appended. Focused migration/UI/security assertions pass 5/5. The full local gate
+passes TypeScript plus 228/228 Node tests, lint, `git diff --check` and the direct
+optimized 44-route production build. Staging remains exactly 006–044 and migration
+045 is not applied. The exposed staging database password must be rotated before
+any guarded staging apply or live acceptance; production was not contacted.

@@ -10,6 +10,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatTrainingSessionRecency } from "@/lib/format-date";
 import ClassEnrollmentPanel from "@/components/class-enrollment-panel";
 
 type Profile = {
@@ -67,6 +68,12 @@ type Membership = {
     id: string;
     name: string;
   } | null;
+};
+
+type TrainingSessionStatus = {
+  membership_id: string;
+  training_date: string | null;
+  days_ago: number | null;
 };
 
 type TitleHistoryItem = {
@@ -135,6 +142,12 @@ export default function ProfilePage() {
 
   const [memberships, setMemberships] =
     useState<Membership[]>([]);
+
+  const [trainingSessions, setTrainingSessions] =
+    useState<Record<string, TrainingSessionStatus>>({});
+
+  const [trainingSessionsUnavailable, setTrainingSessionsUnavailable] =
+    useState(false);
 
   const [aikidoDojos, setAikidoDojos] =
     useState<Dojo[]>([]);
@@ -339,6 +352,13 @@ export default function ProfilePage() {
       const loadedMemberships =
         (membershipData ?? []) as unknown as Membership[];
 
+      const {
+        data: trainingSessionData,
+        error: trainingSessionError,
+      } = await supabase.rpc(
+        "get_my_last_training_sessions"
+      );
+
       if (active) {
         setProfile(profileData as Profile);
 
@@ -347,6 +367,30 @@ export default function ProfilePage() {
         );
 
         setMemberships(loadedMemberships);
+
+        if (trainingSessionError) {
+          setTrainingSessionsUnavailable(true);
+          setMessage(
+            "Your profile loaded, but the latest training-session status is temporarily unavailable."
+          );
+          setMessageType("error");
+        } else {
+          setTrainingSessionsUnavailable(false);
+          setTrainingSessions(
+            Object.fromEntries(
+              (
+                (trainingSessionData ?? []) as TrainingSessionStatus[]
+              ).map(
+                (
+                  session
+                ) => [
+                  session.membership_id,
+                  session,
+                ]
+              )
+            )
+          );
+        }
       }
 
       /*
@@ -1632,18 +1676,7 @@ export default function ProfilePage() {
                       />
                     </div>
 
-                    <div
-                      className={`
-                        mt-4
-                        grid
-                        gap-4
-                        ${
-                          title
-                            ? "sm:grid-cols-3"
-                            : "sm:grid-cols-2"
-                        }
-                      `}
-                    >
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <DetailCard
                         label="Grade Category"
                         value={
@@ -1668,6 +1701,22 @@ export default function ProfilePage() {
                           </p>
                         </div>
                       )}
+
+                      <DetailCard
+                        label="Last Training Session"
+                        value={
+                          trainingSessionsUnavailable
+                            ? "Temporarily unavailable"
+                            : formatTrainingSessionRecency(
+                                trainingSessions[
+                                  membership.id
+                                ]?.training_date,
+                                trainingSessions[
+                                  membership.id
+                                ]?.days_ago
+                              )
+                        }
+                      />
 
                       <DetailCard
                         label="Role"

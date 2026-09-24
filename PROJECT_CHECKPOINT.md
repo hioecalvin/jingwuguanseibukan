@@ -4,11 +4,11 @@ Checkpoint date: 24/09/2026
 
 ## Source and database state
 
-- Published branch checkpoint: `release/v1-readiness-20260918` at `bc001b5`.
-- The local tracking ref matched the recorded origin ref at the start of this work;
-  no fresh remote fetch was performed.
-- The current working tree is an uncommitted local candidate containing the memorial
-  and bulk-assessment work described below.
+- Published branch checkpoint: `release/v1-readiness-20260918` at `68252fd`.
+- Local HEAD and the recorded `origin/release/v1-readiness-20260918` ref matched at
+  the start of the last-training-session work; no fresh remote fetch was performed.
+- The current working tree is an uncommitted local migration-045 candidate adding
+  the instructor-recorded last-training-session feature described below.
 - The verified staging migration ledger is exactly 006–044.
 - Migrations 040, 041, 042, 043 and 044 were applied in order to staging
   `eomubndonbetszdbhsrj` only. The repository's local Supabase metadata remains
@@ -27,6 +27,7 @@ Checkpoint date: 24/09/2026
 | --- | --- | --- | --- |
 | Member management and statuses | Existing member, membership, class/dojo, approval, Break, transfer, grading and retained-history flows. | New deceased boundaries require staging and browser acceptance. | `app/admin/members/page.tsx`; `profiles`; `memberships`; `admin_visible_members` |
 | Aikikai and JS Member IDs | Registration accepts the applicant's optional Aikikai Registration Number and stores it separately. Persisted migration 044 assigns the next permanent numeric JS Member ID atomically only when a Super Admin approves the initial application. Supplied/blank Aikikai values, ID assignment, rejection, legacy preservation, role denial, queue atomicity and zero residue passed live staging acceptance. | Exercise both blank and supplied Aikikai registration paths through the deployed browser workflow. | migration 044; `profiles.aikikai_registration_number`; `profiles.registration_number`; `js_member_id_seq`; both `review_class_request*` RPCs; registration and Applications pages |
+| Last training session | Local migration 045 stores the latest training date per class membership, keeps a private append-only correction audit, and permits only the assigned scoped Admin or Super Admin to record it. The one-click attendance action uses the Jakarta server date, while a separate date field supports corrections/backdating. The Admin member list and Member profile display Today, 1 day ago, or N days ago through day 29, then the actual date from day 30 onward. | Migration 045 is not applied to staging or production. It still requires isolated PostgreSQL semantic acceptance, guarded staging apply after password rotation, role-boundary/zero-residue checks, and authenticated browser verification. | migration 045; `class_memberships.last_training_session_*`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. | Announcement comments and image attachments were not found. Live delivery/scheduler configuration remains an operational gate. | `announcements`; `notifications`; `email_outbox`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
@@ -72,6 +73,13 @@ group is ordered by destination rank and sub-rank from highest to lowest, with m
 name as a deterministic tie-breaker.
 
 ## Verification completed locally
+
+- Migration 045's focused source/security suite passes 5/5. The full gate passes
+  TypeScript plus 228/228 Node tests, lint, `git diff --check`, and the direct
+  optimized Next.js production build of all 44 routes.
+- The migration-045 review preserves the existing `admin_visible_members` column
+  order and appends its two new fields, preventing an unsafe/incompatible view
+  replacement. No remote database was contacted for this candidate.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only

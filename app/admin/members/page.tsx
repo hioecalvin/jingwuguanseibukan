@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   formatDate,
   formatDateTime,
+  formatTrainingSessionRecency,
 } from "@/lib/format-date";
 import {
   exportToExcel,
@@ -94,6 +95,9 @@ type Member = {
   joined_date: string | null;
 
   last_grading_date: string | null;
+
+  last_training_session_date: string | null;
+  last_training_days_ago: number | null;
 
   /*
    * OPTIONAL TITLE APPOINTMENT
@@ -404,6 +408,37 @@ export default function MemberManagementPage() {
     useState<
       Record<string, string>
     >({});
+
+
+  const [
+    trainingDateDraft,
+    setTrainingDateDraft,
+  ] =
+    useState<
+      Record<string, string>
+    >({});
+
+
+  const [
+    trainingSaving,
+    setTrainingSaving,
+  ] = useState<
+    Record<string, boolean>
+  >({});
+
+
+  const [
+    trainingFeedback,
+    setTrainingFeedback,
+  ] = useState<
+    Record<
+      string,
+      {
+        type: "success" | "error";
+        message: string;
+      }
+    >
+  >({});
 
 
   /*
@@ -1096,8 +1131,30 @@ export default function MemberManagementPage() {
     }
 
 
-    setProcessingId(
-      member.membership_id
+    setTrainingSaving(
+      (
+        current
+      ) => ({
+        ...current,
+        [member.membership_id]:
+          true,
+      })
+    );
+
+    setTrainingFeedback(
+      (
+        current
+      ) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[
+          member.membership_id
+        ];
+
+        return next;
+      }
     );
 
     clearMessage();
@@ -1172,6 +1229,182 @@ export default function MemberManagementPage() {
     } finally {
       setProcessingId(
         null
+      );
+    }
+  }
+
+
+  /*
+   * =====================================================
+   * LAST TRAINING SESSION
+   * =====================================================
+   */
+
+  async function saveLastTrainingSession(
+    member: Member,
+    mode: "today" | "date"
+  ) {
+    const value =
+      trainingDateDraft[
+        member.membership_id
+      ] ??
+      member.last_training_session_date ??
+      "";
+
+
+    if (
+      mode === "date" &&
+      !value
+    ) {
+      showError(
+        "Training date is required."
+      );
+
+      return;
+    }
+
+
+    setProcessingId(
+      member.membership_id
+    );
+
+    clearMessage();
+
+
+    try {
+      const {
+        data,
+        error,
+      } =
+        await supabase.rpc(
+          mode === "today"
+            ? "mark_membership_trained_today"
+            : "set_membership_last_training_session",
+          mode === "today"
+            ? {
+                target_membership_id:
+                  member.membership_id,
+              }
+            : {
+                target_membership_id:
+                  member.membership_id,
+
+                new_training_date:
+                  value,
+              }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      const result =
+        (
+          Array.isArray(data)
+            ? data[0]
+            : data
+        ) as
+          | {
+              training_date: string;
+              days_ago: number;
+            }
+          | null;
+
+
+      if (!result) {
+        throw new Error(
+          "The training date was not returned."
+        );
+      }
+
+
+      setMembers(
+        (
+          current
+        ) =>
+          current.map(
+            (
+              item
+            ) =>
+              item.membership_id ===
+              member.membership_id
+                ? {
+                    ...item,
+                    last_training_session_date:
+                      result.training_date,
+                    last_training_days_ago:
+                      result.days_ago,
+                  }
+                : item
+          )
+      );
+
+
+      setTrainingDateDraft(
+        (
+          current
+        ) => ({
+          ...current,
+          [member.membership_id]:
+            result.training_date,
+        })
+      );
+
+
+      showSuccess(
+        mode === "today"
+          ? `${member.full_name} was marked as trained today.`
+          : `${member.full_name}'s last training session was corrected.`
+      );
+
+      setTrainingFeedback(
+        (
+          current
+        ) => ({
+          ...current,
+          [member.membership_id]: {
+            type: "success",
+            message:
+              mode === "today"
+                ? "Training recorded for today."
+                : "Training date corrected.",
+          },
+        })
+      );
+    } catch (
+      error: unknown
+    ) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to record the training session.";
+
+      showError(
+        errorMessage
+      );
+
+      setTrainingFeedback(
+        (
+          current
+        ) => ({
+          ...current,
+          [member.membership_id]: {
+            type: "error",
+            message: errorMessage,
+          },
+        })
+      );
+    } finally {
+      setTrainingSaving(
+        (
+          current
+        ) => ({
+          ...current,
+          [member.membership_id]:
+            false,
+        })
       );
     }
   }
@@ -4643,9 +4876,16 @@ export default function MemberManagementPage() {
                   ];
 
 
+                const trainingProcessing =
+                  trainingSaving[
+                    member.membership_id
+                  ] === true;
+
+
                 const processing =
                   processingId ===
-                  member.membership_id;
+                    member.membership_id ||
+                  trainingProcessing;
 
 
                 const historyOpen =
@@ -5021,7 +5261,7 @@ export default function MemberManagementPage() {
 
                     {/* MEMBERSHIP TIMELINE */}
 
-                    <div className="mt-6 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2">
+                    <div className="mt-6 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2 xl:grid-cols-3">
 
                       <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
 
@@ -5147,6 +5387,144 @@ export default function MemberManagementPage() {
 
                         <p className="mt-2 text-xs text-neutral-500">
                           Latest valid promotion date.
+                        </p>
+
+                      </div>
+
+
+                      <div className="rounded-xl border border-emerald-900 bg-emerald-950/10 p-5">
+
+                        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                          Last Training Session
+                        </p>
+
+
+                        <p className="mt-2 text-lg font-semibold">
+                          {formatTrainingSessionRecency(
+                            member.last_training_session_date,
+                            member.last_training_days_ago
+                          )}
+                        </p>
+
+
+                        <button
+                          type="button"
+                          aria-label={`Mark ${member.full_name} as trained today for ${member.class_name}`}
+                          disabled={
+                            processing ||
+                            Boolean(member.date_of_passing) ||
+                            member.membership_status !== "active" ||
+                            member.last_training_days_ago === 0
+                          }
+                          onClick={() =>
+                            saveLastTrainingSession(
+                              member,
+                              "today"
+                            )
+                          }
+                          className="mt-4 w-full rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50"
+                        >
+                          {trainingProcessing
+                            ? "Saving..."
+                            : member.last_training_days_ago === 0
+                              ? "Trained Today"
+                              : "Mark Trained Today"}
+                        </button>
+
+
+                        <label
+                          htmlFor={`last-training-${member.membership_id}`}
+                          className="mt-4 block text-xs font-medium text-neutral-400"
+                        >
+                          Correct or backdate the session
+                        </label>
+
+
+                        <input
+                          id={`last-training-${member.membership_id}`}
+                          type="date"
+                          min={
+                            member.joined_date ??
+                            undefined
+                          }
+                          value={
+                            trainingDateDraft[
+                              member.membership_id
+                            ] ??
+                            member.last_training_session_date ??
+                            ""
+                          }
+                          disabled={
+                            processing ||
+                            Boolean(member.date_of_passing) ||
+                            member.membership_status !== "active"
+                          }
+                          onChange={(event) =>
+                            setTrainingDateDraft(
+                              (
+                                current
+                              ) => ({
+                                ...current,
+                                [member.membership_id]:
+                                  event.target.value,
+                              })
+                            )
+                          }
+                          className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white disabled:opacity-50"
+                        />
+
+
+                        <button
+                          type="button"
+                          disabled={
+                            processing ||
+                            Boolean(member.date_of_passing) ||
+                            member.membership_status !== "active"
+                          }
+                          onClick={() =>
+                            saveLastTrainingSession(
+                              member,
+                              "date"
+                            )
+                          }
+                          className="mt-3 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-700 disabled:opacity-50"
+                        >
+                          {trainingProcessing
+                            ? "Saving..."
+                            : "Save Date Correction"}
+                        </button>
+
+
+                        {trainingFeedback[
+                          member.membership_id
+                        ] && (
+                          <p
+                            role={
+                              trainingFeedback[
+                                member.membership_id
+                              ].type === "error"
+                                ? "alert"
+                                : "status"
+                            }
+                            className={`mt-3 text-xs ${
+                              trainingFeedback[
+                                member.membership_id
+                              ].type === "error"
+                                ? "text-red-300"
+                                : "text-emerald-300"
+                            }`}
+                          >
+                            {
+                              trainingFeedback[
+                                member.membership_id
+                              ].message
+                            }
+                          </p>
+                        )}
+
+
+                        <p className="mt-2 text-xs text-neutral-500">
+                          The server counts sessions from the last 30 days; older sessions show their date.
                         </p>
 
                       </div>

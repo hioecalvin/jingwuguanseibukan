@@ -1,5 +1,5 @@
 -- Read-only post-migration assertions. Run through psql with ON_ERROR_STOP=1
--- against the explicitly selected staging connection after migrations 040-042.
+-- against the explicitly selected staging connection after migrations 040-045.
 -- This is not a substitute for role-based API and authenticated workflow tests.
 begin transaction read only;
 
@@ -10,12 +10,12 @@ declare
   target_signature text;
 begin
   if exists (
-    select 1 from unnest(array['011','012','013','014','015','016','017','018','040','041','042']) as expected(version)
+    select 1 from unnest(array['011','012','013','014','015','016','017','018','040','041','042','043','044','045']) as expected(version)
     where not exists (
       select 1 from supabase_migrations.schema_migrations as applied
       where applied.version = expected.version
     )
-  ) then raise exception 'Required security foundation and migrations 040-042 are not all recorded'; end if;
+  ) then raise exception 'Required security foundation and migrations 040-045 are not all recorded'; end if;
 
   if exists (
     select 1 from pg_proc as routine
@@ -80,10 +80,14 @@ begin
       'assessment_results',
       'prepared_assessments',
       'prepared_assessment_candidates',
-      'prepared_assessment_certificates'
+      'prepared_assessment_certificates',
+      'membership_training_session_audit'
     ] loop
-      if has_table_privilege(target_role, 'public.' || target_name, 'SELECT') then
-        raise exception 'Sensitive relation remains directly readable: %', target_name;
+      if has_table_privilege(target_role, 'public.' || target_name, 'SELECT')
+         or has_table_privilege(target_role, 'public.' || target_name, 'INSERT')
+         or has_table_privilege(target_role, 'public.' || target_name, 'UPDATE')
+         or has_table_privilege(target_role, 'public.' || target_name, 'DELETE') then
+        raise exception 'Sensitive relation retains a browser privilege: %', target_name;
       end if;
     end loop;
   end loop;
@@ -154,6 +158,20 @@ begin
     if has_function_privilege('anon', target_signature, 'EXECUTE')
        or not has_function_privilege('authenticated', target_signature, 'EXECUTE') then
       raise exception 'Bulk-assessment RPC ACL is unsafe: %', target_signature;
+    end if;
+  end loop;
+
+  foreach target_signature in array array[
+    'public.get_my_last_training_sessions()',
+    'public.mark_membership_trained_today(uuid)',
+    'public.set_membership_last_training_session(uuid,date)'
+  ] loop
+    if to_regprocedure(target_signature) is null then
+      raise exception 'Missing last-training RPC: %', target_signature;
+    end if;
+    if has_function_privilege('anon', target_signature, 'EXECUTE')
+       or not has_function_privilege('authenticated', target_signature, 'EXECUTE') then
+      raise exception 'Last-training RPC ACL is unsafe: %', target_signature;
     end if;
   end loop;
 
