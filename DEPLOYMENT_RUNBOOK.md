@@ -1,14 +1,14 @@
 # Staging promotion, production deployment, and rollback
 
-Last updated: 24/09/2026. Release is **BLOCKED**. Sydney staging
-`eomubndonbetszdbhsrj` is healthy at exact migration history **006–044**.
-Migrations 040–044 are persisted there and the guarded memorial, annual-reminder,
+Last updated: 25/09/2026. Release is **BLOCKED**. Sydney staging
+`eomubndonbetszdbhsrj` is at exact migration history **006–046**.
+Migrations 040–046 are persisted there and the guarded memorial, annual-reminder,
 bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and direct
-database role-boundary acceptance passed. Migration 044's optional-Aikikai and
-automatic-JS-Member-ID acceptance passed against its persisted staging objects, the
-authenticated role suite passed 12/12, database lint is clean and the combined local
-gate for the local migration-045 candidate is now 228/228 tests. Production was not
-contacted during that work.
+database role-boundary acceptance passed. Migration 046 repairs migration 045's
+last-training audit insert; its rollback-contained semantic, audit, idempotency,
+scope, zero-residue, lint and exact-ledger checks pass. The authenticated role suite
+passes 12/12 and the combined local gate passes 230/230 tests. Production was not
+contacted.
 
 The strict database security verifier still stops at the known platform-owned
 `supabase_admin` future-object default-privilege finding. An unqualified production
@@ -23,7 +23,7 @@ The configured staging application origin currently returns 404 for the app and 
 worker endpoints. Staging has no `pg_cron`, so the one-minute worker/memorial schedule
 must be external and still needs deployment plus monitoring evidence. The retained
 restore rehearsal stops at ledger 006–026 and is not recovery proof for current
-ledger 006–044.
+ledger 006–046.
 
 There is **no current production Supabase project reference or host**. The intended
 production target is a new Singapore project that has not been created. Historical
@@ -33,10 +33,9 @@ operator instructions.
 
 ## Current release boundary — supersedes historical milestone notes
 
-- Staging is Sydney project `eomubndonbetszdbhsrj`, exact ledger 006–044. Do not
-  reapply those migrations. Local migration 045 is the only reviewed pending file;
-  do not dry-run or apply it until the exposed staging database password is rotated
-  and a new explicit staging-only approval is given.
+- Staging is Sydney project `eomubndonbetszdbhsrj`, exact ledger 006–046. Do not
+  reapply those migrations. The staging database password has been rotated and
+  verified. There is no pending reviewed migration at this checkpoint.
 - Production must be a separately created and dashboard-verified Singapore
   (`ap-southeast-1`) project. Its reference, host and recovery plan do not yet exist.
 - The repository migration directory begins at 006; it is not, by itself, a clean
@@ -157,7 +156,7 @@ the copied target until test-only destinations are verified.
 Preserve immutable, secret-scanned baseline evidence outside the active migration
 chain. The current migration directory starts at 006 and cannot prove how an empty
 managed project acquires its earlier prerequisite schema. Before creating the new
-production database, review and rehearse the exact baseline/import plus 006–044
+production database, review and rehearse the exact baseline/import plus 006–046
 sequence on a disposable managed target. Retain legacy root SQL and prior baseline
 evidence until the clean restore proves complete coverage; never replay legacy SQL
 or manufacture ledger rows merely to make migration history appear current.
@@ -181,23 +180,23 @@ flag does not authorize or perform production access.
 
 ## Current staging verification and future migration apply
 
-Staging currently remains at exact history 006–044 and local migration 045 is
-pending. Before contacting staging, rotate its exposed database password. Then
-review restored objects, ownership, grants, RLS, triggers, Auth/Storage behavior and
-extensions; confirm exact history 006–044; record migration 045's reviewed hash;
-and obtain new explicit staging-only approval. Do not apply migration 045 without a
-dry run listing exactly that one file.
+Staging is at exact history 006–046. Its database password was rotated and the new
+protected connection was verified. Migration 046 repaired migration 045's audit
+insert without rewriting history. Its reviewed SHA-256 is
+`61894AF224D2BFB9758D5C87FC65B49CE216DEC31CBC3DDE388B1169F948F35B`.
+The rollback-contained semantic suite, independent zero-residue snapshot, exact
+ledger, database lint and authenticated role-security suite all pass. A post-apply
+dry run reports the database is up to date.
 
 ```powershell
 npx.cmd --yes supabase@2.117.0 migration list --db-url $env:STAGING_DB_URL
 npx.cmd --yes supabase@2.117.0 db push --db-url $env:STAGING_DB_URL --skip-vault --dry-run
 ```
 
-The next authorized dry run must list exactly
-`045_last_training_session.sql`. The former instructions that 011–016 or 044 may be
-pending are superseded. A dry run lists migrations; it does not execute or validate
-SQL. Review every future file and hash before an approved apply. `--skip-vault`
-avoids unrelated configured Vault updates.
+There is no pending migration at this checkpoint. Historical instructions that
+011–016 or 044–046 may be pending are superseded. A dry run lists migrations; it
+does not execute or validate SQL. Review every future file and hash before an
+approved apply. `--skip-vault` avoids unrelated configured Vault updates.
 
 After a separately approved future apply, require an exact ledger, database lint,
 the strict SQL verifier, targeted rollback-contained acceptance, independent
@@ -425,7 +424,7 @@ Before production approval, require all of the following evidence:
 
 1. Separate verified staging project and protected complete backup with a proved
    restore, including Auth/Storage/assets/configuration recovery as applicable.
-2. Exact 006–044 history after guarded staging acceptance, fresh duplicate preflight,
+2. Exact 006–046 history after guarded staging acceptance, fresh duplicate preflight,
    no unreviewed pending migration,
    authorized platform-owner grant resolution, lint, SQL security checks and the
    dedicated Member/scoped Admin/Super Admin security suite.

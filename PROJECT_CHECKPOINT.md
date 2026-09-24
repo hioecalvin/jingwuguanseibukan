@@ -1,18 +1,19 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-Checkpoint date: 24/09/2026
+Checkpoint date: 25/09/2026
 
 ## Source and database state
 
-- Published branch checkpoint: `release/v1-readiness-20260918` at `68252fd`.
-- Local HEAD and the recorded `origin/release/v1-readiness-20260918` ref matched at
-  the start of the last-training-session work; no fresh remote fetch was performed.
-- The current working tree is an uncommitted local migration-045 candidate adding
-  the instructor-recorded last-training-session feature described below.
-- The verified staging migration ledger is exactly 006–044.
-- Migrations 040, 041, 042, 043 and 044 were applied in order to staging
+- Published branch checkpoint: `release/v1-readiness-20260918` at `49d4151`.
+- Local HEAD and the recorded `origin/release/v1-readiness-20260918` ref match.
+- The current working tree contains the accepted migration-046 repair, guarded
+  staging evidence and updated checkpoint documentation.
+- The verified staging migration ledger is exactly 006–046 with no pending file.
+- Migrations 040 through 046 were applied in order to staging
   `eomubndonbetszdbhsrj` only. The repository's local Supabase metadata remains
   linked to production, so it was not used or changed.
+- The staging database password was rotated, stored only in the protected staging
+  environment and successfully used for an explicit staging connection.
 - Migration 044, optional Aikikai-number capture plus automatic JS Member ID
   assignment on initial approval, is persisted and accepted on staging. It has not
   been applied to production.
@@ -27,7 +28,7 @@ Checkpoint date: 24/09/2026
 | --- | --- | --- | --- |
 | Member management and statuses | Existing member, membership, class/dojo, approval, Break, transfer, grading and retained-history flows. | New deceased boundaries require staging and browser acceptance. | `app/admin/members/page.tsx`; `profiles`; `memberships`; `admin_visible_members` |
 | Aikikai and JS Member IDs | Registration accepts the applicant's optional Aikikai Registration Number and stores it separately. Persisted migration 044 assigns the next permanent numeric JS Member ID atomically only when a Super Admin approves the initial application. Supplied/blank Aikikai values, ID assignment, rejection, legacy preservation, role denial, queue atomicity and zero residue passed live staging acceptance. | Exercise both blank and supplied Aikikai registration paths through the deployed browser workflow. | migration 044; `profiles.aikikai_registration_number`; `profiles.registration_number`; `js_member_id_seq`; both `review_class_request*` RPCs; registration and Applications pages |
-| Last training session | Local migration 045 stores the latest training date per class membership, keeps a private append-only correction audit, and permits only the assigned scoped Admin or Super Admin to record it. The one-click attendance action uses the Jakarta server date, while a separate date field supports corrections/backdating. The Admin member list and Member profile display Today, 1 day ago, or N days ago through day 29, then the actual date from day 30 onward. | Migration 045 is not applied to staging or production. It still requires isolated PostgreSQL semantic acceptance, guarded staging apply after password rotation, role-boundary/zero-residue checks, and authenticated browser verification. | migration 045; `class_memberships.last_training_session_*`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
+| Last training session | Migrations 045–046 are persisted on staging. The repaired implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. Database lint is clean and independent postflight proved zero residue. | Complete the deployed authenticated browser workflow on desktop/mobile and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. | Announcement comments and image attachments were not found. Live delivery/scheduler configuration remains an operational gate. | `announcements`; `notifications`; `email_outbox`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
@@ -74,12 +75,19 @@ name as a deterministic tie-breaker.
 
 ## Verification completed locally
 
-- Migration 045's focused source/security suite passes 5/5. The full gate passes
-  TypeScript plus 228/228 Node tests, lint, `git diff --check`, and the direct
-  optimized Next.js production build of all 44 routes.
+- Migration 045/046 focused source/security suites pass. The current full gate
+  passes TypeScript plus 230/230 Node tests, lint, `git diff --check` and a fresh
+  optimized production build of all 44 routes.
 - The migration-045 review preserves the existing `admin_visible_members` column
   order and appends its two new fields, preventing an unsafe/incompatible view
-  replacement. No remote database was contacted for this candidate.
+  replacement. Migration 045 is now persisted on staging; production was not
+  contacted.
+- The migration-046 staging dry run is non-mutating and lists exactly
+  `046_repair_last_training_audit_insert.sql`, with no seeds or roles.
+- Persisted migration 046 passed the rollback-contained last-training semantic,
+  audit, idempotency, role-boundary and ACL suite. Independent snapshots proved zero
+  residue, database lint reports no errors, the ledger is exactly 006–046, the
+  post-apply dry run is up to date and the authenticated role suite passes 12/12.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only
@@ -119,7 +127,7 @@ name as a deterministic tie-breaker.
   and worker routes, and no database scheduler is installed.
 - Recovery tooling passes 5/5, but the retained restore rehearsal reaches only
   ledger 006–026 and excludes managed Auth/Storage and other platform resources. It
-  is not current recovery evidence for 006–044.
+  is not current recovery evidence for 006–046.
 - `npm audit --audit-level=high --omit=dev` reports zero vulnerabilities.
 - A fresh local PostgreSQL 17 cluster installed migration 029 then 041 and passed the
   14-check semantic suite, including active/non-deceased assessor enforcement,
@@ -138,20 +146,17 @@ name as a deterministic tie-breaker.
 
 ## Live verification still required
 
-1. Rotate the staging database password before any further live staging work. A
-   staging connection URL was exposed in internal command output during an offline
-   audit on 24/09/2026; the value is not repeated or used after that event.
-2. Exercise optional-Aikikai registration and automatic JS Member ID approval in the
+1. Exercise optional-Aikikai registration and automatic JS Member ID approval in the
    deployed authenticated browser workflow.
-3. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
+2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
    with dedicated staging accounts; verify no live member data is mutated.
-4. Run authenticated Member, scoped Admin and Super Admin browser workflows for the
+3. Run authenticated Member, scoped Admin and Super Admin browser workflows for the
    new features on a deployed staging host, including WebKit, then complete physical
    Safari/iOS validation. The currently configured host returns 404.
-5. Resolve or formally accept the existing Supabase platform-owned default-privilege
+4. Resolve or formally accept the existing Supabase platform-owned default-privilege
    database-verifier blocker without weakening the verifier.
-6. Configure and monitor the external scheduler/provider boundaries before release.
-7. Rehearse a complete 006–044 managed-platform restore into a disposable isolated
+5. Configure and monitor the external scheduler/provider boundaries before release.
+6. Rehearse a complete 006–046 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 
 The three reusable staging dummy identities exist and their protected passwords were

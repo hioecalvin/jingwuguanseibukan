@@ -1,22 +1,23 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 24/09/2026
+Last updated: 25/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `68252fd`; its
-local tracking ref matched the recorded origin ref at the start of this work, although
-no fresh remote fetch was made for this checkpoint. The uncommitted local candidate
-passes lint with no warnings, TypeScript and 228/228 Node regressions. The latest
-fresh migration-045 build attempt is temporarily blocked by a locked local Next.js
-trace; the immediately preceding candidate build generated all 44 routes. The earlier dependency audit
+The published release branch is `release/v1-readiness-20260918` at `49d4151`, with
+local HEAD and the recorded origin ref synchronized before the current accepted
+migration-046 repair. The local candidate passes lint with no warnings, TypeScript
+and 230/230 Node regressions. The preceding candidate build generated all 44 routes.
+The earlier dependency audit
 reported zero known vulnerabilities. Sydney staging `eomubndonbetszdbhsrj` is
-verified at exact migration history 006–044. Migrations 040–044 are applied and the
+verified at exact migration history 006–046. Migrations 040–046 are applied and the
 persisted rollback-contained memorial, annual-reminder, bulk-assessment,
 prepared-certificate/QR, zero-residue, exact-ledger and direct role-boundary suites
 pass. Migration 044's optional-Aikikai, automatic-JS-Member-ID, role-boundary and
 sequence-restoration suite also passes against the persisted staging objects.
-Production was not contacted.
+Migration 046 repairs migration 045's audit-insert runtime defect and passed the
+rollback-contained semantic, audit, idempotency, role-boundary, zero-residue,
+database-lint and exact-ledger checks. Production was not contacted.
 
 The exact three dedicated staging security-test accounts were audited and received
 password-only rotations. Public email login remains disabled; the guarded runner
@@ -93,7 +94,7 @@ Storage-object and platform-configuration recovery proof, email/push scheduler a
 YouTube channel operational configuration, authenticated browser coverage for the
 new workflows, and the remaining operational release gates are still required.
 Production's current migration ledger remains unverified because it was not
-contacted. Migrations 040–043 are applied to staging only and have not been applied
+contacted. Migrations 040–046 are applied to staging only and have not been applied
 to production.
 
 The approved production-region plan is a separate Supabase primary in Singapore
@@ -3255,3 +3256,59 @@ passes TypeScript plus 228/228 Node tests, lint, `git diff --check` and the dire
 optimized 44-route production build. Staging remains exactly 006–044 and migration
 045 is not applied. The exposed staging database password must be rotated before
 any guarded staging apply or live acceptance; production was not contacted.
+
+### Milestone 124 — staging password rotation, migration 045 apply and forward repair (24/09/2026)
+
+Rotated the staging database password through the dashboard, retained the generated
+replacement only in the protected staging environment and verified the new explicit
+connection. Confirmed exact staging history 006–044, ran an isolated dry run that
+selected only `045_last_training_session.sql`, then applied migration 045 to Sydney
+staging `eomubndonbetszdbhsrj`. Production was not contacted.
+
+The guarded first runtime call failed on the deployed function because its audit
+insert names `effective_training_date` as a column even though the table defines
+`new_training_date`; it also passes the nullable input argument rather than the
+resolved effective date. Supabase database lint independently reports SQLSTATE
+42703 for the same statement. The single-statement acceptance harness failed before
+its deliberate success marker, so PostgreSQL rolled the statement back. Independent
+before/after snapshots match: Member 0101 and Super Admin 0001 remain active and
+living, both last-training dates remain NULL and both audit counts remain zero.
+
+Prepared forward-only migration 046 to replace only the affected function, use the
+real audit column and persist the effective Jakarta date. Its reviewed SHA-256 is
+`61894AF224D2BFB9758D5C87FC65B49CE216DEC31CBC3DDE388B1169F948F35B`.
+The local gate passes TypeScript plus 230/230 Node tests, lint, `git diff --check`
+and a fresh optimized production build of all 44 routes. A non-mutating staging dry
+run lists exactly migration 046 with no seeds or roles.
+The independently authenticated staging suite still passes all 12 Member, scoped
+Admin and Super Admin security checks. The exact ledger is 006–045 with only local
+046 pending. Migration 046 was not applied; it requires explicit staging-only
+approval followed by the rollback-contained semantic, audit, idempotency, role,
+zero-residue, exact-ledger and lint checks.
+
+### Milestone 125 — migration 046 applied and last-training accepted on staging (25/09/2026)
+
+With explicit staging-only approval, reverified SHA-256
+`61894AF224D2BFB9758D5C87FC65B49CE216DEC31CBC3DDE388B1169F948F35B`, confirmed
+exact history 006–045 and ran a dry run that selected only
+`046_repair_last_training_audit_insert.sql` with no seeds or roles. Applied that one
+forward-only migration to Sydney staging `eomubndonbetszdbhsrj`. Production was not
+contacted.
+
+The persisted repaired function passed the rollback-contained acceptance suite for
+Member denial, scoped-Admin success, Jakarta mark-today, complete previous/new audit
+attribution, same-day idempotency, valid backdated correction, repeated-correction
+idempotency, Member-own getter isolation, wrong-dojo denial, future-date
+rejection, Super Admin organization scope, inactive membership rejection, pre-join
+rejection, deceased-member rejection and RPC/table ACLs. The suite reached its exact
+deliberate rollback success marker. Independent before/after snapshots are identical:
+Member 0101 and Super Admin 0001 remain active and living, their last-training dates
+remain NULL and their audit counts remain zero.
+
+Postflight confirms exact ledger 006–046, no pending migrations and clean Supabase
+database lint. The one-time-session role suite passes all 12 Member, scoped Admin and
+Super Admin checks with cleanup confirmed. The strict multi-statement SQL verifier
+could not be re-executed through this CLI's prepared-statement query command; the
+previously documented platform-owned default-privilege finding therefore remains a
+separate release decision and was not weakened. The local gate remains TypeScript
+plus 230/230 Node tests, lint, `git diff --check` and a 44-route production build.
