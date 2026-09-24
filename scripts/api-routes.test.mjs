@@ -28,6 +28,8 @@ function worker({
   markFailedError = null,
   queueHealth = healthyEmailQueue,
   queueHealthError = null,
+  memorialData = { created_count: 0 },
+  memorialError = null,
 } = {}) {
   const calls = [];
   let claimIndex = 0;
@@ -35,6 +37,7 @@ function worker({
     'next/server': nextServer,
     '@/lib/supabase/admin': { createAdminClient: () => ({ rpc: async (name, args) => {
       calls.push({ name, args });
+      if (name === 'process_memorial_anniversaries') return { data: memorialData, error: memorialError };
       if (name === 'claim_next_email') return claims[claimIndex++] ?? { data: [], error: null };
       if (name === 'mark_email_sent') return { error: markSentError };
       if (name === 'mark_email_failed') return { error: markFailedError };
@@ -68,6 +71,10 @@ test('an empty email queue is a successful zero-work run', async () => {
     processed: 0,
     sent: 0,
     failed: 0,
+    memorialProcessor: {
+      status: 'PASS',
+      createdAnnouncements: 0,
+    },
     queueHealth: {
       status: 'PASS',
       checks: {
@@ -90,7 +97,24 @@ test('email claim failures are not reported as successful runs or exposed to cli
   assert.equal(body.success, false);
   assert.equal(body.processed, 0);
   assert.doesNotMatch(JSON.stringify(body), /private database detail/);
-  assert.deepEqual(route.calls.map(call => call.name), ['claim_next_email']);
+  assert.deepEqual(route.calls.map(call => call.name), ['process_memorial_anniversaries', 'claim_next_email']);
+});
+
+test('memorial processing is observable without blocking queued email delivery', async () => {
+  const route = worker({
+    claims: [{ data: [email], error: null }],
+    memorialError: { message: 'private memorial detail' },
+  });
+  const response = await route.run();
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.equal(body.success, false);
+  assert.equal(body.sent, 1);
+  assert.deepEqual(body.memorialProcessor, {
+    status: 'FAIL',
+    createdAnnouncements: null,
+  });
+  assert.doesNotMatch(JSON.stringify(body), /private memorial detail/);
 });
 
 test('email worker preserves completed counters if a subsequent claim fails', async () => {

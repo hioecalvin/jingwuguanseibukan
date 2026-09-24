@@ -57,6 +57,22 @@ function assert(condition, message) {
 }
 
 
+async function withFutureJwtRetry(run) {
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes("JWT issued at future") || attempt === attempts) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 10_000));
+    }
+  }
+}
+
+
 function appClient(url, key) {
   return createClient(url, key, {
     auth: {
@@ -326,7 +342,7 @@ async function main() {
   console.log(`Security mode: ${mode}; ${checks.length} checks; mutation probe ${allowMutationProbe ? "enabled" : "disabled"}.`);
 
   const results = await Promise.allSettled(
-    checks.map(([, run]) => run())
+    checks.map(([, run]) => withFutureJwtRetry(run))
   );
 
   await Promise.allSettled([

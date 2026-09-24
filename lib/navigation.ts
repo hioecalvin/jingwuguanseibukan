@@ -250,6 +250,17 @@ export const navigationItems:
   },
 
   {
+    label: "Assessments",
+    href: "/admin/assessments",
+
+    roles: [
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+  {
     label: "Subscriptions",
     href: "/admin/subscriptions",
 
@@ -407,7 +418,6 @@ export const navigationItems:
     href: "/admin/applications",
 
     roles: [
-      "admin",
       "super_admin",
     ],
 

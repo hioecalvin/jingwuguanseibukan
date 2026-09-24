@@ -5,7 +5,7 @@ migration source and must never be passed to Supabase CLI, a reset
 script, or a deployment job.
 
 The only active ordered migration chain is `supabase/migrations`, currently
-versions 006 through 030. The database baseline predates version 006 and must
+versions 006 through 044. The database baseline predates version 006 and must
 come from an authorised, reviewed backup or future consolidated baseline—not by
 replaying these drafts.
 
@@ -15,7 +15,7 @@ The three retained files cannot form an ordered chain:
   and define overlapping tables and functions.
 - `005_settlement_module.sql` depends on finance objects whose authoritative
   live definitions subsequently diverged.
-- migrations 011–030 repair and harden definitions from the restored baseline;
+- migrations 011–044 repair, harden, and extend definitions from the restored baseline;
   replaying the drafts would overwrite those reviewed definitions.
 
 Integrity fingerprints (SHA-256):

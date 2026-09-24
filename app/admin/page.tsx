@@ -289,17 +289,6 @@ export default function AdminDashboardPage() {
     AdminCard[] = [
       {
         title:
-          "Applications",
-
-        description:
-          "Approve or reject new membership applications.",
-
-        href:
-          "/admin/applications",
-      },
-
-      {
-        title:
           "Members",
 
         description:
@@ -442,6 +431,20 @@ export default function AdminDashboardPage() {
 
   const superAdminCards:
     AdminCard[] = [
+      {
+        title:
+          "Applications",
+
+        description:
+          "Approve or reject new membership applications and assign permanent Member IDs.",
+
+        href:
+          "/admin/applications",
+
+        tone:
+          "super",
+      },
+
       {
         title:
           "Events",

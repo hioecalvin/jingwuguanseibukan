@@ -2,7 +2,7 @@ import http from 'node:http';
 import https from 'node:https';
 import fs from 'node:fs';
 import path from 'node:path';
-import { build } from 'esbuild';
+import { build, stop } from 'esbuild';
 import { BROWSER_SMOKE_DIST_DIR, NAV_ORIGIN, assertSmokeEnvironment, assertSmokeBuild } from './browser-smoke-config.mjs';
 import { readSmokeTls } from './browser-smoke-tls.mjs';
 
@@ -50,6 +50,10 @@ function fixtureHtml(pathname) {
 }
 const handler = (req, res) => {
   const url = new URL(req.url, NAV_ORIGIN);
+  if (req.method === 'POST' && url.pathname === '/__browser-smoke-shutdown') {
+    res.writeHead(204, { Connection: 'close' }).end(() => close());
+    return;
+  }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405).end(); return; }
   const asset = assets.get(url.pathname);
   const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; frame-ancestors 'none'" };
@@ -59,3 +63,12 @@ const handler = (req, res) => {
 };
 const server = tls ? https.createServer(tls, handler) : http.createServer(handler);
 server.listen(3101, '127.0.0.1', () => console.log(`Presentation-only navigation fixture on ${NAV_ORIGIN}`));
+let closing = false;
+function close() {
+  if (closing) return;
+  closing = true;
+  server.closeAllConnections?.();
+  server.close(() => stop());
+}
+process.once('SIGTERM', close);
+process.once('SIGINT', close);

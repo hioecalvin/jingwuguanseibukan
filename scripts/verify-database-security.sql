@@ -1,5 +1,5 @@
 -- Read-only post-migration assertions. Run through psql with ON_ERROR_STOP=1
--- against the explicitly selected staging connection after migrations 011-018.
+-- against the explicitly selected staging connection after migrations 040-042.
 -- This is not a substitute for role-based API and authenticated workflow tests.
 begin transaction read only;
 
@@ -10,12 +10,12 @@ declare
   target_signature text;
 begin
   if exists (
-    select 1 from unnest(array['011','012','013','014','015','016','017','018']) as expected(version)
+    select 1 from unnest(array['011','012','013','014','015','016','017','018','040','041','042']) as expected(version)
     where not exists (
       select 1 from supabase_migrations.schema_migrations as applied
       where applied.version = expected.version
     )
-  ) then raise exception 'Required migrations 011-018 are not all recorded'; end if;
+  ) then raise exception 'Required security foundation and migrations 040-042 are not all recorded'; end if;
 
   if exists (
     select 1 from pg_proc as routine
@@ -42,13 +42,17 @@ begin
     'public.claim_next_email()',
     'public.get_membership_grade_history(uuid)',
     'public.get_membership_subscription_rate(uuid,date)',
+    'public.is_active_super_admin(uuid)',
     'public.mark_email_failed(uuid,text)',
     'public.mark_email_sent(uuid,text)',
     'public.mark_password_changed(uuid)',
     'public.mark_password_reset_applied(uuid)',
     'public.notify_dojo_admins(uuid,text,text,jsonb)',
+    'public.process_memorial_anniversaries(date)',
     'public.process_monthly_membership_breaks(date)',
-    'public.queue_email(text,text,text,jsonb,uuid,text,uuid,text)'
+    'public.publish_memorial_announcement(uuid,text,date,text,text,uuid)',
+    'public.queue_email(text,text,text,jsonb,uuid,text,uuid,text)',
+    'public.verify_prepared_assessment_certificate(uuid)'
   ] loop
     if to_regprocedure(target_signature) is null then
       raise exception 'Missing internal routine: %', target_signature;
@@ -62,7 +66,22 @@ begin
     if has_schema_privilege(target_role, 'public', 'CREATE') then
       raise exception 'Untrusted role can create objects in public';
     end if;
-    foreach target_name in array array['document_archive','certificate_archive','dojo_receiving_accounts','membership_payment_confirmations','email_outbox'] loop
+    foreach target_name in array array[
+      'document_archive',
+      'certificate_archive',
+      'dojo_receiving_accounts',
+      'membership_payment_confirmations',
+      'email_outbox',
+      'member_memorial_settings',
+      'member_memorial_recipient_classes',
+      'member_memorial_audit',
+      'member_memorial_publications',
+      'assessment_batches',
+      'assessment_results',
+      'prepared_assessments',
+      'prepared_assessment_candidates',
+      'prepared_assessment_certificates'
+    ] loop
       if has_table_privilege(target_role, 'public.' || target_name, 'SELECT') then
         raise exception 'Sensitive relation remains directly readable: %', target_name;
       end if;
@@ -120,6 +139,31 @@ begin
       raise exception 'Subscription RPC lacks authenticated grant: %', target_name;
     end if;
   end loop;
+
+  foreach target_signature in array array[
+    'public.get_bulk_assessment_candidates(uuid,uuid)',
+    'public.prepare_bulk_assessment(uuid,uuid,date,uuid,text,uuid,jsonb)',
+    'public.get_prepared_bulk_assessments()',
+    'public.get_prepared_bulk_assessment(uuid)',
+    'public.record_prepared_assessment_certificate_print(uuid)',
+    'public.finalize_prepared_bulk_assessment(uuid,uuid,jsonb)'
+  ] loop
+    if to_regprocedure(target_signature) is null then
+      raise exception 'Missing bulk-assessment RPC: %', target_signature;
+    end if;
+    if has_function_privilege('anon', target_signature, 'EXECUTE')
+       or not has_function_privilege('authenticated', target_signature, 'EXECUTE') then
+      raise exception 'Bulk-assessment RPC ACL is unsafe: %', target_signature;
+    end if;
+  end loop;
+
+  if has_function_privilege(
+    'authenticated',
+    'public.submit_bulk_assessment(uuid,uuid,date,uuid,text,uuid,jsonb)',
+    'EXECUTE'
+  ) then
+    raise exception 'Direct bulk submission bypasses the prepared roster';
+  end if;
 
   -- Per-schema ACLs ADD to the global ACL (or the built-in global default).
   -- Platform-owned defaults are intentionally a release gate, not silently

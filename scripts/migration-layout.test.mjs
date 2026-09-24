@@ -12,13 +12,13 @@ const legacyHashes = new Map([
   ['005_settlement_module.sql', '992FF1B45364F3D75F7FF863212379B47B2C50D18DE6F4F058D5923B7E99635D'],
 ]);
 
-test('only the ordered Supabase directory is active and versions 006-039 are contiguous', async () => {
+test('only the ordered Supabase directory is active and versions 006-044 are contiguous', async () => {
   const files = (await readdir(activeDirectory))
     .filter((name) => name.endsWith('.sql'))
     .sort();
   const versions = files.map((name) => Number.parseInt(name.slice(0, 3), 10));
 
-  assert.deepEqual(versions, Array.from({ length: 34 }, (_, index) => index + 6));
+  assert.deepEqual(versions, Array.from({ length: 39 }, (_, index) => index + 6));
   assert.equal(new Set(versions).size, versions.length);
 });
 

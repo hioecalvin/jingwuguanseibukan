@@ -232,7 +232,17 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // Browser RPCs added after the destructive migration-018 reset must be
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
+    "finalize_prepared_bulk_assessment",
+    "get_bulk_assessment_candidates",
+    "get_member_memorial_settings",
+    "get_prepared_bulk_assessment",
+    "get_prepared_bulk_assessments",
+    "prepare_bulk_assessment",
+    "publish_initial_memorial",
+    "record_prepared_assessment_certificate_print",
     "review_class_request_with_level",
+    "set_member_deceased",
+    "submit_bulk_assessment",
   ]);
   const serverOnly = new Set([
     "activate_repository_video_asset",
@@ -243,8 +253,10 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "mark_email_sent",
     "mark_password_changed",
     "mark_password_reset_applied",
+    "process_memorial_anniversaries",
     "queue_email",
     "record_repository_video_event",
+    "verify_prepared_assessment_certificate",
   ]);
   const roots = ["app", "components", "lib"];
   const referenced = new Set();
@@ -492,7 +504,7 @@ test("database verifier rejects dangerous relation and server-worker grants", ()
     "utf8"
   );
 
-  assert.match(sql, /array\['011','012','013','014','015','016','017','018'\]/i);
+  assert.match(sql, /array\['011','012','013','014','015','016','017','018','040','041','042'\]/i);
   assert.match(sql, /privilege\.privilege_type in \('TRUNCATE','REFERENCES','TRIGGER','MAINTAIN'\)/i);
   assert.match(sql, /acldefault\('S', sequence_data\.relowner\)/i);
   for (const signature of [
@@ -501,7 +513,10 @@ test("database verifier rejects dangerous relation and server-worker grants", ()
     "public.mark_email_sent(uuid,text)",
     "public.mark_password_changed(uuid)",
     "public.mark_password_reset_applied(uuid)",
+    "public.process_memorial_anniversaries(date)",
+    "public.publish_memorial_announcement(uuid,text,date,text,text,uuid)",
     "public.queue_email(text,text,text,jsonb,uuid,text,uuid,text)",
+    "public.verify_prepared_assessment_certificate(uuid)",
   ]) {
     assert.ok(sql.includes(`'${signature}'`));
   }

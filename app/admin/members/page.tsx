@@ -33,6 +33,10 @@ import TitleCertificatePDF, {
   TitleCertificateRecord,
 } from "@/components/TitleCertificatePDF";
 
+import DeceasedMemorialPanel, {
+  MemorialDraft,
+} from "./DeceasedMemorialPanel";
+
 
 type Member = {
   membership_id: string;
@@ -51,6 +55,9 @@ type Member = {
   avatar_url: string | null;
 
   date_of_birth: string | null;
+
+  date_of_passing: string | null;
+  account_status: "active" | "disabled";
 
   class_id: string;
   class_name: string;
@@ -583,6 +590,36 @@ export default function MemberManagementPage() {
     setDojoFilter,
   ] =
     useState("all");
+
+
+  const [
+    memorialOpen,
+    setMemorialOpen,
+  ] = useState<Record<string, boolean>>({});
+
+
+  const [
+    memorialDrafts,
+    setMemorialDrafts,
+  ] = useState<Record<string, MemorialDraft>>({});
+
+
+  const [
+    memorialLoading,
+    setMemorialLoading,
+  ] = useState<Record<string, boolean>>({});
+
+
+  const [
+    memorialSaving,
+    setMemorialSaving,
+  ] = useState<Record<string, boolean>>({});
+
+
+  const [
+    memorialPublishing,
+    setMemorialPublishing,
+  ] = useState<Record<string, boolean>>({});
 
 
   /*
@@ -3315,6 +3352,329 @@ export default function MemberManagementPage() {
 
   /*
    * =====================================================
+   * DECEASED MEMBER & MEMORIALS (SUPER ADMIN ONLY)
+   * =====================================================
+   */
+
+  function createMemorialDraft(
+    member: Member,
+    row?: Record<string, unknown> | null
+  ): MemorialDraft {
+    const recipientClassIds =
+      Array.isArray(row?.recipient_class_ids)
+        ? row.recipient_class_ids.filter(
+            (value): value is string => typeof value === "string"
+          )
+        : [member.class_id];
+
+    const dateOfPassing =
+      typeof row?.date_of_passing === "string"
+        ? row.date_of_passing
+        : member.date_of_passing ?? "";
+
+    return {
+      isDeceased: Boolean(dateOfPassing),
+      dateOfPassing,
+      recipientClassIds,
+      remembranceEnabled:
+        row?.remembrance_enabled === true ||
+        row?.remembrance_day_enabled === true,
+      remembranceMessage:
+        typeof row?.remembrance_message === "string"
+          ? row.remembrance_message
+          : "",
+      heavenlyBirthdayEnabled:
+        row?.heavenly_birthday_enabled === true,
+      heavenlyBirthdayMessage:
+        typeof row?.heavenly_birthday_message === "string"
+          ? row.heavenly_birthday_message
+          : "",
+      initialMemorialTitle: `${member.full_name} — In Memoriam`,
+      initialMemorialMessage: "",
+    };
+  }
+
+
+  function updateMemorialDraft(
+    userId: string,
+    draft: MemorialDraft
+  ) {
+    setMemorialDrafts((current) => ({
+      ...current,
+      [userId]: draft,
+    }));
+  }
+
+
+  async function toggleMemorialSettings(
+    member: Member
+  ) {
+    if (!isSuperAdmin) {
+      showError("Only Super Admin can manage deceased members and memorials.");
+      return;
+    }
+
+    const opening = !memorialOpen[member.membership_id];
+
+    setMemorialOpen((current) => ({
+      ...current,
+      [member.membership_id]: opening,
+    }));
+
+    if (!opening || memorialDrafts[member.user_id]) {
+      return;
+    }
+
+    setMemorialLoading((current) => ({
+      ...current,
+      [member.membership_id]: true,
+    }));
+    clearMessage();
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_member_memorial_settings",
+        {
+          target_user_id: member.user_id,
+        }
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      const rawRow = Array.isArray(data) ? data[0] : data;
+      const row =
+        rawRow && typeof rawRow === "object"
+          ? (rawRow as Record<string, unknown>)
+          : null;
+
+      updateMemorialDraft(
+        member.user_id,
+        createMemorialDraft(member, row)
+      );
+    } catch (error: unknown) {
+      setMemorialOpen((current) => ({
+        ...current,
+        [member.membership_id]: false,
+      }));
+      showError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load memorial settings."
+      );
+    } finally {
+      setMemorialLoading((current) => ({
+        ...current,
+        [member.membership_id]: false,
+      }));
+    }
+  }
+
+
+  function validateMemorialDraft(
+    draft: MemorialDraft
+  ): string | null {
+    if (!draft.isDeceased) {
+      return null;
+    }
+
+    if (!draft.dateOfPassing) {
+      return "Date of Passing is required when Deceased is checked.";
+    }
+
+    if (draft.dateOfPassing > new Date().toISOString().slice(0, 10)) {
+      return "Date of Passing cannot be in the future.";
+    }
+
+    if (draft.recipientClassIds.length === 0) {
+      return "Select at least one recipient class.";
+    }
+
+    if (draft.remembranceEnabled && !draft.remembranceMessage.trim()) {
+      return "Enter the Remembrance Day message or disable that reminder.";
+    }
+
+    if (draft.heavenlyBirthdayEnabled && !draft.heavenlyBirthdayMessage.trim()) {
+      return "Enter the Heavenly Birthday message or disable that reminder.";
+    }
+
+    return null;
+  }
+
+
+  async function getMemorialAccessToken() {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error || !session?.access_token) {
+      throw new Error("Your session has expired. Sign in again before saving.");
+    }
+
+    return session.access_token;
+  }
+
+
+  async function postMemorialRequest(
+    path: string,
+    body: Record<string, unknown>
+  ) {
+    const accessToken = await getMemorialAccessToken();
+    const response = await fetch(path, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const responseBody = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      message?: string;
+    };
+
+    if (!response.ok) {
+      throw new Error(
+        responseBody.error ??
+          responseBody.message ??
+          "The memorial request failed."
+      );
+    }
+  }
+
+
+  async function persistMemorialSettings(
+    member: Member,
+    draft: MemorialDraft
+  ) {
+    const validationError = validateMemorialDraft(draft);
+
+    if (validationError) {
+      throw new Error(validationError);
+    }
+
+    await postMemorialRequest("/api/admin/members/deceased", {
+      targetUserId: member.user_id,
+      dateOfPassing: draft.isDeceased ? draft.dateOfPassing : null,
+      recipientClassIds: draft.recipientClassIds,
+      remembranceEnabled: draft.isDeceased && draft.remembranceEnabled,
+      heavenlyBirthdayEnabled:
+        draft.isDeceased && draft.heavenlyBirthdayEnabled,
+      remembranceMessage: draft.remembranceMessage.trim(),
+      heavenlyBirthdayMessage: draft.heavenlyBirthdayMessage.trim(),
+    });
+
+    // Reload the authoritative state because reversal restores the account
+    // status that existed before the deceased designation; it is not always
+    // safe to assume that the restored state is Active.
+    await loadMembers();
+  }
+
+
+  async function saveMemorialSettings(
+    member: Member
+  ) {
+    const draft =
+      memorialDrafts[member.user_id] ?? createMemorialDraft(member);
+
+    if (
+      member.date_of_passing &&
+      !draft.isDeceased &&
+      !window.confirm(
+        `Clear Deceased for ${member.full_name}? Their online access and ordinary birthday announcements may resume.`
+      )
+    ) {
+      return;
+    }
+
+    setMemorialSaving((current) => ({
+      ...current,
+      [member.membership_id]: true,
+    }));
+    clearMessage();
+
+    try {
+      await persistMemorialSettings(member, draft);
+      showSuccess(
+        draft.isDeceased
+          ? `${member.full_name}'s deceased record and memorial settings were saved.`
+          : `${member.full_name}'s deceased designation was cleared.`
+      );
+    } catch (error: unknown) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save memorial settings."
+      );
+    } finally {
+      setMemorialSaving((current) => ({
+        ...current,
+        [member.membership_id]: false,
+      }));
+    }
+  }
+
+
+  async function publishInitialMemorial(
+    member: Member
+  ) {
+    const draft =
+      memorialDrafts[member.user_id] ?? createMemorialDraft(member);
+    const validationError = validateMemorialDraft(draft);
+
+    if (validationError) {
+      showError(validationError);
+      return;
+    }
+
+    if (!draft.initialMemorialTitle.trim() || !draft.initialMemorialMessage.trim()) {
+      showError("Enter both a title and message for the Initial Memorial.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Publish the Initial Memorial for ${member.full_name} to the selected classes now?`
+      )
+    ) {
+      return;
+    }
+
+    setMemorialPublishing((current) => ({
+      ...current,
+      [member.membership_id]: true,
+    }));
+    clearMessage();
+
+    try {
+      // Persist recipient and reminder settings first so publication uses the
+      // exact class selection currently shown to the Super Admin.
+      await persistMemorialSettings(member, draft);
+      await postMemorialRequest("/api/admin/members/deceased/memorial", {
+        targetUserId: member.user_id,
+        title: draft.initialMemorialTitle.trim(),
+        message: draft.initialMemorialMessage.trim(),
+      });
+      showSuccess(`${member.full_name}'s Initial Memorial was published.`);
+    } catch (error: unknown) {
+      showError(
+        error instanceof Error
+          ? error.message
+          : "Failed to publish the Initial Memorial."
+      );
+    } finally {
+      setMemorialPublishing((current) => ({
+        ...current,
+        [member.membership_id]: false,
+      }));
+    }
+  }
+
+
+  /*
+   * =====================================================
    * FILTERS
    * =====================================================
    */
@@ -3434,7 +3794,12 @@ export default function MemberManagementPage() {
 
         const statusMatch =
           statusFilter === "all" ||
-          member.membership_status === statusFilter;
+          (
+            statusFilter === "deceased"
+              ? Boolean(member.date_of_passing)
+              : !member.date_of_passing &&
+                member.membership_status === statusFilter
+          );
 
 
         const levelMatch =
@@ -3692,8 +4057,17 @@ export default function MemberManagementPage() {
               member
             ) =>
               statusLabel(
-                member.membership_status
+                member.membership_status,
+                member.date_of_passing
               ),
+        },
+
+        {
+          header:
+            "Date of Passing",
+
+          key:
+            "date_of_passing",
         },
 
         {
@@ -3797,8 +4171,13 @@ export default function MemberManagementPage() {
 
   function statusLabel(
     status:
-      Member["membership_status"]
+      Member["membership_status"],
+    dateOfPassing?: string | null
   ) {
+    if (dateOfPassing) {
+      return "Deceased";
+    }
+
     if (status === "break_1") {
       return "Break 1";
     }
@@ -3817,8 +4196,13 @@ export default function MemberManagementPage() {
 
   function statusClass(
     status:
-      Member["membership_status"]
+      Member["membership_status"],
+    dateOfPassing?: string | null
   ) {
+    if (dateOfPassing) {
+      return "border-violet-700 bg-violet-950/40 text-violet-200";
+    }
+
     if (
       status ===
       "active"
@@ -4047,6 +4431,12 @@ export default function MemberManagementPage() {
               <option value="inactive">
                 Inactive
               </option>
+
+              {isSuperAdmin && (
+                <option value="deceased">
+                  Deceased
+                </option>
+              )}
 
             </select>
 
@@ -4354,6 +4744,26 @@ export default function MemberManagementPage() {
                   false;
 
 
+                const memorialIsOpen =
+                  memorialOpen[member.membership_id] ?? false;
+
+
+                const memorialIsLoading =
+                  memorialLoading[member.membership_id] ?? false;
+
+
+                const memorialIsSaving =
+                  memorialSaving[member.membership_id] ?? false;
+
+
+                const memorialIsPublishing =
+                  memorialPublishing[member.membership_id] ?? false;
+
+
+                const memorialDraft =
+                  memorialDrafts[member.user_id] ?? createMemorialDraft(member);
+
+
                 const groupedAdminOptions =
                   Array.from(
                     new Map(
@@ -4462,6 +4872,15 @@ export default function MemberManagementPage() {
 
                             )}
 
+
+                            {member.date_of_passing && (
+
+                              <span className="rounded-full border border-violet-700 bg-violet-950/40 px-3 py-1 text-xs font-semibold text-violet-200">
+                                Deceased
+                              </span>
+
+                            )}
+
                           </div>
 
 
@@ -4550,6 +4969,16 @@ export default function MemberManagementPage() {
                             </p>
 
 
+                            {member.date_of_passing && (
+                              <p>
+                                <span className="text-neutral-500">
+                                  Date of Passing:
+                                </span>{" "}
+                                {formatDate(member.date_of_passing)}
+                              </p>
+                            )}
+
+
                             <p>
                               <span className="text-neutral-500">
                                 Class:
@@ -4577,11 +5006,13 @@ export default function MemberManagementPage() {
 
                       <span
                         className={`self-start rounded-full border px-3 py-1 text-sm font-medium ${statusClass(
-                          member.membership_status
+                          member.membership_status,
+                          member.date_of_passing
                         )}`}
                       >
                         {statusLabel(
-                          member.membership_status
+                          member.membership_status,
+                          member.date_of_passing
                         )}
                       </span>
 
@@ -6298,6 +6729,27 @@ export default function MemberManagementPage() {
                     </div>
 
 
+                    {isSuperAdmin && (
+                      <DeceasedMemorialPanel
+                        fullName={member.full_name}
+                        classes={classes.map(([id, name]) => ({ id, name }))}
+                        draft={memorialDraft}
+                        open={memorialIsOpen}
+                        loading={memorialIsLoading}
+                        saving={memorialIsSaving}
+                        publishing={memorialIsPublishing}
+                        onToggleOpen={() => toggleMemorialSettings(member)}
+                        onChange={(draft) =>
+                          updateMemorialDraft(member.user_id, draft)
+                        }
+                        onSave={() => saveMemorialSettings(member)}
+                        onPublishInitialMemorial={() =>
+                          publishInitialMemorial(member)
+                        }
+                      />
+                    )}
+
+
                     {/* STATUS */}
 
                     <div className="mt-6 border-t border-neutral-800 pt-5">
@@ -6308,6 +6760,18 @@ export default function MemberManagementPage() {
 
 
                       <div className="mt-4 flex flex-wrap gap-3">
+
+                        {member.date_of_passing ? (
+                          <div className="w-full rounded-lg border border-violet-900 bg-violet-950/20 p-4 text-sm text-violet-100">
+                            Deceased — membership history remains preserved as{" "}
+                            <span className="font-semibold">
+                              {statusLabel(member.membership_status)}
+                            </span>
+                            . Use Memorial Settings above to make any correction; Deceased is not
+                            Inactive or Terminated.
+                          </div>
+                        ) : (
+                          <>
 
                         {member.membership_status ===
                           "active" && (
@@ -6375,6 +6839,9 @@ export default function MemberManagementPage() {
                             Set Inactive
                           </button>
 
+                        )}
+
+                          </>
                         )}
 
                       </div>

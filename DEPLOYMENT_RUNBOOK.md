@@ -1,30 +1,67 @@
 # Staging promotion, production deployment, and rollback
 
-Last updated: 18/09/2026. Release is BLOCKED. Sydney staging is healthy at exact
-migration history 006–036. Corrective migration 032 passes its 15/15
-rollback-contained YouTube acceptance, migration 033 passes its 12/12 email-health
-acceptance, migration 034 passes its 27/27 repository/event acceptance, and the
-post-migration role-security suite passes 12/12. Migrations 035 and 036 are applied
-and accepted: Member lifecycle passes 35/35, registration/password reset passes
-23/23, database lint is clean, and rollback-residue checks pass. The
-application-owned schema restore has been rehearsed successfully. Production has not
-received migrations 011–036. Complete
-managed Auth, Storage-object, roles/configuration and provider recovery proof,
-remaining workflow/browser coverage and production operational configuration are
-still prerequisites. Migration 037 is prepared locally only, with SHA-256
-`849866937AE085FAC16372852D1724E71570925ADF3868B106531E4D4AE1563A`.
-It must first pass the separately approved rollback-contained staging rehearsal;
-do not include it in an apply command yet.
+Last updated: 24/09/2026. Release is **BLOCKED**. Sydney staging
+`eomubndonbetszdbhsrj` is healthy at exact migration history **006–044**.
+Migrations 040–044 are persisted there and the guarded memorial, annual-reminder,
+bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and direct
+database role-boundary acceptance passed. Migration 044's optional-Aikikai and
+automatic-JS-Member-ID acceptance passed against its persisted staging objects, the
+authenticated role suite passed 12/12, database lint is clean and the combined local
+gate remains 223/223 tests. Production was not contacted during that work.
+
+The strict database security verifier still stops at the known platform-owned
+`supabase_admin` future-object default-privilege finding. An unqualified production
+release therefore remains blocked. Read-only catalog evidence confirms that the
+connected `postgres` role cannot assume `supabase_admin`; use a supported owner-level
+remediation or an explicitly reviewed exception, never speculative escalation. The
+deployed authenticated Member/scoped Admin/Super Admin browser matrix, real
+email/push/scheduler delivery, physical Safari/iOS coverage, production
+secrets/configuration and complete current recovery proof also remain release gates.
+
+The configured staging application origin currently returns 404 for the app and both
+worker endpoints. Staging has no `pg_cron`, so the one-minute worker/memorial schedule
+must be external and still needs deployment plus monitoring evidence. The retained
+restore rehearsal stops at ledger 006–026 and is not recovery proof for current
+ledger 006–044.
+
+There is **no current production Supabase project reference or host**. The intended
+production target is a new Singapore project that has not been created. Historical
+references to `pkmllhaavadhaozmwapz`, or to a production target having only 011–016
+pending, are retained below solely as milestone history and are not valid current
+operator instructions.
+
+## Current release boundary — supersedes historical milestone notes
+
+- Staging is Sydney project `eomubndonbetszdbhsrj`, exact ledger 006–044. Do not
+  reapply those migrations. The explicit staging dry run currently reports no
+  pending migration.
+- Production must be a separately created and dashboard-verified Singapore
+  (`ap-southeast-1`) project. Its reference, host and recovery plan do not yet exist.
+- The repository migration directory begins at 006; it is not, by itself, a clean
+  bootstrap for an empty Supabase project. A reviewed baseline/import procedure must
+  establish and verify all prerequisite objects and ledger entries before any
+  migration push is proposed.
+- Do not use repository-linked commands, the old production reference, or staging
+  credentials for production. Do not infer authorization to create a project,
+  migrate data, configure providers, deploy, or cut over traffic.
+- Production operations remain blocked until the new target is verified, fresh
+  source and target recovery points are proved, migration hashes/order are reviewed,
+  secrets and redirect/provider configuration are ready, the default-ACL decision is
+  approved, authenticated/provider/Safari gates pass, and a specific release window
+  and rollback owner receive explicit approval.
 
 ## Prerequisites and target safety
 
 - Separate Supabase staging project/branch, with outbound email/push disabled or
   isolated to test recipients before copied data is used.
+- Separately created production project in Singapore with its exact reference,
+  region and ownership independently verified. This project does not yet exist.
 - Complete restorable backup, PostgreSQL 17 client tools or Docker, and a tested
   restore. Catalog JSON is review evidence, not a database backup.
 - Dedicated staging Member, scoped Admin, and Super Admin accounts, with in-scope
   and out-of-scope memberships across at least two dojos/classes.
-- Staging secrets, VAPID keys, sender settings, and redirect allowlists.
+- Staging and future-production secrets, VAPID keys, sender settings, provider
+  ownership, scheduler ownership and redirect allowlists, kept in separate scopes.
 - Reviewed patch and migration hashes. Root 004/005 must not be replayed.
 
 ## Production region decision
@@ -44,16 +81,21 @@ project creation, migration, billable upgrade or production cutover is authorize
 this planning decision alone; each consequential action still requires its normal
 release approval and recovery point.
 
-The repository is linked to LIVE project `pkmllhaavadhaozmwapz`. Never use
-`--linked` for staging. Every command below uses an explicit URL. Keep passwords
-and connection URLs in the operator environment, not source, chat, or logs.
-CLI 2.116.0 was checked for these options.
+The repository's local Supabase metadata may still point at the historical project
+`pkmllhaavadhaozmwapz`. Treat that link as unsafe and stale: never use `--linked` for
+staging or production. That historical project is not the intended release target
+and must not be contacted by this runbook. Every database command must use an
+explicit, independently verified URL. Keep passwords and connection URLs in the
+operator environment, not source, chat, process arguments or logs. CLI 2.117.0 was
+used for the latest staging sequence; pin and record the reviewed version used for
+the production rehearsal and release.
 
 Require `STAGING_DB_URL` and `STAGING_PROJECT_REF`. Independently verify them
 against the staging dashboard: direct host `db.<STAGING_PROJECT_REF>.supabase.co`,
-or a Supabase pooler username ending in `.<STAGING_PROJECT_REF>`. The reference
-must not be `pkmllhaavadhaozmwapz`. Require TLS and percent-encode credentials.
-For a local clone, verify its loopback host and isolated port instead.
+or a Supabase pooler username ending in `.<STAGING_PROJECT_REF>`. The reference must
+equal `eomubndonbetszdbhsrj` and must not be the historical
+`pkmllhaavadhaozmwapz` reference. Require TLS and percent-encode credentials. For a
+local clone, verify its loopback host and isolated port instead.
 
 Run from the reviewed repository. Stop on every nonzero exit code. Do not use
 `--include-all`, `--include-seed`, `--include-roles`, or history repair to bypass
@@ -61,12 +103,12 @@ a mismatch.
 
 ## Backup and reproducible baseline
 
-Portable clients are available at
-`C:\Users\hioec\.codex\.chatgpt-projects\g-p-6a82d9108974819182fef42ef83189ba\tools\postgresql-17.11\pgsql\bin`.
-The psql, pg_dump, pg_dumpall and pg_restore version checks report 17.11. No
-Windows service or PATH change was made. See the resume evidence TOOLING.md for
-download provenance/hashes. Docker is still needed for CLI dump commands below;
-native clients offer an alternative once a backup connection is configured.
+Install trusted PostgreSQL command-line clients on the operator host and verify
+`psql`, `pg_dump`, `pg_dumpall` and `pg_restore` before the release window. Record
+their versions and installation provenance in the protected release evidence;
+do not depend on a user-specific cache path. Docker is still needed for the
+Supabase CLI dump commands below. Native PostgreSQL clients are the alternative
+when an authorized backup connection is configured.
 
 Provide backup credentials in a protected local libpq service/password file
 outside the repository, or in a scoped operator environment. Never echo the
@@ -110,9 +152,13 @@ branching/platform restore and manual logical restore have different key-handlin
 requirements. Outbound jobs and real-recipient messaging must stay disabled on
 the copied target until test-only destinations are verified.
 
-Preserve an immutable, secret-scanned pre-011 application schema baseline outside
-the active migration chain. Restore the exact 006–010 ledger separately. Retain
-legacy root SQL until the clean restore proves complete coverage.
+Preserve immutable, secret-scanned baseline evidence outside the active migration
+chain. The current migration directory starts at 006 and cannot prove how an empty
+managed project acquires its earlier prerequisite schema. Before creating the new
+production database, review and rehearse the exact baseline/import plus 006–044
+sequence on a disposable managed target. Retain legacy root SQL and prior baseline
+evidence until the clean restore proves complete coverage; never replay legacy SQL
+or manufacture ledger rows merely to make migration history appear current.
 
 ### Complete-recovery evidence gate
 
@@ -131,30 +177,30 @@ the procedure, not the freshness of a production backup. Production-source evide
 requires the validator's explicit `--allow-production-source` acknowledgement; that
 flag does not authorize or perform production access.
 
-## Staging preflight and apply
+## Current staging verification and future migration apply
 
-1. Review restored objects, ownership, grants, RLS, triggers, Auth/Storage behavior,
-   and extensions. Resolve platform-owned unsafe default privileges.
-2. Rerun both normalized duplicate queries at the top of migration 012. Require
-   zero rows; never auto-merge/delete profiles. Plan for transactional index locks
-   and identity canonicalization.
-3. Confirm exact 006–010 history and inspect all six pending SQL files.
-
-```powershell
-npx.cmd --yes supabase@2.116.0 migration list --db-url $env:STAGING_DB_URL
-npx.cmd --yes supabase@2.116.0 db push --db-url $env:STAGING_DB_URL --skip-vault --dry-run
-```
-
-Only 011, 012, 013, 014, 015, and 016 may be pending. A dry run lists migrations;
-it does not execute or validate SQL. Review every file and hash before applying.
-`--skip-vault` avoids unrelated configured Vault updates.
+Staging currently has no pending repository migration. Before any future change,
+review restored objects, ownership, grants, RLS, triggers, Auth/Storage behavior and
+extensions; confirm exact history 006–044; compare repository SQL
+hashes with the accepted evidence; and rerun the strict verifier. Do not apply a
+future migration without a new explicit staging approval and a dry run listing only
+the newly reviewed file or files.
 
 ```powershell
-npx.cmd --yes supabase@2.116.0 db push --db-url $env:STAGING_DB_URL --skip-vault
-npx.cmd --yes supabase@2.116.0 migration list --db-url $env:STAGING_DB_URL
-npx.cmd --yes supabase@2.116.0 db lint --db-url $env:STAGING_DB_URL --level warning
-psql --dbname=$env:STAGING_DB_URL --set=ON_ERROR_STOP=1 --file=scripts/verify-database-security.sql
+npx.cmd --yes supabase@2.117.0 migration list --db-url $env:STAGING_DB_URL
+npx.cmd --yes supabase@2.117.0 db push --db-url $env:STAGING_DB_URL --skip-vault --dry-run
 ```
+
+The current dry run must report the database up to date with no migration files.
+The former instructions that 011–016 or 044 may be pending are superseded. A dry run
+lists migrations; it does not execute or validate SQL. Review every future file and
+hash before an approved apply. `--skip-vault` avoids unrelated configured Vault
+updates.
+
+After a separately approved future apply, require an exact ledger, database lint,
+the strict SQL verifier, targeted rollback-contained acceptance, independent
+zero-residue checks and the authenticated role-security suite. Never weaken a failed
+check to obtain a release pass.
 
 The read-only SQL assertions must pass. They intentionally fail if unsafe
 `supabase_admin` global/public defaults remain: postgres cannot resolve those
@@ -175,6 +221,31 @@ Set the app's `NEXT_PUBLIC_*` values to staging BEFORE building. Next.js embeds
 these values in browser bundles: never promote a staging-configured binary to
 production. Server secrets must also be staging-only. Set the six dedicated
 account variables in README, then:
+
+Before the authenticated suite, audit the exact three existing staging identities.
+The command is read-only unless the exact `--apply` flag is supplied. Rotation is a
+separate consequential action and requires explicit staging-only approval; never use
+the broad dummy-user seed as a password-rotation shortcut.
+
+```powershell
+node scripts/rotate-security-test-passwords.mjs
+# Only after the audit passes and a separate rotation approval exists:
+node scripts/rotate-security-test-passwords.mjs --apply
+```
+
+Staging intentionally keeps public email login disabled. After the three identities
+and protected values are audited, use non-delivered one-time sessions rather than
+enabling the provider merely for testing. Load the protected environment without
+printing it, then run:
+
+```powershell
+npm.cmd run test:security:staging
+```
+
+The runner is locked to `eomubndonbetszdbhsrj`, requires an explicit confirmation
+flag through the package command, verifies the exact three mailboxes, passes tokens
+only through the child environment and confirms session cleanup. It does not create
+users or change profiles/memberships.
 
 ```powershell
 $env:SECURITY_TEST_ENVIRONMENT='staging'
@@ -217,28 +288,45 @@ redirect allowlists and rollback operator access are not yet verified.
 
 ## Production promotion — explicit authorization required
 
-After all staging gates pass and the user authorizes a release window:
+**Hard stop:** the intended Singapore production project does not exist, so no
+production connection command, migration, secret upload, provider configuration,
+deployment or cutover is currently executable or authorized. First create the
+project under separate approval, record its exact reference and `ap-southeast-1`
+region, and independently verify its dashboard URL and ownership. The reference
+must be distinct from staging and from historical project
+`pkmllhaavadhaozmwapz`.
 
-1. Freeze schema changes; capture a fresh production restore point and verified
-   backups. Confirm the reviewed patch/commit, target hashes, and recovery owner.
-   Never use staging backups as the production restore point.
-2. Set `PRODUCTION_DB_URL` to the dashboard-verified live TLS connection:
+After all staging gates pass and the user separately authorizes a release window:
+
+1. Freeze schema changes. Capture and prove fresh recovery points for every source
+   that will be imported and for the new target before release mutations. Confirm
+   the reviewed immutable commit, baseline/import plan, migration hashes, rollback
+   owner and stop conditions. Never treat a staging dump alone as production
+   recovery proof.
+2. Only after the new reference exists, set `PRODUCTION_PROJECT_REF` and
+   `PRODUCTION_DB_URL` from its dashboard-verified TLS connection. Guard that the
+   URL resolves to that exact new reference and rejects both staging and the
+   historical reference before running read-only preflight:
 
 ```powershell
-npx.cmd --yes supabase@2.116.0 migration list --db-url $env:PRODUCTION_DB_URL
-npx.cmd --yes supabase@2.116.0 db push --db-url $env:PRODUCTION_DB_URL --skip-vault --dry-run
+if (-not $env:PRODUCTION_PROJECT_REF -or -not $env:PRODUCTION_DB_URL) { throw 'Verified production target is required' }
+if ($env:PRODUCTION_PROJECT_REF -in @('eomubndonbetszdbhsrj', 'pkmllhaavadhaozmwapz')) { throw 'Refusing staging or historical project' }
+npx.cmd --yes supabase@2.117.0 migration list --db-url $env:PRODUCTION_DB_URL
+npx.cmd --yes supabase@2.117.0 db push --db-url $env:PRODUCTION_DB_URL --skip-vault --dry-run
 ```
 
-3. Stop unless only reviewed 011–016 files are pending. Rerun duplicate preflight
-   and check for schema drift. Only in the approved window:
+3. Stop unless the observed baseline and pending list exactly match the separately
+   reviewed new-project migration plan. The repository starts at 006, so an empty
+   target must not receive a blind `db push`. Rerun duplicate preflight and schema-
+   drift checks. Only in the specifically approved release window:
 
 ```powershell
-npx.cmd --yes supabase@2.116.0 db push --db-url $env:PRODUCTION_DB_URL --skip-vault
-npx.cmd --yes supabase@2.116.0 migration list --db-url $env:PRODUCTION_DB_URL
-npx.cmd --yes supabase@2.116.0 db lint --db-url $env:PRODUCTION_DB_URL --level warning
+npx.cmd --yes supabase@2.117.0 db push --db-url $env:PRODUCTION_DB_URL --skip-vault
+npx.cmd --yes supabase@2.117.0 migration list --db-url $env:PRODUCTION_DB_URL
+npx.cmd --yes supabase@2.117.0 db lint --db-url $env:PRODUCTION_DB_URL --level warning
 psql --dbname=$env:PRODUCTION_DB_URL --set=ON_ERROR_STOP=1 --file=scripts/verify-database-security.sql
 $env:SECURITY_TEST_ENVIRONMENT='production-read-only'
-$env:SECURITY_TEST_EXPECTED_HOST='pkmllhaavadhaozmwapz.supabase.co'
+$env:SECURITY_TEST_EXPECTED_HOST=([uri]$env:NEXT_PUBLIC_SUPABASE_URL).Authority
 npm.cmd run test:security
 ```
 
@@ -251,6 +339,14 @@ npm.cmd run test:security
 6. Check read-only login/approval/role boundaries and monitor auth errors, API
    5xx, outbox age/retries, push failures, and database logs. Stop on an
    authorization failure; do not weaken grants to accommodate old UI.
+
+No production release may start until the platform-default-ACL finding is resolved
+through a supported owner action or accepted as a documented narrow risk decision;
+dedicated authenticated Member/Admin/Super Admin tests pass; email, push and
+scheduler/provider behavior is verified; physical Safari/iOS and required responsive
+coverage pass; secrets, redirects, domains and monitoring are production-scoped; and
+the fresh recovery point, release window, rollback owner and exact target receive
+explicit approval.
 
 ## Rollback and recovery
 
@@ -271,6 +367,14 @@ npm.cmd run test:security
 After recovery, repeat migration history, database lint, security smoke, and
 integrity/audit checks before reopening writes. A restore is not verified until
 it has actually been rehearsed.
+
+## Historical milestone log — superseded where it conflicts above
+
+The following sections preserve evidence and decisions recorded at each earlier
+milestone. Their historical ledger counts, pending-migration lists, old project
+references and readiness estimates are not current operator instructions. The
+**Current release boundary**, **Current staging verification**, and **Production
+promotion** sections above control all future work.
 
 ## Milestone 16 frontend validation and integration
 
@@ -319,9 +423,10 @@ Before production approval, require all of the following evidence:
 
 1. Separate verified staging project and protected complete backup with a proved
    restore, including Auth/Storage/assets/configuration recovery as applicable.
-2. Correct pending history, fresh duplicate preflight, reviewed 011–016 dry-run,
-   authorized platform-owner grant resolution, staged apply, lint, SQL security
-   checks and dedicated Member/scoped Admin/Super Admin security suite.
+2. Exact 006–044 history after guarded staging acceptance, fresh duplicate preflight,
+   no unreviewed pending migration,
+   authorized platform-owner grant resolution, lint, SQL security checks and the
+   dedicated Member/scoped Admin/Super Admin security suite.
 3. Original registration/approval/password/membership/grading/assessor/title/
    certificate/transfer/subscription/payment/settlement/notification/export/audit
    workflows, including 016 concurrency, deduplication and wrong-dojo denial.

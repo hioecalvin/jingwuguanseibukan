@@ -9,7 +9,11 @@ export async function allVisibleMembers(client) {
       .order("membership_id", { nullsFirst: true })
       .order("user_id")
       .range(rows.length, rows.length + pageSize - 1);
-    if (error) throw new Error(`Member view query failed: ${error.code ?? "unknown error"}`);
+    if (error) {
+      throw new Error(
+        `Member view query failed: ${error.code ?? "unknown error"} ${error.message ?? ""}`.trim()
+      );
+    }
     if (!Number.isSafeInteger(count) || count < 0 || count > 100000) {
       throw new Error("Member view returned an invalid or unbounded row count");
     }

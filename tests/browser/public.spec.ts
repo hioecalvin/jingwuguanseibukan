@@ -9,7 +9,7 @@ async function typeText(page: Page, label: string, value: string) {
 }
 
 async function registrationFields(page: Page) {
-  await typeText(page, 'Member ID / Registration Number', ' M-100 ');
+  await typeText(page, 'Aikikai Registration Number (optional)', ' AIKIKAI   100 ');
   await typeText(page, 'Full Name', ' Test   Member ');
   await page.getByLabel('Date of Birth', { exact: true }).fill('2000-01-01');
   await typeText(page, 'Email', 'fixture@example.invalid');
@@ -148,7 +148,8 @@ test('password mismatch does not call Auth and matching fields send normalized m
   await expect(page.getByText('Registration successful. Please check your email to verify your account.')).toBeVisible();
   expect(backend.authCalls).toBe(1);
   expect(backend.signupPayload?.data.full_name).toBe('Test Member');
-  expect(backend.signupPayload?.data.registration_number).toBe('M-100');
+  expect(backend.signupPayload?.data.aikikai_registration_number).toBe('AIKIKAI 100');
+  expect(backend.signupPayload?.data.registration_number).toBeUndefined();
   expect(backend.signupPayload?.data.requested_dojo_id).toBe('dojo-a');
 });
 

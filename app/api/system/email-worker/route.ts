@@ -42,6 +42,12 @@ type EmailQueueHealth = {
 };
 
 
+type MemorialProcessorHealth = {
+  status: "PASS" | "FAIL";
+  createdAnnouncements: number | null;
+};
+
+
 function nonnegativeInteger(
   value: unknown,
 ) {
@@ -252,6 +258,54 @@ export async function POST(
 
   const supabase =
     createAdminClient();
+
+
+  let memorialProcessor: MemorialProcessorHealth = {
+    status: "PASS",
+    createdAnnouncements: 0,
+  };
+
+
+  const {
+    data:
+      memorialData,
+
+    error:
+      memorialError,
+  } =
+    await supabase.rpc(
+      "process_memorial_anniversaries"
+    );
+
+
+  if (
+    memorialError
+  ) {
+    console.error(
+      "Memorial anniversary processor failed:",
+      memorialError,
+    );
+
+    memorialProcessor = {
+      status: "FAIL",
+      createdAnnouncements: null,
+    };
+  } else {
+    const rawMemorial =
+      memorialData &&
+      typeof memorialData === "object" &&
+      !Array.isArray(memorialData)
+        ? memorialData as Record<string, unknown>
+        : null;
+
+    memorialProcessor = {
+      status: "PASS",
+      createdAnnouncements:
+        nonnegativeInteger(
+          rawMemorial?.created_count,
+        ),
+    };
+  }
 
 
   let sent =
@@ -536,17 +590,20 @@ export async function POST(
     {
       success:
         failed === 0 &&
-        queueHealthy,
+        queueHealthy &&
+        memorialProcessor.status === "PASS",
       processed,
       sent,
       failed,
+      memorialProcessor,
       queueHealth,
     },
     {
       status:
         failed > 0
           ? 502
-          : queueHealthy
+          : queueHealthy &&
+              memorialProcessor.status === "PASS"
             ? 200
             : 503,
     }

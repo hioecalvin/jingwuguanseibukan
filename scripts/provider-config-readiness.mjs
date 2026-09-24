@@ -61,6 +61,15 @@ export function evaluateProviderConfiguration(env, options = {}) {
   const expectedOrigin = parseExactOrigin(options.expectedOrigin ?? "", { allowLoopbackHttp });
   if (!expectedOrigin) add(blockers, "expectedOrigin", "must be an exact HTTPS origin (HTTP is allowed only for loopback local use)");
 
+  const siteUrl = requireValue(blockers, env, "NEXT_PUBLIC_SITE_URL");
+  const configuredOrigin = parseExactOrigin(siteUrl, { allowLoopbackHttp });
+  if (siteUrl && !configuredOrigin) {
+    add(blockers, "NEXT_PUBLIC_SITE_URL", "must be an exact HTTPS origin (HTTP is allowed only for loopback local use)");
+  }
+  if (expectedOrigin && configuredOrigin && expectedOrigin !== configuredOrigin) {
+    add(blockers, "NEXT_PUBLIC_SITE_URL", "normalized origin does not match --expected-origin");
+  }
+
   const supabaseUrl = requireValue(blockers, env, "NEXT_PUBLIC_SUPABASE_URL");
   const publishableKey = requireValue(blockers, env, "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
   const supabaseSecret = value(env, "SUPABASE_SECRET_KEY") || value(env, "SUPABASE_SERVICE_ROLE_KEY");

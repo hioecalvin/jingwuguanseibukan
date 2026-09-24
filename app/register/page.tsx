@@ -27,7 +27,7 @@ export default function RegisterPage() {
   const [dojoRetry, setDojoRetry] = useState(0);
 
   const [fullName, setFullName] = useState("");
-  const [memberId, setMemberId] = useState("");
+  const [aikikaiRegistrationNumber, setAikikaiRegistrationNumber] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -100,13 +100,15 @@ export default function RegisterPage() {
       return;
     }
 
-    const normalizedMemberId = memberId.trim();
     const normalizedName = fullName.trim().replace(/\s+/g, " ");
+    const normalizedAikikaiRegistrationNumber = aikikaiRegistrationNumber
+      .trim()
+      .replace(/\s+/g, " ");
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPhone = phone.trim().replace(/\s+/g, " ");
 
-    if (!normalizedMemberId || !normalizedName) {
-      setMessage("Member ID and full name are required.");
+    if (!normalizedName) {
+      setMessage("Full name is required.");
       return;
     }
 
@@ -149,8 +151,8 @@ export default function RegisterPage() {
       options: {
         data: {
           full_name: normalizedName,
-          registration_number: normalizedMemberId,
-          username: normalizedMemberId,
+          aikikai_registration_number:
+            normalizedAikikaiRegistrationNumber || null,
           date_of_birth: dateOfBirth,
           phone: normalizedPhone,
           requested_class_id: selectedClassId,
@@ -199,22 +201,12 @@ export default function RegisterPage() {
           Member Registration
         </p>
 
+        <p className="mt-3 text-center text-sm leading-6 text-neutral-400">
+          Add your Aikikai Registration Number if you have one. Your permanent JS
+          Member ID will be assigned automatically after approval.
+        </p>
+
         <form onSubmit={handleRegister} aria-busy={loading} className="mt-8 space-y-5">
-          <div>
-            <label htmlFor="register-member-id" className="mb-1 block text-sm font-medium">
-              Member ID / Registration Number
-            </label>
-
-            <input
-              id="register-member-id"
-              required
-              autoComplete="username"
-              value={memberId}
-              onChange={(e) => setMemberId(e.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-            />
-          </div>
-
           <div>
             <label htmlFor="register-name" className="mb-1 block text-sm font-medium">
               Full Name
@@ -226,6 +218,20 @@ export default function RegisterPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="register-aikikai-registration-number" className="mb-1 block text-sm font-medium">
+              Aikikai Registration Number (optional)
+            </label>
+
+            <input
+              id="register-aikikai-registration-number"
+              maxLength={100}
+              value={aikikaiRegistrationNumber}
+              onChange={(e) => setAikikaiRegistrationNumber(e.target.value)}
               className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
             />
           </div>
@@ -297,6 +303,7 @@ export default function RegisterPage() {
                 setDojoStatus(e.target.value ? "loading" : "idle");
                 setMessage("");
               }}
+              style={{ colorScheme: "dark", WebkitTextFillColor: "#ffffff" }}
               className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
             >
               <option value="" disabled>
@@ -350,6 +357,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 value={selectedDojoId}
                 onChange={(e) => setSelectedDojoId(e.target.value)}
+                style={{ colorScheme: "dark", WebkitTextFillColor: "#ffffff" }}
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
               >
                 <option value="" disabled>

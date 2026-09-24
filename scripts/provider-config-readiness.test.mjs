@@ -8,6 +8,7 @@ function validEnvironment() {
   const ecdh = createECDH("prime256v1");
   ecdh.setPrivateKey(randomBytes(32));
   return {
+    NEXT_PUBLIC_SITE_URL: "https://staging.example.org/",
     NEXT_PUBLIC_SUPABASE_URL: "https://staging-ref.supabase.co",
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_unit_value",
     SUPABASE_SECRET_KEY: "sb_secret_server_value",
@@ -44,6 +45,26 @@ test("missing configuration and the wrong Supabase target fail closed", () => {
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "RESEND_API_KEY"));
   assert.ok(result.blockers.some(({ path }) => path === "NEXT_PUBLIC_SUPABASE_URL"));
+});
+
+test("the expected origin must match the normalized configured site URL", () => {
+  const env = validEnvironment();
+  env.NEXT_PUBLIC_SITE_URL = "https://different-staging.example.org";
+  const result = evaluateProviderConfiguration(env, options);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "NEXT_PUBLIC_SITE_URL" && message.includes("does not match --expected-origin")
+  ));
+});
+
+test("the configured site URL must be an exact secure origin", () => {
+  const env = validEnvironment();
+  env.NEXT_PUBLIC_SITE_URL = "https://staging.example.org/app?preview=true";
+  const result = evaluateProviderConfiguration(env, options);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "NEXT_PUBLIC_SITE_URL" && message.includes("exact HTTPS origin")
+  ));
 });
 
 test("a mismatched VAPID pair and reused secrets fail closed", () => {

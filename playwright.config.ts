@@ -6,6 +6,7 @@ assertSmokeBuild();
 
 export default defineConfig({
   testDir: './tests/browser',
+  globalTeardown: './scripts/browser-smoke-teardown.ts',
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,

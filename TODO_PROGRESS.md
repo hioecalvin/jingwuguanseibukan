@@ -1,25 +1,29 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 18/09/2026
+Last updated: 24/09/2026
 
 ## Release status
 
-The canonical application passes lint with no warnings, TypeScript, all 150 Node
-regressions, a zero-vulnerability production dependency audit, and a production
-build generating 41 routes. Sydney staging `eomubndonbetszdbhsrj` is healthy at
-exact migration history 006–039. Migrations 037–039 are applied and verified on
-staging: transfer boundaries and current Break states are aligned, report labels are
-normalized, and failed-transfer cancellation requires a nonblank reason. Migration
-031's partial-pair defect was corrected by
-migration 032, whose rollback-contained YouTube acceptance passes 15/15 with
-independent zero-residue verification. Migration 030 subscription acceptance remains
-15/15; the latest Member/scoped Admin/Super Admin authorization smoke passes 12/12,
-the current-ledger grading/assessor/title suite passes 14/14, the
-certificate/archive/report database suite passes 22/22, settlement acceptance passes
-30/30, transfer acceptance passes 21/21, and warning-level `public` schema lint reports
-no errors or warnings. Migration 033 email-health acceptance passes 12/12 with
-independent rollback and zero-residue verification. Migration 034 repository/event
-acceptance passes 27/27 with independent rollback and zero-residue verification.
+The published release branch is `release/v1-readiness-20260918` at `bc001b5`; its
+local tracking ref matched the recorded origin ref at the start of this work, although
+no fresh remote fetch was made for this checkpoint. The uncommitted local candidate
+passes lint with no warnings, TypeScript, 223/223 Node regressions, and a fresh
+isolated production build generating 44 routes. The earlier dependency audit
+reported zero known vulnerabilities. Sydney staging `eomubndonbetszdbhsrj` is
+verified at exact migration history 006–044. Migrations 040–044 are applied and the
+persisted rollback-contained memorial, annual-reminder, bulk-assessment,
+prepared-certificate/QR, zero-residue, exact-ledger and direct role-boundary suites
+pass. Migration 044's optional-Aikikai, automatic-JS-Member-ID, role-boundary and
+sequence-restoration suite also passes against the persisted staging objects.
+Production was not contacted.
+
+The exact three dedicated staging security-test accounts were audited and received
+password-only rotations. Public email login remains disabled; the guarded runner
+therefore used non-delivered one-time sessions and passed all 12 Member/scoped
+Admin/Super Admin authorization checks with session cleanup confirmed. The runner
+now retries only Supabase's exact transient `JWT issued at future` response without
+weakening any authorization assertion. No profiles, memberships or live member
+records changed.
 
 Migrations 035 and 036 are applied and verified on staging only. Migration 035
 removes duplicate automated Break history writes; its post-apply Member-lifecycle
@@ -85,10 +89,11 @@ without enabling general production `unsafe-eval`.
 The application is **not approved for production deployment yet**. The scoped
 staging application-schema restore is proven, but complete Supabase managed Auth,
 Storage-object and platform-configuration recovery proof, email/push scheduler and
-YouTube channel operational configuration, complete authenticated browser/CI coverage, and the
-remaining operational release gates are still required. Production has not received
-migrations 011–036; migrations 031–036 exist only on staging, and production was not
-contacted during this milestone.
+YouTube channel operational configuration, authenticated browser coverage for the
+new workflows, and the remaining operational release gates are still required.
+Production's current migration ledger remains unverified because it was not
+contacted. Migrations 040–043 are applied to staging only and have not been applied
+to production.
 
 The approved production-region plan is a separate Supabase primary in Singapore
 (`ap-southeast-1`) for the Jakarta/Indonesia user base. Sydney
@@ -229,8 +234,11 @@ Historical verification from the prior audit (current results below):
 - [x] Registration: verification, approval/rejection, reapplication, and email.
 - [x] Members: permanent ID, multi-class membership, status, break state, and
   applicable Aikikai number.
-- [x] Grading: deterministic progression, assessor capture, guarded
-  confirmation, undo, and retained history.
+- [x] Grading: deterministic progression, assessor capture, guarded confirmation,
+  undo, and retained history for the existing individual workflow.
+- [x] Apply and validate migration 041 on staging, including atomic bulk assessment,
+  stale-target/concurrency/idempotency boundaries, pass-only promotion, unchanged
+  failed candidates, one results announcement, and certificate-eligible bulk PDF.
 - [x] Assessors: add, deactivate, reactivate, and external snapshots.
 - [x] Titles: award, revoke, certificate, and retained audit history.
 - [x] Certificates/archive/reports database workflow: scope, search, print/report
@@ -265,13 +273,23 @@ Historical verification from the prior audit (current results below):
   reader tranche, independent residue check and post-suite role-security result.
 - [x] Add durable rate limiting to application account and worker endpoints.
 - [x] Add isolated browser smoke automation and a prepared CI workflow.
-- [ ] Pass the complete browser suite and execute the approved remote CI workflow.
+- [x] Execute the approved remote CI workflow; GitHub Actions run `35395933998`
+  passed checks plus Chromium, Firefox and WebKit jobs on Linux/macOS.
+- [ ] Run authenticated browser acceptance for the new deceased/memorial and bulk
+  assessment workflows, plus physical Safari/iOS validation.
 - [x] Verify accessible error, empty, loading, keyboard, and focus states.
 - [x] Verify mobile, tablet, and desktop layouts.
 - [ ] Verify organization YouTube channel custody, Unlisted visibility, embedding,
   both logo overlays and real Safari playback with dedicated non-sensitive media.
 - [x] Document migration rollback, staging promotion, monitoring, and incident
   response. Restore and rollback rehearsal remain required.
+- [x] Apply migration 040 to staging and validate persisted memorial settings,
+  recipient classes, initial/annual announcements, ACL/RLS, active-account request
+  gating, rollback residue and direct database role boundaries.
+- [ ] Exercise deceased Auth ban/unban and reversal through the protected server API
+  with dedicated staging identities; do not use live member records.
+- [ ] Configure and observe the memorial annual processor through the protected
+  worker scheduler without mutating production.
 
 ## Milestone log
 
@@ -2805,3 +2823,408 @@ A documentation-only branch-tip confirmation subsequently caught a timing-depend
 `disabled:opacity-50`. The control now uses color-only transitions and explicit
 high-contrast disabled colors, preventing the accessibility result from depending on
 scan timing.
+
+### Milestone 109 — implementation checkpoint and memorial lifecycle prepared locally (23/09/2026)
+
+Reconfirmed the published checkpoint at branch `release/v1-readiness-20260918`,
+commit `bc001b5`, with the local tracking ref matching the recorded origin ref. The
+current working tree is intentionally uncommitted while migrations 040–041 and their
+application work are reviewed. The most recent verified staging ledger remains
+exactly 006–039; neither staging nor production was contacted in this milestone.
+
+Prepared migration 040 and the Super-Admin deceased-member workflow without changing
+membership status or historical records. The local candidate adds
+`profiles.date_of_passing`, memorial settings/recipient/audit/publication tables,
+multi-class announcement recipients, active-account request enforcement, scoped
+announcement visibility, initial memorial publishing and idempotent Jakarta-date
+annual Remembrance Day/Heavenly Birthday processing. The Admin UI and protected API
+routes support mark/reverse, settings and initial publication; the server route also
+coordinates Supabase Auth ban/unban with retry-safe partial-failure reporting. The
+email worker invokes the annual processor without hiding its health result.
+
+Migration 040 is local-only. Its database objects, Auth ban/unban integration,
+annual worker behavior, recipient delivery, rollback residue and role matrix have not
+been exercised against staging. Source inspection also found no existing ordinary
+birthday-announcement scheduler to replace; any future ordinary birthday automation
+must explicitly exclude deceased profiles.
+
+### Milestone 110 — atomic bulk assessment and certificate batch prepared locally (23/09/2026)
+
+Prepared migration 041 with private, RLS-enabled `assessment_batches` and
+`assessment_results`, scoped `get_bulk_assessment_candidates`, and one atomic
+`submit_bulk_assessment` boundary. The submission validates the complete roster
+before mutation, locks candidates deterministically, rejects stale expected targets
+and duplicates, records both outcomes, promotes only Pass rows, leaves Fail rows
+unchanged, and publishes one class results announcement only when at least one member
+passes. Instructor text is retained as a historical per-candidate snapshot and does
+not replace the required grading assessor.
+
+Added `/admin/assessments` with class/dojo/date scope, explicit roster inclusion,
+candidate photo and grading context, Pass/Fail, instructor, notes, review confirmation
+and one idempotent submission. After a successful batch, eligible rank promotions can
+be issued certificates and downloaded as one multi-page PDF; failed or non-rank rows
+are excluded. Rollback-contained SQL fixtures/assertions are prepared but have not run
+against staging. A fresh local PostgreSQL 17 cluster installed migration 029 then 041
+and passed all 14 semantic assertions, including disabled/deceased assessor denial,
+pass-only mutation, idempotency, ACLs and private-table audit checks; the temporary
+cluster was removed afterward.
+
+The refreshed local gate passes lint, non-incremental TypeScript, 190/190 Node tests,
+the 44-route optimized production build and `git diff --check` (apart from
+informational Windows line-ending notices). Migration 041, authenticated browser
+flows, bulk announcement/certificate behavior and Safari/iOS remain live-unverified.
+Staging remains 006–039, migrations 040–041 remain unapplied, and production was not
+contacted.
+
+### Milestone 111 — pre-assessment pending certificates and atomic finalization prepared (23/09/2026)
+
+Clarified and implemented the intended Super-Admin assessment sequence locally.
+Migration 042 persists the selected roster before assessment day, reserves auditable
+certificate numbers for certificate-eligible candidates, and permits one multi-page
+PDF to be printed while every certificate remains `pending`. The roster can be
+reopened on assessment day with its date, class/dojo, assessor, member photo, home
+dojo, current/target grade, instructor, notes and Pass/Fail controls.
+
+Every prepared candidate must receive exactly one result in one final submission.
+The existing migration-041 atomic grading boundary performs the promotions and
+records both outcomes; migration 042 then marks Pass certificates `issued` and Fail
+certificates `voided` in the same transaction. Failed candidates retain their current
+grade. Direct browser execution of the unprepared submission RPC is revoked. The one
+published class announcement includes only successful candidates and uses
+`Name, previous rank to promoted rank` under a Congratulations heading.
+
+A fresh temporary PostgreSQL 17 cluster installed migrations 029, 041 and 042 and
+passed the rollback-contained 9/9 semantic suite: complete-roster enforcement,
+pending certificate creation, print audit, issued/voided transitions, pass-only
+promotion and announcement, idempotent finalization, Super-Admin scope and private
+table ACLs. The temporary cluster was stopped and removed. The final local gate passes
+lint, TypeScript, 198/198 Node tests, the optimized 44-route production build and
+`git diff --check`. Migrations 040–042 remain unapplied; staging and production were
+not contacted.
+
+### Milestone 112 — database-verified certificate QR and ordered dojo results completed locally (23/09/2026)
+
+Added a QR barcode to each prepared assessment certificate. Its signed-internal
+payload records the certificate UUID, member name, promoted rank, promotion date,
+assessor and the app verification URL. The public scan route performs the lookup on
+the server through a service-role-only database function and reports `PENDING - NOT
+YET VALID`, `ISSUED - VALID` or `VOID - NOT VALID`. It exposes no certificate PDF or
+member document library. Prepared-assessment tables remain unreadable to browser
+roles, and every preparation, open, print and finalization workflow remains guarded
+for an active Super Admin.
+
+Updated the single grading-results announcement so a selected-dojo assessment names
+that dojo in its title and contains only its selected roster. An all-dojo assessment
+groups result lines by home dojo. Within each dojo, successful promotions are ordered
+by destination rank and sub-rank from highest to lowest, then deterministically by
+member name. Failed candidates remain absent from the announcement.
+
+The certificate face now has one centered `Authorized Signatory` signature line;
+the separate assessor signature was removed. Assessor identity remains preserved in
+the database and QR verification payload as historical audit evidence. The class name
+is displayed in bold immediately below `JINGWUGUAN SEIBUKAN`, and the QR caption now
+states `SCAN TO VERIFY AUTHENTICITY` while retaining live database-status validation.
+
+The final local gate passes lint, non-incremental TypeScript, 204/204 Node tests,
+`git diff --check`, and an isolated optimized Next.js 16.3.4 production build that
+includes `/certificate/verify/[certificateId]`. The ordinary repository `.next`
+directory was held by another local Next.js process, so the build was executed from
+an exact temporary copy; that copy and its environment file were deleted afterward.
+
+A fresh disposable PostgreSQL 17 cluster installed the fixture and migrations 029,
+041 and 042, then passed the rollback-contained 9/9 prepared-certificate semantic
+suite. The server was stopped and all temporary database files were removed. Staging
+remains at the last verified 006–039 ledger; migrations 040–042 remain unapplied,
+and neither staging nor production was contacted.
+
+### Milestone 113 — staging 040–042 read-only preflight passed (23/09/2026)
+
+Detected that the repository's Supabase CLI metadata is still linked to production
+`pkmllhaavadhaozmwapz` and refused to use that link. The protected staging
+configuration independently passed the exact-project guard for Sydney staging
+`eomubndonbetszdbhsrj`. No relink was performed.
+
+A direct TLS-verified, transaction-read-only staging audit confirmed the exact ledger
+006–039 with latest migration 039. A second read-only catalog query confirmed every
+migration 040–042 prerequisite, the required rank/sub-rank ordering columns, the
+authenticator role and `is_super_admin(uuid)` default contract. The PostgREST
+pre-request hook is currently unclaimed, all new relations and the prepared-certificate
+sequence are absent, and there are zero conflicting new routines.
+
+Exact SHA-256 pins were recorded for migrations 040–042. Staging mutations were zero;
+production requests, connections and mutations were zero. Sanitized evidence is in
+`release-evidence-20260923-migrations-040-042-preflight`. Applying migrations 040,
+041 and 042 remains a separate consequential action requiring explicit staging-only
+approval.
+
+### Milestone 114 — staging 040–042 applied; live semantics exposed migration 043 repair (24/09/2026)
+
+Applied migrations 040, 041 and 042, in order, to Sydney staging
+`eomubndonbetszdbhsrj` only through an isolated migration directory and a direct
+TLS-verified staging URL. The repository's production-linked Supabase metadata was
+not used or changed, and production was not contacted. Migration 042 initially
+failed transactionally because staging uses the established `is_super_admin(uuid)`
+contract rather than a `profiles.role` column. The corrected 042 passed 35 targeted
+checks, a disposable PostgreSQL semantic suite, the full local gate and a staging
+dry run before it was applied. The staging ledger then became exactly 006–042.
+
+The first rollback-contained live semantic run found two additional runtime catalog
+mismatches without leaving residue: PostgreSQL does not provide `min(uuid)` in the
+memorial publisher, and the prepared-assessment function referenced the nonexistent
+`profiles.member_id` instead of `profiles.registration_number`. Prepared local
+migration 043 with exact-definition fail-closed guards and restored ACL assertions.
+Migration 043 has not been applied. A guarded Supabase CLI dry run selected exactly
+`043_repair_memorial_and_prepared_assessment_runtime.sql` and no seed or role files.
+
+Applied the 043 candidate only inside a staging transaction and ran the full guarded
+suite. The initial memorial, annual Remembrance Day and Heavenly Birthday passed.
+A three-person rank-promotion roster created three Pending certificates, recorded a
+print, finalized two Pass and one Fail atomically, issued two certificates, voided
+the failed certificate, promoted only the passes and created the result announcement.
+Pending and final QR/database authenticity payloads passed. Existing Admin and Member
+identities were denied the Super-Admin-only and private-table paths. The transaction
+was rolled back, and a separate connection confirmed zero memorial/assessment/
+certificate residue, the exact 006–042 ledger and the intended RPC ACLs.
+
+The general database verifier still stops at the previously documented Supabase
+platform-owned default-privilege finding; it was not weakened. Dedicated security
+test account variables in the protected staging file are still placeholders, so
+password-authenticated API/browser role smoke remains pending. Local verification
+passes TypeScript plus 207/207 Node tests, lint and `git diff --check` (apart from
+informational Windows line-ending notices). No commit, push, deployment or production
+contact occurred.
+
+### Milestone 115 — migration 043 and persisted staging acceptance passed (24/09/2026)
+
+Applied migration 043 to staging `eomubndonbetszdbhsrj` only through the isolated,
+hash-pinned migration directory and direct TLS-verified staging connection. The CLI
+selected and applied only
+`043_repair_memorial_and_prepared_assessment_runtime.sql`; no seed or role files were
+applied. A separate read-only check confirmed both repaired function definitions are
+persisted and the staging migration ledger is exactly 006–043.
+
+Reran the complete rollback-contained suite without the temporary candidate repair.
+The persisted memorial lifecycle passed initial publication, Remembrance Day and
+Heavenly Birthday generation. The persisted assessment flow prepared three Pending
+certificates, recorded printing, finalized two Pass and one Fail, promoted only the
+passes, issued two certificates, voided one and created the result announcement.
+Pending and final QR/database verification passed. Member and scoped Admin identities
+were denied the protected boundaries. The transaction rolled back successfully.
+
+An independent connection then passed zero-residue, exact-ledger and RPC-ACL checks.
+The strict database verifier was also rerun and still stops only at the previously
+documented Supabase platform-owned default-privilege finding; it was not weakened.
+Dedicated security-test credentials remain placeholders, so password-authenticated
+API/browser smoke and provider delivery remain pending. Production was not contacted,
+and no deployment, commit, push or merge occurred.
+
+### Milestone 116 — parallel account, provider, role-route and release audit (24/09/2026)
+
+Ran four independent readiness tracks in parallel. The dedicated staging Member,
+scoped Admin and Super Admin identities already exist, but all six protected email/
+password values are placeholders. The lower-impact next action is to rotate only
+those three staging Auth passwords and update protected configuration; the existing
+seed is not the default because it rewrites 56 dummy users, profiles and memberships.
+
+Corrected the assessment role inconsistency. `/admin/assessments` is now displayed
+only to Super Admin and has a server layout guard that redirects direct access by
+Members and scoped Admins. This matches the migration-042 prepared-assessment RPCs
+and the agreed assessor workflow.
+
+Hardened offline provider readiness so `--expected-origin` must exactly match the
+normalized `NEXT_PUBLIC_SITE_URL`; path/query-bearing and mismatched origins fail
+closed. The protected staging configuration passes the strengthened offline check.
+This remains configuration-consistency evidence only, not live provider delivery.
+
+The strict default-ACL blocker is platform-owned: the project migration role cannot
+alter `supabase_admin` defaults. Existing app objects remain explicitly ACL-hardened.
+The next action is a Supabase owner-level staging remediation request or a narrow,
+time-bounded release exception; the verifier must remain unchanged and nonzero.
+
+TypeScript and 210/210 Node tests pass, lint passes, and provider configuration is
+offline-ready. A fresh isolated optimized production build passed all 44 routes,
+including `/admin/assessments` and certificate verification. Chromium and WebKit
+both launched locally and the browser production build compiled, but this session
+could not complete Playwright fixtures: the
+shared trace was locked by another local process and the isolated copy's esbuild
+fixture resolver was blocked by the sandbox while traversing parent directories.
+This is not counted as browser acceptance. Earlier remote browser CI remains valid,
+while new authenticated 040–043 browser workflows still require real staging
+credentials and a deployed HTTPS staging origin. Production was not contacted.
+
+### Milestone 117 — guarded staging-account rotation tooling and release notes finalized (24/09/2026)
+
+Added a targeted security-test account rotation utility that is audit-only by
+default and hard-limited to staging `eomubndonbetszdbhsrj`. It requires exactly the
+existing Member 0101, Admin 0002 and Super Admin 0001 identities, verifies their
+active/living profiles and resolved roles, rejects browser credentials, placeholder
+or duplicate passwords, and uses password-only Auth Admin mutation payloads. The
+explicit `--apply` path is the only mutation mode. Seven focused tests cover target
+guards, credentials, exact identity matching, audit-only behavior and the three
+password-only updates.
+
+The full local gate now passes TypeScript plus 217/217 Node tests, lint, the prior
+fresh isolated 44-route production build and diff checking. Updated the current
+release boundary so historical 011–016 instructions cannot be mistaken for active
+operator steps. The remote account audit and password rotation were not run and the
+protected configuration was not changed; those remain behind explicit staging-only
+approval. Production was not contacted.
+
+### Milestone 118 — dedicated staging credentials rotated and role security passed (24/09/2026)
+
+With explicit approval, updated only the six protected `SECURITY_TEST_*` entries in
+`C:\protected\jingwuguan-staging.env`. A read-only Auth/profile audit first verified
+exactly Member 0101, scoped Admin 0002 and Super Admin 0001, including member numbers,
+active/living status and resolved roles. The apply then changed only those three Auth
+passwords; it created no users and changed no profile or membership records.
+
+The first password-authenticated test stopped before authorization probes because
+staging intentionally has public email login disabled. Provider settings were not
+changed. A staging-locked runner generated non-delivered one-time sessions for the
+same audited accounts, waited for token clock consistency, and passed 12/12 checks:
+all role flags, Member row isolation, scoped-Admin isolation, archive/delivery/payment
+privacy, finance and role-helper caller isolation, effective-rate privacy and the
+Member privileged-RPC denial. The child suite signed out each session and the wrapper
+confirmed cleanup. Production contacts and production mutations were zero.
+
+### Milestone 119 — automatic JS Member ID on Super Admin approval prepared locally (24/09/2026)
+
+Prepared migration 044 without contacting any remote database. Applicants no longer
+choose a JS Member ID during registration. They may still provide their distinct,
+optional Aikikai Registration Number; signup normalizes and stores it in
+`profiles.aikikai_registration_number`, while leaving the JS ID column
+`profiles.registration_number` empty. The review queue displays and exports the
+Aikikai value when present. The initial Applications workflow is now
+Super-Admin-only in navigation, at the server route boundary and inside both review
+RPC signatures. When a Super Admin approves a pending application, the transaction
+locks the request and profile, preserves any existing nonblank Member ID, otherwise
+allocates the next private numeric sequence value with a minimum four-digit display,
+creates or activates the selected membership, records the review and queues the
+approval notification containing the assigned ID. Rejection assigns no ID. The
+existing manual Member ID page remains available for an authorized later correction.
+
+The sequence seeds above the greatest existing 1–18 digit numeric Member ID, never
+cycles and is not directly usable by browser or service roles. A disposable local
+PostgreSQL 17 acceptance run proved supplied and blank Aikikai values persist as a
+normalized value and `NULL`, respectively, without assigning a JS ID at signup. It
+also proved `0101` advances to `0102`, `9999` advances to `10000` without truncation,
+legacy `LEGACY-7` is preserved, rejection leaves the JS ID empty, the legacy RPC
+delegates to the same boundary, a scoped Admin is denied and sequence ACLs remain
+private. The temporary cluster was stopped and removed.
+
+The complete local gate passes TypeScript plus 223/223 Node tests, lint,
+`git diff --check` and a clean isolated 44-route optimized production build. The
+source build's shared `.next/trace-build` remained locked by another local process,
+so the build used a physical temporary copy that was deleted after success. Staging
+remains exactly 006–043; migration 044 requires separate explicit staging-only
+approval, dry-run isolation and guarded rollback-contained acceptance. Production
+was not contacted.
+
+### Milestone 120 — migration 044 applied and accepted on staging (24/09/2026)
+
+With explicit staging-only approval, verified the protected target as Sydney staging
+`eomubndonbetszdbhsrj`, confirmed exact history 006–043, pinned the migration hash
+and ran an isolated Supabase CLI dry run that selected only
+`044_assign_member_id_on_approval.sql`. The first apply stopped transactionally at
+the fail-closed preflight because staging exposes `is_super_admin(uuid default
+auth.uid())`, not a separate zero-argument overload. No schema or ledger change
+persisted. Repaired the preflight to validate the established UUID signature and its
+one default argument, reran its focused local tests and dry run, then applied only
+migration 044. Production was not contacted.
+
+Independent postflight confirms the persisted optional-Aikikai signup definition,
+Super-Admin-only automatic JS Member ID approval path, application-review field,
+private sequence ACL and exact staging ledger 006–044. The rollback-contained live
+suite proved supplied and blank Aikikai handling, no JS ID at signup, numeric
+minimum-four-digit ID assignment on approval, scoped-Admin denial, Super Admin
+approval, membership plus routed-email atomicity, rejection without an ID, legacy
+ID preservation and sequence restoration. A separate connection confirmed zero
+synthetic residue and the exact ledger.
+
+The guarded authenticated API suite passed 12/12 Member, scoped Admin and Super
+Admin security checks. Supabase database lint reports no schema errors, and the
+post-apply dry run reports no pending migrations. The unchanged strict SQL verifier
+still stops only at the documented platform-owned `postgres`/`supabase_admin`
+global/public-schema default privileges; it was not weakened. The complete local
+gate passes TypeScript plus 223/223 Node tests, lint and the direct 44-route optimized
+production build. No commit, push, deployment or production contact occurred.
+
+### Milestone 121 — parallel browser, provider, recovery and release audit (24/09/2026)
+
+Ran four independent readiness tracks without contacting production. The browser
+track built all 44 routes and exercised the 161-case isolated matrix. It found one
+real WCAG contrast defect in the new registration explanation (`text-neutral-500`
+on the dark card, measured 3.78:1); changed only that copy to `text-neutral-400`.
+After the fix, Chromium desktop completed 23/23 assertions and WebKit desktop,
+tablet and mobile completed 69/69 assertions. Both commands then hung during runner
+shutdown after the final pass and required interruption, so this is assertion
+evidence rather than a clean browser-command exit. Firefox never opened because its
+Windows executable returned `spawn UNKNOWN`. The local harness intentionally strips
+remote targets and credentials, so deployed authenticated workflows and physical
+Safari/iOS remain unverified.
+
+Provider configuration passes offline with zero blockers and 50/50 focused email,
+push, memorial, rate-limit and route tests pass. A forced read-only staging probe
+confirmed ledger 044, a healthy empty email queue, private health RPCs, push RLS with
+four own-user policies and five stored subscriptions, and a service-role-only
+memorial processor. No email or push was sent. The configured staging origin returns
+404 for the app and worker endpoints, `pg_cron` is absent, and the read-only Resend
+domain lookup returned 401; therefore deployed hosting, an external one-minute
+scheduler, Resend key scope/domain ownership and real test-recipient/device delivery
+remain operational blockers.
+
+Recovery validator tests pass 5/5 and the template correctly fails closed. The last
+restore evidence covers only `public` plus the migration ledger through 006–026; it
+does not prove the current 006–044 candidate, managed Auth, Storage bytes/metadata,
+roles/default grants, Vault/encryption custody, providers, schedules, RPO/RTO or
+post-restore security. A fresh disposable full managed-platform rehearsal requires
+separate target and protected-evidence authorization.
+
+The production dependency audit reports zero vulnerabilities. Read-only catalog
+inventory narrowed the strict database blocker to `supabase_admin` future-object
+defaults: broad `anon`/`authenticated` public-schema defaults and built-in PUBLIC
+function execution. Current application objects remain explicitly hardened. The
+connected `postgres` role cannot use or become `supabase_admin`, so remediation must
+come from a supported Supabase owner action or an explicit reviewed risk decision;
+the verifier was not weakened. The full post-fix local gate remains TypeScript plus
+223/223 Node tests, lint and a fresh isolated optimized build of all 44 routes. The
+source `.next/trace-build` was locked by the completed browser run, so the build used
+a physical temporary copy; the first junction-based attempt failed closed, the
+dependency directory was physically copied, the clean build passed, and the entire
+temporary copy was verified and removed. No commit, push or deployment occurred.
+
+### Milestone 122 — release-candidate preservation and clean browser exits (24/09/2026)
+
+Backed up the complete uncommitted release candidate before further edits. The
+binary tracked patch and untracked-source archive are retained outside the
+repository in `release-evidence-20260924-source-backup` with SHA-256 values
+recorded in the release handoff.
+Local certificate preview output and temporary rendering files are now ignored and
+remain outside the release candidate. Removed one user-specific PostgreSQL-tool
+cache path from the deployment runbook and replaced it with portable, versioned
+client guidance. A complete source review found no real secrets, debug artifacts or
+unrelated code in the intended 040–044 candidate.
+
+Reproduced the Playwright post-assertion hang and isolated it to the restricted
+Windows host denying Playwright 1.62's `taskkill /T /F` web-server cleanup. Added a
+test-only loopback shutdown contract and global teardown so both the Next server and
+navigation fixture close before Playwright's fallback. Chromium desktop now passes
+23/23 with exit code zero and leaves no residual test Node process. The first clean
+WebKit matrix rerun exposed a native mobile-select contrast failure; the registration
+Class and Dojo controls now explicitly retain a dark native color scheme and white
+WebKit text. WebKit desktop, tablet and mobile then passed 69/69 with exit code zero.
+
+The complete local gate passes TypeScript plus 223/223 Node tests, lint,
+`git diff --check` and a direct optimized production build of all 44 routes. An
+offline deployment audit confirms `/login`, `/api/system/email-worker` and
+`/api/push/send` exist in source and the compiled manifest. The blanket staging 404
+therefore points to an absent, unlinked, mis-aliased or wrong-root Vercel staging
+deployment, not a Next route defect. No Vercel deployment workflow or external
+worker schedule exists in the repository, and staging has no database cron.
+
+During the offline deployment audit, an internal command output inadvertently
+included the staging database connection URL. Its password must be rotated before
+any further live staging use. The value is not repeated and was not used after the
+event. No production service was contacted. The distinct Developer-role audit also
+confirmed it would require a new authorization boundary and migration; it remains a
+post-v1 feature rather than expanding the current release gate.

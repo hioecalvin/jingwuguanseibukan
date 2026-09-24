@@ -126,9 +126,10 @@ function registrationFixture({ classes = [{ id: 'a', name: 'Class A' }, { id: 'b
   return { ui, queries, signups, recoverClasses() { failClasses = false; } };
 }
 
-function fillRegistration(ui) {
+function fillRegistration(ui, { aikikaiNumber = ' AIKIKAI   123 ' } = {}) {
   for (const [id, value] of Object.entries({
-    'member-id': ' M-100 ', name: ' Test   Member ', 'birth-date': '2000-01-01',
+    name: ' Test   Member ', 'birth-date': '2000-01-01',
+    'aikikai-registration-number': aikikaiNumber,
     email: ' FIXTURE@EXAMPLE.INVALID ', phone: ' 123   456 ',
     password: 'FixturePassword123', 'confirm-password': 'FixturePassword123',
   })) ui.change(`register-${id}`, value);
@@ -269,9 +270,26 @@ test('successful registration sends normalized metadata and selected catalog nam
   await ui.flush();
   assert.equal(signups[0].email, 'fixture@example.invalid');
   assert.equal(signups[0].options.data.full_name, 'Test Member');
+  assert.equal(signups[0].options.data.aikikai_registration_number, 'AIKIKAI 123');
   assert.equal(signups[0].options.data.requested_dojo_id, 'a1');
   assert.equal(signups[0].options.data.requested_class_name, 'Class A');
+  assert.equal(signups[0].options.data.registration_number, undefined);
+  assert.equal(signups[0].options.data.username, undefined);
   assert.match(ui.text(), /Registration successful/);
+});
+
+test('registration accepts a blank optional Aikikai number without assigning a JS Member ID', async () => {
+  const { ui, queries, signups } = registrationFixture();
+  await ui.flush();
+  fillRegistration(ui, { aikikaiNumber: '' });
+  ui.change('register-class', 'a');
+  queries[0].resolve({ data: [], error: null });
+  await ui.flush();
+  await ui.submit();
+  await ui.flush();
+  assert.equal(signups.length, 1);
+  assert.equal(signups[0].options.data.aikikai_registration_number, null);
+  assert.equal(signups[0].options.data.registration_number, undefined);
 });
 
 test('a successfully loaded empty dojo catalog retains the existing approval workflow', async () => {

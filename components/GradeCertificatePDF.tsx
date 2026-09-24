@@ -71,13 +71,17 @@ export type CertificateAudit = {
 };
 
 
-type Props = {
+export type GradeCertificateProps = {
   record: CertificateRecord;
   audit: CertificateAudit;
 
   organisationLogoUrl: string;
 
   categoryLogoUrl:
+    | string
+    | null;
+
+  verificationBarcodeUrl?:
     | string
     | null;
 };
@@ -371,7 +375,7 @@ const styles =
         "row",
 
       justifyContent:
-        "space-between",
+        "center",
     },
 
 
@@ -415,7 +419,7 @@ const styles =
 
       bottom: 31,
       left: 42,
-      right: 42,
+      right: 105,
 
       flexDirection:
         "row",
@@ -427,6 +431,24 @@ const styles =
 
       color:
         "#777777",
+    },
+
+    verificationBarcode: {
+      position: "absolute",
+      right: 44,
+      bottom: 48,
+      width: 48,
+      height: 48,
+    },
+
+    verificationBarcodeLabel: {
+      position: "absolute",
+      right: 38,
+      bottom: 38,
+      width: 60,
+      fontSize: 5.5,
+      color: "#666666",
+      textAlign: "center",
     },
   });
 
@@ -491,12 +513,13 @@ function formatDateTime(
  * ============================================================
  */
 
-export default function GradeCertificatePDF({
+export function GradeCertificatePage({
   record,
   audit,
   organisationLogoUrl,
   categoryLogoUrl,
-}: Props) {
+  verificationBarcodeUrl,
+}: GradeCertificateProps) {
 
   /*
    * ==========================================================
@@ -557,11 +580,6 @@ export default function GradeCertificatePDF({
 
 
   return (
-    <Document
-      title={`${record.rank_name} Certificate - ${record.full_name}`}
-      author="Jingwuguan Seibukan"
-      subject="Certificate of Promotion"
-    >
       <Page
         size="A4"
         orientation="landscape"
@@ -569,6 +587,18 @@ export default function GradeCertificatePDF({
           styles.page
         }
       >
+
+        {verificationBarcodeUrl && (
+          <>
+            <Image
+              src={verificationBarcodeUrl}
+              style={styles.verificationBarcode}
+            />
+            <Text style={styles.verificationBarcodeLabel}>
+              SCAN TO VERIFY AUTHENTICITY
+            </Text>
+          </>
+        )}
 
         {/*
          * ====================================================
@@ -996,29 +1026,7 @@ export default function GradeCertificatePDF({
                   styles.signatureText
                 }
               >
-                Grading Assessor
-              </Text>
-            </View>
-
-
-            <View
-              style={
-                styles.signature
-              }
-            >
-              <View
-                style={
-                  styles.signatureLine
-                }
-              />
-
-
-              <Text
-                style={
-                  styles.signatureText
-                }
-              >
-                Jingwuguan Seibukan
+                Authorized Signatory
               </Text>
             </View>
 
@@ -1069,6 +1077,20 @@ export default function GradeCertificatePDF({
         </View>
 
       </Page>
+  );
+}
+
+
+export default function GradeCertificatePDF(
+  props: GradeCertificateProps
+) {
+  return (
+    <Document
+      title={`${props.record.rank_name} Certificate - ${props.record.full_name}`}
+      author="Jingwuguan Seibukan"
+      subject="Certificate of Promotion"
+    >
+      <GradeCertificatePage {...props} />
     </Document>
   );
 }
