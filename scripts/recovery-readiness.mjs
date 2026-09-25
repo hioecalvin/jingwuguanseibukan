@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
+import { RELEASE_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
+
+export const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
+
 export const REQUIRED_COMPONENTS = Object.freeze([
   "applicationDatabase",
   "migrationLedger",
@@ -50,6 +54,10 @@ function isIsoDate(value) {
   return typeof value === "string" && value.length > 0 && Number.isFinite(Date.parse(value));
 }
 
+function isSha256(value) {
+  return typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
+}
+
 function add(blockers, path, message) {
   blockers.push({ path, message });
 }
@@ -74,8 +82,8 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     };
   }
 
-  if (manifest.manifestVersion !== 1) {
-    add(blockers, "manifestVersion", "must equal 1");
+  if (manifest.manifestVersion !== 2) {
+    add(blockers, "manifestVersion", "must equal 2");
   }
   if (!isIsoDate(manifest.recordedAt)) {
     add(blockers, "recordedAt", "must be an ISO-8601 timestamp");
@@ -90,7 +98,14 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
   }
   requireNonEmptyString(blockers, source.projectRef, "source.projectRef");
   requireNonEmptyString(blockers, restoreTarget.projectRef, "restoreTarget.projectRef");
-  requireNonEmptyString(blockers, production.projectRef, "production.projectRef");
+
+  if (production.exists !== true && production.exists !== false) {
+    add(blockers, "production.exists", "must be a boolean");
+  } else if (production.exists === true) {
+    requireNonEmptyString(blockers, production.projectRef, "production.projectRef");
+  } else if (production.projectRef !== null) {
+    add(blockers, "production.projectRef", "must be null while no production project exists");
+  }
 
   if (!["disposable-supabase", "isolated-postgresql"].includes(restoreTarget.kind)) {
     add(
@@ -102,7 +117,7 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
   if (restoreTarget.projectRef && restoreTarget.projectRef === source.projectRef) {
     add(blockers, "restoreTarget.projectRef", "must differ from the source project");
   }
-  if (restoreTarget.projectRef && restoreTarget.projectRef === production.projectRef) {
+  if (production.exists === true && restoreTarget.projectRef && restoreTarget.projectRef === production.projectRef) {
     add(blockers, "restoreTarget.projectRef", "must never be the production project");
   }
   if (source.environment === "production" && options.allowProductionSource !== true) {
@@ -112,8 +127,21 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
       "production-source evidence requires the explicit --allow-production-source acknowledgement",
     );
   }
+  if (source.environment === "production" && production.exists !== true) {
+    add(blockers, "source.environment", "cannot be production while production.exists is false");
+  }
+  if (source.environment === "production" && production.exists === true &&
+      source.projectRef !== production.projectRef) {
+    add(blockers, "source.projectRef", "must equal the recorded production project");
+  }
   if (source.environment === "staging" && source.projectRef === production.projectRef) {
     add(blockers, "source.projectRef", "staging source must not equal the production project");
+  }
+  if (source.environment === "staging" && source.projectRef !== STAGING_PROJECT_REF) {
+    add(blockers, "source.projectRef", `must equal the approved staging project ${STAGING_PROJECT_REF}`);
+  }
+  if (production.exists === true && production.projectRef === STAGING_PROJECT_REF) {
+    add(blockers, "production.projectRef", "must not equal the staging project");
   }
   if (production.mutations !== 0) {
     add(blockers, "production.mutations", "must be exactly 0 during a recovery rehearsal");
@@ -146,6 +174,54 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     objectives.observedRestoreMinutes > objectives.declaredRtoHours * 60
   ) {
     add(blockers, "objectives.observedRestoreMinutes", "exceeds the declared RTO");
+  }
+
+  const timing = isObject(manifest.timing) ? manifest.timing : {};
+  for (const key of ["recoveryPointAt", "rehearsalStartedAt", "rehearsalCompletedAt"]) {
+    if (!isIsoDate(timing[key])) {
+      add(blockers, `timing.${key}`, "must be an ISO-8601 timestamp");
+    }
+  }
+  if ([timing.recoveryPointAt, timing.rehearsalStartedAt, timing.rehearsalCompletedAt]
+    .every(isIsoDate)) {
+    const recoveryPointAt = Date.parse(timing.recoveryPointAt);
+    const startedAt = Date.parse(timing.rehearsalStartedAt);
+    const completedAt = Date.parse(timing.rehearsalCompletedAt);
+    const recordedAt = Date.parse(manifest.recordedAt);
+    if (recoveryPointAt > startedAt) {
+      add(blockers, "timing.recoveryPointAt", "must not be later than rehearsalStartedAt");
+    }
+    if (completedAt < startedAt) {
+      add(blockers, "timing.rehearsalCompletedAt", "must not be earlier than rehearsalStartedAt");
+    }
+    if (Number.isFinite(recordedAt) && completedAt > recordedAt) {
+      add(blockers, "timing.rehearsalCompletedAt", "must not be later than recordedAt");
+    }
+    if (Number.isFinite(objectives.declaredRpoHours) &&
+        startedAt - recoveryPointAt > objectives.declaredRpoHours * 60 * 60 * 1000) {
+      add(blockers, "timing.recoveryPointAt", "does not meet the declared RPO");
+    }
+    const measuredRestoreMinutes = (completedAt - startedAt) / 60_000;
+    if (Number.isFinite(objectives.observedRestoreMinutes) &&
+        Math.abs(measuredRestoreMinutes - objectives.observedRestoreMinutes) > 1) {
+      add(blockers, "objectives.observedRestoreMinutes", "must match the rehearsal timestamps within one minute");
+    }
+  }
+
+  const ledger = isObject(manifest.migrationLedger) ? manifest.migrationLedger : {};
+  for (const [key, expected] of Object.entries(RELEASE_MIGRATION_CONTRACT)) {
+    if (ledger[key] !== expected) {
+      add(blockers, `migrationLedger.${key}`, `must match the release contract (${expected})`);
+    }
+  }
+  for (const key of ["sourceLedgerSha256", "restoredLedgerSha256"]) {
+    if (!isSha256(ledger[key])) {
+      add(blockers, `migrationLedger.${key}`, "must be a SHA-256 digest");
+    }
+  }
+  if (isSha256(ledger.sourceLedgerSha256) && isSha256(ledger.restoredLedgerSha256) &&
+      ledger.sourceLedgerSha256.toLowerCase() !== ledger.restoredLedgerSha256.toLowerCase()) {
+    add(blockers, "migrationLedger.restoredLedgerSha256", "must match the source ledger digest");
   }
 
   const components = isObject(manifest.components) ? manifest.components : {};

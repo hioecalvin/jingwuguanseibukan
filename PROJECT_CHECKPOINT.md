@@ -179,9 +179,12 @@ name as a deterministic tie-breaker.
   RPCs, and redundant sign-out was removed because every test has an isolated browser
   context. This is automated WebKit evidence; physical Safari/iOS and guarded
   mutation workflows remain open.
-- Recovery tooling passes 5/5, but the retained restore rehearsal reaches only
-  ledger 006–026 and excludes managed Auth/Storage and other platform resources. It
-  is not current recovery evidence for 006–047.
+- Recovery tooling now passes 13/13 focused tests. Manifest v2 binds a rehearsal to
+  exact staging, the immutable repository 006–047 fingerprint, matching sanitized
+  source/restored ledger fingerprints and measured RPO/RTO timestamps; it also
+  represents the absence of a production project without a fake reference. The
+  retained restore itself still reaches only ledger 006–026 and excludes managed
+  Auth/Storage and other platform resources, so it is not current recovery evidence.
 - `npm audit --audit-level=high --omit=dev` reports zero vulnerabilities.
 - A fresh local PostgreSQL 17 cluster installed migration 029 then 041 and passed the
   14-check semantic suite, including active/non-deceased assessor enforcement,

@@ -4,19 +4,31 @@ import test from "node:test";
 import {
   REQUIRED_CHECKS,
   REQUIRED_COMPONENTS,
+  STAGING_PROJECT_REF,
   evaluateRecoveryManifest,
 } from "./recovery-readiness.mjs";
+import { RELEASE_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
 
-const verifiedAt = "2026-09-16T00:00:00.000Z";
+const verifiedAt = "2026-09-16T02:00:00.000Z";
 
 function validManifest() {
   return {
-    manifestVersion: 1,
+    manifestVersion: 2,
     recordedAt: verifiedAt,
-    source: { environment: "staging", projectRef: "staging-ref" },
+    source: { environment: "staging", projectRef: STAGING_PROJECT_REF },
     restoreTarget: { kind: "disposable-supabase", projectRef: "disposable-ref" },
-    production: { projectRef: "production-ref", mutations: 0 },
-    objectives: { declaredRpoHours: 24, declaredRtoHours: 4, observedRestoreMinutes: 90 },
+    production: { exists: false, projectRef: null, mutations: 0 },
+    objectives: { declaredRpoHours: 24, declaredRtoHours: 4, observedRestoreMinutes: 60 },
+    timing: {
+      recoveryPointAt: "2026-09-16T00:00:00.000Z",
+      rehearsalStartedAt: "2026-09-16T01:00:00.000Z",
+      rehearsalCompletedAt: verifiedAt,
+    },
+    migrationLedger: {
+      ...RELEASE_MIGRATION_CONTRACT,
+      sourceLedgerSha256: "a".repeat(64),
+      restoredLedgerSha256: "a".repeat(64),
+    },
     controls: {
       backupEncrypted: true,
       accessRestricted: true,
@@ -55,6 +67,8 @@ test("missing managed Auth and Storage object proof fails closed", () => {
 
 test("a production restore target and production mutation can never pass", () => {
   const manifest = validManifest();
+  manifest.production.exists = true;
+  manifest.production.projectRef = "production-ref";
   manifest.restoreTarget.projectRef = manifest.production.projectRef;
   manifest.production.mutations = 1;
 
@@ -66,10 +80,56 @@ test("a production restore target and production mutation can never pass", () =>
 
 test("production-source evidence requires an explicit acknowledgement", () => {
   const manifest = validManifest();
+  manifest.production.exists = true;
+  manifest.production.projectRef = "production-ref";
   manifest.source = { environment: "production", projectRef: manifest.production.projectRef };
 
   assert.equal(evaluateRecoveryManifest(manifest).ready, false);
   assert.equal(evaluateRecoveryManifest(manifest, { allowProductionSource: true }).ready, true);
+});
+
+test("production-source evidence cannot invent a project before production exists", () => {
+  const manifest = validManifest();
+  manifest.source = { environment: "production", projectRef: "invented-production" };
+
+  const result = evaluateRecoveryManifest(manifest, { allowProductionSource: true });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "source.environment" && /production\.exists/.test(message)));
+});
+
+test("a missing production project is represented explicitly without a fake reference", () => {
+  const manifest = validManifest();
+  assert.equal(evaluateRecoveryManifest(manifest).ready, true);
+
+  manifest.production.projectRef = "placeholder-production";
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "production.projectRef"));
+});
+
+test("stale recovery points and inconsistent rehearsal timing fail closed", () => {
+  const manifest = validManifest();
+  manifest.objectives.declaredRpoHours = 0.5;
+  manifest.objectives.observedRestoreMinutes = 10;
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "timing.recoveryPointAt" && /RPO/.test(message)));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "objectives.observedRestoreMinutes" && /timestamps/.test(message)));
+});
+
+test("the exact 006-047 release contract and matching restored ledger are required", () => {
+  const manifest = validManifest();
+  manifest.migrationLedger.lastVersion = "046";
+  manifest.migrationLedger.restoredLedgerSha256 = "b".repeat(64);
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "migrationLedger.lastVersion"));
+  assert.ok(result.blockers.some(({ path }) => path === "migrationLedger.restoredLedgerSha256"));
 });
 
 test("unsafe evidence retention and an exceeded RTO fail closed", () => {

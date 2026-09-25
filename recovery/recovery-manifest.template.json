@@ -1,22 +1,36 @@
 {
-  "manifestVersion": 1,
+  "manifestVersion": 2,
   "recordedAt": "REPLACE_WITH_ISO_TIMESTAMP",
   "source": {
     "environment": "staging",
-    "projectRef": "REPLACE_WITH_SOURCE_PROJECT_REF"
+    "projectRef": "eomubndonbetszdbhsrj"
   },
   "restoreTarget": {
     "kind": "disposable-supabase",
     "projectRef": "REPLACE_WITH_DISPOSABLE_PROJECT_REF"
   },
   "production": {
-    "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+    "exists": false,
+    "projectRef": null,
     "mutations": 0
   },
   "objectives": {
     "declaredRpoHours": 24,
     "declaredRtoHours": 4,
     "observedRestoreMinutes": -1
+  },
+  "timing": {
+    "recoveryPointAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalStartedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalCompletedAt": "REPLACE_WITH_ISO_TIMESTAMP"
+  },
+  "migrationLedger": {
+    "firstVersion": "006",
+    "lastVersion": "047",
+    "migrationCount": 42,
+    "repositoryFilesSha256": "59eab6170edb8f028ea21d73a01421f955130b56be176654b72c13f9716bbf54",
+    "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
   },
   "controls": {
     "backupEncrypted": false,

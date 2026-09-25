@@ -3455,3 +3455,21 @@ on future functions and public-schema `anon`/`authenticated` function, sequence 
 table privileges, including all eight relation privileges. No unsafe `postgres`-
 owned default was found. This managed-platform owner gate remains unresolved and was
 not weakened or accepted.
+
+### Milestone 131 — exact 006–047 recovery contract prepared (25/09/2026)
+
+Upgraded the offline recovery-readiness gate to manifest version 2 without contacting
+staging or production. The gate now requires exact staging project
+`eomubndonbetszdbhsrj`, an explicit `production.exists=false`/null reference while no
+production project exists, measured recovery-point/start/completion timestamps, and
+RPO/RTO consistency. It fails closed on invented production identities, stale
+recovery points and inconsistent restore durations.
+
+Added a deterministic release fingerprint covering every canonicalized migration
+file from 006 through 047 and a protected-ledger fingerprint mode that hashes ordered
+version, name and statement evidence without printing SQL. Manifest readiness now
+requires the immutable repository contract plus matching source/restored ledger
+fingerprints. Thirteen focused recovery tests pass, and the intentionally incomplete
+template remains blocked as designed. This prepares the disposable-target rehearsal;
+it does not claim that managed Auth, Storage bytes/metadata, roles, configuration or
+provider resources have been restored.

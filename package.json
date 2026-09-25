@@ -14,6 +14,7 @@
     "test:browser": "node scripts/browser-smoke.mjs",
     "test:browser:staging:read-only": "node scripts/staging-browser-smoke.mjs --confirm-staging",
     "recovery:check": "node scripts/recovery-readiness.mjs",
+    "recovery:fingerprint": "node scripts/recovery-ledger-fingerprint.mjs",
     "provider:check": "node scripts/provider-config-readiness.mjs"
   },
   "dependencies": {

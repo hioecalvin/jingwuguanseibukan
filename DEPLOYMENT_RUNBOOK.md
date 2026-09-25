@@ -32,7 +32,8 @@ role-security and zero-residue acceptance all pass. Staging has no `pg_cron`, so
 one-minute worker/memorial schedule must be external and use the application worker
 secret.
 The retained restore rehearsal stops at ledger 006–026 and is not recovery proof for
-current ledger 006–047.
+current ledger 006–047. The v2 offline recovery gate is now prepared for an exact
+006–047 disposable-target drill, but preparation is not restore evidence.
 
 There is **no current production Supabase project reference or host**. The intended
 production target is a new Singapore project that has not been created. Historical
@@ -182,6 +183,14 @@ for the disposable managed-platform drill, then run `npm.cmd run recovery:check 
 blocked until managed Auth, Storage metadata and object bytes, database roles/grants,
 Vault/encryption handling, Auth configuration, secrets inventory, schedules and
 external provider resources have all been restored or recovered and verified.
+
+Manifest v2 must name exact staging project `eomubndonbetszdbhsrj`, represent the
+absence of a production project with `production.exists=false` and a null reference,
+match the immutable repository migration fingerprint, and contain equal sanitized
+source/restored ledger fingerprints for versions 006–047. Its recovery-point,
+rehearsal-start and completion timestamps must satisfy the declared RPO/RTO. Produce
+the repository and protected ledger fingerprints with `npm.cmd run
+recovery:fingerprint`; never retain SQL statements in repository evidence.
 
 Do not place dumps, object bytes, personal information, passwords, tokens, private
 keys or secret values in the manifest or repository. Record only sanitized counts,
