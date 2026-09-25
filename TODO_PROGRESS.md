@@ -3416,3 +3416,42 @@ dedicated deliverable staging recipient is present in protected configuration.
 
 The final local gate passes TypeScript and 233/233 Node tests, lint and a fresh
 44-route optimized production build. Production was not contacted.
+
+### Milestone 130 — staging worker and guarded WebKit release gates (25/09/2026)
+
+Completed a non-mutating staging operations audit without contacting production.
+The service-role queue-health RPC reports `PASS`; stuck, exhausted, overdue, queued,
+due and duplicate counts are all zero. Invalid-secret probes against the deployed
+`/api/system/email-worker` and `/api/push/send` routes both returned HTTP 401, and no
+email or push was sent. Staging has only `supabase_vault` among the relevant installed
+extensions: neither `pg_cron` nor `pg_net` is available, so no database scheduler is
+currently installed.
+
+The email worker requires an external once-per-minute POST to the exact staging
+worker URL with the protected `x-worker-secret`, no request body, no redirects,
+single-flight execution and sanitized logs. Native Vercel cron is not the selected
+design because its request/target/frequency model does not match this endpoint. The
+push route is not a queue worker: it requires an explicit user and notification
+payload and must not be put on the email schedule. The protected Resend credential's
+domain-inventory request returned HTTP 401, so sender-domain ownership and real
+provider delivery remain unverified even though custom SMTP configuration exists.
+
+Added a separate guarded, read-only deployed-staging WebKit harness; it does not
+replace or repoint the loopback browser suite. The final staging-only run passes
+18/18 in 28.5 seconds across WebKit desktop, iPad Mini and iPhone 13. The interim
+no-request login failures were a harness-only Next hydration race, corrected by
+waiting for network idle and verifying the controlled email/password values before
+submit. The request allowlist adds exactly two legitimate read-only Member-profile
+RPCs. Redundant sign-out was removed because Playwright creates an isolated browser
+context for every test. No mutation was allowed, no member record changed and no
+credential-bearing artifact was retained. This is automated WebKit evidence;
+physical Safari/iOS and separately approved mutation workflows remain open.
+
+The updated strict SQL verifier was also run read-only against exact staging history
+006–047. All migration, hook, ACL, ownership and role checks before the final default-
+privilege gate passed. The verifier then stopped as designed with SQLSTATE `P0001`:
+only `supabase_admin`-owned defaults remain unsafe. They grant global `PUBLIC EXECUTE`
+on future functions and public-schema `anon`/`authenticated` function, sequence and
+table privileges, including all eight relation privileges. No unsafe `postgres`-
+owned default was found. This managed-platform owner gate remains unresolved and was
+not weakened or accepted.

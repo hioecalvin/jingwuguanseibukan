@@ -282,7 +282,8 @@ generation/reminder calls, repeated retries, zero/partial/full payments,
 cancelled/waived charges, wrong-dojo denial, and one reminder per charge/day.
 Require correct scope, financial totals, and notification idempotency. Verify
 keyboard/focus/error states and mobile/tablet/desktop layouts. Configure and test
-worker scheduling, email, push, and durable rate limits.
+email-worker scheduling, email delivery, explicitly targeted push delivery, and
+durable rate limits. Do not treat the per-user push route as a scheduler worker.
 
 Worker monitoring must alert on HTTP 500 (queue/retry persistence) and 502
 (delivery or acknowledgement failure). Preserve existing outbox IDs on retry;
@@ -290,6 +291,52 @@ do not re-enqueue a second row to obtain another provider key. Test provider
 acceptance followed by database acknowledgement failure, expired claims, retry
 backoff, exhausted attempts and provider idempotency expiry in staging. The
 new handler tests cover responses and calls, not external delivery guarantees.
+
+For the current staging design, use an external scheduler to issue a single-flight
+`POST` once per minute to:
+
+```text
+https://jingwuguanseibukan-staging.vercel.app/api/system/email-worker
+```
+
+Send no body, set only the protected `x-worker-secret` authorization header, reject
+redirects and sanitize URLs/headers from scheduler logs. Alert on 401, 429, 500, 502
+and 503. Do not place the secret in a query string. Native Vercel cron is not a safe
+drop-in for this route because it uses a different request/authorization model and
+targets the production deployment; the available Hobby cadence is also insufficient
+for the required one-minute worker. Staging currently has neither `pg_cron` nor
+`pg_net`, so a Supabase database schedule is not configured.
+
+`/api/push/send` is intentionally excluded from this schedule. It requires an
+explicit recipient and notification payload, and the repository has no push outbox
+consumer. Exercise it only with a dedicated staging user/device under a separately
+guarded delivery test.
+
+Current read-only staging evidence is limited but healthy: the email queue-health RPC
+reports `PASS`, with stuck, exhausted, overdue, queued, due and duplicate counts all
+zero; invalid-secret probes for both worker routes return 401. A Resend domain-list
+request with the protected staging key returns 401, so its sender-domain ownership
+and actual delivery capability remain unverified. Custom Supabase SMTP configuration
+alone does not close that gate.
+
+The guarded deployed read-only WebKit matrix passes 18/18 in 28.5 seconds across
+desktop, iPad Mini and iPhone 13. Its interim role-login failures were a harness-only
+Next hydration race. Keep the corrective controls: wait for network idle, verify the
+controlled credential values before submit, allow only the two reviewed read-only
+Member-profile RPCs and rely on each test's isolated browser context instead of a
+redundant sign-out request. This is automated WebKit evidence, not physical Safari/
+iOS acceptance, and it does not cover mutation workflows. The loopback harness must
+remain locked to loopback and must not be repointed to staging.
+
+The current strict verifier has run read-only against exact staging history 006–047.
+All checks before its final default-privilege gate pass; the gate then stops with
+SQLSTATE `P0001`. The unsafe defaults are exclusively owned by `supabase_admin`:
+global future functions grant `PUBLIC EXECUTE`; public-schema future functions grant
+`anon`/`authenticated` `EXECUTE`; future sequences grant those roles
+`SELECT`/`UPDATE`/`USAGE`; and future tables grant all eight relation privileges.
+There are no unsafe `postgres`-owned defaults. Do not weaken or bypass this gate.
+Obtain a supported managed-platform owner remediation or a separately reviewed,
+target-specific and time-bounded risk acceptance before production promotion.
 
 Remaining rate-limit work needs approved thresholds and a durable enforcement
 point. A process-local counter is insufficient across server instances, and

@@ -35,7 +35,7 @@ Checkpoint date: 25/09/2026
 | Aikikai and JS Member IDs | Registration accepts the applicant's optional Aikikai Registration Number and stores it separately. Persisted migration 044 assigns the next permanent numeric JS Member ID atomically only when a Super Admin approves the initial application. Supplied/blank Aikikai values, ID assignment, rejection, legacy preservation, role denial, queue atomicity and zero residue passed live staging acceptance. | Exercise both blank and supplied Aikikai registration paths through the deployed browser workflow. | migration 044; `profiles.aikikai_registration_number`; `profiles.registration_number`; `js_member_id_seq`; both `review_class_request*` RPCs; registration and Applications pages |
 | Last training session | Migrations 045–046 are persisted on staging. The repaired implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. The deployed Admin member list rendered the controls without mutation. | Complete the deliberate mutation workflow on a disposable membership and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
-| Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. | Announcement comments and image attachments were not found. Live delivery/scheduler configuration remains an operational gate. | `announcements`; `notifications`; `email_outbox`; migration 034; migration 040 recipient extensions |
+| Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. The staging queue-health probe currently passes with no queued, due, overdue, stuck, exhausted or duplicate rows. | Announcement comments and image attachments were not found. External email-worker scheduling, sender-domain ownership and real delivery remain operational gates. The push delivery route is per-recipient and is not a scheduler worker. | `announcements`; `notifications`; `email_outbox`; `/api/system/email-worker`; `/api/push/send`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
 | Deceased member and memorials | Migrations 040 and 043 are on staging. The persisted state transition, initial memorial, annual Remembrance Day and Heavenly Birthday, class recipients, idempotency and Member/Admin denials passed rollback-contained acceptance. | Auth ban/unban and real scheduled delivery still require dedicated accounts/provider execution. | migrations 040 and 043; deceased UI/API; memorial tables and RPCs |
 | Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. | Complete password-authenticated and browser workflows using dedicated staging accounts. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs |
@@ -111,6 +111,14 @@ name as a deterministic tie-breaker.
   lint, anonymous catalog, helper-denial, sensitive-relation-denial, service-role,
   rollback-contained active/disabled/deceased semantics, 12/12 role-security and
   independent zero-residue checks on staging.
+- The updated strict SQL verifier was executed read-only against staging through
+  migration 047. Every preceding check passed; its final default-privilege gate
+  stopped with SQLSTATE `P0001`. The remaining unsafe defaults are owned exclusively
+  by managed-platform role `supabase_admin`: global function defaults grant
+  `PUBLIC EXECUTE`; public-schema function defaults grant `anon`/`authenticated`
+  `EXECUTE`; sequence defaults grant those roles `SELECT`/`UPDATE`/`USAGE`; and table
+  defaults grant all eight relation privileges, including mutations, `TRUNCATE`,
+  `TRIGGER` and `MAINTAIN`. No unsafe `postgres`-owned default was found.
 - The exact staging alias is publicly reachable through the approved single-domain
   Vercel exception. All 11 host probes pass, including public pages, assets, method
   guards and security headers. Generated Preview URLs remain protected.
@@ -154,10 +162,23 @@ name as a deterministic tie-breaker.
   A WebKit mobile native-select contrast failure found during the clean-exit rerun
   was corrected on both registration selectors. Firefox still cannot launch on this
   Windows host (`spawn UNKNOWN`).
-- Provider configuration and 50/50 focused worker tests pass; a read-only staging
-  probe confirms a healthy empty email queue, push RLS/policies and service-only
-  memorial processing. The configured staging host currently returns 404 for the app
-  and worker routes, and no database scheduler is installed.
+- Provider configuration and 50/50 focused worker tests pass. A read-only staging
+  probe reports queue-health `PASS`, with stuck, exhausted, overdue, queued, due and
+  duplicate counts all zero. Invalid-secret probes against both the deployed email
+  worker and push route returned the expected HTTP 401 without sending anything.
+  Staging has neither `pg_cron` nor `pg_net`, so no database scheduler is installed.
+  The protected Resend key's domain-inventory request returned HTTP 401; this is
+  consistent with a restricted send-only key but does not verify sender-domain
+  ownership or live delivery.
+- A guarded read-only Playwright staging harness now covers the public registration,
+  invalid-confirmation, role-boundary and certificate-not-found paths in WebKit
+  desktop, iPad Mini and iPhone 13. The final staging-only run passes 18/18 in 28.5
+  seconds. The interim login failures were a harness-only Next hydration race; the
+  harness now waits for network idle and verifies controlled input values before
+  submitting. Its allowlist adds exactly two legitimate read-only Member-profile
+  RPCs, and redundant sign-out was removed because every test has an isolated browser
+  context. This is automated WebKit evidence; physical Safari/iOS and guarded
+  mutation workflows remain open.
 - Recovery tooling passes 5/5, but the retained restore rehearsal reaches only
   ledger 006–026 and excludes managed Auth/Storage and other platform resources. It
   is not current recovery evidence for 006–047.
@@ -185,11 +206,12 @@ name as a deterministic tie-breaker.
 2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
    with dedicated staging accounts; verify no live member data is mutated.
 3. Complete the remaining authenticated mutation workflows in deployed staging,
-   then run WebKit and physical Safari/iOS coverage.
+   repeat the relevant guarded WebKit coverage, and run physical Safari/iOS coverage.
 4. Resolve or formally accept the existing Supabase platform-owned default-privilege
    database-verifier blocker without weakening the verifier.
-5. Configure and monitor the external email/push worker scheduler and verify real
-   test-recipient/device delivery.
+5. Configure and monitor an external **email** worker scheduler, then verify real
+   test-recipient delivery. Push remains an explicitly targeted per-user operation,
+   not a scheduled queue worker; verify it separately with a dedicated test device.
 6. Rehearse a complete 006–047 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 

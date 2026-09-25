@@ -175,11 +175,13 @@ on staging, then complete the role and functional test matrix.
 
 ## Authentication workflow
 
-Registration requires a Member ID, normalized contact data, class/dojo request,
-and a strong password. Supabase email confirmation must remain enabled. A
-verified Member without an approved class membership is held on the approval
-page; the protected repository is unlocked only after an Admin approves a
-membership. Temporary-password accounts are redirected to the password-change
+Registration requires normalized contact data, a class/dojo request, and a
+strong password; an Aikikai Registration Number is optional. Applicants do not
+enter a JS Member ID: it is assigned automatically after a Super Admin approves
+the initial membership application. Supabase email confirmation must remain
+enabled. A verified Member without an approved class membership is held on the
+approval page; the protected repository is unlocked only after an Admin approves
+a membership. Temporary-password accounts are redirected to the password-change
 flow before application access.
 
 See `TODO_PROGRESS.md` for the audited release status and known external
@@ -230,8 +232,9 @@ made to port 54321 or Supabase. The separate navigation fixture renders the real
 React components with fictional roles and inert Auth/router shims. It is NOT an
 authenticated route, authorization test or deployed application feature.
 
-Seventeen cases run under five profiles: Chromium desktop/tablet/mobile,
-Firefox desktop and WebKit mobile-width (85 test instances). Coverage includes
+Twenty-three cases run under seven profiles: Chromium desktop/tablet/mobile,
+Firefox desktop and WebKit desktop/tablet/mobile (161 test instances). Coverage
+includes
 registration failure/empty/retry/race behavior, mocked signup metadata, signed-out
 redirects, page titles, focus, modal dismissal/resize, role-link presentation,
 sign-out failure and automated axe scans. Three new runner-isolation regressions
@@ -300,7 +303,8 @@ The authorized CurrentUser certificate installation stalled before browser execu
 and was stopped; its exact trust entry was absent and temporary material removed.
 An interactive narrow trust setup is still required. No security prompt was automated
 or suppressed. The full browser suite was not rerun: its last result remains 76/9,
-not a pass. All 85 required cases and protections are unchanged.
+not a pass. That historical run covered 85 instances; it is not a result for the
+current 161-instance suite.
 
 Latest evidence: `release-evidence-20260831-https-validation`. GitHub access works,
 but an active Vercel integration requires authenticated deployment-rule inspection

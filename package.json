@@ -12,6 +12,7 @@
     "test:security": "node scripts/security-smoke.mjs",
     "test:security:staging": "node scripts/run-staging-security-tests.mjs --confirm-staging",
     "test:browser": "node scripts/browser-smoke.mjs",
+    "test:browser:staging:read-only": "node scripts/staging-browser-smoke.mjs --confirm-staging",
     "recovery:check": "node scripts/recovery-readiness.mjs",
     "provider:check": "node scripts/provider-config-readiness.mjs"
   },

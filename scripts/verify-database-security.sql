@@ -1,5 +1,5 @@
 -- Read-only post-migration assertions. Run through psql with ON_ERROR_STOP=1
--- against the explicitly selected staging connection after migrations 040-045.
+-- against the explicitly selected staging connection after migrations 040-047.
 -- This is not a substitute for role-based API and authenticated workflow tests.
 begin transaction read only;
 
@@ -10,12 +10,83 @@ declare
   target_signature text;
 begin
   if exists (
-    select 1 from unnest(array['011','012','013','014','015','016','017','018','040','041','042','043','044','045']) as expected(version)
+    select 1 from unnest(array['011','012','013','014','015','016','017','018','040','041','042','043','044','045','046','047']) as expected(version)
     where not exists (
       select 1 from supabase_migrations.schema_migrations as applied
       where applied.version = expected.version
     )
-  ) then raise exception 'Required security foundation and migrations 040-045 are not all recorded'; end if;
+  ) then raise exception 'Required security foundation and migrations 040-047 are not all recorded'; end if;
+
+  if to_regprocedure('public.is_active_app_user(uuid)') is null
+     or to_regprocedure('public.enforce_active_account_request()') is null then
+    raise exception 'Migration 047 active-account request routines are missing';
+  end if;
+
+  if exists (
+    select 1
+    from pg_proc as routine
+    join pg_namespace as namespace on namespace.oid = routine.pronamespace
+    where namespace.nspname = 'public'
+      and routine.proname = 'enforce_active_account_request'
+      and routine.pronargs = 0
+      and (
+        routine.prosecdef
+        or not coalesce(
+          routine.proconfig @> array['search_path=public, pg_temp'],
+          false
+        )
+      )
+  ) then
+    raise exception 'The active-account pre-request hook is not fixed-path SECURITY INVOKER';
+  end if;
+
+  if has_function_privilege(
+       'anon',
+       'public.is_active_app_user(uuid)',
+       'EXECUTE'
+     )
+     or not has_function_privilege(
+       'authenticated',
+       'public.is_active_app_user(uuid)',
+       'EXECUTE'
+     )
+     or not has_function_privilege(
+       'service_role',
+       'public.is_active_app_user(uuid)',
+       'EXECUTE'
+     ) then
+    raise exception 'The active-account helper ACL is unsafe';
+  end if;
+
+  if not has_function_privilege(
+       'anon',
+       'public.enforce_active_account_request()',
+       'EXECUTE'
+     )
+     or not has_function_privilege(
+       'authenticated',
+       'public.enforce_active_account_request()',
+       'EXECUTE'
+     )
+     or not has_function_privilege(
+       'service_role',
+       'public.enforce_active_account_request()',
+       'EXECUTE'
+     ) then
+    raise exception 'The active-account pre-request hook ACL is incomplete';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_db_role_setting as setting_record
+    join pg_roles as role_record on role_record.oid = setting_record.setrole
+    where role_record.rolname = 'authenticator'
+      and 'pgrst.db_pre_request=public.enforce_active_account_request' = any(
+        setting_record.setconfig
+      )
+  ) then
+    raise exception 'The authenticator active-account pre-request setting is missing';
+  end if;
 
   if exists (
     select 1 from pg_proc as routine

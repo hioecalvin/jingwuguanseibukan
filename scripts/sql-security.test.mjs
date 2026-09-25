@@ -507,7 +507,13 @@ test("database verifier rejects dangerous relation and server-worker grants", ()
     "utf8"
   );
 
-  assert.match(sql, /array\['011','012','013','014','015','016','017','018','040','041','042','043','044','045'\]/i);
+  assert.match(sql, /array\['011','012','013','014','015','016','017','018','040','041','042','043','044','045','046','047'\]/i);
+  assert.match(sql, /to_regprocedure\('public\.is_active_app_user\(uuid\)'\)/i);
+  assert.match(sql, /to_regprocedure\('public\.enforce_active_account_request\(\)'\)/i);
+  assert.match(sql, /routine\.prosecdef[\s\S]*routine\.proconfig @> array\['search_path=public, pg_temp'\]/i);
+  assert.match(sql, /has_function_privilege\([\s\S]*?'anon'[\s\S]*?'public\.is_active_app_user\(uuid\)'[\s\S]*?'EXECUTE'/i);
+  assert.match(sql, /has_function_privilege\([\s\S]*?'authenticated'[\s\S]*?'public\.enforce_active_account_request\(\)'[\s\S]*?'EXECUTE'/i);
+  assert.match(sql, /pgrst\.db_pre_request=public\.enforce_active_account_request/i);
   assert.match(sql, /membership_training_session_audit/i);
   assert.match(sql, /public\.get_my_last_training_sessions\(\)/i);
   assert.match(sql, /public\.mark_membership_trained_today\(uuid\)/i);
