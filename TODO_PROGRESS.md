@@ -4,7 +4,7 @@ Last updated: 25/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `cf0876a`, with
+The published release branch is `release/v1-readiness-20260918` at `89abe27`, with
 local HEAD and the recorded origin ref synchronized before the current migration-047
 candidate. The local candidate passes lint with no warnings, TypeScript and 233/233
 Node regressions. A fresh isolated staging-configured build generated all 44 routes.
@@ -3385,3 +3385,5 @@ disabled/deceased-account error and reasserts the authenticator hook plus ACLs. 
 migration and layout tests pass 5/5. Migration 047 has not been applied anywhere and
 requires explicit staging-only approval followed by anonymous catalog, helper denial,
 disabled/deceased JWT, role-security, lint, exact-ledger and zero-residue acceptance.
+GitHub Actions run `36096335398` passed checks, Chromium/Linux, Firefox/Linux,
+WebKit/Linux and WebKit/macOS for the pushed candidate.

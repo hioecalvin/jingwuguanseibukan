@@ -4,8 +4,8 @@ Checkpoint date: 25/09/2026
 
 ## Source and database state
 
-- Published branch checkpoint before the current forward-fix work:
-  `release/v1-readiness-20260918` at `cf0876a`.
+- Published migration-047 candidate checkpoint:
+  `release/v1-readiness-20260918` at `89abe27`.
 - Local HEAD and `origin/release/v1-readiness-20260918` matched at that checkpoint.
 - The current working tree contains the read-only staging-host probe and candidate
   migration 047 for the newly discovered anonymous PostgREST pre-request defect.
@@ -105,8 +105,8 @@ name as a deterministic tie-breaker.
   `SECURITY_TEST_*` and legacy duplicate key aliases were excluded. The resulting
   Preview build is Ready and its fixed staging alias is assigned; no Production
   environment value or deployment was changed.
-- GitHub Actions run `36054340271` passed checks plus Chromium, Firefox, WebKit/Linux
-  and WebKit/macOS for commit `cf0876a`.
+- GitHub Actions run `36096335398` passed checks plus Chromium, Firefox,
+  WebKit/Linux and WebKit/macOS for migration-047 candidate commit `89abe27`.
 - The exact-host unauthenticated probe reaches Vercel but all 11 requests are
   intercepted by Deployment Protection with a 302 to Vercel SSO. Through the
   signed-in in-app browser, `/login`, `/auth/error`, static assets and API method
