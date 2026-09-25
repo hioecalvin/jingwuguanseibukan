@@ -4,11 +4,14 @@ Checkpoint date: 25/09/2026
 
 ## Source and database state
 
-- Published branch checkpoint: `release/v1-readiness-20260918` at `49d4151`.
-- Local HEAD and the recorded `origin/release/v1-readiness-20260918` ref match.
-- The current working tree contains the accepted migration-046 repair, guarded
-  staging evidence and updated checkpoint documentation.
-- The verified staging migration ledger is exactly 006–046 with no pending file.
+- Published branch checkpoint before the current forward-fix work:
+  `release/v1-readiness-20260918` at `cf0876a`.
+- Local HEAD and `origin/release/v1-readiness-20260918` matched at that checkpoint.
+- The current working tree contains the read-only staging-host probe and candidate
+  migration 047 for the newly discovered anonymous PostgREST pre-request defect.
+- The verified staging migration ledger remains exactly 006–046. Migration 047 is
+  local-only and must not be described as applied until a separately approved
+  staging apply and acceptance complete.
 - Migrations 040 through 046 were applied in order to staging
   `eomubndonbetszdbhsrj` only. The repository's local Supabase metadata remains
   linked to production, so it was not used or changed.
@@ -20,7 +23,10 @@ Checkpoint date: 25/09/2026
 - Migration 043 repaired the two runtime catalog mismatches found by live acceptance:
   unsupported `min(uuid)` in memorial publishing and the prepared-assessment lookup
   of `profiles.member_id` instead of `profiles.registration_number`.
-- Production was not contacted. Its current database ledger is therefore unverified.
+- Vercel Preview deployment `dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9` is Ready at the
+  immutable preview URL and fixed alias
+  `https://jingwuguanseibukan-staging.vercel.app`. Production was not contacted or
+  modified. Its current database ledger is therefore unverified.
 
 ## Actual feature inventory
 
@@ -75,9 +81,10 @@ name as a deterministic tie-breaker.
 
 ## Verification completed locally
 
-- Migration 045/046 focused source/security suites pass. The current full gate
-  passes TypeScript plus 230/230 Node tests, lint, `git diff --check` and a fresh
-  optimized production build of all 44 routes.
+- Migration 045/046 focused source/security suites and the migration-047 repair
+  suites pass. The current full gate passes TypeScript plus 233/233 Node tests,
+  lint, `git diff --check` and a fresh isolated optimized production build of all
+  44 routes using the protected staging build environment.
 - The migration-045 review preserves the existing `admin_visible_members` column
   order and appends its two new fields, preventing an unsafe/incompatible view
   replacement. Migration 045 is now persisted on staging; production was not
@@ -92,8 +99,25 @@ name as a deterministic tie-breaker.
   `DURABLE_RATE_LIMIT_SECRET` is now required by the offline provider validator,
   covered by regression tests and present as a distinct generated value only in the
   protected staging environment. The offline staging provider check passes without
-  exposing values. The existing Vercel project is still unlinked to Git and has no
-  project environment variables, so no staging deployment is claimed.
+  exposing values. The existing `js1-ccd7/jingwuguanseibukan` project is linked
+  locally and the reviewed 13-variable runtime allowlist was uploaded only to the
+  release branch's Preview scope. Database URLs/passwords, backup paths,
+  `SECURITY_TEST_*` and legacy duplicate key aliases were excluded. The resulting
+  Preview build is Ready and its fixed staging alias is assigned; no Production
+  environment value or deployment was changed.
+- GitHub Actions run `36054340271` passed checks plus Chromium, Firefox, WebKit/Linux
+  and WebKit/macOS for commit `cf0876a`.
+- The exact-host unauthenticated probe reaches Vercel but all 11 requests are
+  intercepted by Deployment Protection with a 302 to Vercel SSO. Through the
+  signed-in in-app browser, `/login`, `/auth/error`, static assets and API method
+  guards render correctly, and unauthenticated `/admin` reaches the app then routes
+  to `/login`. This is behind-protection evidence, not public/scheduler reachability.
+- The deployed `/register` page currently cannot load its class catalog. A direct
+  read-only anonymous staging query reproduces SQLSTATE `42501` for both `classes`
+  and `dojos`: migration 040's PostgREST pre-request hook may evaluate the protected
+  `is_active_app_user(uuid)` helper before its anonymous-role operand. Candidate
+  migration 047 uses an explicit non-authenticated early return while preserving
+  the helper denial and authenticated disabled/deceased-account gate.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only
@@ -152,16 +176,21 @@ name as a deterministic tie-breaker.
 
 ## Live verification still required
 
-1. Exercise optional-Aikikai registration and automatic JS Member ID approval in the
-   deployed authenticated browser workflow.
+1. Review and explicitly approve migration 047 for staging, then prove anonymous
+   active class/dojo reads, anonymous helper denial, disabled/deceased JWT rejection,
+   role-security, exact 006–047 ledger, lint and zero residue. Only then exercise
+   optional-Aikikai registration and automatic JS Member ID approval in browser.
 2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
    with dedicated staging accounts; verify no live member data is mutated.
-3. Run authenticated Member, scoped Admin and Super Admin browser workflows for the
-   new features on a deployed staging host, including WebKit, then complete physical
-   Safari/iOS validation. The currently configured host returns 404.
+3. Add only the fixed staging alias as a Vercel Deployment Protection exception, or
+   approve another staging-only access design. Then run authenticated Member, scoped
+   Admin and Super Admin browser workflows, including WebKit and physical Safari/iOS.
+   Do not weaken Production protection.
 4. Resolve or formally accept the existing Supabase platform-owned default-privilege
    database-verifier blocker without weakening the verifier.
-5. Configure and monitor the external scheduler/provider boundaries before release.
+5. Correct the staging Supabase Site URL and exact `/auth/confirm` redirect, enable
+   email/password plus custom Resend SMTP with the reviewed confirmation template,
+   and configure/monitor the external worker scheduler before release.
 6. Rehearse a complete 006–046 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 

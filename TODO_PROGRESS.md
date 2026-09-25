@@ -4,10 +4,10 @@ Last updated: 25/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `49d4151`, with
-local HEAD and the recorded origin ref synchronized before the current accepted
-migration-046 repair. The local candidate passes lint with no warnings, TypeScript
-and 230/230 Node regressions. The preceding candidate build generated all 44 routes.
+The published release branch is `release/v1-readiness-20260918` at `cf0876a`, with
+local HEAD and the recorded origin ref synchronized before the current migration-047
+candidate. The local candidate passes lint with no warnings, TypeScript and 233/233
+Node regressions. A fresh isolated staging-configured build generated all 44 routes.
 The earlier dependency audit
 reported zero known vulnerabilities. Sydney staging `eomubndonbetszdbhsrj` is
 verified at exact migration history 006–046. Migrations 040–046 are applied and the
@@ -18,6 +18,10 @@ sequence-restoration suite also passes against the persisted staging objects.
 Migration 046 repairs migration 045's audit-insert runtime defect and passed the
 rollback-contained semantic, audit, idempotency, role-boundary, zero-residue,
 database-lint and exact-ledger checks. Production was not contacted.
+
+Migration 047 is prepared locally but not applied. It repairs the anonymous
+PostgREST pre-request evaluation defect found through the deployed registration
+page without weakening the authenticated disabled/deceased-account boundary.
 
 The exact three dedicated staging security-test accounts were audited and received
 password-only rotations. Public email login remains disabled; the guarded runner
@@ -3338,3 +3342,46 @@ passwords, `SECURITY_TEST_*` or backup paths. After CLI authorization, link only
 existing staging project, upload the reviewed staging runtime variables to Preview
 scope, deploy the exact release commit, verify the fixed HTTPS alias and run the
 read-only host gate before any authenticated or provider mutation test.
+
+### Milestone 127 — Preview staging deployed and protected-host smoke tested (25/09/2026)
+
+Authorized Vercel CLI access was completed, and the repository was linked only to the
+existing `js1-ccd7/jingwuguanseibukan` project. The reviewed 13-variable runtime
+allowlist was loaded from the protected staging environment into Preview scope for
+`release/v1-readiness-20260918`. Database URLs/passwords, backup paths,
+`SECURITY_TEST_*` and legacy duplicate aliases were excluded. The offline provider
+validator passed before upload. Production variables and deployments were untouched.
+
+Commit `cf0876a` deployed successfully as Preview
+`dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9`; its immutable URL is
+`https://jingwuguanseibukan-plwra42mx-js1-ccd7.vercel.app`, status is Ready, and
+`https://jingwuguanseibukan-staging.vercel.app` points to it. The Vercel build passed
+dependency installation, Next.js compilation, TypeScript, static generation of all
+44 routes and output deployment. GitHub Actions run `36054340271` independently passed
+checks plus Chromium, Firefox, WebKit/Linux and WebKit/macOS.
+
+The exact-host public probe reached Vercel, but all 11 safe GETs returned a 302 to
+Vercel SSO before the application. Through the signed-in in-app browser, `/login` and
+`/auth/error` rendered, static assets and GET method-denial API boundaries passed, and
+unauthenticated `/admin` reached the app and routed to `/login`. This is valid
+behind-protection evidence only. Ordinary members, Supabase confirmation callbacks and
+the external worker scheduler remain blocked until an explicitly approved exception is
+added for only the fixed staging alias or another staging-safe access design is chosen.
+
+### Milestone 128 — anonymous registration pre-request defect isolated and migration 047 prepared (25/09/2026)
+
+The deployed registration page rendered but could not load its class selector. A
+direct read-only query with the protected staging publishable key reproduced SQLSTATE
+`42501`, `permission denied for function is_active_app_user`, for both `classes` and
+`dojos`. Migration 018's anonymous catalog SELECT grants and active-only RLS policies
+remain correct. The failure occurs earlier: migration 040's PostgREST pre-request hook
+combines the authenticated-role test and protected helper call in one boolean
+expression, whose evaluation order PostgreSQL does not guarantee.
+
+Candidate migration 047 replaces only that SECURITY INVOKER hook. It returns before
+the helper call for every non-authenticated role, preserves the fixed search path,
+keeps `is_active_app_user(uuid)` denied to anonymous callers, retains the authenticated
+disabled/deceased-account error and reasserts the authenticator hook plus ACLs. Focused
+migration and layout tests pass 5/5. Migration 047 has not been applied anywhere and
+requires explicit staging-only approval followed by anonymous catalog, helper denial,
+disabled/deceased JWT, role-security, lint, exact-ledger and zero-residue acceptance.

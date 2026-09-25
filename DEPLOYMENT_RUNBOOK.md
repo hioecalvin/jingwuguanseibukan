@@ -1,13 +1,14 @@
 # Staging promotion, production deployment, and rollback
 
 Last updated: 25/09/2026. Release is **BLOCKED**. Sydney staging
-`eomubndonbetszdbhsrj` is at exact migration history **006–046**.
+`eomubndonbetszdbhsrj` is at exact persisted migration history **006–046**;
+candidate migration 047 exists only in the working release candidate.
 Migrations 040–046 are persisted there and the guarded memorial, annual-reminder,
 bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and direct
 database role-boundary acceptance passed. Migration 046 repairs migration 045's
 last-training audit insert; its rollback-contained semantic, audit, idempotency,
 scope, zero-residue, lint and exact-ledger checks pass. The authenticated role suite
-passes 12/12 and the combined local gate passes 230/230 tests. Production was not
+passes 12/12 and the current combined local gate passes 233/233 tests. Production was not
 contacted.
 
 The strict database security verifier still stops at the known platform-owned
@@ -19,11 +20,23 @@ deployed authenticated Member/scoped Admin/Super Admin browser matrix, real
 email/push/scheduler delivery, physical Safari/iOS coverage, production
 secrets/configuration and complete current recovery proof also remain release gates.
 
-The configured staging application origin currently returns 404 for the app and both
-worker endpoints. Staging has no `pg_cron`, so the one-minute worker/memorial schedule
-must be external and still needs deployment plus monitoring evidence. The retained
-restore rehearsal stops at ledger 006–026 and is not recovery proof for current
-ledger 006–046.
+Vercel Preview `dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9` is Ready and the fixed staging
+alias is assigned. Vercel Standard Protection currently intercepts ordinary requests
+to that alias with a 302 to SSO. That proves alias reachability only; it does not prove
+public app routes, headers, API authorization, Supabase callbacks or scheduler access.
+Signed-in browser and CLI-bypass checks reach the app, but external automation remains
+blocked. Keep Standard Protection for generated previews and approve an exception for
+only the staging alias before end-user/provider testing; never disable Production
+protection or store bypass credentials in source, command output or logs.
+
+The deployed registration page also exposes a database gate: anonymous class and dojo
+reads return SQLSTATE 42501 from the migration-040 pre-request hook. Candidate 047
+repairs the hook without granting anonymous access to `is_active_app_user(uuid)` and
+requires a separate staging apply plus guarded acceptance. Staging has no `pg_cron`,
+so the one-minute worker/memorial schedule must be external; while SSO remains enabled,
+that scheduler needs both a Vercel automation bypass and the application worker secret.
+The retained restore rehearsal stops at ledger 006–026 and is not recovery proof for
+current ledger 006–046.
 
 There is **no current production Supabase project reference or host**. The intended
 production target is a new Singapore project that has not been created. Historical
@@ -33,9 +46,9 @@ operator instructions.
 
 ## Current release boundary — supersedes historical milestone notes
 
-- Staging is Sydney project `eomubndonbetszdbhsrj`, exact ledger 006–046. Do not
-  reapply those migrations. The staging database password has been rotated and
-  verified. There is no pending reviewed migration at this checkpoint.
+- Staging is Sydney project `eomubndonbetszdbhsrj`, exact persisted ledger 006–046.
+  Do not reapply those migrations. The staging database password has been rotated and
+  verified. Candidate migration 047 is pending review and explicit staging approval.
 - Production must be a separately created and dashboard-verified Singapore
   (`ap-southeast-1`) project. Its reference, host and recovery plan do not yet exist.
 - The repository migration directory begins at 006; it is not, by itself, a clean
