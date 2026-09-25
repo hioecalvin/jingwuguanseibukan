@@ -1,9 +1,8 @@
 # Staging promotion, production deployment, and rollback
 
 Last updated: 25/09/2026. Release is **BLOCKED**. Sydney staging
-`eomubndonbetszdbhsrj` is at exact persisted migration history **006–046**;
-candidate migration 047 exists only in the working release candidate.
-Migrations 040–046 are persisted there and the guarded memorial, annual-reminder,
+`eomubndonbetszdbhsrj` is at exact persisted migration history **006–047**.
+Migrations 040–047 are persisted there and the guarded memorial, annual-reminder,
 bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and direct
 database role-boundary acceptance passed. Migration 046 repairs migration 045's
 last-training audit insert; its rollback-contained semantic, audit, idempotency,
@@ -21,22 +20,19 @@ email/push/scheduler delivery, physical Safari/iOS coverage, production
 secrets/configuration and complete current recovery proof also remain release gates.
 
 Vercel Preview `dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9` is Ready and the fixed staging
-alias is assigned. Vercel Standard Protection currently intercepts ordinary requests
-to that alias with a 302 to SSO. That proves alias reachability only; it does not prove
-public app routes, headers, API authorization, Supabase callbacks or scheduler access.
-Signed-in browser and CLI-bypass checks reach the app, but external automation remains
-blocked. Keep Standard Protection for generated previews and approve an exception for
-only the staging alias before end-user/provider testing; never disable Production
-protection or store bypass credentials in source, command output or logs.
+alias is assigned. Only `jingwuguanseibukan-staging.vercel.app` is a Deployment
+Protection exception; generated Preview URLs remain protected. The direct 11-route
+host probe now passes pages, assets, method guards and security headers. Never add a
+Production domain to this exception or store bypass credentials in source, command
+output or logs.
 
-The deployed registration page also exposes a database gate: anonymous class and dojo
-reads return SQLSTATE 42501 from the migration-040 pre-request hook. Candidate 047
-repairs the hook without granting anonymous access to `is_active_app_user(uuid)` and
-requires a separate staging apply plus guarded acceptance. Staging has no `pg_cron`,
-so the one-minute worker/memorial schedule must be external; while SSO remains enabled,
-that scheduler needs both a Vercel automation bypass and the application worker secret.
+Migration 047 repaired the anonymous catalog gate without granting anonymous access to
+`is_active_app_user(uuid)`. Guarded API, disabled/deceased, ACL, exact-ledger, lint,
+role-security and zero-residue acceptance all pass. Staging has no `pg_cron`, so the
+one-minute worker/memorial schedule must be external and use the application worker
+secret.
 The retained restore rehearsal stops at ledger 006–026 and is not recovery proof for
-current ledger 006–046.
+current ledger 006–047.
 
 There is **no current production Supabase project reference or host**. The intended
 production target is a new Singapore project that has not been created. Historical
@@ -46,9 +42,9 @@ operator instructions.
 
 ## Current release boundary — supersedes historical milestone notes
 
-- Staging is Sydney project `eomubndonbetszdbhsrj`, exact persisted ledger 006–046.
+- Staging is Sydney project `eomubndonbetszdbhsrj`, exact persisted ledger 006–047.
   Do not reapply those migrations. The staging database password has been rotated and
-  verified. Candidate migration 047 is pending review and explicit staging approval.
+  verified.
 - Production must be a separately created and dashboard-verified Singapore
   (`ap-southeast-1`) project. Its reference, host and recovery plan do not yet exist.
 - The repository migration directory begins at 006; it is not, by itself, a clean
@@ -172,7 +168,7 @@ the copied target until test-only destinations are verified.
 Preserve immutable, secret-scanned baseline evidence outside the active migration
 chain. The current migration directory starts at 006 and cannot prove how an empty
 managed project acquires its earlier prerequisite schema. Before creating the new
-production database, review and rehearse the exact baseline/import plus 006–046
+production database, review and rehearse the exact baseline/import plus 006–047
 sequence on a disposable managed target. Retain legacy root SQL and prior baseline
 evidence until the clean restore proves complete coverage; never replay legacy SQL
 or manufacture ledger rows merely to make migration history appear current.
@@ -196,13 +192,12 @@ flag does not authorize or perform production access.
 
 ## Current staging verification and future migration apply
 
-Staging is at exact history 006–046. Its database password was rotated and the new
-protected connection was verified. Migration 046 repaired migration 045's audit
-insert without rewriting history. Its reviewed SHA-256 is
-`61894AF224D2BFB9758D5C87FC65B49CE216DEC31CBC3DDE388B1169F948F35B`.
-The rollback-contained semantic suite, independent zero-residue snapshot, exact
-ledger, database lint and authenticated role-security suite all pass. A post-apply
-dry run reports the database is up to date.
+Staging is at exact history 006–047. Its database password was rotated and the new
+protected connection was verified. Migration 047's reviewed SHA-256 is
+`B0402BC01EBF9CE455F5797BAA224F5B87EB391DD04D0746C871D73C3CB131B4`.
+The rollback-contained active/disabled/deceased semantic suite, anonymous API checks,
+independent zero-residue postflight, exact ledger, database lint and authenticated
+role-security suite all pass. A post-apply dry run reports the database is up to date.
 
 ```powershell
 npx.cmd --yes supabase@2.117.0 migration list --db-url $env:STAGING_DB_URL
@@ -210,7 +205,7 @@ npx.cmd --yes supabase@2.117.0 db push --db-url $env:STAGING_DB_URL --skip-vault
 ```
 
 There is no pending migration at this checkpoint. Historical instructions that
-011–016 or 044–046 may be pending are superseded. A dry run lists migrations; it
+011–016 or 044–047 may be pending are superseded. A dry run lists migrations; it
 does not execute or validate SQL. Review every future file and hash before an
 approved apply. `--skip-vault` avoids unrelated configured Vault updates.
 
@@ -250,10 +245,11 @@ node scripts/rotate-security-test-passwords.mjs
 node scripts/rotate-security-test-passwords.mjs --apply
 ```
 
-Staging intentionally keeps public email login disabled. After the three identities
-and protected values are audited, use non-delivered one-time sessions rather than
-enabling the provider merely for testing. Load the protected environment without
-printing it, then run:
+Staging email/password login and confirmation are enabled. The exact staging Site URL,
+exact `/auth/confirm` redirect, ten-character mixed-case-and-digit password policy,
+custom Resend SMTP and token-hash confirmation template were set in the staging
+dashboard. The three protected identities authenticate through the deployed app.
+Load the protected environment without printing it, then run:
 
 ```powershell
 npm.cmd run test:security:staging
@@ -440,7 +436,7 @@ Before production approval, require all of the following evidence:
 
 1. Separate verified staging project and protected complete backup with a proved
    restore, including Auth/Storage/assets/configuration recovery as applicable.
-2. Exact 006–046 history after guarded staging acceptance, fresh duplicate preflight,
+2. Exact 006–047 history after guarded staging acceptance, fresh duplicate preflight,
    no unreviewed pending migration,
    authorized platform-owner grant resolution, lint, SQL security checks and the
    dedicated Member/scoped Admin/Super Admin security suite.

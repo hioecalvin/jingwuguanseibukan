@@ -4,15 +4,13 @@ Checkpoint date: 25/09/2026
 
 ## Source and database state
 
-- Published migration-047 candidate checkpoint:
-  `release/v1-readiness-20260918` at `89abe27`.
+- Last pushed checkpoint before this staging acceptance:
+  `release/v1-readiness-20260918` at `75fdeec`.
 - Local HEAD and `origin/release/v1-readiness-20260918` matched at that checkpoint.
-- The current working tree contains the read-only staging-host probe and candidate
-  migration 047 for the newly discovered anonymous PostgREST pre-request defect.
-- The verified staging migration ledger remains exactly 006–046. Migration 047 is
-  local-only and must not be described as applied until a separately approved
-  staging apply and acceptance complete.
-- Migrations 040 through 046 were applied in order to staging
+- Migration 047 was applied only to staging `eomubndonbetszdbhsrj`. The verified
+  staging migration ledger is now exactly 006–047, and the post-apply dry run is
+  up to date.
+- Migrations 040 through 047 were applied in order to staging
   `eomubndonbetszdbhsrj` only. The repository's local Supabase metadata remains
   linked to production, so it was not used or changed.
 - The staging database password was rotated, stored only in the protected staging
@@ -25,16 +23,17 @@ Checkpoint date: 25/09/2026
   of `profiles.member_id` instead of `profiles.registration_number`.
 - Vercel Preview deployment `dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9` is Ready at the
   immutable preview URL and fixed alias
-  `https://jingwuguanseibukan-staging.vercel.app`. Production was not contacted or
-  modified. Its current database ledger is therefore unverified.
+  `https://jingwuguanseibukan-staging.vercel.app`. Only that exact alias is now a
+  Deployment Protection exception; generated Preview URLs remain protected.
+  Production was not contacted or modified.
 
 ## Actual feature inventory
 
 | Feature | Existing implementation | Missing or unverified work | Relevant files / database objects |
 | --- | --- | --- | --- |
-| Member management and statuses | Existing member, membership, class/dojo, approval, Break, transfer, grading and retained-history flows. | New deceased boundaries require staging and browser acceptance. | `app/admin/members/page.tsx`; `profiles`; `memberships`; `admin_visible_members` |
+| Member management and statuses | Existing member, membership, class/dojo, approval, Break, transfer, grading and retained-history flows. Migration 047's active/disabled/deceased request gate passed rollback-contained staging acceptance. | Physical Safari/iOS and remaining mutation workflows still require guarded coverage. | `app/admin/members/page.tsx`; `profiles`; `memberships`; `admin_visible_members`; migration 047 |
 | Aikikai and JS Member IDs | Registration accepts the applicant's optional Aikikai Registration Number and stores it separately. Persisted migration 044 assigns the next permanent numeric JS Member ID atomically only when a Super Admin approves the initial application. Supplied/blank Aikikai values, ID assignment, rejection, legacy preservation, role denial, queue atomicity and zero residue passed live staging acceptance. | Exercise both blank and supplied Aikikai registration paths through the deployed browser workflow. | migration 044; `profiles.aikikai_registration_number`; `profiles.registration_number`; `js_member_id_seq`; both `review_class_request*` RPCs; registration and Applications pages |
-| Last training session | Migrations 045–046 are persisted on staging. The repaired implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. Database lint is clean and independent postflight proved zero residue. | Complete the deployed authenticated browser workflow on desktop/mobile and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
+| Last training session | Migrations 045–046 are persisted on staging. The repaired implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. The deployed Admin member list rendered the controls without mutation. | Complete the deliberate mutation workflow on a disposable membership and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. | Announcement comments and image attachments were not found. Live delivery/scheduler configuration remains an operational gate. | `announcements`; `notifications`; `email_outbox`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
@@ -83,8 +82,8 @@ name as a deterministic tie-breaker.
 
 - Migration 045/046 focused source/security suites and the migration-047 repair
   suites pass. The current full gate passes TypeScript plus 233/233 Node tests,
-  lint, `git diff --check` and a fresh isolated optimized production build of all
-  44 routes using the protected staging build environment.
+  lint and a fresh optimized production build of all 44 routes using the protected
+  staging build environment.
 - The migration-045 review preserves the existing `admin_visible_members` column
   order and appends its two new fields, preventing an unsafe/incompatible view
   replacement. Migration 045 is now persisted on staging; production was not
@@ -105,19 +104,23 @@ name as a deterministic tie-breaker.
   `SECURITY_TEST_*` and legacy duplicate key aliases were excluded. The resulting
   Preview build is Ready and its fixed staging alias is assigned; no Production
   environment value or deployment was changed.
-- GitHub Actions run `36096335398` passed checks plus Chromium, Firefox,
-  WebKit/Linux and WebKit/macOS for migration-047 candidate commit `89abe27`.
-- The exact-host unauthenticated probe reaches Vercel but all 11 requests are
-  intercepted by Deployment Protection with a 302 to Vercel SSO. Through the
-  signed-in in-app browser, `/login`, `/auth/error`, static assets and API method
-  guards render correctly, and unauthenticated `/admin` reaches the app then routes
-  to `/login`. This is behind-protection evidence, not public/scheduler reachability.
-- The deployed `/register` page currently cannot load its class catalog. A direct
-  read-only anonymous staging query reproduces SQLSTATE `42501` for both `classes`
-  and `dojos`: migration 040's PostgREST pre-request hook may evaluate the protected
-  `is_active_app_user(uuid)` helper before its anonymous-role operand. Candidate
-  migration 047 uses an explicit non-authenticated early return while preserving
-  the helper denial and authenticated disabled/deceased-account gate.
+- GitHub Actions runs `36096335398` and `36096832757` passed checks plus
+  Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS for the migration-047
+  candidate and its evidence-only checkpoint.
+- Migration 047 passed isolated apply, exact-ledger, up-to-date dry-run, database
+  lint, anonymous catalog, helper-denial, sensitive-relation-denial, service-role,
+  rollback-contained active/disabled/deceased semantics, 12/12 role-security and
+  independent zero-residue checks on staging.
+- The exact staging alias is publicly reachable through the approved single-domain
+  Vercel exception. All 11 host probes pass, including public pages, assets, method
+  guards and security headers. Generated Preview URLs remain protected.
+- Supabase staging now has the exact staging Site URL and `/auth/confirm` redirect,
+  email/password login, confirmation, a ten-character mixed-case-and-digit policy,
+  custom Resend SMTP and the reviewed token-hash confirmation template.
+- Deployed browser checks passed public registration catalog loading, generic invalid
+  confirmation handling, Member login and Admin denial, scoped Admin login and
+  Aikido-only member visibility, Super Admin login and all-class visibility, and the
+  Applications page. Test sessions were signed out and no member record was changed.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only
@@ -157,7 +160,7 @@ name as a deterministic tie-breaker.
   and worker routes, and no database scheduler is installed.
 - Recovery tooling passes 5/5, but the retained restore rehearsal reaches only
   ledger 006–026 and excludes managed Auth/Storage and other platform resources. It
-  is not current recovery evidence for 006–046.
+  is not current recovery evidence for 006–047.
 - `npm audit --audit-level=high --omit=dev` reports zero vulnerabilities.
 - A fresh local PostgreSQL 17 cluster installed migration 029 then 041 and passed the
   14-check semantic suite, including active/non-deceased assessor enforcement,
@@ -176,40 +179,34 @@ name as a deterministic tie-breaker.
 
 ## Live verification still required
 
-1. Review and explicitly approve migration 047 for staging, then prove anonymous
-   active class/dojo reads, anonymous helper denial, disabled/deceased JWT rejection,
-   role-security, exact 006–047 ledger, lint and zero residue. Only then exercise
-   optional-Aikikai registration and automatic JS Member ID approval in browser.
+1. Exercise a real disposable registration plus confirmation delivery, optional
+   Aikikai input and automatic JS Member ID approval using an authorized staging
+   recipient. No dedicated deliverable test mailbox is currently configured.
 2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
    with dedicated staging accounts; verify no live member data is mutated.
-3. Add only the fixed staging alias as a Vercel Deployment Protection exception, or
-   approve another staging-only access design. Then run authenticated Member, scoped
-   Admin and Super Admin browser workflows, including WebKit and physical Safari/iOS.
-   Do not weaken Production protection.
+3. Complete the remaining authenticated mutation workflows in deployed staging,
+   then run WebKit and physical Safari/iOS coverage.
 4. Resolve or formally accept the existing Supabase platform-owned default-privilege
    database-verifier blocker without weakening the verifier.
-5. Correct the staging Supabase Site URL and exact `/auth/confirm` redirect, enable
-   email/password plus custom Resend SMTP with the reviewed confirmation template,
-   and configure/monitor the external worker scheduler before release.
-6. Rehearse a complete 006–046 managed-platform restore into a disposable isolated
+5. Configure and monitor the external email/push worker scheduler and verify real
+   test-recipient/device delivery.
+6. Rehearse a complete 006–047 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 
 The three reusable staging dummy identities exist and their protected passwords were
-rotated through password-only Auth Admin updates. The exact-account audit passed, and
-the one-time-session Member/scoped Admin/Super Admin security suite passed 12/12 while
-public email login remained disabled. No profile, membership or live member record
-was changed. The offline provider configuration check passes and now proves that the
-expected origin matches normalized `NEXT_PUBLIC_SITE_URL`; it does not replace live
-delivery tests.
+rotated through password-only Auth Admin updates. The exact-account audit, 12/12 API
+role suite and password-authenticated deployed Member/scoped Admin/Super Admin checks
+pass. No profile, membership or live member record was changed. The offline provider
+configuration check passes and now proves that the expected origin matches normalized
+`NEXT_PUBLIC_SITE_URL`; it does not replace live delivery tests.
 
 The targeted rotation command is audit-only by default, is hard-limited to staging,
 requires the exact three existing member numbers and resolved roles, and sends only
-password updates. Its remote audit and explicitly approved apply both passed. Because
-staging intentionally disables public email login, the final suite used non-delivered
-one-time sessions and confirmed their cleanup instead of changing provider settings.
+password updates. Its remote audit and explicitly approved apply both passed. Staging
+email/password login is now enabled and the protected dummy accounts authenticate;
+the API role suite still uses short-lived sessions and confirms their cleanup.
 
 The assessment page and navigation are now explicitly Super-Admin-only. Scoped
 Admins no longer see the entry, and direct non-Super-Admin access is redirected.
 
-No deployment, production connection, commit, push or merge is claimed by this
-checkpoint.
+No production connection, deployment or merge is claimed by this checkpoint.

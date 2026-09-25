@@ -3387,3 +3387,32 @@ requires explicit staging-only approval followed by anonymous catalog, helper de
 disabled/deceased JWT, role-security, lint, exact-ledger and zero-residue acceptance.
 GitHub Actions run `36096335398` passed checks, Chromium/Linux, Firefox/Linux,
 WebKit/Linux and WebKit/macOS for the pushed candidate.
+
+### Milestone 129 — migration 047 accepted and staging authentication opened (25/09/2026)
+
+Migration 047 was applied only to staging `eomubndonbetszdbhsrj`. Its exact ledger is
+now 006–047, the post-apply dry run is up to date and warning-level database lint is
+clean. Anonymous API acceptance passed five active classes, four active dojos, zero
+inactive catalog leakage, protected-helper denial, six sensitive-relation denials,
+safe anonymous wrapper execution and the service-role boundary. The rollback-contained
+active/disabled/deceased request-gate suite produced its expected rollback marker; an
+independent connection confirmed zero Member 0101 residue and the exact ledger. The
+Member/scoped Admin/Super Admin role suite passed 12/12.
+
+Only `jingwuguanseibukan-staging.vercel.app` was added as a Vercel Deployment
+Protection exception. Generated Preview URLs remain protected. The direct host probe
+now passes all 11 public-page, asset, worker-method and security-header checks.
+Supabase staging now uses that exact Site URL and only its exact `/auth/confirm`
+redirect. Email/password login, confirmation, a ten-character mixed-case-and-digit
+policy, protected Resend SMTP and the reviewed token-hash confirmation template were
+enabled without exposing credentials.
+
+Deployed browser acceptance passed public registration with all five classes, the
+generic invalid-confirmation path, Member login plus Admin denial, scoped Admin login
+plus Aikido-only member visibility, Super Admin login plus all-class visibility and
+the pending Applications page. All sessions were signed out and no member record was
+changed. A real signup/confirmation email was intentionally not sent because no
+dedicated deliverable staging recipient is present in protected configuration.
+
+The final local gate passes TypeScript and 233/233 Node tests, lint and a fresh
+44-route optimized production build. Production was not contacted.
