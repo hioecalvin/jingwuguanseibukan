@@ -9,9 +9,10 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,
-  // Keep each device's role sequence ordered, but run the three isolated
-  // device projects concurrently. Every test receives a fresh browser context.
-  workers: 3,
+  // The three device projects intentionally reuse the same protected role
+  // accounts. Run them serially so concurrent sign-ins cannot invalidate one
+  // another's sessions and make this acceptance gate nondeterministic.
+  workers: 1,
   timeout: 45_000,
   expect: { timeout: 10_000 },
   reporter: [['list']],
