@@ -121,7 +121,7 @@ test("stale recovery points and inconsistent rehearsal timing fail closed", () =
     path === "objectives.observedRestoreMinutes" && /timestamps/.test(message)));
 });
 
-test("the exact 006-047 release contract and matching restored ledger are required", () => {
+test("the exact 006-053 release contract and matching restored ledger are required", () => {
   const manifest = validManifest();
   manifest.migrationLedger.lastVersion = "046";
   manifest.migrationLedger.restoredLedgerSha256 = "b".repeat(64);

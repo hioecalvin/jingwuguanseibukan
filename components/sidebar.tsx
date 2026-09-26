@@ -12,6 +12,7 @@ import {
 type SidebarProps = {
   role: AppRole;
   memberName?: string | null;
+  hasRepositoryUpload?: boolean;
 };
 
 
@@ -26,13 +27,15 @@ const sectionLabels = {
 export default function Sidebar({
   role,
   memberName,
+  hasRepositoryUpload = false,
 }: SidebarProps) {
   const pathname =
     usePathname();
 
   const items =
     getNavigationForRole(
-      role
+      role,
+      { repositoryUpload: hasRepositoryUpload },
     );
 
 

@@ -42,6 +42,9 @@ export type CurrentAppUser = {
 
   hasApprovedMembership:
     boolean;
+
+  hasRepositoryUpload:
+    boolean;
 };
 
 
@@ -275,6 +278,23 @@ export async function getCurrentAppUser():
       "admin";
   }
 
+  const {
+    data: repositoryUploadScopes,
+    error: repositoryUploadError,
+  } = await supabase.rpc(
+    "get_my_repository_upload_scopes"
+  );
+
+  if (repositoryUploadError) {
+    console.error(
+      "Unable to load Repository Uploader scopes:",
+      repositoryUploadError
+    );
+  }
+
+  const hasRepositoryUpload =
+    (repositoryUploadScopes?.length ?? 0) > 0;
+
 
   return {
     id:
@@ -305,5 +325,7 @@ export async function getCurrentAppUser():
       profile.account_status,
 
     hasApprovedMembership,
+
+    hasRepositoryUpload,
   };
 }

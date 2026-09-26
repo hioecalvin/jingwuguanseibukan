@@ -5,6 +5,7 @@ import test from 'node:test';
 const migration = fs.readFileSync(new URL('../supabase/migrations/026_durable_api_rate_limits.sql', import.meta.url), 'utf8');
 const helper = fs.readFileSync(new URL('../lib/security/durable-rate-limit.ts', import.meta.url), 'utf8');
 const routeSources = [
+  '../app/api/account/change-email/route.ts',
   '../app/api/account/change-password/route.ts',
   '../app/api/subscribe/route.ts',
   '../app/api/system/email-worker/route.ts',

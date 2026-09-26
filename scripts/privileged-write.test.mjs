@@ -27,11 +27,14 @@ function clientSourceFiles(relativeDirectory) {
 
 test("repository content management uses reviewed mutation boundaries", () => {
   const managePage = source("app/admin/content/manage/page.tsx");
+  const scopedUploaderPage = source("app/admin/content/page.tsx");
 
-  assert.match(managePage, /rpc\(\s*["']update_repository_content["']/);
-  assert.match(managePage, /rpc\(\s*["']delete_repository_content["']/);
+  assert.match(managePage, /export \{ default \} from ["']@\/app\/admin\/content\/page["']/);
+  assert.match(scopedUploaderPage, /rpc\(\s*["']get_my_repository_upload_scopes["']/);
+  assert.match(scopedUploaderPage, /rpc\(\s*["']update_repository_content["']/);
+  assert.match(scopedUploaderPage, /rpc\(\s*["']delete_repository_content["']/);
   assert.doesNotMatch(
-    managePage,
+    scopedUploaderPage,
     /\.from\(\s*["']content["']\s*\)[\s\S]{0,120}?\.(?:insert|update|upsert|delete)\(/,
   );
 });

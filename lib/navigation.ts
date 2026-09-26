@@ -10,6 +10,8 @@ export type NavigationItem = {
 
   roles: AppRole[];
 
+  requiresRepositoryUpload?: boolean;
+
   section:
     | "main"
     | "management"
@@ -58,6 +60,34 @@ export const navigationItems:
   {
     label: "Calendar",
     href: "/calendar",
+
+    roles: [
+      "member",
+      "admin",
+      "super_admin",
+    ],
+
+    section: "main",
+  },
+
+
+  {
+    label: "Schedules",
+    href: "/schedules",
+
+    roles: [
+      "member",
+      "admin",
+      "super_admin",
+    ],
+
+    section: "main",
+  },
+
+
+  {
+    label: "Directory",
+    href: "/directory",
 
     roles: [
       "member",
@@ -249,6 +279,19 @@ export const navigationItems:
     section: "management",
   },
 
+
+  {
+    label: "Manage Schedules",
+    href: "/admin/schedules",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
   {
     label: "Assessments",
     href: "/admin/assessments",
@@ -370,15 +413,30 @@ export const navigationItems:
    */
 
   {
-    label: "Content",
-    href: "/admin/content",
+    label: "Repository Upload",
+    href: "/repository/upload",
 
     roles: [
+      "member",
       "admin",
       "super_admin",
     ],
 
+    requiresRepositoryUpload: true,
+
     section: "content",
+  },
+
+
+  {
+    label: "Repository Uploaders",
+    href: "/admin/repository-uploaders",
+
+    roles: [
+      "super_admin",
+    ],
+
+    section: "system",
   },
 
 
@@ -446,10 +504,14 @@ export const navigationItems:
  */
 
 export function getNavigationForRole(
-  role: AppRole
+  role: AppRole,
+  capabilities?: {
+    repositoryUpload?: boolean;
+  },
 ) {
   return navigationItems.filter(
     (item) =>
-      item.roles.includes(role)
+      item.roles.includes(role) &&
+      (!item.requiresRepositoryUpload || capabilities?.repositoryUpload === true)
   );
 }

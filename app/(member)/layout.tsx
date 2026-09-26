@@ -68,6 +68,7 @@ export default async function MemberLayout({
       role={currentUser.role}
       memberName={currentUser.fullName}
       memberId={currentUser.memberId}
+      hasRepositoryUpload={currentUser.hasRepositoryUpload}
     >
       {children}
     </AppShell>

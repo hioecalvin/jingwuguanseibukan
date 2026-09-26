@@ -14,6 +14,11 @@ type ClassItem = {
   name: string;
 };
 
+type RepositoryUploadScope = {
+  class_id: string;
+  class_name: string;
+};
+
 type Rank = {
   id: string;
   class_id: string;
@@ -157,23 +162,34 @@ export default function AdminContentPage() {
       }
 
       const { data: classData, error: classError } =
-        await supabase
-          .from("classes")
-          .select("id, name")
-          .eq("active", true)
-          .order("name");
+        await supabase.rpc(
+          "get_my_repository_upload_scopes"
+        );
 
       if (classError) {
-        setMessage(classError.message);
+        setMessage(
+          "Repository upload access is unavailable."
+        );
         setMessageType("error");
         setLoading(false);
         return;
       }
 
-      setClasses((classData ?? []) as ClassItem[]);
+      const uploadScopes = (classData ?? []) as RepositoryUploadScope[];
+      setClasses(uploadScopes.map((scope) => ({
+        id: scope.class_id,
+        name: scope.class_name,
+      })));
 
-      if (classData && classData.length > 0) {
-        setSelectedClassId(classData[0].id);
+      if (!uploadScopes.length) {
+        setMessage(
+          "You do not have an active Repository Uploader appointment."
+        );
+        setMessageType("error");
+      }
+
+      if (uploadScopes.length > 0) {
+        setSelectedClassId(uploadScopes[0].class_id);
       }
 
       await Promise.all([
@@ -602,7 +618,7 @@ export default function AdminContentPage() {
             <div>
 
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-red-400">
-                Administration
+                Repository Uploader
               </p>
 
               <h1 className="text-3xl font-bold">
@@ -610,8 +626,7 @@ export default function AdminContentPage() {
               </h1>
 
               <p className="mt-1 text-sm text-neutral-400">
-                Add, edit and publish
-                repository content.
+                Add, edit and publish repository content for your appointed classes.
               </p>
 
             </div>
@@ -623,12 +638,12 @@ export default function AdminContentPage() {
             type="button"
             onClick={() =>
               router.push(
-                "/admin"
+                "/repository"
               )
             }
             className="self-start rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
           >
-            ← Admin
+            ← Repository
           </button>
 
         </header>

@@ -7,7 +7,7 @@ Vault/encryption material, platform configuration, schedules and external provid
 resources still need a protected disposable-target rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
-version 2 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–047,
+version 2 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–053,
 the checked-in migration-file fingerprint, matching source/restored ledger
 fingerprints and measured RPO/RTO timestamps. It represents the not-yet-created
 production project explicitly instead of using a fake project reference. It never
@@ -36,7 +36,7 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 Before and after the restore, export the ordered `version`, `name` and `statements`
-columns for migrations 006–047 from `supabase_migrations.schema_migrations` into
+columns for migrations 006–053 from `supabase_migrations.schema_migrations` into
 protected JSON arrays. Generate sanitized fingerprints without printing the SQL:
 
 ```powershell

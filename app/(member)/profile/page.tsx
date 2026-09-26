@@ -21,6 +21,7 @@ type Profile = {
   email: string;
   phone: string;
   whatsapp_number: string | null;
+  instagram_username: string | null;
   date_of_birth: string;
   avatar_url: string | null;
 };
@@ -181,6 +182,27 @@ export default function ProfilePage() {
 
   /*
    * =====================================================
+   * CONTACT DETAILS
+   * =====================================================
+   */
+
+  const [editingContact, setEditingContact] =
+    useState(false);
+
+  const [phoneInput, setPhoneInput] =
+    useState("");
+
+  const [instagramInput, setInstagramInput] =
+    useState("");
+
+  const [newEmailInput, setNewEmailInput] =
+    useState("");
+
+  const [requestingEmail, setRequestingEmail] =
+    useState(false);
+
+  /*
+   * =====================================================
    * DOJO TRANSFER
    * =====================================================
    */
@@ -284,6 +306,7 @@ export default function ProfilePage() {
           email,
           phone,
           whatsapp_number,
+          instagram_username,
           date_of_birth,
           avatar_url
         `)
@@ -364,6 +387,14 @@ export default function ProfilePage() {
 
         setWhatsappInput(
           profileData.whatsapp_number ?? ""
+        );
+
+        setPhoneInput(
+          profileData.phone ?? ""
+        );
+
+        setInstagramInput(
+          profileData.instagram_username ?? ""
         );
 
         setMemberships(loadedMemberships);
@@ -720,6 +751,158 @@ export default function ProfilePage() {
     );
     setMessageType("success");
     setProcessing(false);
+  }
+
+  /*
+   * =====================================================
+   * CONTACT DETAILS
+   * =====================================================
+   */
+
+  async function saveContactDetails(
+    event: FormEvent
+  ) {
+    event.preventDefault();
+
+    setProcessing(true);
+    setMessage("");
+    setMessageType("");
+
+    const {
+      data,
+      error,
+    } = await supabase.rpc(
+      "update_my_contact_details",
+      {
+        new_phone:
+          phoneInput,
+        new_instagram_username:
+          instagramInput,
+      }
+    );
+
+    if (error) {
+      setMessage(error.message);
+      setMessageType("error");
+      setProcessing(false);
+      return;
+    }
+
+    const row =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+    const normalizedPhone =
+      typeof row?.phone === "string"
+        ? row.phone
+        : phoneInput.trim();
+
+    const normalizedInstagram =
+      typeof row?.instagram_username === "string"
+        ? row.instagram_username
+        : null;
+
+    setProfile((current) =>
+      current
+        ? {
+            ...current,
+            phone:
+              normalizedPhone,
+            instagram_username:
+              normalizedInstagram,
+          }
+        : current
+    );
+
+    setPhoneInput(
+      normalizedPhone
+    );
+    setInstagramInput(
+      normalizedInstagram ?? ""
+    );
+    setEditingContact(false);
+    setMessage(
+      "Contact details updated successfully."
+    );
+    setMessageType("success");
+    setProcessing(false);
+  }
+
+  async function requestEmailChange(
+    event: FormEvent
+  ) {
+    event.preventDefault();
+
+    setRequestingEmail(true);
+    setMessage("");
+    setMessageType("");
+
+    try {
+      const {
+        data: {
+          session,
+        },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (
+        sessionError ||
+        !session
+      ) {
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(
+        "/api/account/change-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            newEmail:
+              newEmailInput,
+          }),
+        }
+      );
+
+      const result: {
+        success?: boolean;
+        error?: string;
+        message?: string;
+      } = await response.json();
+
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        throw new Error(
+          result.error ??
+          "Unable to request the email change."
+        );
+      }
+
+      setNewEmailInput("");
+      setMessage(
+        result.message ??
+        "Verification was sent to the new email address."
+      );
+      setMessageType("success");
+    } catch (error: unknown) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to request the email change."
+      );
+      setMessageType("error");
+    } finally {
+      setRequestingEmail(false);
+    }
   }
 
   /*
@@ -1374,6 +1557,15 @@ export default function ProfilePage() {
             }
           />
 
+          {profile?.instagram_username && (
+            <DetailItem
+              label="Instagram"
+              value={
+                `@${profile.instagram_username}`
+              }
+            />
+          )}
+
           <DetailItem
             label="Date of Birth"
             value={formatDate(
@@ -1382,6 +1574,205 @@ export default function ProfilePage() {
             )}
           />
         </div>
+      </section>
+
+      {/* CONTACT DETAILS */}
+
+      <section className="mt-6 rounded-2xl border border-sky-900 bg-sky-950/10 p-6">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-400">
+              Contact
+            </p>
+
+            <h2 className="mt-1 text-xl font-bold">
+              Phone & Instagram
+            </h2>
+
+            <p className="mt-2 text-sm text-neutral-400">
+              Keep your phone current. Instagram is optional and is shown as @username when supplied.
+            </p>
+          </div>
+
+          {!editingContact && (
+            <button
+              type="button"
+              onClick={() =>
+                setEditingContact(true)
+              }
+              className="self-start rounded-lg border border-sky-800 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-950/40"
+            >
+              Edit
+            </button>
+          )}
+        </div>
+
+        {!editingContact ? (
+          <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            <DetailItem
+              label="Phone"
+              value={
+                profile?.phone || "-"
+              }
+            />
+
+            {profile?.instagram_username && (
+              <DetailItem
+                label="Instagram"
+                value={
+                  `@${profile.instagram_username}`
+                }
+              />
+            )}
+          </div>
+        ) : (
+          <form
+            onSubmit={saveContactDetails}
+            className="mt-6 space-y-5"
+          >
+            <div>
+              <label
+                htmlFor="profile-phone"
+                className="mb-2 block text-sm font-medium"
+              >
+                Phone
+              </label>
+
+              <input
+                id="profile-phone"
+                type="tel"
+                value={phoneInput}
+                onChange={(event) =>
+                  setPhoneInput(
+                    event.target.value
+                  )
+                }
+                autoComplete="tel"
+                required
+                placeholder="+62 812 3456 7890"
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-3 text-white outline-none focus:border-sky-600"
+              />
+
+              <p className="mt-2 text-xs text-neutral-500">
+                Spaces, brackets and hyphens are removed when saved.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="profile-instagram"
+                className="mb-2 block text-sm font-medium"
+              >
+                Instagram username (optional)
+              </label>
+
+              <input
+                id="profile-instagram"
+                type="text"
+                value={instagramInput}
+                onChange={(event) =>
+                  setInstagramInput(
+                    event.target.value
+                  )
+                }
+                autoComplete="off"
+                maxLength={31}
+                placeholder="username"
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-3 text-white outline-none focus:border-sky-600"
+              />
+
+              <p className="mt-2 text-xs text-neutral-500">
+                You may enter the leading @; it will not be stored.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={processing}
+                className="rounded-lg bg-sky-600 px-5 py-2 font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
+              >
+                {processing
+                  ? "Saving..."
+                  : "Save Contact Details"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingContact(false);
+                  setPhoneInput(
+                    profile?.phone ?? ""
+                  );
+                  setInstagramInput(
+                    profile?.instagram_username ?? ""
+                  );
+                }}
+                disabled={processing}
+                className="rounded-lg border border-neutral-700 px-5 py-2 text-neutral-300 transition hover:bg-neutral-800 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+
+      {/* EMAIL CHANGE */}
+
+      <section className="mt-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-400">
+          Account Email
+        </p>
+
+        <h2 className="mt-1 text-xl font-bold">
+          Change Email
+        </h2>
+
+        <p className="mt-2 text-sm text-neutral-400">
+          Current email: {profile?.email || "-"}
+        </p>
+
+        <p className="mt-1 text-xs leading-5 text-neutral-500">
+          Your current address remains active until Supabase verifies the new address. Depending on the security settings, confirmation may also be required from your current inbox.
+        </p>
+
+        <form
+          onSubmit={requestEmailChange}
+          className="mt-5 max-w-xl"
+        >
+          <label
+            htmlFor="profile-new-email"
+            className="mb-2 block text-sm font-medium"
+          >
+            New email address
+          </label>
+
+          <input
+            id="profile-new-email"
+            type="email"
+            value={newEmailInput}
+            onChange={(event) =>
+              setNewEmailInput(
+                event.target.value
+              )
+            }
+            autoComplete="email"
+            required
+            placeholder="name@example.com"
+            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-3 text-white outline-none focus:border-sky-600"
+          />
+
+          <button
+            type="submit"
+            disabled={requestingEmail}
+            className="mt-4 rounded-lg bg-sky-600 px-5 py-2 font-semibold text-white transition hover:bg-sky-500 disabled:opacity-50"
+          >
+            {requestingEmail
+              ? "Requesting..."
+              : "Send Verification"}
+          </button>
+        </form>
       </section>
 
       {/* WHATSAPP */}

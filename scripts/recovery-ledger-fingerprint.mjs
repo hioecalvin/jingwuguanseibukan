@@ -4,9 +4,9 @@ import { pathToFileURL } from "node:url";
 
 export const RELEASE_MIGRATION_CONTRACT = Object.freeze({
   firstVersion: "006",
-  lastVersion: "047",
-  migrationCount: 42,
-  repositoryFilesSha256: "59eab6170edb8f028ea21d73a01421f955130b56be176654b72c13f9716bbf54",
+  lastVersion: "053",
+  migrationCount: 48,
+  repositoryFilesSha256: "196152720f54509947c7d325e8554285862e19d7f51d53642f23b29938049937",
 });
 
 export async function fingerprintMigrationDirectory(
@@ -60,7 +60,7 @@ export function fingerprintLedgerRows(rows) {
   );
   if (new Set(versions).size !== versions.length ||
       JSON.stringify(versions) !== JSON.stringify(expectedVersions)) {
-    throw new Error("Ledger export must contain each migration from 006 through 047 exactly once.");
+    throw new Error("Ledger export must contain each migration from 006 through 053 exactly once.");
   }
 
   const ledgerSha256 = createHash("sha256")

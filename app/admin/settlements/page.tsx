@@ -53,7 +53,9 @@ type SettlementItem = {
   membership_id: string;
   member_name: string;
   member_id: string;
+  billing_month: string;
   payment_date: string;
+  is_late_payment: boolean;
   payment_amount: number;
   payment_method: string | null;
   payment_reference: string | null;
@@ -67,7 +69,9 @@ type EligiblePayment = {
   membership_id: string;
   member_name: string;
   member_id: string;
+  billing_month: string;
   payment_date: string;
+  is_late_payment: boolean;
   payment_amount: number;
   currency: string;
   payment_method: string | null;
@@ -333,7 +337,7 @@ export default function AdminSettlementsPage() {
     clearAlerts();
 
     const { data, error: rpcError } = await supabase.rpc(
-      "get_settlement_eligible_payments",
+      "get_settlement_eligible_payment_details",
       {
         target_dojo_id: dojoId,
         target_month: `${month}-01`,
@@ -556,7 +560,7 @@ export default function AdminSettlementsPage() {
 
     try {
       const { data, error: rpcError } = await supabase.rpc(
-        "get_dojo_settlement_items",
+        "get_dojo_settlement_item_details",
         { target_settlement_id: s.settlement_id }
       );
 
@@ -572,7 +576,9 @@ export default function AdminSettlementsPage() {
         columns: [
           { header: "Member ID", key: "member_id" },
           { header: "Member Name", key: "member_name" },
+          { header: "Charge Billing Month", key: "billing_month", value: (i) => monthLabel(i.billing_month) },
           { header: "Payment Date", key: "payment_date", value: (i) => dateOnly(i.payment_date) },
+          { header: "Late Payment", key: "is_late_payment", value: (i) => i.is_late_payment ? "Yes" : "No" },
           { header: "Payment Amount", key: "payment_amount", value: (i) => Number(i.payment_amount) },
           { header: "Currency", key: "currency" },
           { header: "Payment Method", key: "payment_method" },
@@ -604,7 +610,7 @@ export default function AdminSettlementsPage() {
     clearAlerts();
 
     const { data, error: rpcError } = await supabase.rpc(
-      "get_dojo_settlement_items",
+      "get_dojo_settlement_item_details",
       { target_settlement_id: id }
     );
 
@@ -789,9 +795,14 @@ export default function AdminSettlementsPage() {
                           {p.member_name} · {p.member_id}
                         </div>
                         <div className="text-sm text-zinc-400">
-                          Paid {dateOnly(p.payment_date)} ·{" "}
+                          {monthLabel(p.billing_month)} subscription · Paid {dateOnly(p.payment_date)} ·{" "}
                           {p.payment_method || "Payment"}
                         </div>
+                        {p.is_late_payment && (
+                          <span className="mt-1 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-300">
+                            LATE PAYMENT
+                          </span>
+                        )}
                       </div>
                       <div className="text-right">
                         <div>{money(p.payment_amount, p.currency)}</div>
@@ -1267,7 +1278,9 @@ export default function AdminSettlementsPage() {
                               <thead className="bg-zinc-950 text-left text-zinc-400">
                                 <tr>
                                   <th className="p-3">Member</th>
+                                  <th className="p-3">Billing Month</th>
                                   <th className="p-3">Payment Date</th>
+                                  <th className="p-3">Timing</th>
                                   <th className="p-3">Method</th>
                                   <th className="p-3 text-right">Payment</th>
                                   <th className="p-3 text-right">Share</th>
@@ -1283,7 +1296,19 @@ export default function AdminSettlementsPage() {
                                       </div>
                                     </td>
                                     <td className="p-3">
+                                      {monthLabel(item.billing_month)}
+                                    </td>
+                                    <td className="p-3">
                                       {dateOnly(item.payment_date)}
+                                    </td>
+                                    <td className="p-3">
+                                      {item.is_late_payment ? (
+                                        <span className="inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[10px] font-bold tracking-wide text-amber-300">
+                                          LATE PAYMENT
+                                        </span>
+                                      ) : (
+                                        <span className="text-zinc-400">On time</span>
+                                      )}
                                     </td>
                                     <td className="p-3">
                                       {item.payment_method || "—"}

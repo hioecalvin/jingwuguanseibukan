@@ -18,6 +18,8 @@ type AppShellProps = {
   memberName?: string | null;
 
   memberId?: string | null;
+
+  hasRepositoryUpload?: boolean;
 };
 
 export default function AppShell({
@@ -25,6 +27,7 @@ export default function AppShell({
   role,
   memberName,
   memberId,
+  hasRepositoryUpload = false,
 }: AppShellProps) {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
@@ -32,12 +35,14 @@ export default function AppShell({
       <MobileNav
         role={role}
         memberName={memberName}
+        hasRepositoryUpload={hasRepositoryUpload}
       />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1800px]">
         <Sidebar
           role={role}
           memberName={memberName}
+          hasRepositoryUpload={hasRepositoryUpload}
         />
 
         <div className="min-w-0 flex-1">

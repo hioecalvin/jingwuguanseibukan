@@ -73,6 +73,24 @@ test('Member can load their profile and is denied Admin access', async ({ page, 
   await login(page, credentials('MEMBER'), requestAudit, browserDiagnostics);
   await page.goto('/profile');
   await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible();
+  const contactSection = page
+    .getByRole('heading', { name: 'Phone & Instagram' })
+    .locator('xpath=ancestor::section');
+  await contactSection.getByRole('button', { name: 'Edit', exact: true }).click();
+  await expect(contactSection.getByLabel('Phone', { exact: true })).toBeVisible();
+  await expect(contactSection.getByLabel('Instagram username (optional)', { exact: true })).toBeVisible();
+
+  await page.goto('/schedules');
+  await expect(page.getByRole('heading', { name: 'Regular schedules' })).toBeVisible();
+  await expect(page.getByText('Loading schedules…', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'By dojo', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'By class', exact: true })).toBeVisible();
+
+  await page.goto('/directory');
+  await expect(page.getByRole('heading', { name: 'Member Directory' })).toBeVisible();
+  await expect(page.getByText('Loading directory...', { exact: true })).toHaveCount(0);
+
+  await expect(page.getByRole('link', { name: 'Repository Upload', exact: true })).toHaveCount(0);
   await page.goto('/admin');
   await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
   await expect(page.getByRole('heading', { name: 'Admin Dashboard' })).toHaveCount(0);
@@ -91,6 +109,14 @@ test('scoped Admin sees only Aikido members and is denied Super Admin pages', as
     await expect(classDetail).toHaveText(/^\s*Class:\s*Aikido\s*$/);
   }
 
+  await page.goto('/admin/schedules');
+  await expect(page.getByRole('heading', { name: 'Manage regular schedules' })).toBeVisible();
+  await expect(page.getByText('Loading management scope…', { exact: true })).toHaveCount(0);
+
+  await page.goto('/admin/payments');
+  await expect(page.getByRole('heading', { name: 'Payment Confirmations' })).toBeVisible();
+  await expect(page.getByText('Loading payments...', { exact: true })).toHaveCount(0);
+
   for (const restricted of ['/admin/applications', '/admin/assessments']) {
     await page.goto(restricted);
     await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
@@ -106,6 +132,20 @@ test('Super Admin can load applications and assessments without mutating them', 
   await page.goto('/admin/assessments');
   await expect(page.getByRole('heading', { name: 'Bulk Assessments' })).toBeVisible();
   await expect(page.getByText('Loading your Admin scope…', { exact: true })).toHaveCount(0);
+
+  await page.goto('/admin/settlements');
+  await expect(page.getByRole('heading', { name: 'Dojo Settlements' })).toBeVisible();
+  const firstSettlementDetails = page.getByRole('button', { name: 'View Payments', exact: true }).first();
+  if (await firstSettlementDetails.count()) {
+    await firstSettlementDetails.click();
+    await expect(page.getByRole('columnheader', { name: 'Billing Month', exact: true })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Timing', exact: true })).toBeVisible();
+  }
+
+  await page.goto('/admin/repository-uploaders');
+  await expect(page.getByRole('heading', { name: 'Repository Uploaders' })).toBeVisible();
+  await expect(page.getByText('Loading Repository Uploaders...', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Member', { exact: true })).toBeVisible();
 });
 
 test('a random certificate UUID is not found', async ({ page }) => {

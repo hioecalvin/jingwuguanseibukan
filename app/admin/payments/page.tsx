@@ -44,6 +44,17 @@ type PaymentConfirmation = {
 
 type MessageType = "success" | "error" | "";
 
+function isLatePayment(
+  billingMonth: string,
+  paymentDate: string | null,
+) {
+  return Boolean(
+    paymentDate &&
+    paymentDate.slice(0, 7) >
+      billingMonth.slice(0, 7),
+  );
+}
+
 export default function AdminPaymentsPage() {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -787,6 +798,12 @@ export default function AdminPaymentsPage() {
                       <Info label="Transfer Date" value={item.transfer_date ? formatDate(item.transfer_date) : "-"} />
                     </div>
 
+                    {isLatePayment(item.billing_month, item.transfer_date) && (
+                      <span className="mt-4 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-300">
+                        LATE PAYMENT
+                      </span>
+                    )}
+
                     {item.member_note && (
                       <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
@@ -920,7 +937,12 @@ export default function AdminPaymentsPage() {
                       </td>
 
                       <td className="px-4 py-4">
-                        {formatBillingMonth(item.billing_month)}
+                        <p>{formatBillingMonth(item.billing_month)}</p>
+                        {isLatePayment(item.billing_month, item.transfer_date) && (
+                          <span className="mt-1 inline-flex rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-300">
+                            LATE PAYMENT
+                          </span>
+                        )}
                       </td>
 
                       <td className="px-4 py-4 font-semibold">
