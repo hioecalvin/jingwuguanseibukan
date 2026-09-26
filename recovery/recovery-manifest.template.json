@@ -1,0 +1,70 @@
+{
+  "manifestVersion": 2,
+  "recordedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+  "source": {
+    "environment": "staging",
+    "projectRef": "eomubndonbetszdbhsrj"
+  },
+  "restoreTarget": {
+    "kind": "disposable-supabase",
+    "projectRef": "REPLACE_WITH_DISPOSABLE_PROJECT_REF"
+  },
+  "production": {
+    "exists": false,
+    "projectRef": null,
+    "mutations": 0
+  },
+  "objectives": {
+    "declaredRpoHours": 24,
+    "declaredRtoHours": 4,
+    "observedRestoreMinutes": -1
+  },
+  "timing": {
+    "recoveryPointAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalStartedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalCompletedAt": "REPLACE_WITH_ISO_TIMESTAMP"
+  },
+  "migrationLedger": {
+    "firstVersion": "006",
+    "lastVersion": "053",
+    "migrationCount": 48,
+    "repositoryFilesSha256": "196152720f54509947c7d325e8554285862e19d7f51d53642f23b29938049937",
+    "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+  },
+  "controls": {
+    "backupEncrypted": false,
+    "accessRestricted": false,
+    "retentionAndDeletionRecorded": false,
+    "restoreTargetOutboundDisabled": false,
+    "rawSecretsRetainedInEvidence": false,
+    "rawPersonalDataRetainedInEvidence": false
+  },
+  "components": {
+    "applicationDatabase": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "migrationLedger": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "authUsersAndIdentities": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "storageMetadata": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "storageObjectBytes": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "databaseRolesAndGrants": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "vaultAndEncryptionKeys": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "authConfiguration": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "edgeAndProviderSecrets": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "scheduledJobs": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "externalProviderResources": { "status": "PENDING", "verifiedAt": "", "evidence": "" }
+  },
+  "checks": {
+    "restoreCompleted": false,
+    "sourceRestoreFactsMatch": false,
+    "migrationHistoryExact": false,
+    "authLoginRefreshVerified": false,
+    "storageUploadDownloadVerified": false,
+    "storageObjectManifestMatched": false,
+    "rlsAndGrantsVerified": false,
+    "scheduledJobsDisabledOnRestore": false,
+    "outboundDeliveryIsolated": false,
+    "securitySmokePassed": false,
+    "databaseLintPassed": false,
+    "restoreTargetDecommissionedOrQuarantined": false
+  }
+}

@@ -6,13 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "npm run typecheck && node --test scripts/*.test.mjs",
+    "test:security": "node scripts/security-smoke.mjs",
+    "test:security:staging": "node scripts/run-staging-security-tests.mjs --confirm-staging",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "test:browser:staging:read-only": "node scripts/staging-browser-smoke.mjs --confirm-staging",
+    "recovery:check": "node scripts/recovery-readiness.mjs",
+    "recovery:fingerprint": "node scripts/recovery-ledger-fingerprint.mjs",
+    "provider:check": "node scripts/provider-config-readiness.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.6.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
-    "next": "16.3.1",
+    "@types/qrcode": "^1.5.6",
+    "next": "16.3.4",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.20.0",
@@ -20,13 +31,16 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
+    "esbuild": "0.28.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

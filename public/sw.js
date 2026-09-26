@@ -1,3 +1,32 @@
+function safeApplicationPath(value) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.includes("\\") ||
+    /[\u0000-\u001f\u007f]/.test(value) ||
+    value.length > 2048
+  ) {
+    return "/notifications";
+  }
+
+  try {
+    const parsed =
+      new URL(
+        value,
+        self.location.origin
+      );
+
+    return parsed.origin ===
+      self.location.origin
+      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+      : "/notifications";
+  } catch {
+    return "/notifications";
+  }
+}
+
+
 self.addEventListener("push", (event) => {
   let data = {};
 
@@ -28,8 +57,9 @@ self.addEventListener("push", (event) => {
 
     data: {
       url:
-        data.url ||
-        "/notifications",
+        safeApplicationPath(
+          data.url
+        ),
     },
   };
 
@@ -48,8 +78,9 @@ self.addEventListener(
     event.notification.close();
 
     const url =
-      event.notification.data?.url ||
-      "/notifications";
+      safeApplicationPath(
+        event.notification.data?.url
+      );
 
     event.waitUntil(
       clients

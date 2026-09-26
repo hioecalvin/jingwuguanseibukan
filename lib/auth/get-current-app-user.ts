@@ -39,6 +39,12 @@ export type CurrentAppUser = {
   accountStatus:
     | string
     | null;
+
+  hasApprovedMembership:
+    boolean;
+
+  hasRepositoryUpload:
+    boolean;
 };
 
 
@@ -197,6 +203,58 @@ export async function getCurrentAppUser():
 
   /*
    * ============================================
+   * APPROVED MEMBERSHIP
+   * ============================================
+   *
+   * Registration creates a request before it
+   * creates a class membership. A confirmed Auth
+   * account must not enter the Member application
+   * until an Admin has approved at least one class.
+   */
+
+  const {
+    data:
+      approvedMemberships,
+
+    error:
+      membershipError,
+  } =
+    await supabase
+      .from(
+        "class_memberships"
+      )
+      .select(
+        "id"
+      )
+      .eq(
+        "user_id",
+        user.id
+      )
+      .limit(
+        1
+      );
+
+
+  if (
+    membershipError
+  ) {
+    console.error(
+      "Unable to load approved memberships:",
+      membershipError
+    );
+  }
+
+
+  const hasApprovedMembership =
+    (
+      approvedMemberships
+        ?.length ??
+      0
+    ) > 0;
+
+
+  /*
+   * ============================================
    * RESOLVE APPLICATION ROLE
    * ============================================
    */
@@ -219,6 +277,23 @@ export async function getCurrentAppUser():
     role =
       "admin";
   }
+
+  const {
+    data: repositoryUploadScopes,
+    error: repositoryUploadError,
+  } = await supabase.rpc(
+    "get_my_repository_upload_scopes"
+  );
+
+  if (repositoryUploadError) {
+    console.error(
+      "Unable to load Repository Uploader scopes:",
+      repositoryUploadError
+    );
+  }
+
+  const hasRepositoryUpload =
+    (repositoryUploadScopes?.length ?? 0) > 0;
 
 
   return {
@@ -248,5 +323,9 @@ export async function getCurrentAppUser():
 
     accountStatus:
       profile.account_status,
+
+    hasApprovedMembership,
+
+    hasRepositoryUpload,
   };
 }

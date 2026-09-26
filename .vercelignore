@@ -1,0 +1,2 @@
+# Desktop sources and Windows artifacts are not part of the web deployment.
+desktop/

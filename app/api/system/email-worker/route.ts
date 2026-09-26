@@ -14,6 +14,11 @@ import {
 import {
   renderEmail,
 } from "@/lib/email/render-email";
+import {
+  configuredRateLimit,
+  consumeDurableRateLimit,
+  durableRateLimitHeaders,
+} from "@/lib/security/durable-rate-limit";
 
 
 export const runtime =
@@ -22,6 +27,98 @@ export const runtime =
 
 const MAX_EMAILS_PER_RUN =
   20;
+
+
+type EmailQueueHealth = {
+  status: "PASS" | "FAIL";
+  checks: {
+    stuckProcessingEmails: number;
+    exhaustedFailures: number;
+    oldPendingEmails: number;
+    overdueReadyEmails: number;
+    duplicateDedupeKeys: number;
+  };
+  checkedAt: string | null;
+};
+
+
+type MemorialProcessorHealth = {
+  status: "PASS" | "FAIL";
+  createdAnnouncements: number | null;
+};
+
+
+function nonnegativeInteger(
+  value: unknown,
+) {
+  return typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0
+    ? value
+    : 0;
+}
+
+
+function normaliseQueueHealth(
+  value: unknown,
+): EmailQueueHealth | null {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+
+  const raw = value as Record<string, unknown>;
+  const rawChecks =
+    raw.checks &&
+    typeof raw.checks === "object" &&
+    !Array.isArray(raw.checks)
+      ? raw.checks as Record<string, unknown>
+      : null;
+
+  if (
+    (raw.status !== "PASS" && raw.status !== "FAIL") ||
+    !rawChecks
+  ) {
+    return null;
+  }
+
+  const oldPendingEmails =
+    nonnegativeInteger(
+      rawChecks.old_pending_emails,
+    );
+
+  return {
+    status: raw.status,
+    checks: {
+      stuckProcessingEmails:
+        nonnegativeInteger(
+          rawChecks.stuck_processing_emails,
+        ),
+      exhaustedFailures:
+        nonnegativeInteger(
+          rawChecks.failed_emails_exhausted,
+        ),
+      oldPendingEmails,
+      overdueReadyEmails:
+        rawChecks.overdue_ready_emails === undefined
+          ? oldPendingEmails
+          : nonnegativeInteger(
+              rawChecks.overdue_ready_emails,
+            ),
+      duplicateDedupeKeys:
+        nonnegativeInteger(
+          rawChecks.duplicate_dedupe_keys,
+        ),
+    },
+    checkedAt:
+      typeof raw.checked_at === "string"
+        ? raw.checked_at
+        : null,
+  };
+}
 
 
 function authorised(
@@ -68,6 +165,58 @@ export async function POST(
     );
   }
 
+  try {
+    const rateLimit =
+      await consumeDurableRateLimit({
+        bucket:
+          "email-worker",
+        subject:
+          "authorised-scheduler",
+        limit:
+          configuredRateLimit(
+            "EMAIL_WORKER_RATE_LIMIT",
+            12,
+            10_000,
+          ),
+        windowSeconds:
+          configuredRateLimit(
+            "EMAIL_WORKER_RATE_WINDOW_SECONDS",
+            60,
+            86_400,
+          ),
+      });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "Too many worker requests.",
+        },
+        {
+          status: 429,
+          headers:
+            durableRateLimitHeaders(
+              rateLimit,
+            ),
+        },
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Email worker rate-limit error:",
+      error,
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Email worker is temporarily unavailable.",
+      },
+      {
+        status: 503,
+      },
+    );
+  }
+
 
   const apiKey =
     process.env
@@ -111,6 +260,54 @@ export async function POST(
     createAdminClient();
 
 
+  let memorialProcessor: MemorialProcessorHealth = {
+    status: "PASS",
+    createdAnnouncements: 0,
+  };
+
+
+  const {
+    data:
+      memorialData,
+
+    error:
+      memorialError,
+  } =
+    await supabase.rpc(
+      "process_memorial_anniversaries"
+    );
+
+
+  if (
+    memorialError
+  ) {
+    console.error(
+      "Memorial anniversary processor failed:",
+      memorialError,
+    );
+
+    memorialProcessor = {
+      status: "FAIL",
+      createdAnnouncements: null,
+    };
+  } else {
+    const rawMemorial =
+      memorialData &&
+      typeof memorialData === "object" &&
+      !Array.isArray(memorialData)
+        ? memorialData as Record<string, unknown>
+        : null;
+
+    memorialProcessor = {
+      status: "PASS",
+      createdAnnouncements:
+        nonnegativeInteger(
+          rawMemorial?.created_count,
+        ),
+    };
+  }
+
+
   let sent =
     0;
 
@@ -150,7 +347,16 @@ export async function POST(
         claimError
       );
 
-      break;
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unable to claim queued email.",
+          processed,
+          sent,
+          failed,
+        },
+        { status: 500 }
+      );
     }
 
 
@@ -304,16 +510,102 @@ export async function POST(
           "Could not mark email failed:",
           markFailedError
         );
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Unable to persist email retry state.",
+            processed,
+            sent,
+            failed,
+          },
+          { status: 500 }
+        );
       }
     }
   }
 
 
-  return NextResponse.json({
-    success: true,
+  const {
+    data:
+      healthData,
 
-    processed,
-    sent,
-    failed,
-  });
+    error:
+      healthError,
+  } =
+    await supabase.rpc(
+      "email_backend_health_check"
+    );
+
+
+  if (
+    healthError
+  ) {
+    console.error(
+      "Email queue health check failed:",
+      healthError,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unable to verify email queue health.",
+        processed,
+        sent,
+        failed,
+      },
+      { status: 500 },
+    );
+  }
+
+
+  const queueHealth =
+    normaliseQueueHealth(
+      healthData,
+    );
+
+
+  if (
+    !queueHealth
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Email queue health returned an invalid result.",
+        processed,
+        sent,
+        failed,
+      },
+      { status: 500 },
+    );
+  }
+
+
+  const queueHealthy =
+    queueHealth.status ===
+      "PASS";
+
+
+  return NextResponse.json(
+    {
+      success:
+        failed === 0 &&
+        queueHealthy &&
+        memorialProcessor.status === "PASS",
+      processed,
+      sent,
+      failed,
+      memorialProcessor,
+      queueHealth,
+    },
+    {
+      status:
+        failed > 0
+          ? 502
+          : queueHealthy &&
+              memorialProcessor.status === "PASS"
+            ? 200
+            : 503,
+    }
+  );
 }
