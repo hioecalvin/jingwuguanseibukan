@@ -2,6 +2,24 @@
 
 Checkpoint date: 27/09/2026
 
+## Deceased-member memorial interface verified (27/09/2026)
+
+The real Super Admin memorial panel now has isolated browser coverage for opening the
+settings, marking Deceased, entering Date of Passing, selecting multiple recipient
+classes, enabling and writing Remembrance Day and Heavenly Birthday messages, saving
+the complete draft, manually publishing the Initial Memorial, and clearing Deceased.
+The reversal check proves the date is cleared and all memorial publication controls
+become disabled. The interface explicitly preserves Member ID, grades, certificates,
+attendance and records, and states that Deceased is separate from Terminated.
+
+The first automated accessibility scan found two low-contrast explanatory labels in
+the production panel. Both were corrected from neutral-500 to neutral-400. The final
+browser matrix passes 174/174 checks across Chromium and WebKit desktop, tablet and
+mobile; the two memorial workflows pass 12/12 profile executions. This UI proof
+complements the existing API authorization/Auth-ban unit tests and persisted,
+rollback-contained staging memorial SQL acceptance. It does not claim live Auth
+ban/unban or publication: no staging or production record was changed.
+
 ## Certificate QR verification browser states verified (27/09/2026)
 
 The real server-rendered public verification page now has isolated end-to-end browser
@@ -466,7 +484,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. The staging queue-health probe currently passes with no queued, due, overdue, stuck, exhausted or duplicate rows. | Announcement comments and image attachments were not found. External email-worker scheduling, sender-domain ownership and real delivery remain operational gates. The push delivery route is per-recipient and is not a scheduler worker. | `announcements`; `notifications`; `email_outbox`; `/api/system/email-worker`; `/api/push/send`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
-| Deceased member and memorials | Migrations 040 and 043 are on staging. The persisted state transition, initial memorial, annual Remembrance Day and Heavenly Birthday, class recipients, idempotency and Member/Admin denials passed rollback-contained acceptance. | Auth ban/unban and real scheduled delivery still require dedicated accounts/provider execution. | migrations 040 and 043; deceased UI/API; memorial tables and RPCs |
+| Deceased member and memorials | Migrations 040 and 043 are on staging. The persisted state transition, initial memorial, annual Remembrance Day and Heavenly Birthday, class recipients, idempotency and Member/Admin denials passed rollback-contained acceptance. The real memorial panel now passes mark/save/publish/reversal and accessibility workflows across Chromium/WebKit desktop, tablet and mobile. | Live Auth ban/unban and real scheduled delivery still require dedicated disposable accounts/provider execution. | migrations 040 and 043; deceased UI/API; memorial tables and RPCs; `tests/browser/admin-memorial.spec.ts` |
 | Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. The real page now also passes an isolated Chromium/WebKit desktop, tablet and mobile workflow for preparation, Pending status, mixed results and one atomic submission. | A password-authenticated deployed staging mutation remains deliberately unperformed because it would create immutable grading/audit history; use dedicated disposable records if this final live proof is required. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs; `tests/browser/admin-assessments.spec.ts` |
 | Certificate barcode verification | Pending QR payloads and final Issued/Void database statuses passed persisted service-role verification; browser roles were denied direct verification/table access. The real server-rendered public page now passes Issued, Pending, Void and unknown-record browser checks across Chromium/WebKit desktop, tablet and mobile with no download exposure. | Physical Safari/iOS remains open. A deployed valid-record scan would require deliberately creating disposable immutable certificate history; deployed random/unknown verification already passes. | `verify_prepared_assessment_certificate(uuid)`; public verification page; certificate PDF components; `tests/browser/certificate-verification.spec.ts` |
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
@@ -651,7 +669,8 @@ name as a deterministic tie-breaker.
    Aikikai input and automatic JS Member ID approval using an authorized staging
    recipient. No dedicated deliverable test mailbox is currently configured.
 2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
-   with dedicated staging accounts; verify no live member data is mutated.
+   with dedicated disposable staging accounts; the isolated memorial UI workflow is
+   now covered across Chromium and WebKit. Verify no live member data is mutated.
 3. Complete the remaining authenticated mutation workflows in deployed staging;
    the regular-schedule browser mutation path is now covered locally across Chromium
    and WebKit, as is the complete bulk-assessment preparation/finalization path.

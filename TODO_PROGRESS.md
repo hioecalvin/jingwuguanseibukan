@@ -3564,3 +3564,21 @@ The first attempt reached the correct Issued page but expected the route title w
 the configured site-name suffix; the assertion was aligned with actual production
 metadata before the clean final runs. No staging record, provider or production
 system was read or changed.
+
+### Milestone 138 — deceased-member memorial interface and contrast gate (27/09/2026)
+
+Added network-disabled browser coverage around the real Super Admin memorial panel.
+The workflow marks a member Deceased, enters Date of Passing, selects Aikido and
+Karate recipients, enables and writes both annual reminders, saves the complete
+draft, and manually publishes Initial Memorial title/message content. A separate
+reversal workflow proves clearing Deceased empties the date, clears annual enablement
+and disables all memorial publication controls. The preservation and non-Terminated
+copy is asserted directly.
+
+The first accessibility scan found two genuine contrast failures in the production
+panel's neutral-500 explanatory text. Both were corrected to neutral-400. The final
+production build generated 50 routes and the expanded matrix passes 174/174 checks
+across Chromium and WebKit desktop, tablet and mobile; memorial workflows pass 12/12
+profile executions. Type-check/Node tests pass 279/279 and lint passes. Existing API
+unit tests and rollback-contained staging SQL remain the authorization, Auth-action,
+transaction and zero-residue evidence; no live Auth or data mutation occurred.

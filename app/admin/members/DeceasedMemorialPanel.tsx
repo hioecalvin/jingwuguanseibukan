@@ -101,7 +101,7 @@ export default function DeceasedMemorialPanel({
                 />
                 <span>
                   <span className="block text-sm font-semibold text-white">Deceased</span>
-                  <span className="mt-1 block text-xs text-neutral-500">
+                  <span className="mt-1 block text-xs text-neutral-400">
                     Disables online access and ordinary birthday announcements when saved.
                   </span>
                 </span>
@@ -124,7 +124,7 @@ export default function DeceasedMemorialPanel({
 
             <fieldset disabled={!draft.isDeceased || busy}>
               <legend className="text-sm font-semibold text-neutral-200">Recipient classes</legend>
-              <p className="mt-1 text-xs text-neutral-500">
+              <p className="mt-1 text-xs text-neutral-400">
                 These classes receive the Initial Memorial and enabled annual reminders.
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
