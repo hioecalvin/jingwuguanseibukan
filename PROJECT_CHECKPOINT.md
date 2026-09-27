@@ -4,8 +4,9 @@ Checkpoint date: 27/09/2026
 
 ## Release commit, CI and Preview gate verified (27/09/2026)
 
-The published release branch `release/v1-readiness-20260918` is synchronized locally
-and remotely at commit `3a118f7`. GitHub CI passed all five release checks: the common
+The implementation release checkpoint on `release/v1-readiness-20260918` is commit
+`3a118f7`; subsequent commits contain release evidence and recovery metadata only.
+GitHub CI passed all five release checks: the common
 checks job plus Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. The
 locale-safe finance assertion was also rerun locally in Playwright WebKit, passing
 114/114 checks with zero skips, unexpected results or flakes.
@@ -484,8 +485,8 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 
 ## Source and database state
 
-- The release candidate is `release/v1-readiness-20260918` at `3a118f7`; local HEAD
-  and `origin/release/v1-readiness-20260918` matched before this evidence update.
+- The release candidate implementation on `release/v1-readiness-20260918` is commit
+  `3a118f7`; later commits contain release evidence and recovery metadata only.
 - Migrations 048 through 054 were applied only to staging
   `eomubndonbetszdbhsrj`. The verified staging migration ledger is now exactly
   006–054. Migration 054 passed rollback-contained full/partial/duplicate-payment

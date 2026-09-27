@@ -4,8 +4,8 @@ Last updated: 27/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `3a118f7`, with
-local HEAD and the recorded origin ref synchronized before this documentation update.
+The implementation release checkpoint on `release/v1-readiness-20260918` is commit
+`3a118f7`; later commits contain release evidence and recovery metadata only.
 GitHub CI passes all five release checks, and the locale-safe finance assertion passes
 114/114 local Playwright WebKit checks. Sydney staging `eomubndonbetszdbhsrj` is
 verified at the exact migration history 006–054. Migration 054 passed its independent
@@ -3766,8 +3766,9 @@ requires a new staging deployment before a disposable end-to-end browser mutatio
 ### Milestone 147 — release CI and branch Preview verified (27/09/2026)
 
 Published the reviewed training and full-payment release work, followed by the
-locale-safe finance assertion repair, to `release/v1-readiness-20260918`. Local HEAD
-and the origin tracking ref now match at `3a118f7`. GitHub CI passed all five release
+locale-safe finance assertion repair, to `release/v1-readiness-20260918`. The
+implementation checkpoint is `3a118f7`; later commits contain release evidence and
+recovery metadata only. GitHub CI passed all five release
 checks: the common checks job, Chromium/Linux, Firefox/Linux, WebKit/Linux and
 WebKit/macOS. The corrected local Playwright WebKit matrix passed 114/114 with zero
 skips, unexpected results or flakes.
