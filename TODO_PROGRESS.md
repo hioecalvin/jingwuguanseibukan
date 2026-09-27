@@ -1,27 +1,18 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 25/09/2026
+Last updated: 27/09/2026
 
 ## Release status
 
-The published release branch is `release/v1-readiness-20260918` at `89abe27`, with
-local HEAD and the recorded origin ref synchronized before the current migration-047
-candidate. The local candidate passes lint with no warnings, TypeScript and 233/233
-Node regressions. A fresh isolated staging-configured build generated all 44 routes.
-The earlier dependency audit
-reported zero known vulnerabilities. Sydney staging `eomubndonbetszdbhsrj` is
-verified at exact migration history 006–046. Migrations 040–046 are applied and the
-persisted rollback-contained memorial, annual-reminder, bulk-assessment,
-prepared-certificate/QR, zero-residue, exact-ledger and direct role-boundary suites
-pass. Migration 044's optional-Aikikai, automatic-JS-Member-ID, role-boundary and
-sequence-restoration suite also passes against the persisted staging objects.
-Migration 046 repairs migration 045's audit-insert runtime defect and passed the
-rollback-contained semantic, audit, idempotency, role-boundary, zero-residue,
-database-lint and exact-ledger checks. Production was not contacted.
-
-Migration 047 is prepared locally but not applied. It repairs the anonymous
-PostgREST pre-request evaluation defect found through the deployed registration
-page without weakening the authenticated disabled/deceased-account boundary.
+The published release branch is `release/v1-readiness-20260918` at `3a118f7`, with
+local HEAD and the recorded origin ref synchronized before this documentation update.
+GitHub CI passes all five release checks, and the locale-safe finance assertion passes
+114/114 local Playwright WebKit checks. Sydney staging `eomubndonbetszdbhsrj` is
+verified at the exact migration history 006–054. Migration 054 passed its independent
+zero-residue/security postflight and all 12 authenticated Member, scoped Admin and
+Super Admin role-security checks. The new Vercel branch Preview is Ready, but the fixed
+staging alias still serves the prior deployment because the project-scoped-token alias
+API returned HTTP 404. Production was not contacted or modified.
 
 The exact three dedicated staging security-test accounts were audited and received
 password-only rotations. Public email login remains disabled; the guarded runner
@@ -3771,3 +3762,24 @@ matrix passed 18/18 across desktop, tablet and mobile, including scoped Admin pa
 and Super Admin settlements without mutation. One-time sessions were cleaned up by the
 guarded runners. Production was not contacted. The current full-payment interface still
 requires a new staging deployment before a disposable end-to-end browser mutation test.
+
+### Milestone 147 — release CI and branch Preview verified (27/09/2026)
+
+Published the reviewed training and full-payment release work, followed by the
+locale-safe finance assertion repair, to `release/v1-readiness-20260918`. Local HEAD
+and the origin tracking ref now match at `3a118f7`. GitHub CI passed all five release
+checks: the common checks job, Chromium/Linux, Firefox/Linux, WebKit/Linux and
+WebKit/macOS. The corrected local Playwright WebKit matrix passed 114/114 with zero
+skips, unexpected results or flakes.
+
+Vercel Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP` is Ready through the
+release-branch Preview alias. The fixed staging alias was not changed and still serves
+the prior release because the project-scoped-token alias API returned HTTP 404. The
+temporary Vercel token was revoked, its local temporary file was removed and the
+clipboard was cleared. Therefore, guarded browser acceptance through the fixed staging
+alias is still open and no success is claimed for the new Preview through that host.
+
+Migration 054's independent staging postflight again passed the exact 006–054 ledger,
+zero-residue and security contract. The authenticated staging security suite passed
+12/12 for Member, scoped Admin and Super Admin. No production endpoint, deployment,
+configuration or data was contacted or changed.

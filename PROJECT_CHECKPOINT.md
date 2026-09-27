@@ -2,6 +2,27 @@
 
 Checkpoint date: 27/09/2026
 
+## Release commit, CI and Preview gate verified (27/09/2026)
+
+The published release branch `release/v1-readiness-20260918` is synchronized locally
+and remotely at commit `3a118f7`. GitHub CI passed all five release checks: the common
+checks job plus Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. The
+locale-safe finance assertion was also rerun locally in Playwright WebKit, passing
+114/114 checks with zero skips, unexpected results or flakes.
+
+Vercel Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP` is Ready and available
+through its release-branch Preview alias. The fixed staging alias still points to the
+older release deployment: the attempted project-scoped-token alias API operation
+returned HTTP 404, so no alias change is claimed. The temporary token was revoked, its
+local temporary file was removed and the clipboard was cleared. Production was not
+contacted or modified.
+
+Migration 054 remains persisted only on staging `eomubndonbetszdbhsrj`. Its independent
+postflight again passed the exact 006–054 ledger, zero-residue and security contract,
+and all 12 authenticated Member, scoped Admin and Super Admin role-security checks
+passed. Guarded browser verification of the new release through the fixed staging
+alias remains blocked until that alias is deliberately moved to the new Preview.
+
 ## Member contact self-service browser workflows verified (27/09/2026)
 
 The real Member profile now has isolated browser coverage for phone and optional
@@ -463,7 +484,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 
 ## Source and database state
 
-- The release candidate is `release/v1-readiness-20260918` at `bda9bf9`; local HEAD
+- The release candidate is `release/v1-readiness-20260918` at `3a118f7`; local HEAD
   and `origin/release/v1-readiness-20260918` matched before this evidence update.
 - Migrations 048 through 054 were applied only to staging
   `eomubndonbetszdbhsrj`. The verified staging migration ledger is now exactly
@@ -480,10 +501,12 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 - Migration 043 repaired the two runtime catalog mismatches found by live acceptance:
   unsupported `min(uuid)` in memorial publishing and the prepared-assessment lookup
   of `profiles.member_id` instead of `profiles.registration_number`.
-- Vercel Preview deployment `dpl_DocKgDVEB2EjtMt6i2sh4owYdhVj` is Ready at
-  `https://jingwuguanseibukan-lcpp3n10i-js1-ccd7.vercel.app`, and the fixed alias
-  `https://jingwuguanseibukan-staging.vercel.app` points to it. It was built from
-  release commit `bda9bf9` with the 13 approved staging-only Preview variables. Only
+- Vercel Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP` is Ready through its
+  release-branch Preview alias and was built from release commit `3a118f7`. The fixed
+  alias `https://jingwuguanseibukan-staging.vercel.app` still points to prior deployment
+  `dpl_DocKgDVEB2EjtMt6i2sh4owYdhVj` for commit `bda9bf9`: the project-scoped-token alias
+  API attempt returned HTTP 404 and did not change the alias. The Preview uses the 13
+  approved staging-only variables. Only
   the exact fixed alias is a Deployment Protection exception; generated Preview URLs
   remain protected. The unused `Staging Release` deploy hook was removed and a
   follow-up listing returned no project deploy hooks. The four temporary Codex Vercel
@@ -508,7 +531,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
 | Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The real profile contact and email-change workflows pass 12/12 isolated Chromium/WebKit desktop, tablet and mobile executions, including failure recovery. | Guarded real Auth email-confirmation/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details`; `tests/browser/profile-contact.spec.ts` |
 | Member directory privacy | Migration 050 is persisted and passed caller-class isolation, record-only inclusion, excluded-account and ACL acceptance. Scoped Admin membership visibility passes in the deployed role matrix. | Guarded directory-related mutations are not applicable; physical Safari/iOS remains open. | migration 050; `/directory`; Member-directory RPC |
-| Finance and full-payment-only workflow | Migrations 051 and 054 are persisted on staging. Migration 054 passed rollback-contained partial/full/duplicate-payment semantics, exact 006–054 ledger, zero residue, enabled-trigger, fixed-search-path, helper-ACL, database-lint and 12-check role-security verification. Network-disabled real-page browser coverage verifies fixed full Admin payment, payment-confirmation approval/rejection, settlement late/on-time details, real Excel detail export, Super Admin approval/rejection, preserved retry input and success feedback, accessibility and responsive Chromium/WebKit behavior. The deployed read-only WebKit matrix also loads scoped Admin payments and Super Admin settlements without mutation. | The current full-payment UI changes have not been redeployed to staging. A deliberate disposable-record end-to-end payment mutation and positive deployed settlement-detail example remain open. | migrations 051 and 054; Admin/Member subscriptions and Admin payments/settlements; `tests/browser/finance-workflows.spec.ts`; `tests/sql/054_staging_acceptance.sql`; `tests/sql/054_staging_postflight.sql`; settlement-detail wrappers |
+| Finance and full-payment-only workflow | Migrations 051 and 054 are persisted on staging. Migration 054 passed rollback-contained partial/full/duplicate-payment semantics, exact 006–054 ledger, zero residue, enabled-trigger, fixed-search-path, helper-ACL, database-lint and 12-check role-security verification. Network-disabled real-page browser coverage verifies fixed full Admin payment, payment-confirmation approval/rejection, settlement late/on-time details, real Excel detail export, Super Admin approval/rejection, preserved retry input and success feedback, accessibility and responsive Chromium/WebKit behavior. The deployed read-only WebKit matrix also loads scoped Admin payments and Super Admin settlements without mutation. Release commit `3a118f7` is Ready on its branch Preview and passed all five CI checks plus 114/114 local WebKit checks. | The fixed staging alias still serves the prior deployment because the project-scoped-token alias API returned HTTP 404. Move and verify that alias before claiming guarded browser acceptance of the new Preview. A deliberate disposable-record end-to-end payment mutation and positive deployed settlement-detail example also remain open. | migrations 051 and 054; Admin/Member subscriptions and Admin payments/settlements; `tests/browser/finance-workflows.spec.ts`; `tests/sql/054_staging_acceptance.sql`; `tests/sql/054_staging_postflight.sql`; settlement-detail wrappers |
 | Repository Uploader appointments | Migration 052 is persisted and passed Super-only appointment, exact-class CRUD, revocation/audit, RLS and ACL acceptance. The current uploader controls are present in the deployed release. | Guarded appointment and scoped CRUD browser mutations plus physical Safari/iOS remain open. | migration 052; `/repository/upload`; `/admin/repository-uploaders`; uploader RPCs and audit |
 
 ## Memorial design in the local candidate
@@ -659,8 +682,8 @@ name as a deterministic tie-breaker.
   because its three device projects intentionally share the same protected Member,
   Admin and Super Admin accounts; this prevents concurrent logins from invalidating
   one another's sessions. No member record was changed.
-- Recovery tooling now passes 13/13 focused tests. Manifest v2 binds a rehearsal to
-  exact staging, the immutable repository 006–053 fingerprint, matching sanitized
+- Recovery tooling now passes 14/14 focused tests. Manifest v2 binds a rehearsal to
+  exact staging, the immutable repository 006–054 fingerprint, matching sanitized
   source/restored ledger fingerprints and measured RPO/RTO timestamps; it also
   represents the absence of a production project without a fake reference. The
   retained restore itself still reaches only ledger 006–026 and excludes managed
@@ -696,7 +719,7 @@ name as a deterministic tie-breaker.
 4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.
-5. Rehearse a complete 006–053 managed-platform restore into a disposable isolated
+5. Rehearse a complete 006–054 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 
 The three reusable staging dummy identities exist and their protected passwords were

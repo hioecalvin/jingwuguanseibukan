@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -12,6 +13,19 @@ test("the checked-in migration files match the immutable 006-054 recovery contra
   const result = await verifyReleaseMigrationContract();
   assert.equal(result.matches, true);
   assert.deepEqual(result.actual, RELEASE_MIGRATION_CONTRACT);
+});
+
+test("the recovery manifest template matches the immutable migration contract", async () => {
+  const template = JSON.parse(await readFile(
+    new URL("../recovery/recovery-manifest.template.json", import.meta.url),
+    "utf8",
+  ));
+  const { firstVersion, lastVersion, migrationCount, repositoryFilesSha256 } =
+    template.migrationLedger;
+  assert.deepEqual(
+    { firstVersion, lastVersion, migrationCount, repositoryFilesSha256 },
+    RELEASE_MIGRATION_CONTRACT,
+  );
 });
 
 function ledgerRows() {
