@@ -260,12 +260,11 @@ export default function AdminPaymentsPage() {
 
       if (error) throw error;
 
+      setRejectingId(null);
+      await loadPaymentPage();
       showSuccess(
         `${item.member_name}'s payment was approved and recorded as an official payment.`
       );
-
-      setRejectingId(null);
-      await loadPaymentPage();
     } catch (error: unknown) {
       showError(
         error instanceof Error
@@ -306,10 +305,6 @@ export default function AdminPaymentsPage() {
 
       if (error) throw error;
 
-      showSuccess(
-        `${item.member_name}'s payment confirmation was rejected. The Member can submit another confirmation.`
-      );
-
       setRejectionReasons((current) => ({
         ...current,
         [item.confirmation_id]: "",
@@ -317,6 +312,9 @@ export default function AdminPaymentsPage() {
       setRejectingId(null);
 
       await loadPaymentPage();
+      showSuccess(
+        `${item.member_name}'s payment confirmation was rejected. The Member can submit another confirmation.`
+      );
     } catch (error: unknown) {
       showError(
         error instanceof Error
@@ -604,19 +602,19 @@ export default function AdminPaymentsPage() {
             <p className="mt-2 text-3xl font-bold">
               {pendingConfirmations.length}
             </p>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-neutral-400">
               Awaiting review
             </p>
           </div>
 
           <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
               Pending Value
             </p>
             <p className="mt-2 text-xl font-bold">
               {formatMoney(pendingTotal, "IDR")}
             </p>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-neutral-400">
               Display total assumes IDR
             </p>
           </div>
@@ -652,6 +650,7 @@ export default function AdminPaymentsPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <input
               type="search"
+              aria-label="Search payment confirmations"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Member / ID / dojo / method"
@@ -659,6 +658,7 @@ export default function AdminPaymentsPage() {
             />
 
             <select
+              aria-label="Payment confirmation status"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
               className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2"
@@ -670,6 +670,7 @@ export default function AdminPaymentsPage() {
             </select>
 
             <select
+              aria-label="Payment confirmation class"
               value={classFilter}
               onChange={(event) => {
                 setClassFilter(event.target.value);
@@ -687,6 +688,7 @@ export default function AdminPaymentsPage() {
             </select>
 
             <select
+              aria-label="Payment confirmation dojo"
               value={dojoFilter}
               onChange={(event) => setDojoFilter(event.target.value)}
               className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2"
@@ -702,6 +704,7 @@ export default function AdminPaymentsPage() {
 
             <input
               type="month"
+              aria-label="Payment confirmation month"
               value={monthFilter}
               onChange={(event) => setMonthFilter(event.target.value)}
               className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2"
@@ -709,7 +712,7 @@ export default function AdminPaymentsPage() {
           </div>
 
           <div className="mt-5 flex flex-col gap-3 border-t border-neutral-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-400">
               Showing {filteredConfirmations.length} of {confirmations.length} confirmations
             </p>
 
@@ -745,7 +748,7 @@ export default function AdminPaymentsPage() {
               <p className="font-semibold text-green-300">
                 No pending payment confirmations.
               </p>
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mt-2 text-sm text-neutral-400">
                 New Member submissions will appear here.
               </p>
             </div>
@@ -772,17 +775,17 @@ export default function AdminPaymentsPage() {
                           </span>
                         </div>
 
-                        <p className="mt-1 text-sm text-neutral-500">
+                        <p className="mt-1 text-sm text-neutral-400">
                           Member ID: {item.member_id ?? "Not assigned"}
                         </p>
 
-                        <p className="mt-1 text-sm text-neutral-500">
+                        <p className="mt-1 text-sm text-neutral-400">
                           {item.class_name} · {item.dojo_name}
                         </p>
                       </div>
 
                       <div className="text-left lg:text-right">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                           Amount Submitted
                         </p>
                         <p className="mt-1 text-2xl font-bold text-green-300">
@@ -806,7 +809,7 @@ export default function AdminPaymentsPage() {
 
                     {item.member_note && (
                       <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                           Member Note
                         </p>
                         <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-300">
@@ -815,7 +818,7 @@ export default function AdminPaymentsPage() {
                       </div>
                     )}
 
-                    <p className="mt-4 text-xs text-neutral-600">
+                    <p className="mt-4 text-xs text-neutral-400">
                       Submitted {formatDateTime(item.created_at)}
                     </p>
 
@@ -858,7 +861,7 @@ export default function AdminPaymentsPage() {
                           className="mt-3 w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2"
                         />
 
-                        <p className="mt-2 text-xs text-neutral-500">
+                        <p className="mt-2 text-xs text-neutral-400">
                           The rejected confirmation remains in history and the Member can submit another payment confirmation.
                         </p>
 
@@ -901,13 +904,18 @@ export default function AdminPaymentsPage() {
           </div>
 
           {historyConfirmations.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-8 text-center text-neutral-500">
+            <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-8 text-center text-neutral-400">
               No reviewed confirmations match the current filters.
             </div>
           ) : (
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-neutral-800">
+            <div
+              className="mt-4 overflow-x-auto rounded-2xl border border-neutral-800"
+              role="region"
+              aria-label="Payment confirmation review history"
+              tabIndex={0}
+            >
               <table className="min-w-full divide-y divide-neutral-800 bg-neutral-900 text-sm">
-                <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-wider text-neutral-500">
+                <thead className="bg-neutral-950/60 text-left text-xs uppercase tracking-wider text-neutral-400">
                   <tr>
                     <th className="px-4 py-3">Member</th>
                     <th className="px-4 py-3">Class / Dojo</th>
@@ -924,14 +932,14 @@ export default function AdminPaymentsPage() {
                     <tr key={item.confirmation_id} className="align-top">
                       <td className="px-4 py-4">
                         <p className="font-semibold">{item.member_name}</p>
-                        <p className="mt-1 text-xs text-neutral-500">
+                        <p className="mt-1 text-xs text-neutral-400">
                           {item.member_id ?? "No Member ID"}
                         </p>
                       </td>
 
                       <td className="px-4 py-4">
                         <p>{item.class_name}</p>
-                        <p className="mt-1 text-xs text-neutral-500">
+                        <p className="mt-1 text-xs text-neutral-400">
                           {item.dojo_name}
                         </p>
                       </td>
@@ -961,7 +969,7 @@ export default function AdminPaymentsPage() {
                             ? formatDateTime(item.reviewed_at)
                             : "-"}
                         </p>
-                        <p className="mt-1 text-xs text-neutral-500">
+                        <p className="mt-1 text-xs text-neutral-400">
                           {item.reviewed_by_name ?? "-"}
                         </p>
                       </td>
@@ -998,7 +1006,7 @@ function Info({
 }) {
   return (
     <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+      <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
         {label}
       </p>
       <p className="mt-2 font-semibold text-neutral-200">{value}</p>

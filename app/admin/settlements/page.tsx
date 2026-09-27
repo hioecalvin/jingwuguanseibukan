@@ -378,12 +378,12 @@ export default function AdminSettlementsPage() {
     if (rpcError) {
       setError(rpcError.message);
     } else {
-      setMessage("Settlement draft created.");
       setCreateOpen(false);
       setCreateNotes("");
       setEligible([]);
       setSelectedPayments([]);
       await loadPage();
+      setMessage("Settlement draft created.");
     }
 
     setBusy(null);
@@ -424,9 +424,9 @@ export default function AdminSettlementsPage() {
     if (rpcError) {
       setError(rpcError.message);
     } else {
-      setMessage("Transfer details saved.");
       setTransferId(null);
       await loadPage();
+      setMessage("Transfer details saved.");
     }
 
     setBusy(null);
@@ -443,8 +443,8 @@ export default function AdminSettlementsPage() {
     if (rpcError) {
       setError(rpcError.message);
     } else {
-      setMessage("Share sent to Super Admin for review.");
       await loadPage();
+      setMessage("Share sent to Super Admin for review.");
     }
 
     setBusy(null);
@@ -463,8 +463,8 @@ export default function AdminSettlementsPage() {
     if (rpcError) {
       setError(rpcError.message);
     } else {
-      setMessage("Settlement cancelled.");
       await loadPage();
+      setMessage("Settlement cancelled.");
     }
 
     setBusy(null);
@@ -494,14 +494,14 @@ export default function AdminSettlementsPage() {
     if (rpcError) {
       setError(rpcError.message);
     } else {
+      setRejectId(null);
+      setRejectionReason("");
+      await loadPage();
       setMessage(
         decision === "approved"
           ? "Settlement approved."
           : "Settlement rejected. The Admin can correct it and resubmit."
       );
-      setRejectId(null);
-      setRejectionReason("");
-      await loadPage();
     }
 
     setBusy(null);
@@ -840,6 +840,7 @@ export default function AdminSettlementsPage() {
 
         <section className="grid gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 md:grid-cols-3">
           <select
+            aria-label="Settlement status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"
@@ -853,6 +854,7 @@ export default function AdminSettlementsPage() {
           </select>
 
           <select
+            aria-label="Settlement dojo"
             value={dojoFilter}
             onChange={(e) => setDojoFilter(e.target.value)}
             className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2"
@@ -866,6 +868,7 @@ export default function AdminSettlementsPage() {
           </select>
 
           <input
+            aria-label="Settlement month"
             type="month"
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
@@ -914,19 +917,19 @@ export default function AdminSettlementsPage() {
 
                       <div className="grid grid-cols-3 gap-5 text-right text-sm">
                         <div>
-                          <div className="text-zinc-500">Gross</div>
+                          <div className="text-zinc-400">Gross</div>
                           <div className="font-semibold">
                             {money(s.gross_amount, s.currency)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-zinc-500">Share</div>
+                          <div className="text-zinc-400">Share</div>
                           <div className="font-semibold">
                             {money(s.share_amount, s.currency)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-zinc-500">Dojo Retains</div>
+                          <div className="text-zinc-400">Dojo Retains</div>
                           <div className="font-semibold">
                             {money(
                               Number(s.gross_amount) - Number(s.share_amount),
@@ -1080,7 +1083,7 @@ export default function AdminSettlementsPage() {
                             onClick={() =>
                               void submitSettlement(s.settlement_id)
                             }
-                            className="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                            className="rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
                             title={
                               hasTransfer
                                 ? ""
@@ -1116,7 +1119,7 @@ export default function AdminSettlementsPage() {
                                 "approved"
                               )
                             }
-                            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold hover:bg-emerald-600 disabled:opacity-50"
                           >
                             Approve
                           </button>
@@ -1126,7 +1129,7 @@ export default function AdminSettlementsPage() {
                               setRejectId(s.settlement_id);
                               setRejectionReason("");
                             }}
-                            className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold"
+                            className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-600"
                           >
                             Reject
                           </button>
@@ -1148,7 +1151,7 @@ export default function AdminSettlementsPage() {
                         </p>
 
                         <div className="mt-4 rounded-xl bg-zinc-950 p-4">
-                          <div className="text-xs uppercase tracking-wide text-zinc-500">
+                          <div className="text-xs uppercase tracking-wide text-zinc-400">
                             Amount to Super Admin
                           </div>
                           <div className="mt-1 text-2xl font-bold">
@@ -1243,7 +1246,7 @@ export default function AdminSettlementsPage() {
                                 "rejected"
                               )
                             }
-                            className="rounded-xl bg-red-600 px-4 py-2 font-semibold disabled:opacity-50"
+                            className="rounded-xl bg-red-700 px-4 py-2 font-semibold hover:bg-red-600 disabled:opacity-50"
                           >
                             Confirm Rejection
                           </button>
@@ -1273,7 +1276,12 @@ export default function AdminSettlementsPage() {
                             No payment items found.
                           </div>
                         ) : (
-                          <div className="overflow-x-auto">
+                          <div
+                            className="overflow-x-auto"
+                            role="region"
+                            aria-label="Included Member Payments"
+                            tabIndex={0}
+                          >
                             <table className="w-full min-w-[800px] text-sm">
                               <thead className="bg-zinc-950 text-left text-zinc-400">
                                 <tr>
@@ -1291,7 +1299,7 @@ export default function AdminSettlementsPage() {
                                   <tr key={item.item_id}>
                                     <td className="p-3">
                                       <div>{item.member_name}</div>
-                                      <div className="text-xs text-zinc-500">
+                                      <div className="text-xs text-zinc-400">
                                         {item.member_id}
                                       </div>
                                     </td>
@@ -1321,7 +1329,7 @@ export default function AdminSettlementsPage() {
                                     </td>
                                     <td className="p-3 text-right">
                                       {money(item.share_amount, item.currency)}
-                                      <div className="text-xs text-zinc-500">
+                                      <div className="text-xs text-zinc-400">
                                         {Number(item.share_percent)}%
                                       </div>
                                     </td>

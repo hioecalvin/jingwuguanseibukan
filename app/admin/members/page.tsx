@@ -1397,6 +1397,10 @@ export default function MemberManagementPage() {
         })
       );
     } finally {
+      setProcessingId(
+        null
+      );
+
       setTrainingSaving(
         (
           current
@@ -4634,6 +4638,7 @@ export default function MemberManagementPage() {
 
 
             <select
+              aria-label="Membership status filter"
               value={
                 statusFilter
               }
@@ -4675,6 +4680,7 @@ export default function MemberManagementPage() {
 
 
             <select
+              aria-label="Grade category filter"
               value={
                 levelFilter
               }
@@ -4702,6 +4708,7 @@ export default function MemberManagementPage() {
 
 
             <select
+              aria-label="Admin access filter"
               value={
                 adminAccessFilter
               }
@@ -4729,6 +4736,7 @@ export default function MemberManagementPage() {
 
 
             <select
+              aria-label="Class filter"
               value={
                 classFilter
               }
@@ -4775,6 +4783,7 @@ export default function MemberManagementPage() {
           <div className="mt-4 max-w-sm">
 
             <select
+              aria-label="Dojo filter"
               value={
                 dojoFilter
               }
@@ -4820,7 +4829,7 @@ export default function MemberManagementPage() {
 
           <div className="mt-5 flex flex-col gap-3 border-t border-neutral-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
-  <p className="text-sm text-neutral-500">
+  <p className="text-sm text-neutral-400">
     Showing{" "}
     {filteredMembers.length}{" "}
     of{" "}
@@ -5054,7 +5063,7 @@ export default function MemberManagementPage() {
 
                           ) : (
 
-                            <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-neutral-500">
+                            <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-neutral-400">
 
                               {member.full_name
                                 .charAt(
@@ -5149,7 +5158,7 @@ export default function MemberManagementPage() {
                           <div className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 Email:
                               </span>{" "}
                               {
@@ -5159,7 +5168,7 @@ export default function MemberManagementPage() {
 
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 Phone:
                               </span>{" "}
                               {
@@ -5169,7 +5178,7 @@ export default function MemberManagementPage() {
 
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 WhatsApp:
                               </span>{" "}
 
@@ -5200,7 +5209,7 @@ export default function MemberManagementPage() {
 
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 DOB:
                               </span>{" "}
                               {formatDate(
@@ -5211,7 +5220,7 @@ export default function MemberManagementPage() {
 
                             {member.date_of_passing && (
                               <p>
-                                <span className="text-neutral-500">
+                                <span className="text-neutral-400">
                                   Date of Passing:
                                 </span>{" "}
                                 {formatDate(member.date_of_passing)}
@@ -5220,7 +5229,7 @@ export default function MemberManagementPage() {
 
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 Class:
                               </span>{" "}
                               {
@@ -5230,7 +5239,7 @@ export default function MemberManagementPage() {
 
 
                             <p>
-                              <span className="text-neutral-500">
+                              <span className="text-neutral-400">
                                 Member Of:
                               </span>{" "}
                               {member.dojo_name ??
@@ -5265,7 +5274,7 @@ export default function MemberManagementPage() {
 
                       <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
 
-                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                           Date Joined
                         </p>
 
@@ -5385,7 +5394,7 @@ export default function MemberManagementPage() {
                         </p>
 
 
-                        <p className="mt-2 text-xs text-neutral-500">
+                        <p className="mt-2 text-xs text-neutral-400">
                           Latest valid promotion date.
                         </p>
 
@@ -5523,7 +5532,7 @@ export default function MemberManagementPage() {
                         )}
 
 
-                        <p className="mt-2 text-xs text-neutral-500">
+                        <p className="mt-2 text-xs text-neutral-400">
                           The server counts sessions from the last 30 days; older sessions show their date.
                         </p>
 
@@ -5555,7 +5564,7 @@ export default function MemberManagementPage() {
                             </p>
 
 
-                            <p className="mt-2 text-xs text-neutral-500">
+                            <p className="mt-2 text-xs text-neutral-400">
                               Optional appointment for selected Members only.
                             </p>
 
@@ -5830,7 +5839,7 @@ export default function MemberManagementPage() {
 
                               {memberTitleHistory.length === 0 && (
 
-                                <p className="text-sm text-neutral-500">
+                                <p className="text-sm text-neutral-400">
                                   No title history yet.
                                 </p>
 
@@ -5873,7 +5882,7 @@ export default function MemberManagementPage() {
                                 </p>
 
 
-                                <p className="mt-2 text-xs text-neutral-500">
+                                <p className="mt-2 text-xs text-neutral-400">
                                   Official Aikikai registration identifier for this Yudansha Member.
                                 </p>
                               </>
@@ -5907,7 +5916,7 @@ export default function MemberManagementPage() {
                                 />
 
 
-                                <p className="mt-2 text-xs text-neutral-500">
+                                <p className="mt-2 text-xs text-neutral-400">
                                   Leave blank and save if the number should be removed.
                                 </p>
 
@@ -6042,7 +6051,7 @@ export default function MemberManagementPage() {
 
                       <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
 
-                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                           Current Grade
                         </p>
 
@@ -6124,7 +6133,7 @@ export default function MemberManagementPage() {
                         </p>
 
 
-                        <p className="mt-1 text-sm text-neutral-500">
+                        <p className="mt-1 text-sm text-neutral-400">
                           The next grade is calculated automatically. Every grading must have an assessor.
                         </p>
 
@@ -6431,7 +6440,7 @@ export default function MemberManagementPage() {
                             Official Promotion Record
                           </p>
 
-                          <p className="mt-1 text-sm text-neutral-500">
+                          <p className="mt-1 text-sm text-neutral-400">
                             Valid and revoked promotions are retained permanently.
                           </p>
                         </div>
@@ -6460,14 +6469,14 @@ export default function MemberManagementPage() {
 
                           {!history ? (
 
-                            <p className="text-sm text-neutral-500">
+                            <p className="text-sm text-neutral-400">
                               Loading history...
                             </p>
 
                           ) : history.length ===
                             0 ? (
 
-                            <p className="text-sm text-neutral-500">
+                            <p className="text-sm text-neutral-400">
                               No promotions recorded yet.
                             </p>
 
@@ -6529,7 +6538,7 @@ export default function MemberManagementPage() {
                                     <div className="flex flex-wrap items-center gap-2">
 
                                       <p className="text-sm">
-                                        <span className="text-neutral-500">
+                                        <span className="text-neutral-400">
                                           Assessor:
                                         </span>{" "}
 
@@ -6630,7 +6639,7 @@ export default function MemberManagementPage() {
                                   className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
                                     member.is_grading_assessor
                                       ? "border-green-800 bg-green-950/30 text-green-300"
-                                      : "border-neutral-700 bg-neutral-900 text-neutral-500"
+                                      : "border-neutral-700 bg-neutral-900 text-neutral-400"
                                   }`}
                                 >
                                   {member.is_grading_assessor
@@ -6641,7 +6650,7 @@ export default function MemberManagementPage() {
                               </div>
 
 
-                              <p className="mt-2 text-sm text-neutral-500">
+                              <p className="mt-2 text-sm text-neutral-400">
                                 Active assessors can be selected for Mudansha grading. Super Admin can switch this on or off at any time.
                               </p>
 
@@ -6707,7 +6716,7 @@ export default function MemberManagementPage() {
                             </p>
 
 
-                            <p className="mt-1 text-sm text-neutral-500">
+                            <p className="mt-1 text-sm text-neutral-400">
                               Separate from the member&apos;s actual dojo membership.
                             </p>
 
@@ -6737,14 +6746,14 @@ export default function MemberManagementPage() {
 
                             {loadingAccess ? (
 
-                              <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5 text-sm text-neutral-500">
+                              <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5 text-sm text-neutral-400">
                                 Loading administrative access...
                               </div>
 
                             ) : adminOptions.length ===
                               0 ? (
 
-                              <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5 text-sm text-neutral-500">
+                              <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5 text-sm text-neutral-400">
                                 No eligible dojos.
                               </div>
 
@@ -6840,7 +6849,7 @@ export default function MemberManagementPage() {
                                                     </div>
 
 
-                                                    <p className="mt-1 text-xs text-neutral-500">
+                                                    <p className="mt-1 text-xs text-neutral-400">
                                                       {option.is_admin
                                                         ? "Administrative access enabled"
                                                         : "No administrative access"}
@@ -6907,7 +6916,7 @@ export default function MemberManagementPage() {
                             <p className="text-sm font-semibold uppercase tracking-wider text-emerald-400">
                               Subscription & Payment
                             </p>
-                            <p className="mt-2 text-xs text-neutral-500">
+                            <p className="mt-2 text-xs text-neutral-400">
                               Current fee, monthly charge, official payments and Member-specific rate.
                             </p>
                           </div>
@@ -6930,11 +6939,11 @@ export default function MemberManagementPage() {
                           <>
                             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
-                                <p className="text-xs uppercase tracking-wider text-neutral-500">Current Rate</p>
+                                <p className="text-xs uppercase tracking-wider text-neutral-400">Current Rate</p>
                                 <p className="mt-2 text-lg font-bold">
                                   {subscriptionSummary.current_rate_currency} {subscriptionSummary.current_rate.toLocaleString()}
                                 </p>
-                                <p className="mt-1 text-xs text-neutral-500">
+                                <p className="mt-1 text-xs text-neutral-400">
                                   {subscriptionSummary.current_rate_source === "member_special"
                                     ? "Member special rate"
                                     : "Dojo default rate"}
@@ -6942,19 +6951,19 @@ export default function MemberManagementPage() {
                               </div>
 
                               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
-                                <p className="text-xs uppercase tracking-wider text-neutral-500">Current Month Charge</p>
+                                <p className="text-xs uppercase tracking-wider text-neutral-400">Current Month Charge</p>
                                 <p className="mt-2 text-lg font-bold">
                                   {subscriptionSummary.charge_amount == null
                                     ? "No charge"
                                     : `${subscriptionSummary.charge_currency ?? subscriptionSummary.current_rate_currency} ${subscriptionSummary.charge_amount.toLocaleString()}`}
                                 </p>
-                                <p className="mt-1 text-xs text-neutral-500">
+                                <p className="mt-1 text-xs text-neutral-400">
                                   {formatDate(subscriptionSummary.billing_month)}
                                 </p>
                               </div>
 
                               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
-                                <p className="text-xs uppercase tracking-wider text-neutral-500">Paid / Remaining</p>
+                                <p className="text-xs uppercase tracking-wider text-neutral-400">Paid / Remaining</p>
                                 <p className="mt-2 font-semibold text-green-300">
                                   Paid: {subscriptionSummary.charge_currency ?? subscriptionSummary.current_rate_currency} {subscriptionSummary.total_paid.toLocaleString()}
                                 </p>
@@ -6964,7 +6973,7 @@ export default function MemberManagementPage() {
                               </div>
 
                               <div className="rounded-lg border border-neutral-800 bg-neutral-950/50 p-4">
-                                <p className="text-xs uppercase tracking-wider text-neutral-500">Payment Status</p>
+                                <p className="text-xs uppercase tracking-wider text-neutral-400">Payment Status</p>
                                 <p className="mt-2 font-bold uppercase">
                                   {subscriptionSummary.charge_status ?? "NO CHARGE"}
                                 </p>
@@ -6984,7 +6993,7 @@ export default function MemberManagementPage() {
                                 <p className="mt-2 font-semibold">
                                   {subscriptionSummary.special_rate_currency ?? "IDR"} {subscriptionSummary.special_rate_amount.toLocaleString()}
                                 </p>
-                                <p className="mt-1 text-xs text-neutral-500">
+                                <p className="mt-1 text-xs text-neutral-400">
                                   Effective {subscriptionSummary.special_rate_effective_from
                                     ? formatDate(subscriptionSummary.special_rate_effective_from)
                                     : "-"}
@@ -7002,7 +7011,7 @@ export default function MemberManagementPage() {
                             )}
                           </>
                         ) : (
-                          <p className="mt-4 text-sm text-neutral-500">
+                          <p className="mt-4 text-sm text-neutral-400">
                             Open Adjust Fee to load the current subscription and payment summary.
                           </p>
                         )}

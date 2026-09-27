@@ -465,10 +465,11 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 
 - The release candidate is `release/v1-readiness-20260918` at `bda9bf9`; local HEAD
   and `origin/release/v1-readiness-20260918` matched before this evidence update.
-- Migrations 048 through 053 were applied only to staging
+- Migrations 048 through 054 were applied only to staging
   `eomubndonbetszdbhsrj`. The verified staging migration ledger is now exactly
-  006–053, and the post-apply dry run reports no pending migration.
-- Migrations 040 through 053 were applied in order to staging
+  006–054. Migration 054 passed rollback-contained full/partial/duplicate-payment
+  acceptance, independent zero-residue/security postflight and Supabase database lint.
+- Migrations 040 through 054 were applied in order to staging
   `eomubndonbetszdbhsrj` only. The repository's local Supabase metadata remains
   linked to production, so it was not used or changed.
 - The staging database password was rotated, stored only in the protected staging
@@ -497,7 +498,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | --- | --- | --- | --- |
 | Member management and statuses | Existing member, membership, class/dojo, approval, Break, transfer, grading and retained-history flows. Migration 047's active/disabled/deceased request gate passed rollback-contained staging acceptance. | Physical Safari/iOS and remaining mutation workflows still require guarded coverage. | `app/admin/members/page.tsx`; `profiles`; `memberships`; `admin_visible_members`; migration 047 |
 | Aikikai and JS Member IDs | Registration accepts the applicant's optional Aikikai Registration Number and stores it separately. Persisted migration 044 assigns the next permanent numeric JS Member ID atomically only when a Super Admin approves the initial application. Supplied/blank Aikikai values, ID assignment, rejection, legacy preservation, role denial, queue atomicity and zero residue passed live staging acceptance. | Exercise both blank and supplied Aikikai registration paths through the deployed browser workflow. | migration 044; `profiles.aikikai_registration_number`; `profiles.registration_number`; `js_member_id_seq`; both `review_class_request*` RPCs; registration and Applications pages |
-| Last training session | Migrations 045–046 are persisted on staging. The repaired implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. The deployed Admin member list rendered the controls without mutation. | Complete the deliberate mutation workflow on a disposable membership and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile |
+| Last training session | Migrations 045–046 are persisted on staging. The implementation stores the latest date per class membership, appends the effective Jakarta date to a private audit, enforces scoped Admin/Super Admin writes and exposes Member-own reads. Rollback-contained live tests passed mark-today, correction/audit, idempotency, Member denial, Admin scope, Super Admin scope, inactive/pre-join/deceased rejection and ACL checks. The real Admin and Member interfaces now pass isolated mark-today, correction, rejection/retry, recent/older-date display and unavailable-state workflows across Chromium/WebKit desktop, tablet and mobile. The browser gate also repaired a processing lock that previously remained set after training mutations. | Complete the deliberate deployed mutation workflow on a disposable membership and physical Safari/iOS. | migrations 045–046; `class_memberships.last_training_session_date`; `membership_training_session_audit`; `mark_membership_trained_today`; `set_membership_last_training_session`; `get_my_last_training_sessions`; Admin member page; Member profile; `tests/browser/last-training-session.spec.ts` |
 | Ordinary birthday announcements | Date of birth is retained. No ordinary birthday announcement scheduler was found in source or retained evidence. | If added later, it must exclude `date_of_passing is not null`; do not claim that migration 040 replaces an existing birthday job. | `profiles.date_of_birth` |
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. The staging queue-health probe currently passes with no queued, due, overdue, stuck, exhausted or duplicate rows. | Announcement comments and image attachments were not found. External email-worker scheduling, sender-domain ownership and real delivery remain operational gates. The push delivery route is per-recipient and is not a scheduler worker. | `announcements`; `notifications`; `email_outbox`; `/api/system/email-worker`; `/api/push/send`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
@@ -507,7 +508,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
 | Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The real profile contact and email-change workflows pass 12/12 isolated Chromium/WebKit desktop, tablet and mobile executions, including failure recovery. | Guarded real Auth email-confirmation/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details`; `tests/browser/profile-contact.spec.ts` |
 | Member directory privacy | Migration 050 is persisted and passed caller-class isolation, record-only inclusion, excluded-account and ACL acceptance. Scoped Admin membership visibility passes in the deployed role matrix. | Guarded directory-related mutations are not applicable; physical Safari/iOS remains open. | migration 050; `/directory`; Member-directory RPC |
-| Finance late-payment presentation | Migration 051 is persisted and passed late/on-time classification, projection-preservation and wrapper-ACL acceptance. | A positive live late-payment presentation example and guarded payment/settlement mutations remain open. | migration 051; Admin payments and settlements; settlement-detail wrappers |
+| Finance and full-payment-only workflow | Migrations 051 and 054 are persisted on staging. Migration 054 passed rollback-contained partial/full/duplicate-payment semantics, exact 006–054 ledger, zero residue, enabled-trigger, fixed-search-path, helper-ACL, database-lint and 12-check role-security verification. Network-disabled real-page browser coverage verifies fixed full Admin payment, payment-confirmation approval/rejection, settlement late/on-time details, real Excel detail export, Super Admin approval/rejection, preserved retry input and success feedback, accessibility and responsive Chromium/WebKit behavior. The deployed read-only WebKit matrix also loads scoped Admin payments and Super Admin settlements without mutation. | The current full-payment UI changes have not been redeployed to staging. A deliberate disposable-record end-to-end payment mutation and positive deployed settlement-detail example remain open. | migrations 051 and 054; Admin/Member subscriptions and Admin payments/settlements; `tests/browser/finance-workflows.spec.ts`; `tests/sql/054_staging_acceptance.sql`; `tests/sql/054_staging_postflight.sql`; settlement-detail wrappers |
 | Repository Uploader appointments | Migration 052 is persisted and passed Super-only appointment, exact-class CRUD, revocation/audit, RLS and ACL acceptance. The current uploader controls are present in the deployed release. | Guarded appointment and scoped CRUD browser mutations plus physical Safari/iOS remain open. | migration 052; `/repository/upload`; `/admin/repository-uploaders`; uploader RPCs and audit |
 
 ## Memorial design in the local candidate
@@ -717,3 +718,26 @@ Admins no longer see the entry, and direct non-Super-Admin access is redirected.
 Production was not contacted. No production connection, deployment or merge is
 claimed by this checkpoint. Migration 053 was applied to staging only and its guarded
 acceptance completed; production remains unchanged.
+
+## Mux uploader checkpoint — 27 September 2026
+
+- Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.
+  Existing YouTube content remains readable as legacy content; it was not migrated or
+  deleted.
+- The desktop preserves the two baked-in JS/class logo watermarks, contains no Mux
+  secret, uploads directly to Mux with a one-time URL, and creates only a Draft after
+  server-side provider/owner verification.
+- Member playback is protected by repository RLS plus a server-issued RS256 Mux token.
+  Mux Data tracking/cookies are disabled and no viewer name, member number or email is
+  included in the token or player metadata.
+- The Mux migration and its rollback-contained acceptance/postflight SQL are preserved
+  under deferred paths. They have no active migration number and have **not** been
+  applied to staging or production.
+- Verified locally: Super App 288/288 tests, desktop uploader 21/21 tests, lint, exact
+  006–054 recovery fingerprint, whitespace validation, and the 51-route production
+  build all pass; both production-dependency audits report zero vulnerabilities.
+- Still required before a usable Mux staging installer: create/configure the Mux API
+  token and URL-signing key in protected staging/Vercel settings; assign and approve the
+  next available Mux migration; deploy the release candidate; run the guarded SQL/security suite;
+  perform one disposable real upload and signed Member playback; then rebuild, inspect,
+  install, smoke-test and uninstall the Windows installer. Production remains untouched.

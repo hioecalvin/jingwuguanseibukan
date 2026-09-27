@@ -282,7 +282,7 @@ export default function BreakRequestsPage() {
       state ===
       "partially_paid"
     ) {
-      return "Partially Paid";
+      return "Payment Recorded";
     }
 
     if (

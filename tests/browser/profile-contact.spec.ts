@@ -6,6 +6,7 @@ type ProfileContactState = {
   failNextEmail: boolean;
   contactCalls: Array<{ new_phone: string; new_instagram_username: string }>;
   emailCalls: Array<{ authorization: string | null; body: { newEmail?: string } }>;
+  trainingRequests: number;
 };
 
 function fixtureState(page: import('@playwright/test').Page) {

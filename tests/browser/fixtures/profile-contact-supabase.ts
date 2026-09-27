@@ -13,6 +13,7 @@ export type ProfileContactFixtureState = {
   failNextEmail: boolean;
   contactCalls: ContactArguments[];
   emailCalls: EmailCall[];
+  trainingRequests: number;
 };
 
 declare global {
@@ -26,6 +27,7 @@ export const fixtureState: ProfileContactFixtureState = {
   failNextEmail: false,
   contactCalls: [],
   emailCalls: [],
+  trainingRequests: 0,
 };
 
 window.__profileContactFixture = fixtureState;
@@ -54,8 +56,75 @@ const profile: {
   avatar_url: null,
 };
 
+const memberships = [
+  {
+    id: 'fixture-membership-aikido',
+    class_id: 'fixture-class-aikido',
+    dojo_id: 'fixture-dojo-aikido',
+    status: 'active',
+    level: 'mudansha',
+    role: 'user',
+    rank_id: 'fixture-rank-aikido',
+    sub_rank_id: null,
+    title_level: null,
+    classes: {
+      id: 'fixture-class-aikido',
+      name: 'Aikido',
+      title_system: 'japanese',
+    },
+    dojos: {
+      id: 'fixture-dojo-aikido',
+      name: 'Fixture Aikido Dojo',
+    },
+    ranks: {
+      id: 'fixture-rank-aikido',
+      name: '5th Kyu',
+    },
+    sub_ranks: null,
+  },
+  {
+    id: 'fixture-membership-karate',
+    class_id: 'fixture-class-karate',
+    dojo_id: 'fixture-dojo-karate',
+    status: 'active',
+    level: 'mudansha',
+    role: 'user',
+    rank_id: 'fixture-rank-karate',
+    sub_rank_id: null,
+    title_level: null,
+    classes: {
+      id: 'fixture-class-karate',
+      name: 'Karate',
+      title_system: 'none',
+    },
+    dojos: {
+      id: 'fixture-dojo-karate',
+      name: 'Fixture Karate Dojo',
+    },
+    ranks: {
+      id: 'fixture-rank-karate',
+      name: '8th Kyu',
+    },
+    sub_ranks: null,
+  },
+] as const;
+
+const trainingSessions = [
+  {
+    membership_id: 'fixture-membership-aikido',
+    training_date: '2026-09-15',
+    days_ago: 12,
+  },
+  {
+    membership_id: 'fixture-membership-karate',
+    training_date: '2026-08-01',
+    days_ago: 57,
+  },
+];
+
 function resultFor(table: string) {
   if (table === 'profiles') return { data: profile, error: null };
+  if (table === 'class_memberships') return { data: memberships, error: null };
   return { data: [], error: null };
 }
 
@@ -84,8 +153,15 @@ export function createClient() {
     },
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args?: ContactArguments) => {
+      if (name === 'get_my_last_training_sessions') {
+        fixtureState.trainingRequests += 1;
+        if (new URLSearchParams(window.location.search).has('training-error')) {
+          return { data: null, error: new Error('Training status is temporarily unavailable.') };
+        }
+        return { data: trainingSessions, error: null };
+      }
+
       if (
-        name === 'get_my_last_training_sessions' ||
         name === 'get_my_membership_break_requests' ||
         name === 'get_my_available_class_enrollments' ||
         name === 'get_my_class_enrollment_requests'

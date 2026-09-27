@@ -358,19 +358,30 @@ test('sign out revokes only the current browser session', () => {
 test('admins have an explicit audited direct-payment path without a member request', () => {
   const paymentPage = fs.readFileSync('app/admin/payments/page.tsx', 'utf8');
   const subscriptionsPage = fs.readFileSync('app/admin/subscriptions/page.tsx', 'utf8');
+  const memberSubscriptionsPage = fs.readFileSync('app/(member)/subscription/page.tsx', 'utf8');
   const paymentMigration = fs.readFileSync(
     'supabase/migrations/021_harden_payment_completion_and_notifications.sql',
+    'utf8'
+  );
+  const fullPaymentMigration = fs.readFileSync(
+    'supabase/migrations/054_full_payment_only.sql',
     'utf8'
   );
 
   assert.match(paymentPage, /Record Direct Payment/);
   assert.match(paymentPage, /\/admin\/subscriptions\?tab=payments/);
   assert.match(subscriptionsPage, /record_membership_payment/);
-  assert.match(subscriptionsPage, /Mark Paid \/ Record Partial/);
+  assert.match(subscriptionsPage, /Mark Full Payment/);
+  assert.match(subscriptionsPage, /Full Payment Amount/);
+  assert.doesNotMatch(subscriptionsPage, /Record Partial|Partially Paid/);
+  assert.doesNotMatch(subscriptionsPage, /paymentAmount|setPaymentAmount/);
+  assert.match(memberSubscriptionsPage, /Full Payment Amount/);
+  assert.doesNotMatch(memberSubscriptionsPage, /Amount Transferred|transferAmount|setTransferAmount/);
   assert.match(paymentMigration, /for update/i);
   assert.match(paymentMigration, /can_access_dojo_finance/i);
   assert.match(paymentMigration, /recorded_by[\s\S]*auth\.uid\(\)/i);
-  assert.match(paymentMigration, /Payment exceeds the remaining subscription balance/i);
+  assert.match(fullPaymentMigration, /Payment must equal the full outstanding subscription balance/i);
+  assert.match(fullPaymentMigration, /Payment confirmation must equal the full outstanding subscription balance/i);
 });
 
 test('unfinished push-notification controls are not exposed in the v1 member UI', () => {

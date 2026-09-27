@@ -3599,3 +3599,175 @@ Chromium and WebKit desktop, tablet and mobile; the two contact workflows pass 1
 profile executions. Type-check/Node tests pass 279/279 and lint passes. No external
 request, staging mutation, Auth-provider change, email delivery or production contact
 occurred; the real confirmation round trip remains a guarded staging gate.
+
+### Milestone 140 — Mux video uploader and signed repository playback candidate (27/09/2026)
+
+Replaced the desktop uploader's new-upload YouTube path with Mux Direct Uploads while
+preserving existing YouTube repository items as legacy playback. Desktop v0.9.0 keeps
+both organization/class watermarks in the locally processed MP4, obtains a one-time
+upload URL from the authenticated Super App, uploads resumable 8 MiB chunks directly
+to Mux, polls processing, and asks the server to create a repository Draft. Google
+OAuth, channel configuration and YouTube uploader code were removed from the desktop
+package. No Mux, staging or production endpoint was contacted.
+
+Added a deferred Mux migration candidate, which stores a separate Mux asset ID, validates complete
+provider pairs, keeps legacy YouTube rows valid, makes asset IDs unique/idempotent, and
+adds a service-role-only Draft finalizer. The server re-reads the Direct Upload and
+Asset from Mux, verifies the signed playback policy plus uploader/class passthrough,
+then supplies the provider IDs to the database; the desktop cannot supply them. Mux
+provider IDs are immutable through the browser update RPC, while authorized title,
+description, status and sort-order edits remain available. Guarded rollback-contained
+staging acceptance and independent ledger/residue/security SQL were prepared but not
+run because the Mux candidate has not been assigned an active migration number or applied remotely.
+
+Member playback now uses the lazy Mux React player after existing repository RLS grants
+visibility. A server endpoint issues an RS256 playback JWT with the Mux-required claims;
+the player receives no API credential or signing key and disables Mux Data tracking and
+cookies. The CSP permits Mux playback CDNs, and legacy YouTube embeds continue to use
+the privacy-enhanced host. Provider readiness now validates four server-only Mux values:
+`MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_SIGNING_KEY_ID` and a base64-encoded
+`MUX_SIGNING_PRIVATE_KEY`.
+
+The complete Super App type-check/Node suite passes 285/285, the desktop TypeScript/
+build suite passes 21/21, lint passes, the 51-route production build passes, migration
+006–054 integrity matches its updated 49-file fingerprint, and `git diff --check`
+reports no whitespace errors. Root and desktop production-dependency audits each report
+zero vulnerabilities. Live release remains blocked on a Mux account/API token,
+URL-signing key, protected staging environment values, an active Mux migration number,
+staging deployment, a disposable real-video upload/playback test, and a rebuilt/verified
+Windows installer. Existing Aikido and Kungfu Kids logo blockers also still apply.
+
+### Milestone 141 — last-training browser and accessibility gate (27/09/2026)
+
+Completed the non-Mux last-training-session browser milestone without contacting
+staging, production or any provider. A network-disabled fixture now exercises the
+real Admin members page and Member profile. It covers marking an active membership
+as trained today, correcting an older date, the server-calculated under-30-day
+relative display, the 30-day date fallback, an unavailable Member status and a
+rejected Admin mutation that remains retryable without losing its entered date.
+
+The first run exposed a genuine UI state defect: the training mutation set the
+page-wide processing ID but never cleared it, leaving correction and retry controls
+disabled after either success or failure. The Admin page now clears both processing
+locks in `finally`. The full-page accessibility scan also found five unnamed filter
+selects and low-contrast neutral helper text; the filters now have explicit accessible
+names and the affected text uses the compliant neutral-400 presentation.
+
+The production build generated all 51 routes. The finalized browser matrix passes
+204/204 checks across Chromium and WebKit desktop, tablet and mobile; the three new
+last-training workflows pass 18/18 profile executions. Type-check and Node tests pass
+285/285, lint passes and `git diff --check` reports no whitespace errors. Migration
+045–046 staging evidence remains the persisted authorization/audit proof; no live
+membership or audit row was changed. Mux configuration and its deferred migration remain
+explicitly deferred.
+
+### Milestone 142 — finance payment workflow browser gate (27/09/2026)
+
+Completed the next non-Mux finance milestone through network-disabled fixtures around
+the real Admin subscription and payment-confirmation pages. A scoped Admin can record
+a complete payment without waiting for a Member request, retain the entered audit
+details after a rejected RPC, retry the full payment, identify a payment made after
+its billing month as `LATE PAYMENT`, approve a confirmation, require a reason before
+rejection, and retry a failed review without losing that reason. The fixtures assert
+the exact guarded RPC payloads and confirm the resulting paid, approved and
+rejected history states.
+
+The first confirmation-review run exposed a genuine feedback defect: success was shown
+before the page refresh, whose initial message reset immediately erased it. Approval and
+rejection now refresh first and then present their persistent success message. Automated
+accessibility checks also found unnamed search/month/status/class/dojo filters,
+low-contrast helper text and a mobile history table whose horizontal scroll region was
+not keyboard focusable. The controls now have explicit accessible names, affected text
+uses neutral-400, and the named history region accepts keyboard focus.
+
+The production build generated all 51 routes. The finalized browser matrix passes
+222/222 checks across Chromium and WebKit desktop, tablet and mobile; the three new
+finance workflows pass 18/18 profile executions. Type-check and Node tests pass
+285/285, lint passes and `git diff --check` reports no whitespace errors. This milestone
+did not contact staging, production, Supabase, Vercel or any payment provider. Positive
+settlement-detail browser coverage and live guarded finance mutations remain separate
+staging gates; Mux remains explicitly deferred.
+
+### Milestone 143 — full-payment-only simplification (27/09/2026)
+
+Removed partial payments from future Member and Admin workflows. The Admin page now
+offers one `Mark Full Payment` action with a fixed, non-editable outstanding amount;
+the Member confirmation page likewise displays the complete outstanding amount instead
+of accepting an amount. Partial-payment cards, filters, badges and wording were removed.
+Historical payment rows remain intact, and any historical incomplete payment is treated
+as an outstanding charge rather than offered as a new partial-payment workflow.
+
+Candidate migration 054 adds private fixed-search-path insert triggers to both official
+payments and Member confirmations. Each trigger locks its charge, recalculates the
+remaining balance and rejects any new amount that is not exactly the full outstanding
+balance. It does not update or delete historical payments. The active local recovery
+contract is now the exact 49-file migration chain 006–054. Migration 054 is prepared
+locally only and has not been applied to staging or production.
+
+The production build still generates all 51 routes. The finalized browser matrix passes
+222/222 checks across Chromium and WebKit desktop, tablet and mobile, including full
+payment success and retry recovery in every profile. Type-check and Node tests pass
+288/288, lint passes and `git diff --check` reports no whitespace errors. No remote
+database, provider, Vercel environment or production service was contacted.
+
+### Milestone 144 — settlement review, export and responsive browser gate (27/09/2026)
+
+Completed the remaining local finance presentation gate through a network-disabled
+fixture around the real Super Admin settlement page. The workflow verifies late and
+on-time payment classification against charge month, keyboard-accessible settlement
+details, a real Excel detail download, failed-then-successful detail loading, approval,
+required rejection reasons and rejection retry without losing the entered audit note.
+The fixture asserts every settlement-detail and review RPC payload.
+
+The workflow exposed a genuine feedback defect shared by settlement creation, transfer,
+submission, cancellation and review: each success message was set before `loadPage()`,
+which immediately cleared it. These actions now refresh first and then show persistent
+success feedback. Filter controls now have accessible names, the wide payment table is
+a named keyboard-focusable scroll region, and low-contrast settlement labels/buttons
+were corrected.
+
+The production build generates all 51 routes. The expanded browser matrix passes
+228/228 checks across Chromium and WebKit desktop, tablet and mobile; the settlement
+workflow passes 6/6 profile executions. Type-check and Node tests pass 288/288, lint
+passes and the test harness blocks all external browser requests. Migration 054 remains
+prepared locally and unapplied. No staging database, provider, Vercel environment or
+production service was contacted.
+
+### Milestone 145 — migration 054 guarded staging test preparation (27/09/2026)
+
+Prepared, but did not run, the guarded staging checks for the full-payment-only
+migration. The rollback-contained semantic suite selects only the three known staging
+identity roles, creates two isolated future charges inside one exception-rolled-back
+transaction, proves partial direct payment and partial Member confirmation denial,
+accepts each exact outstanding amount once and rejects a second direct payment. It uses
+a unique timestamp marker plus dynamically selected unused months and makes no changes
+to existing payment history.
+
+The independent postflight requires the exact 006–054 ledger and migration name,
+checks zero marker residue, both enabled triggers, serialized `FOR UPDATE` balance
+checks, private browser ACLs and fixed helper search paths. A Node contract test guards
+the rollback signal and postflight coverage. These SQL files remain local and unrun;
+migration 054 remains unapplied, and no staging or production endpoint was contacted.
+
+### Milestone 146 — migration 054 staging persistence and finance security gate (27/09/2026)
+
+Applied only `054_full_payment_only.sql` to staging `eomubndonbetszdbhsrj` after an
+explicit target guard, an exact pre-apply 006–053 ledger check and a dry run that named
+054 as the sole pending migration. No linked-project command was used. The independent
+post-apply ledger now records the exact contiguous 006–054 chain with 054 exactly once.
+
+The rollback-contained semantic suite returned its exact expected success exception.
+It proved partial direct-payment denial, exact full direct-payment acceptance, duplicate
+payment denial, partial Member-confirmation denial and exact full confirmation acceptance.
+The independent postflight passed with zero marker residue, both triggers enabled,
+serialized balance checks, fixed helper search paths and no browser helper execution.
+Supabase database lint reported no schema errors, and the stricter repository database
+verifier also passed.
+
+All 12 authenticated staging security checks passed for Member, scoped Admin and Super
+Admin, including row isolation, archive/delivery/payment-confirmation privacy, finance
+helper caller isolation and privileged RPC denial. The guarded read-only WebKit staging
+matrix passed 18/18 across desktop, tablet and mobile, including scoped Admin payments
+and Super Admin settlements without mutation. One-time sessions were cleaned up by the
+guarded runners. Production was not contacted. The current full-payment interface still
+requires a new staging deployment before a disposable end-to-end browser mutation test.
