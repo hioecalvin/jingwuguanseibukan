@@ -28,7 +28,7 @@ test('Admin records a complete payment without a Member confirmation request', a
 
   const payments = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Member Payments' }) });
   await expect(payments).toContainText('Fixture Member');
-  await expect(payments).toContainText('Rp 100.000');
+  await expect(payments).toContainText(/Rp\s*100\.000/);
   await payments.getByRole('button', { name: 'Mark Full Payment' }).click();
   await expect(payments).toContainText('Full Payment Amount');
   await payments.getByLabel('Payment Reference').fill('CASH-2026-09');
