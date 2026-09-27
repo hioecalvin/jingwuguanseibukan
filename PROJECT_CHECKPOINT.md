@@ -519,10 +519,10 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
   of `profiles.member_id` instead of `profiles.registration_number`.
 - Vercel Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP` is Ready through its
   release-branch Preview alias and was built from release commit `3a118f7`. The fixed
-  alias `https://jingwuguanseibukan-staging.vercel.app` still points to prior deployment
-  `dpl_DocKgDVEB2EjtMt6i2sh4owYdhVj` for commit `bda9bf9`: the project-scoped-token alias
-  API attempt returned HTTP 404 and did not change the alias. The Preview uses the 13
-  approved staging-only variables. Only
+  alias `https://jingwuguanseibukan-staging.vercel.app` now points to that exact Ready
+  deployment. The earlier project-scoped-token API attempt failed safely and was
+  superseded by the verified CLI reassignment. The Preview uses the 13 approved
+  staging-only variables. Only
   the exact fixed alias is a Deployment Protection exception; generated Preview URLs
   remain protected. The unused `Staging Release` deploy hook was removed and a
   follow-up listing returned no project deploy hooks. The four temporary Codex Vercel
@@ -547,7 +547,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
 | Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The real profile contact and email-change workflows pass 12/12 isolated Chromium/WebKit desktop, tablet and mobile executions, including failure recovery. | Guarded real Auth email-confirmation/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details`; `tests/browser/profile-contact.spec.ts` |
 | Member directory privacy | Migration 050 is persisted and passed caller-class isolation, record-only inclusion, excluded-account and ACL acceptance. Scoped Admin membership visibility passes in the deployed role matrix. | Guarded directory-related mutations are not applicable; physical Safari/iOS remains open. | migration 050; `/directory`; Member-directory RPC |
-| Finance and full-payment-only workflow | Migrations 051 and 054 are persisted on staging. Migration 054 passed rollback-contained partial/full/duplicate-payment semantics, exact 006–054 ledger, zero residue, enabled-trigger, fixed-search-path, helper-ACL, database-lint and 12-check role-security verification. Network-disabled real-page browser coverage verifies fixed full Admin payment, payment-confirmation approval/rejection, settlement late/on-time details, real Excel detail export, Super Admin approval/rejection, preserved retry input and success feedback, accessibility and responsive Chromium/WebKit behavior. The deployed read-only WebKit matrix also loads scoped Admin payments and Super Admin settlements without mutation. Release commit `3a118f7` is Ready on its branch Preview and passed all five CI checks plus 114/114 local WebKit checks. | The fixed staging alias still serves the prior deployment because the project-scoped-token alias API returned HTTP 404. Move and verify that alias before claiming guarded browser acceptance of the new Preview. A deliberate disposable-record end-to-end payment mutation and positive deployed settlement-detail example also remain open. | migrations 051 and 054; Admin/Member subscriptions and Admin payments/settlements; `tests/browser/finance-workflows.spec.ts`; `tests/sql/054_staging_acceptance.sql`; `tests/sql/054_staging_postflight.sql`; settlement-detail wrappers |
+| Finance and full-payment-only workflow | Migrations 051 and 054 are persisted on staging. Migration 054 passed rollback-contained partial/full/duplicate-payment semantics, exact 006–054 ledger, zero residue, enabled-trigger, fixed-search-path, helper-ACL, database-lint and 12-check role-security verification. Network-disabled real-page browser coverage verifies fixed full Admin payment, payment-confirmation approval/rejection, settlement late/on-time details, real Excel detail export, Super Admin approval/rejection, preserved retry input and success feedback, accessibility and responsive Chromium/WebKit behavior. The deployed read-only WebKit matrix also loads scoped Admin payments and Super Admin settlements without mutation. Release commit `3a118f7` is Ready on the fixed staging alias and passed all five CI checks plus 114/114 local WebKit checks. | A deliberate disposable-record end-to-end payment mutation, positive deployed settlement-detail example and physical Safari/iOS coverage remain open. | migrations 051 and 054; Admin/Member subscriptions and Admin payments/settlements; `tests/browser/finance-workflows.spec.ts`; `tests/sql/054_staging_acceptance.sql`; `tests/sql/054_staging_postflight.sql`; settlement-detail wrappers |
 | Repository Uploader appointments | Migration 052 is persisted and passed Super-only appointment, exact-class CRUD, revocation/audit, RLS and ACL acceptance. The current uploader controls are present in the deployed release. | Guarded appointment and scoped CRUD browser mutations plus physical Safari/iOS remain open. | migration 052; `/repository/upload`; `/admin/repository-uploaders`; uploader RPCs and audit |
 
 ## Memorial design in the local candidate
@@ -619,9 +619,9 @@ name as a deterministic tie-breaker.
   locally and the reviewed 13-variable runtime allowlist was uploaded only to the
   release branch's Preview scope. Database URLs/passwords, backup paths,
   `SECURITY_TEST_*` and legacy duplicate key aliases were excluded. The resulting
-  Preview build is Ready, but the fixed staging alias still serves the prior
-  deployment, so guarded current-Preview browser acceptance remains blocked; no
-  Production environment value or deployment was changed.
+  Preview build is Ready on the fixed staging alias. Current-Preview host acceptance
+  passes 11/11 and guarded read-only WebKit acceptance passes 18/18; no Production
+  environment value or deployment was changed.
 - GitHub Actions runs `36096335398` and `36096832757` passed checks plus
   Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS for the migration-047
   candidate and its evidence-only checkpoint.
@@ -634,18 +634,18 @@ name as a deterministic tie-breaker.
   that blocker while retaining hard failures for application-owned defaults and
   any actual managed-role public object.
 - The exact staging alias is publicly reachable through the approved single-domain
-  Vercel exception, but it still serves the prior deployment. All 11 host probes pass
-  against that prior deployment, including public pages, assets, method guards and
-  security headers; they do not verify the current Preview. Generated Preview URLs
-  remain protected.
+  Vercel exception and resolves to Ready deployment
+  `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP`. All 11 host probes pass against that current
+  Preview, including public pages, assets, method guards and security headers.
+  Generated Preview URLs remain protected.
 - Supabase staging now has the exact staging Site URL and `/auth/confirm` redirect,
   email/password login, confirmation, a ten-character mixed-case-and-digit policy,
   custom Resend SMTP and the reviewed token-hash confirmation template.
-- Deployed browser checks against the prior deployment passed public registration
-  catalog loading, generic invalid confirmation handling, Member login and Admin
-  denial, scoped Admin login and Aikido-only member visibility, Super Admin login and
-  all-class visibility, and the Applications page. They do not constitute guarded
-  acceptance of the current Preview. Test sessions were signed out and no member
+- Guarded deployed browser checks against the current Preview pass 18/18 in WebKit
+  across desktop, tablet and mobile. They cover public registration catalog loading,
+  generic invalid-confirmation handling, Member login and Admin denial, scoped Admin
+  login and Aikido-only member visibility, Super Admin Applications/Assessments access
+  and unknown-certificate handling. Test sessions were signed out and no member
   record was changed.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
