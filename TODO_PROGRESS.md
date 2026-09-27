@@ -1,6 +1,6 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 27/09/2026
+Last updated: 28/09/2026
 
 ## Release status
 
@@ -10,9 +10,10 @@ GitHub CI passes all five release checks, and the locale-safe finance assertion 
 114/114 local Playwright WebKit checks. Sydney staging `eomubndonbetszdbhsrj` is
 verified at the exact migration history 006–054. Migration 054 passed its independent
 zero-residue/security postflight and all 12 authenticated Member, scoped Admin and
-Super Admin role-security checks. The new Vercel branch Preview is Ready, but the fixed
-staging alias still serves the prior deployment because the project-scoped-token alias
-API returned HTTP 404. Production was not contacted or modified.
+Super Admin role-security checks. The fixed staging alias now resolves to Ready Preview
+deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP`; its 11/11 read-only host probes and
+18/18 guarded WebKit desktop/tablet/mobile checks pass. Production was not contacted
+or modified.
 
 The exact three dedicated staging security-test accounts were audited and received
 password-only rotations. Public email login remains disabled; the guarded runner
@@ -3813,3 +3814,20 @@ baseline: the live `email_outbox` table and its core queue, claim and acknowledg
 RPCs predate the checked-in chain. Protected backup evidence and a disposable restore
 must capture and exercise those objects. The Vercel integration still reports as not
 installed, the staging alias was not changed, and production was not contacted.
+
+### Milestone 149 — fixed staging alias and current-Preview WebKit acceptance (28/09/2026)
+
+Authenticated the supported Vercel CLI to the existing account and reassigned only
+`jingwuguanseibukan-staging.vercel.app` from the prior Preview to Ready deployment
+`dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP`. A post-change inspection resolved the fixed alias
+to that exact deployment, and the Vercel dashboard listed the fixed alias on the
+release Preview. No Production alias, domain, deployment, configuration or data was
+contacted or changed.
+
+The pinned staging host gate passed 11/11 read-only probes covering public pages,
+assets, protected route shells, method guards and security headers. The guarded
+staging WebKit matrix passed 18/18 checks with one worker: six checks each on desktop,
+tablet and mobile for anonymous registration and confirmation recovery, Member access,
+scoped Admin boundaries, Super Admin read-only pages and certificate not-found
+handling. The suite made no application-data mutations. Deferred Mux and uploader
+files remained untouched.

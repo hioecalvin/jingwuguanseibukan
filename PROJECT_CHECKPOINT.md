@@ -1,6 +1,23 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-Checkpoint date: 27/09/2026
+Checkpoint date: 28/09/2026
+
+## Fixed staging alias and guarded WebKit gate verified (28/09/2026)
+
+The fixed staging alias `https://jingwuguanseibukan-staging.vercel.app` was reassigned
+only to Ready Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP`, built from the
+release implementation commit `3a118f7` on `release/v1-readiness-20260918`. A
+post-change Vercel inspection resolved the fixed alias back to that exact deployment,
+and the deployment dashboard listed the fixed alias alongside the release-branch and
+immutable Preview URLs.
+
+The staging-only host gate then passed 11/11 read-only probes covering public pages,
+static assets, protected route shells, method guards and security headers. The guarded
+WebKit suite passed 18/18 checks with one worker: six checks each on desktop, tablet
+and mobile for anonymous registration and confirmation recovery, Member access,
+scoped Admin boundaries, Super Admin read-only pages and certificate not-found
+handling. No application records were mutated. Production was not contacted, and the
+deferred Mux/uploader working tree was not changed.
 
 ## Release commit, CI and Preview gate verified (27/09/2026)
 
@@ -12,17 +29,15 @@ locale-safe finance assertion was also rerun locally in Playwright WebKit, passi
 114/114 checks with zero skips, unexpected results or flakes.
 
 Vercel Preview deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP` is Ready and available
-through its release-branch Preview alias. The fixed staging alias still points to the
-older release deployment: the attempted project-scoped-token alias API operation
-returned HTTP 404, so no alias change is claimed. The temporary token was revoked, its
-local temporary file was removed and the clipboard was cleared. Production was not
-contacted or modified.
+through both its release-branch Preview alias and the deliberately reassigned fixed
+staging alias. The earlier project-scoped-token alias API failure is superseded by the
+verified CLI reassignment recorded above. Production was not contacted or modified.
 
 Migration 054 remains persisted only on staging `eomubndonbetszdbhsrj`. Its independent
 postflight again passed the exact 006–054 ledger, zero-residue and security contract,
 and all 12 authenticated Member, scoped Admin and Super Admin role-security checks
-passed. Guarded browser verification of the new release through the fixed staging
-alias remains blocked until that alias is deliberately moved to the new Preview.
+passed. Guarded read-only browser verification of the new release through the fixed
+staging alias now passes 18/18 WebKit checks.
 
 ## Member contact self-service browser workflows verified (27/09/2026)
 
