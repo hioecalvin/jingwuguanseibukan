@@ -3582,3 +3582,20 @@ across Chromium and WebKit desktop, tablet and mobile; memorial workflows pass 1
 profile executions. Type-check/Node tests pass 279/279 and lint passes. Existing API
 unit tests and rollback-contained staging SQL remain the authorization, Auth-action,
 transaction and zero-residue evidence; no live Auth or data mutation occurred.
+
+### Milestone 139 — Member contact and verified-email browser gate (27/09/2026)
+
+Added a network-disabled fixture around the real Member profile. The successful
+workflow edits only phone and optional Instagram, verifies normalized values,
+preserves Member ID/name/current email, and checks the exact authenticated
+email-change request. The recovery workflow proves a rejected contact update and a
+duplicate email remain visible and retryable without losing the form values.
+
+The fixture uncovered an unstable `useRouter` test double which returned a new
+router object on every render and retriggered the profile loading effect. The double
+now uses the stable identity provided by real Next.js routing. The production build
+generated 50 routes and the finalized browser matrix passes 186/186 checks across
+Chromium and WebKit desktop, tablet and mobile; the two contact workflows pass 12/12
+profile executions. Type-check/Node tests pass 279/279 and lint passes. No external
+request, staging mutation, Auth-provider change, email delivery or production contact
+occurred; the real confirmation round trip remains a guarded staging gate.

@@ -30,6 +30,7 @@ const adminExportsBundle = await bundleFixture('admin-exports.tsx', 'admin-expor
 const adminSchedulesBundle = await bundleFixture('admin-schedules.tsx', 'admin-schedules-supabase.ts');
 const adminAssessmentsBundle = await bundleFixture('admin-assessments.tsx', 'admin-assessments-supabase.ts');
 const adminMemorialBundle = await bundleFixture('admin-memorial.tsx', 'supabase.ts');
+const profileContactBundle = await bundleFixture('profile-contact.tsx', 'profile-contact-supabase.ts');
 const assets = new Map([
   ['/fixture.js', { type: 'text/javascript', data: navigationBundle.outputFiles[0].contents }],
   ['/enrollment-fixture.js', { type: 'text/javascript', data: enrollmentBundle.outputFiles[0].contents }],
@@ -37,6 +38,7 @@ const assets = new Map([
   ['/admin-schedules-fixture.js', { type: 'text/javascript', data: adminSchedulesBundle.outputFiles[0].contents }],
   ['/admin-assessments-fixture.js', { type: 'text/javascript', data: adminAssessmentsBundle.outputFiles[0].contents }],
   ['/admin-memorial-fixture.js', { type: 'text/javascript', data: adminMemorialBundle.outputFiles[0].contents }],
+  ['/profile-contact-fixture.js', { type: 'text/javascript', data: profileContactBundle.outputFiles[0].contents }],
 ]);
 function collectCss(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -52,9 +54,10 @@ function fixtureHtml(pathname) {
   const adminSchedules = pathname === '/admin-schedules';
   const adminAssessments = pathname === '/admin-assessments';
   const adminMemorial = pathname === '/admin-memorial';
+  const profileContact = pathname === '/profile-contact';
   const adminExports = pathname.startsWith('/admin-') && !adminSchedules && !adminAssessments && !adminMemorial;
-  const title = enrollment ? 'Pending approval workflow fixture' : adminSchedules ? 'Schedule mutation workflow fixture' : adminAssessments ? 'Assessment mutation workflow fixture' : adminMemorial ? 'Memorial workflow fixture' : adminExports ? 'Admin export workflow fixture' : 'Navigation component fixture';
-  const script = enrollment ? '/enrollment-fixture.js' : adminSchedules ? '/admin-schedules-fixture.js' : adminAssessments ? '/admin-assessments-fixture.js' : adminMemorial ? '/admin-memorial-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
+  const title = enrollment ? 'Pending approval workflow fixture' : adminSchedules ? 'Schedule mutation workflow fixture' : adminAssessments ? 'Assessment mutation workflow fixture' : adminMemorial ? 'Memorial workflow fixture' : profileContact ? 'Contact self-service fixture' : adminExports ? 'Admin export workflow fixture' : 'Navigation component fixture';
+  const script = enrollment ? '/enrollment-fixture.js' : adminSchedules ? '/admin-schedules-fixture.js' : adminAssessments ? '/admin-assessments-fixture.js' : adminMemorial ? '/admin-memorial-fixture.js' : profileContact ? '/profile-contact-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="${script}"></script></body></html>`;
 }
 const handler = (req, res) => {

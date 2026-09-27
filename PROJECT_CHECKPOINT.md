@@ -2,6 +2,23 @@
 
 Checkpoint date: 27/09/2026
 
+## Member contact self-service browser workflows verified (27/09/2026)
+
+The real Member profile now has isolated browser coverage for phone and optional
+Instagram updates plus the verified email-change request. The successful workflow
+proves phone/Instagram normalization is reflected in the interface, Member ID/name
+remain intact, the current email remains active while confirmation is pending, and
+the same-origin request carries the Member session bearer token. The rejection
+workflow proves both contact and duplicate-email errors remain visible and retryable
+without losing the entered form values.
+
+The production build generated all 50 routes. The finalized browser matrix passes
+186/186 checks across Chromium and WebKit desktop, tablet and mobile; the two new
+contact workflows pass 12/12 profile executions. Type-check plus unit/security tests
+pass 279/279 and lint passes. The browser fixture is network-disabled, so no staging
+Member, Auth provider, email inbox or production system was read or changed. A real
+provider confirmation round trip remains an external staging gate.
+
 ## Deceased-member memorial interface verified (27/09/2026)
 
 The real Super Admin memorial panel now has isolated browser coverage for opening the
@@ -488,7 +505,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. The real page now also passes an isolated Chromium/WebKit desktop, tablet and mobile workflow for preparation, Pending status, mixed results and one atomic submission. | A password-authenticated deployed staging mutation remains deliberately unperformed because it would create immutable grading/audit history; use dedicated disposable records if this final live proof is required. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs; `tests/browser/admin-assessments.spec.ts` |
 | Certificate barcode verification | Pending QR payloads and final Issued/Void database statuses passed persisted service-role verification; browser roles were denied direct verification/table access. The real server-rendered public page now passes Issued, Pending, Void and unknown-record browser checks across Chromium/WebKit desktop, tablet and mobile with no download exposure. | Physical Safari/iOS remains open. A deployed valid-record scan would require deliberately creating disposable immutable certificate history; deployed random/unknown verification already passes. | `verify_prepared_assessment_certificate(uuid)`; public verification page; certificate PDF components; `tests/browser/certificate-verification.spec.ts` |
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
-| Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The Member profile loads in the deployed role matrix. | Guarded Auth email-change/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details` |
+| Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The real profile contact and email-change workflows pass 12/12 isolated Chromium/WebKit desktop, tablet and mobile executions, including failure recovery. | Guarded real Auth email-confirmation/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details`; `tests/browser/profile-contact.spec.ts` |
 | Member directory privacy | Migration 050 is persisted and passed caller-class isolation, record-only inclusion, excluded-account and ACL acceptance. Scoped Admin membership visibility passes in the deployed role matrix. | Guarded directory-related mutations are not applicable; physical Safari/iOS remains open. | migration 050; `/directory`; Member-directory RPC |
 | Finance late-payment presentation | Migration 051 is persisted and passed late/on-time classification, projection-preservation and wrapper-ACL acceptance. | A positive live late-payment presentation example and guarded payment/settlement mutations remain open. | migration 051; Admin payments and settlements; settlement-detail wrappers |
 | Repository Uploader appointments | Migration 052 is persisted and passed Super-only appointment, exact-class CRUD, revocation/audit, RLS and ACL acceptance. The current uploader controls are present in the deployed release. | Guarded appointment and scoped CRUD browser mutations plus physical Safari/iOS remain open. | migration 052; `/repository/upload`; `/admin/repository-uploaders`; uploader RPCs and audit |

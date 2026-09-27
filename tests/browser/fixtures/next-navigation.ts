@@ -1,4 +1,3 @@
 export function usePathname() { return window.location.pathname; }
-export function useRouter() {
-  return { replace: (href: string) => window.location.assign(href), refresh: () => {} };
-}
+const router = { replace: (href: string) => window.location.assign(href), refresh: () => {} };
+export function useRouter() { return router; }
