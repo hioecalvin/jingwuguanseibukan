@@ -2,6 +2,22 @@
 
 Checkpoint date: 27/09/2026
 
+## Certificate QR verification browser states verified (27/09/2026)
+
+The real server-rendered public verification page now has isolated end-to-end browser
+coverage through an exact loopback-only service-role RPC stub. Issued, Pending, Void
+and unknown UUIDs render their distinct database-backed states; the page shows the
+expected member, promoted rank and certificate number, remains responsive, passes the
+automated accessibility scan, and exposes no link or certificate download.
+
+The expanded finalized browser matrix passes 162/162 checks across Chromium and
+WebKit desktop, tablet and mobile; six executions cover all four verification states.
+The stub accepts only the fixed local test service credential and rejects every other
+endpoint. No staging certificate, member, provider or production system was read or
+changed. A deployed staging random/unknown UUID check already passes; a real deployed
+valid-certificate scan remains unnecessary unless dedicated disposable certificate
+history is deliberately created.
+
 ## Bulk-assessment browser workflow verified (27/09/2026)
 
 The real Super Admin assessment page now has an isolated, network-disabled browser
@@ -452,7 +468,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
 | Deceased member and memorials | Migrations 040 and 043 are on staging. The persisted state transition, initial memorial, annual Remembrance Day and Heavenly Birthday, class recipients, idempotency and Member/Admin denials passed rollback-contained acceptance. | Auth ban/unban and real scheduled delivery still require dedicated accounts/provider execution. | migrations 040 and 043; deceased UI/API; memorial tables and RPCs |
 | Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. The real page now also passes an isolated Chromium/WebKit desktop, tablet and mobile workflow for preparation, Pending status, mixed results and one atomic submission. | A password-authenticated deployed staging mutation remains deliberately unperformed because it would create immutable grading/audit history; use dedicated disposable records if this final live proof is required. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs; `tests/browser/admin-assessments.spec.ts` |
-| Certificate barcode verification | Pending QR payloads and final Issued/Void database statuses passed persisted service-role verification; browser roles were denied direct verification/table access. | Exercise the public scan page through the deployed staging app and physical Safari/iOS. | `verify_prepared_assessment_certificate(uuid)`; public verification page; certificate PDF components |
+| Certificate barcode verification | Pending QR payloads and final Issued/Void database statuses passed persisted service-role verification; browser roles were denied direct verification/table access. The real server-rendered public page now passes Issued, Pending, Void and unknown-record browser checks across Chromium/WebKit desktop, tablet and mobile with no download exposure. | Physical Safari/iOS remains open. A deployed valid-record scan would require deliberately creating disposable immutable certificate history; deployed random/unknown verification already passes. | `verify_prepared_assessment_certificate(uuid)`; public verification page; certificate PDF components; `tests/browser/certificate-verification.spec.ts` |
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
 | Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The Member profile loads in the deployed role matrix. | Guarded Auth email-change/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details` |
 | Member directory privacy | Migration 050 is persisted and passed caller-class isolation, record-only inclusion, excluded-account and ACL acceptance. Scoped Admin membership visibility passes in the deployed role matrix. | Guarded directory-related mutations are not applicable; physical Safari/iOS remains open. | migration 050; `/directory`; Member-directory RPC |

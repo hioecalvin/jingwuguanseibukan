@@ -3548,3 +3548,19 @@ workflow passes once in each of the six profiles. Type-check plus Node tests pas
 279/279 and lint passes. No external request, staging mutation or production contact
 occurred. Existing rollback-contained staging SQL evidence remains the persisted
 authorization, transaction, announcement-order and zero-residue proof.
+
+### Milestone 137 — certificate QR verification browser states (27/09/2026)
+
+Extended the isolated production server with a loopback-only Supabase RPC stub for
+the exact server-side `verify_prepared_assessment_certificate` call. The stub accepts
+only the fixed local service credential and only the verification endpoint. The real
+server-rendered public route now verifies Issued, Pending, Void and unknown UUIDs,
+including the expected identity/rank/number details, distinct validity copy, no links
+or downloadable document, responsive layout and an automated accessibility scan.
+
+The finalized expanded matrix passes 162/162 checks across Chromium and WebKit
+desktop, tablet and mobile; certificate verification passes 6/6 profile executions.
+The first attempt reached the correct Issued page but expected the route title without
+the configured site-name suffix; the assertion was aligned with actual production
+metadata before the clean final runs. No staging record, provider or production
+system was read or changed.
