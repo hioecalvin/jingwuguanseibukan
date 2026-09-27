@@ -3473,3 +3473,38 @@ fingerprints. Thirteen focused recovery tests pass, and the intentionally incomp
 template remains blocked as designed. This prepares the disposable-target rehearsal;
 it does not claim that managed Auth, Storage bytes/metadata, roles, configuration or
 provider resources have been restored.
+### Milestone 132 — JS Video Uploader Stage G provider-ready candidate (27/09/2026)
+
+Advanced the preserved Windows uploader from the Stage B authentication preview to
+a provider-ready Stage G candidate without contacting production or uploading a real
+video. Desktop v0.8.1 now enforces the dedicated Repository Uploader appointment,
+loads exact database class/rank/tier and class-logo data, selects local video files,
+bundles FFmpeg with its license, applies organization and class logo watermarks,
+uses installed-app Google OAuth with PKCE and exact-channel verification, performs
+resumable YouTube uploads, exposes upload progress/cancellation and saves successful
+uploads as repository Drafts through the existing guarded RPC.
+
+TypeScript/build and 21/21 desktop tests pass. Read-only staging acceptance denies
+the unappointed Member and Admin fixtures and grants all five classes to Super Admin.
+Development and packaged Electron smoke tests pass; package inspection found no
+protected credential/env/test-fixture leakage. Local FFmpeg processed and decoded a
+synthetic dual-watermark video. The rebuilt NSIS installer passed a complete silent
+install, installed-app smoke test and silent uninstall with zero residue.
+
+Live uploader release remains blocked on the public Google Desktop OAuth client ID,
+the exact organization YouTube channel ID, any Google audit needed to avoid forced
+Private uploads, and correcting the class-logo audit: Aikido still references retired
+project `pkmllhaavadhaozmwapz`, while Kungfu Kids has no logo. Karate, Taiji and
+Xingyi use approved current origins. The candidate is unsigned and
+still uses the default Electron icon. No production, retired Supabase storage or
+YouTube upload endpoint was contacted.
+
+### Milestone 133 — JS Video Uploader upload-path hardening (27/09/2026)
+
+Added deterministic mocked resumable-upload acceptance for request metadata, privacy,
+content range, returned video identity and hostile upload-session addresses. Tightened
+the upload-session boundary to the exact HTTPS Google API origin/path with a required
+session ID, closing a suffix-validation weakness. The test compiler now isolates each
+parallel process so the expanded 21/21 suite is deterministic. A new read-only staging
+logo audit confirmed three current logos and the exact two blockers above. No video,
+repository content, database record or production system was changed.

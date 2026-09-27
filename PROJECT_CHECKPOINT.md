@@ -1,6 +1,50 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-Checkpoint date: 26/09/2026
+Checkpoint date: 27/09/2026
+
+## JS Video Uploader — Stage G provider-ready candidate (27/09/2026)
+
+The existing Stage B login preview was advanced locally to desktop v0.8.1. The
+Windows app now loads exact `get_my_repository_upload_scopes` authority instead of
+mistaking ordinary Admin scope for upload permission; an unappointed Member and
+unappointed Admin are denied, while Super Admin receives all five staging classes.
+It provides database-driven class/rank/tier choices, local video selection, current
+organization/class logo retrieval, bundled FFmpeg dual-watermark processing, Google
+desktop OAuth with PKCE and exact-channel verification, resumable YouTube upload,
+privacy choice with Unlisted recommended, cancellation/progress and guarded Draft
+creation through `create_repository_content`. JS and Google tokens remain memory-only;
+video bytes never route through Vercel or Supabase Storage.
+
+Verification completed without contacting production or uploading a real video:
+
+- TypeScript/build plus 21/21 desktop security, authentication, configuration and
+  local-file tests pass; dependency audit reports zero vulnerabilities.
+- Read-only staging role acceptance passes: Member denied, unappointed Admin denied,
+  Super Admin receives Aikido, Karate, Kungfu Kids, Taiji and Xingyi.
+- Development and packaged Electron UI smoke tests pass renderer isolation, blocked
+  renderer networking, password clearing, exact role scope, sign-out and responsive
+  minimum-width behavior.
+- Local FFmpeg successfully processed and decoded a synthetic two-watermark video.
+- Package inspection confirms only staging public configuration, the external
+  FFmpeg binary/license/readme and no protected credentials, env files or fixtures.
+- The NSIS installer completed a silent install, installed-app smoke test and silent
+  uninstall with exit code zero and no remaining install directory.
+
+The candidate is not yet a live uploader release. The protected staging environment
+does not contain the public installed-app Google OAuth client ID or the expected
+organization YouTube channel ID, and Google may force uploads from a new unaudited
+API project to Private. A read-only audit proves 3/5 class logos use current approved
+origins: Aikido references retired Supabase origin `pkmllhaavadhaozmwapz`, Kungfu
+Kids has no logo, and Karate, Taiji and Xingyi are current. The processing smoke
+refused to contact the retired origin. Re-upload/add the affected class logos in staging,
+project, configure the two public Google/YouTube identifiers, obtain any required
+Google API audit, then run a guarded
+real Unlisted upload/Draft-save acceptance. The installer remains unsigned and uses
+the default Electron icon; those are distribution/polish gates, not hidden successes.
+
+The v0.8.1 hardening tests the resumable upload metadata, exact Google upload-session
+origin/path/ID, returned YouTube video-ID shape and concurrent test isolation. It fixes
+an address-validation suffix weakness that could otherwise accept a deceptive hostname.
 
 ## Staging migrations 048–052 accepted (26/09/2026)
 
@@ -341,8 +385,10 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
   the exact fixed alias is a Deployment Protection exception; generated Preview URLs
   remain protected. The unused `Staging Release` deploy hook was removed and a
   follow-up listing returned no project deploy hooks. The four temporary Codex Vercel
-  token records used for this staging operation were deleted, and their local
-  temporary copies were removed. Production was not contacted or modified.
+  token used for the final alias operation was deleted and its local temporary copy
+  was removed. Three earlier staging-preview token records are expired and no longer
+  authorize access, but remain visible in Vercel history because the dashboard did
+  not complete their deletion. Production was not contacted or modified.
 
 ## Actual feature inventory
 

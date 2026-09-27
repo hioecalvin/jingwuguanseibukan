@@ -27,6 +27,7 @@ const eslintConfig = defineConfig([
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    "desktop/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     // The isolated browser suite uses a separate generated Next.js build.

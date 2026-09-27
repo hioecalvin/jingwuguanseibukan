@@ -26,6 +26,10 @@
 # local generated artifacts
 /output/
 /tmp/
+/desktop/**/node_modules/
+/desktop/**/dist/
+/desktop/**/release/
+/desktop/**/test-results/
 
 # misc
 .DS_Store
