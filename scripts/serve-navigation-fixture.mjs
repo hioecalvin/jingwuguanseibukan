@@ -27,10 +27,12 @@ async function bundleFixture(entry, supabaseFixture) {
 const navigationBundle = await bundleFixture('navigation.tsx', 'supabase.ts');
 const enrollmentBundle = await bundleFixture('enrollment.tsx', 'enrollment-supabase.ts');
 const adminExportsBundle = await bundleFixture('admin-exports.tsx', 'admin-exports-supabase.ts');
+const adminSchedulesBundle = await bundleFixture('admin-schedules.tsx', 'admin-schedules-supabase.ts');
 const assets = new Map([
   ['/fixture.js', { type: 'text/javascript', data: navigationBundle.outputFiles[0].contents }],
   ['/enrollment-fixture.js', { type: 'text/javascript', data: enrollmentBundle.outputFiles[0].contents }],
   ['/admin-exports-fixture.js', { type: 'text/javascript', data: adminExportsBundle.outputFiles[0].contents }],
+  ['/admin-schedules-fixture.js', { type: 'text/javascript', data: adminSchedulesBundle.outputFiles[0].contents }],
 ]);
 function collectCss(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -43,9 +45,10 @@ collectCss(path.join(root, BROWSER_SMOKE_DIST_DIR, 'static'));
 const cssLinks = [...assets.keys()].filter(name => name.endsWith('.css')).map(name => `<link rel="stylesheet" href="${name}">`).join('');
 function fixtureHtml(pathname) {
   const enrollment = pathname === '/enrollment';
-  const adminExports = pathname.startsWith('/admin-');
-  const title = enrollment ? 'Pending approval workflow fixture' : adminExports ? 'Admin export workflow fixture' : 'Navigation component fixture';
-  const script = enrollment ? '/enrollment-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
+  const adminSchedules = pathname === '/admin-schedules';
+  const adminExports = pathname.startsWith('/admin-') && !adminSchedules;
+  const title = enrollment ? 'Pending approval workflow fixture' : adminSchedules ? 'Schedule mutation workflow fixture' : adminExports ? 'Admin export workflow fixture' : 'Navigation component fixture';
+  const script = enrollment ? '/enrollment-fixture.js' : adminSchedules ? '/admin-schedules-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="${script}"></script></body></html>`;
 }
 const handler = (req, res) => {

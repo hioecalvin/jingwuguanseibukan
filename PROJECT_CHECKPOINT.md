@@ -2,6 +2,21 @@
 
 Checkpoint date: 27/09/2026
 
+## Regular-schedule browser mutation workflow verified (27/09/2026)
+
+The real Admin schedule page now has an isolated, network-disabled browser mutation
+fixture covering scoped catalog loading, instructor selection, create, edit,
+deactivate, server-error presentation and no-row-on-failure behavior. The finalized
+suite passes 125/125 checks across Chromium desktop/mobile and WebKit
+desktop/tablet/mobile; ten of those checks are the two new schedule workflows across
+five responsive profiles. The first synchronization attempt exposed only a fixture
+wait issue and was corrected by waiting for the actual RPC-provided options.
+
+This UI evidence complements the existing rollback-contained staging database proof
+for schedule authorization, audit and scope semantics. It does not claim that a
+deployed browser committed a staging schedule: no Supabase row, provider or production
+system was changed.
+
 ## Managed Supabase default-privilege gate resolved (27/09/2026)
 
 The former strict-verifier blocker is closed without weakening application-object
@@ -604,8 +619,9 @@ name as a deterministic tie-breaker.
    recipient. No dedicated deliverable test mailbox is currently configured.
 2. Exercise deceased-member Supabase Auth ban/unban and the protected annual worker
    with dedicated staging accounts; verify no live member data is mutated.
-3. Complete the remaining authenticated mutation workflows in deployed staging,
-   then repeat relevant guarded WebKit coverage and run physical Safari/iOS coverage.
+3. Complete the remaining authenticated mutation workflows in deployed staging;
+   the regular-schedule browser mutation path is now covered locally across Chromium
+   and WebKit. Repeat relevant guarded WebKit coverage and run physical Safari/iOS.
 4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.

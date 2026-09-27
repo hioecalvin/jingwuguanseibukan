@@ -3520,3 +3520,14 @@ role-membership invariants remain true. A future managed-role public object or r
 inheritance therefore fails closed. Focused SQL-security tests and the exact pinned
 read-only staging verifier pass. Production and application data were not contacted
 or changed.
+
+### Milestone 135 — regular-schedule browser mutation gate (27/09/2026)
+
+Added a network-disabled browser fixture around the real Admin schedules page and
+the exact schedule RPC contract. It verifies scope/instructor loading, creation,
+editing, deactivation, error visibility and no created row after rejection. After
+fixing fixture synchronization around asynchronously loaded select options, the full
+browser gate passes 50/50 on Chromium/WebKit desktop and 75/75 on Chromium mobile,
+WebKit tablet and WebKit mobile. No external request or database mutation occurred;
+the earlier rollback-contained staging SQL evidence continues to prove the persisted
+authorization, audit and scope semantics.
