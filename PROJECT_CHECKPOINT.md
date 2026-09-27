@@ -604,8 +604,9 @@ name as a deterministic tie-breaker.
   locally and the reviewed 13-variable runtime allowlist was uploaded only to the
   release branch's Preview scope. Database URLs/passwords, backup paths,
   `SECURITY_TEST_*` and legacy duplicate key aliases were excluded. The resulting
-  Preview build is Ready and its fixed staging alias is assigned; no Production
-  environment value or deployment was changed.
+  Preview build is Ready, but the fixed staging alias still serves the prior
+  deployment, so guarded current-Preview browser acceptance remains blocked; no
+  Production environment value or deployment was changed.
 - GitHub Actions runs `36096335398` and `36096832757` passed checks plus
   Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS for the migration-047
   candidate and its evidence-only checkpoint.
@@ -618,15 +619,19 @@ name as a deterministic tie-breaker.
   that blocker while retaining hard failures for application-owned defaults and
   any actual managed-role public object.
 - The exact staging alias is publicly reachable through the approved single-domain
-  Vercel exception. All 11 host probes pass, including public pages, assets, method
-  guards and security headers. Generated Preview URLs remain protected.
+  Vercel exception, but it still serves the prior deployment. All 11 host probes pass
+  against that prior deployment, including public pages, assets, method guards and
+  security headers; they do not verify the current Preview. Generated Preview URLs
+  remain protected.
 - Supabase staging now has the exact staging Site URL and `/auth/confirm` redirect,
   email/password login, confirmation, a ten-character mixed-case-and-digit policy,
   custom Resend SMTP and the reviewed token-hash confirmation template.
-- Deployed browser checks passed public registration catalog loading, generic invalid
-  confirmation handling, Member login and Admin denial, scoped Admin login and
-  Aikido-only member visibility, Super Admin login and all-class visibility, and the
-  Applications page. Test sessions were signed out and no member record was changed.
+- Deployed browser checks against the prior deployment passed public registration
+  catalog loading, generic invalid confirmation handling, Member login and Admin
+  denial, scoped Admin login and Aikido-only member visibility, Super Admin login and
+  all-class visibility, and the Applications page. They do not constitute guarded
+  acceptance of the current Preview. Test sessions were signed out and no member
+  record was changed.
 
 - `npm test`: passed TypeScript plus 223/223 Node tests after adding migration 044,
   optional Aikikai and automatic JS Member ID coverage, Super-Admin-only
@@ -689,6 +694,10 @@ name as a deterministic tie-breaker.
   represents the absence of a production project without a fake reference. The
   retained restore itself still reaches only ledger 006–026 and excludes managed
   Auth/Storage and other platform resources, so it is not current recovery evidence.
+  The live `email_outbox` table and its core queue/claim/acknowledgement RPCs also
+  predate the checked-in migration chain: migrations 006–054 validate but do not
+  recreate those baseline definitions, so they require explicit protected-backup and
+  disposable-restore evidence.
 - `npm audit --audit-level=high --omit=dev` reports zero vulnerabilities.
 - A fresh local PostgreSQL 17 cluster installed migration 029 then 041 and passed the
   14-check semantic suite, including active/non-deceased assessor enforcement,

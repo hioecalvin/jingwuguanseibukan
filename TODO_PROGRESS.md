@@ -55,14 +55,14 @@ event/announcement in-app notification triggers missing from the restored schema
 Its pinned SHA-256 is
 `42F74C01B81FFFF15B33278BA950F02DD97002A2B6224A20D7ECB8CFE7671145`.
 
-Authenticated Chromium desktop route/navigation testing now passes for the
-dedicated staging Member, scoped Admin and Super Admin accounts, including UI
-sign-out. This closes the role-shell browser sub-gate, not the outstanding complete
-business-workflow and multi-browser coverage.
+Authenticated Chromium desktop route/navigation testing passed against the prior
+deployment for the dedicated staging Member, scoped Admin and Super Admin accounts,
+including UI sign-out. This closes the historical role-shell browser sub-gate, but
+does not verify the current branch Preview through the still-unmoved fixed alias.
 
-The isolated local browser suite passes 69/69 in Chromium and 69/69 in WebKit
-across desktop, tablet and mobile profiles after the YouTube change. The combined
-138/138 run completed with a clean report and exit when allowed to manage its own
+The earlier isolated local browser baseline passed 69/69 in Chromium and 69/69 in
+WebKit across desktop, tablet and mobile profiles before the deferred Mux work. The
+combined 138/138 run completed with a clean report and exit when allowed to manage its own
 local browser/server child processes. The suite covers public authentication
 and recovery states, responsive and accessible role navigation, and the rejected
 enrolment reapply/pending/cancel lifecycle without provider or database access.
@@ -85,12 +85,19 @@ without enabling general production `unsafe-eval`.
 
 The application is **not approved for production deployment yet**. The scoped
 staging application-schema restore is proven, but complete Supabase managed Auth,
-Storage-object and platform-configuration recovery proof, email/push scheduler and
-YouTube channel operational configuration, authenticated browser coverage for the
-new workflows, and the remaining operational release gates are still required.
-Production's current migration ledger remains unverified because it was not
-contacted. Migrations 040–046 are applied to staging only and have not been applied
-to production.
+Storage-object and platform-configuration recovery proof, email-worker scheduling,
+email and targeted-push delivery, physical Safari/iOS coverage, remaining guarded
+provider/mutation workflows, and current-Preview browser acceptance through the fixed
+staging alias are still
+required. Mux remains explicitly deferred and is not an operational gate for the
+current non-Mux release candidate. Production's migration ledger remains unverified
+because production was not contacted. Staging alone is verified at the exact
+006–054 migration ledger.
+
+The exact migration ledger is not a complete schema baseline: the live
+`email_outbox` table and its core queue/claim/acknowledgement RPCs are referenced and
+validated by later migrations but are not created by migrations 006–054. The protected
+backup and disposable restore must capture and exercise those objects explicitly.
 
 The approved production-region plan is a separate Supabase primary in Singapore
 (`ap-southeast-1`) for the Jakarta/Indonesia user base. Sydney
@@ -151,7 +158,9 @@ Historical verification from the prior audit (current results below):
 - [x] Repeat the production build after all final changes (40 routes generated successfully).
 - [x] Verify public login/registration rendering, unauthenticated route guards,
   security headers, and responsive registration layout at 390, 768, and 1440px.
-- [ ] Complete authenticated browser workflow testing with dedicated accounts.
+- [ ] Complete the remaining guarded authenticated provider/mutation workflows with
+  disposable dedicated records after the current Preview is reachable through the
+  fixed staging alias.
 
 ## Prepared P0 fixes
 
@@ -3784,3 +3793,23 @@ Migration 054's independent staging postflight again passed the exact 006–054 
 zero-residue and security contract. The authenticated staging security suite passed
 12/12 for Member, scoped Admin and Super Admin. No production endpoint, deployment,
 configuration or data was contacted or changed.
+
+### Milestone 148 — operational and recovery evidence reconciled (28/09/2026)
+
+Corrected current-state documentation that had incorrectly implied the fixed staging
+alias served the latest Preview. It still serves the prior deployment, so the earlier
+11 host probes and authenticated browser checks remain historical evidence rather than
+acceptance of the current Preview. Mux remains deferred and is not a gate for the
+current non-Mux release candidate.
+
+The isolated recovery and provider-operations checks passed 18/18, the recovery
+fingerprint still matches the exact 006–054, 49-file contract, and the focused email
+worker/provider tests passed 30/30. The email worker implementation and retry/backoff
+behavior are locally verified, but no external once-per-minute scheduler is configured
+and real Resend sender-domain/delivery evidence remains open.
+
+The audit also confirmed that the exact migration ledger is not a complete schema
+baseline: the live `email_outbox` table and its core queue, claim and acknowledgement
+RPCs predate the checked-in chain. Protected backup evidence and a disposable restore
+must capture and exercise those objects. The Vercel integration still reports as not
+installed, the staging alias was not changed, and production was not contacted.

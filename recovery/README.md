@@ -54,6 +54,11 @@ commit the ledger exports or manifest.
 The protected inventory for this application must include, without recording secret
 values in Git:
 
+- the live `email_outbox` table and the pre-migration queue primitives
+  `queue_email`, `claim_next_email`, `mark_email_sent` and `mark_email_failed`;
+  migrations 006–054 reference and validate these objects but do not create their
+  baseline definitions, so the protected database backup and disposable restore must
+  capture and exercise them explicitly;
 - any historical objects in the private Supabase Storage bucket
   `repository-video-originals`, including an object key/size/checksum manifest and
   a verified byte-for-byte restore sample before deciding whether to retire them;
