@@ -2,6 +2,23 @@
 
 Checkpoint date: 27/09/2026
 
+## Bulk-assessment browser workflow verified (27/09/2026)
+
+The real Super Admin assessment page now has an isolated, network-disabled browser
+fixture covering scoped roster loading, required Mudansha and Yudansha assessors,
+three-candidate roster preparation, Pending certificates, one combined Pass/Fail
+review and one atomic submission. The final fixture state proves two passing members
+were promoted, the failed member remained unchanged, Pass certificates became Issued,
+the failed certificate became Void, and the class/dojo announcement payload remained
+ordered from the highest successful destination grade to the lower grade.
+
+The finalized production-build suite passes 156/156 checks across Chromium and
+WebKit desktop, tablet and mobile; six of those checks are this complete assessment
+workflow. Type-check plus unit/security tests pass 279/279, and lint passes. This UI
+evidence complements the existing persisted rollback-contained staging SQL proof. It
+does not claim that a deployed browser changed staging: no member, grade, certificate,
+announcement, provider or production record was mutated.
+
 ## Regular-schedule browser mutation workflow verified (27/09/2026)
 
 The real Admin schedule page now has an isolated, network-disabled browser mutation
@@ -434,7 +451,7 @@ Stop here; obtain approval for Stage B before implementing JS login/authorizatio
 | Announcements and notifications | Existing published text announcements, class scoping, in-app notification creation and durable email outbox integration are present. The staging queue-health probe currently passes with no queued, due, overdue, stuck, exhausted or duplicate rows. | Announcement comments and image attachments were not found. External email-worker scheduling, sender-domain ownership and real delivery remain operational gates. The push delivery route is per-recipient and is not a scheduler worker. | `announcements`; `notifications`; `email_outbox`; `/api/system/email-worker`; `/api/push/send`; migration 034; migration 040 recipient extensions |
 | Events | Existing create/delete/list/export paths and bounded queued event-email notifications are present. | Event voting, voting deadlines and vote correction were not found. | `app/admin/events`; `events`; event notification functions |
 | Deceased member and memorials | Migrations 040 and 043 are on staging. The persisted state transition, initial memorial, annual Remembrance Day and Heavenly Birthday, class recipients, idempotency and Member/Admin denials passed rollback-contained acceptance. | Auth ban/unban and real scheduled delivery still require dedicated accounts/provider execution. | migrations 040 and 043; deceased UI/API; memorial tables and RPCs |
-| Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. | Complete password-authenticated and browser workflows using dedicated staging accounts. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs |
+| Bulk assessment and promotion | Migrations 041–043 are on staging. A persisted three-person rollback suite prepared all certificates as Pending, submitted two Pass and one Fail atomically, promoted only passes, created the results announcement and rolled everything back. The real page now also passes an isolated Chromium/WebKit desktop, tablet and mobile workflow for preparation, Pending status, mixed results and one atomic submission. | A password-authenticated deployed staging mutation remains deliberately unperformed because it would create immutable grading/audit history; use dedicated disposable records if this final live proof is required. | migrations 041–043; `app/admin/assessments/page.tsx`; private assessment tables and guarded RPCs; `tests/browser/admin-assessments.spec.ts` |
 | Certificate barcode verification | Pending QR payloads and final Issued/Void database statuses passed persisted service-role verification; browser roles were denied direct verification/table access. | Exercise the public scan page through the deployed staging app and physical Safari/iOS. | `verify_prepared_assessment_certificate(uuid)`; public verification page; certificate PDF components |
 | Regular schedules | Migration 048 is persisted and passed rollback-contained scoped-write, Member-read, audit and ACL acceptance. The current schedule routes load in the deployed release matrix. | Guarded authenticated schedule mutations and physical Safari/iOS remain open. | migration 048; `/schedules`; `/admin/schedules`; schedule RPCs and private audit |
 | Member contact self-service | Migration 049 is persisted and passed rollback-contained normalization, audit, disabled-user, duplicate-email and ACL acceptance. The Member profile loads in the deployed role matrix. | Guarded Auth email-change/provider delivery and physical Safari/iOS remain open. | migration 049; `/profile`; `/api/account/change-email`; `update_my_contact_details` |
@@ -621,7 +638,8 @@ name as a deterministic tie-breaker.
    with dedicated staging accounts; verify no live member data is mutated.
 3. Complete the remaining authenticated mutation workflows in deployed staging;
    the regular-schedule browser mutation path is now covered locally across Chromium
-   and WebKit. Repeat relevant guarded WebKit coverage and run physical Safari/iOS.
+   and WebKit, as is the complete bulk-assessment preparation/finalization path.
+   Repeat relevant guarded WebKit coverage and run physical Safari/iOS.
 4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.

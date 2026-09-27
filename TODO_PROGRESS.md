@@ -3531,3 +3531,20 @@ browser gate passes 50/50 on Chromium/WebKit desktop and 75/75 on Chromium mobil
 WebKit tablet and WebKit mobile. No external request or database mutation occurred;
 the earlier rollback-contained staging SQL evidence continues to prove the persisted
 authorization, audit and scope semantics.
+
+### Milestone 136 — bulk-assessment browser mutation gate (27/09/2026)
+
+Added a network-disabled fixture around the real Super Admin assessment page and its
+exact prepared-assessment RPC contract. The workflow loads a scoped three-member
+roster, selects both required assessor types, prepares all certificates as Pending,
+marks two Pass and one Fail, reviews the whole roster and submits it exactly once.
+The fixture verifies pass-only promotion, no grade change for the failed member,
+Issued/Void certificate transitions and a class/dojo announcement ordered from the
+highest successful destination grade down.
+
+The production build generated all 50 routes. The final browser matrix passes 156/156
+checks across Chromium and WebKit desktop, tablet and mobile; the new assessment
+workflow passes once in each of the six profiles. Type-check plus Node tests pass
+279/279 and lint passes. No external request, staging mutation or production contact
+occurred. Existing rollback-contained staging SQL evidence remains the persisted
+authorization, transaction, announcement-order and zero-residue proof.
