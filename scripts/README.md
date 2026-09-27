@@ -1,5 +1,21 @@
 # Project scripts
 
+## Read-only staging database verifier
+
+`run-staging-database-verifier.ps1` is pinned to staging project
+`eomubndonbetszdbhsrj`. It reads the existing Supabase CLI credential from Windows
+Credential Manager, submits only `verify-database-security.sql` through the Supabase
+database-query endpoint with `read_only = true`, never prints the credential and
+clears its in-process byte buffer.
+
+```powershell
+.\scripts\run-staging-database-verifier.ps1
+```
+
+The verifier treats unsafe `postgres` defaults as an application release failure.
+Hosted `supabase_admin` defaults are accepted only while `postgres` cannot inherit
+that managed role and it owns no actual object in the public API schema.
+
 ## Isolated browser gates
 
 `npm.cmd run test:browser` builds and tests only against fixed loopback fixtures;

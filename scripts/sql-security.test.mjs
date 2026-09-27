@@ -547,7 +547,20 @@ test("database verifier rejects dangerous relation and server-worker grants", ()
   ]) {
     assert.ok(sql.includes(`'${signature}'`));
   }
-  assert.match(sql, /Unsafe postgres\/supabase_admin global or public-schema defaults remain/);
+  assert.match(sql, /Unsafe postgres global or public-schema defaults remain/);
+});
+
+test("database verifier accepts managed defaults only without managed public objects", () => {
+  const sql = fs.readFileSync(
+    path.join(process.cwd(), "scripts", "verify-database-security.sql"),
+    "utf8"
+  );
+
+  assert.match(sql, /owner_role\.rolname = 'supabase_admin'/i);
+  assert.match(sql, /pg_has_role\('postgres', 'supabase_admin', 'MEMBER'\)/i);
+  assert.match(sql, /namespace\.nspname = 'public'[\s\S]*relation\.relkind in \('r','p','v','m','S'\)[\s\S]*owner_role\.rolname = 'supabase_admin'/i);
+  assert.match(sql, /namespace\.nspname = 'public'[\s\S]*owner_role\.rolname = 'supabase_admin'[\s\S]*Managed supabase_admin defaults affect actual public objects/i);
+  assert.match(sql, /Accepted managed supabase_admin defaults: no public objects are owned by that role/i);
 });
 
 function sqlFilesRecursive(directory) {

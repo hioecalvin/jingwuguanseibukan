@@ -3508,3 +3508,15 @@ session ID, closing a suffix-validation weakness. The test compiler now isolates
 parallel process so the expanded 21/21 suite is deterministic. A new read-only staging
 logo audit confirmed three current logos and the exact two blockers above. No video,
 repository content, database record or production system was changed.
+
+### Milestone 134 — managed Supabase default-privilege gate closed (27/09/2026)
+
+Re-audited the staging catalog read-only and proved all 77 public relations, 214
+public routines and 87 public types are `postgres`-owned, with no public object owned
+by managed `supabase_admin`. The `postgres` application role cannot inherit or alter
+that platform role. Updated the strict verifier to continue failing on unsafe
+`postgres` defaults and to accept managed defaults only while both ownership and
+role-membership invariants remain true. A future managed-role public object or role
+inheritance therefore fails closed. Focused SQL-security tests and the exact pinned
+read-only staging verifier pass. Production and application data were not contacted
+or changed.

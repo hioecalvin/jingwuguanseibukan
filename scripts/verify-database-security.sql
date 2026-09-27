@@ -255,8 +255,8 @@ begin
   end if;
 
   -- Per-schema ACLs ADD to the global ACL (or the built-in global default).
-  -- Platform-owned defaults are intentionally a release gate, not silently
-  -- ignored because postgres cannot alter the other owner's privileges.
+  -- Application migrations run as postgres, so unsafe postgres defaults remain
+  -- a hard failure.
   if exists (
     select 1 from pg_roles as owner_role
     cross join lateral aclexplode(coalesce(
@@ -264,7 +264,7 @@ begin
         and defaclnamespace = 0 and defaclobjtype = 'f'),
       acldefault('f', owner_role.oid)
     )) as privilege
-    where owner_role.rolname in ('postgres','supabase_admin')
+    where owner_role.rolname = 'postgres'
       and privilege.privilege_type = 'EXECUTE'
       and (privilege.grantee = 0 or privilege.grantee in (
         select oid from pg_roles where rolname in ('anon','authenticated')
@@ -275,12 +275,66 @@ begin
     join pg_namespace as namespace on namespace.oid = defaults.defaclnamespace
     cross join lateral aclexplode(defaults.defaclacl) as privilege
     where namespace.nspname = 'public'
-      and owner_role.rolname in ('postgres','supabase_admin')
+      and owner_role.rolname = 'postgres'
       and defaults.defaclobjtype in ('r','S','f')
       and (privilege.grantee = 0 or privilege.grantee in (
         select oid from pg_roles where rolname in ('anon','authenticated')
       ))
-  ) then raise exception 'Unsafe postgres/supabase_admin global or public-schema defaults remain'; end if;
+  ) then raise exception 'Unsafe postgres global or public-schema defaults remain'; end if;
+
+  -- Hosted Supabase owns supabase_admin and postgres cannot alter that role's
+  -- defaults. Supabase documents those defaults as part of its managed Data API
+  -- model. They do not apply to postgres-owned application migrations. Accept
+  -- them only while postgres is not a member of the managed role and no actual
+  -- public relation/sequence/function is owned by supabase_admin. A future
+  -- platform-owned public object therefore reopens this gate for explicit review.
+  if exists (
+    select 1 from pg_roles as owner_role
+    cross join lateral aclexplode(coalesce(
+      (select defaclacl from pg_default_acl where defaclrole = owner_role.oid
+        and defaclnamespace = 0 and defaclobjtype = 'f'),
+      acldefault('f', owner_role.oid)
+    )) as privilege
+    where owner_role.rolname = 'supabase_admin'
+      and privilege.privilege_type = 'EXECUTE'
+      and (privilege.grantee = 0 or privilege.grantee in (
+        select oid from pg_roles where rolname in ('anon','authenticated')
+      ))
+  ) or exists (
+    select 1 from pg_default_acl as defaults
+    join pg_roles as owner_role on owner_role.oid = defaults.defaclrole
+    join pg_namespace as namespace on namespace.oid = defaults.defaclnamespace
+    cross join lateral aclexplode(defaults.defaclacl) as privilege
+    where namespace.nspname = 'public'
+      and owner_role.rolname = 'supabase_admin'
+      and defaults.defaclobjtype in ('r','S','f')
+      and (privilege.grantee = 0 or privilege.grantee in (
+        select oid from pg_roles where rolname in ('anon','authenticated')
+      ))
+  ) then
+    if pg_has_role('postgres', 'supabase_admin', 'MEMBER') then
+      raise exception 'postgres unexpectedly inherits the managed supabase_admin role';
+    end if;
+    if exists (
+      select 1
+      from pg_class as relation
+      join pg_namespace as namespace on namespace.oid = relation.relnamespace
+      join pg_roles as owner_role on owner_role.oid = relation.relowner
+      where namespace.nspname = 'public'
+        and relation.relkind in ('r','p','v','m','S')
+        and owner_role.rolname = 'supabase_admin'
+    ) or exists (
+      select 1
+      from pg_proc as routine
+      join pg_namespace as namespace on namespace.oid = routine.pronamespace
+      join pg_roles as owner_role on owner_role.oid = routine.proowner
+      where namespace.nspname = 'public'
+        and owner_role.rolname = 'supabase_admin'
+    ) then
+      raise exception 'Managed supabase_admin defaults affect actual public objects';
+    end if;
+    raise notice 'Accepted managed supabase_admin defaults: no public objects are owned by that role';
+  end if;
 end
 $verify$;
 

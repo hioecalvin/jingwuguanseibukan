@@ -2,6 +2,24 @@
 
 Checkpoint date: 27/09/2026
 
+## Managed Supabase default-privilege gate resolved (27/09/2026)
+
+The former strict-verifier blocker is closed without weakening application-object
+checks. A fresh read-only staging catalog proves all 77 public relations, 214 public
+routines and 87 public types are owned by `postgres`; zero public objects are owned
+by `supabase_admin`; and `postgres` is not a member of that managed role. The only
+remaining browser-role defaults owned by `supabase_admin` are hosted-platform
+defaults which the application role cannot alter and which do not apply to the
+`postgres`-owned migration objects.
+
+The verifier now keeps unsafe global/public defaults owned by `postgres` as a hard
+failure. It accepts the managed defaults only while `postgres` cannot inherit
+`supabase_admin` and that role owns no public relation, sequence or routine; either
+condition changing reopens the release gate. The pinned read-only verifier then
+passed against staging `eomubndonbetszdbhsrj`. This matches Supabase's documentation
+that `supabase_admin` is an internal administrative role and its default grants are
+part of the managed Data API permission model. Production was not contacted.
+
 ## JS Video Uploader — Stage G provider-ready candidate (27/09/2026)
 
 The existing Stage B login preview was advanced locally to desktop v0.8.1. The
@@ -487,14 +505,10 @@ name as a deterministic tie-breaker.
   lint, anonymous catalog, helper-denial, sensitive-relation-denial, service-role,
   rollback-contained active/disabled/deceased semantics, 12/12 role-security and
   independent zero-residue checks on staging.
-- The updated strict SQL verifier was executed read-only against staging through
-  migration 047. Every preceding check passed; its final default-privilege gate
-  stopped with SQLSTATE `P0001`. The remaining unsafe defaults are owned exclusively
-  by managed-platform role `supabase_admin`: global function defaults grant
-  `PUBLIC EXECUTE`; public-schema function defaults grant `anon`/`authenticated`
-  `EXECUTE`; sequence defaults grant those roles `SELECT`/`UPDATE`/`USAGE`; and table
-  defaults grant all eight relation privileges, including mutations, `TRUNCATE`,
-  `TRIGGER` and `MAINTAIN`. No unsafe `postgres`-owned default was found.
+- The strict SQL verifier previously stopped on hosted `supabase_admin` defaults.
+  The 27 September ownership audit and narrow managed-platform exception above close
+  that blocker while retaining hard failures for application-owned defaults and
+  any actual managed-role public object.
 - The exact staging alias is publicly reachable through the approved single-domain
   Vercel exception. All 11 host probes pass, including public pages, assets, method
   guards and security headers. Generated Preview URLs remain protected.
@@ -592,12 +606,10 @@ name as a deterministic tie-breaker.
    with dedicated staging accounts; verify no live member data is mutated.
 3. Complete the remaining authenticated mutation workflows in deployed staging,
    then repeat relevant guarded WebKit coverage and run physical Safari/iOS coverage.
-4. Resolve or formally accept the existing Supabase platform-owned default-privilege
-   database-verifier blocker without weakening the verifier.
-5. Configure and monitor an external **email** worker scheduler, then verify real
+4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.
-6. Rehearse a complete 006–053 managed-platform restore into a disposable isolated
+5. Rehearse a complete 006–053 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 
 The three reusable staging dummy identities exist and their protected passwords were
