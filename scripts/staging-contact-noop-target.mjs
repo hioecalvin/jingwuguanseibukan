@@ -130,7 +130,18 @@ function explicitReadRequest(method, url) {
   if (!['GET', 'HEAD'].includes(normalizedMethod)) return null;
 
   if (url.origin === STAGING_APP_ORIGIN) {
-    const pathAllowed = ['/', '/login', '/profile', '/favicon.ico'].includes(url.pathname) ||
+    const pathAllowed = [
+      '/',
+      '/login',
+      '/profile',
+      '/repository',
+      '/calendar',
+      '/schedules',
+      '/directory',
+      '/notifications',
+      '/subscription',
+      '/favicon.ico',
+    ].includes(url.pathname) ||
       url.pathname.startsWith('/_next/');
     return pathAllowed
       ? { allowed: true, reason: 'allowlisted staging document or static asset' }
@@ -183,7 +194,7 @@ export function classifyStagingContactNoopRequest(method, rawUrl, body, state) {
     body.expected_phone === baseline.phone &&
     body.expected_instagram_username === baseline.instagram &&
     body.new_phone === baseline.phone &&
-    body.new_instagram_username === baseline.instagram;
+    body.new_instagram_username === (baseline.instagram ?? '');
   return valid
     ? { allowed: true, mutation: 'contact-noop', reason: 'exact contact no-op payload' }
     : deny('contact no-op payload does not match the captured baseline');

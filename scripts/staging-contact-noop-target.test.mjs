@@ -81,7 +81,7 @@ test('request guard permits exactly one matching contact no-op RPC', () => {
     expected_phone: '+628123456789',
     expected_instagram_username: null,
     new_phone: '+628123456789',
-    new_instagram_username: null,
+    new_instagram_username: '',
   };
   const state = {
     phone: '+628123456789', instagram: null, phase: 'new', inFlight: false,
@@ -110,6 +110,18 @@ test('request guard permits exactly one matching contact no-op RPC', () => {
   assert.equal(classifyStagingContactNoopRequest(
     'GET', 'https://jingwuguanseibukan-staging.vercel.app/api/mutate', undefined, state,
   ).allowed, false);
+  for (const path of [
+    '/repository',
+    '/calendar',
+    '/schedules',
+    '/directory',
+    '/notifications',
+    '/subscription',
+  ]) {
+    assert.equal(classifyStagingContactNoopRequest(
+      'GET', `https://jingwuguanseibukan-staging.vercel.app${path}`, undefined, state,
+    ).allowed, true);
+  }
   assert.equal(classifyStagingContactNoopRequest(
     'GET', `${origin}/functions/v1/unsafe`, undefined, state,
   ).allowed, false);

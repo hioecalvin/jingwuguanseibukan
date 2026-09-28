@@ -16,20 +16,39 @@ const baseline = canonicalContactBaseline(
     : process.env.STAGING_CONTACT_BASELINE_INSTAGRAM,
 );
 
-async function beginMemberLogin(page: Page) {
+async function beginMemberLogin(
+  page: Page,
+  requestAudit: string[],
+  violations: string[],
+) {
   await page.goto('/login', { waitUntil: 'networkidle' });
-  await page.getByLabel('Email', { exact: true }).fill(process.env.SECURITY_TEST_MEMBER_EMAIL!);
-  await page.getByLabel('Password', { exact: true }).fill(process.env.SECURITY_TEST_MEMBER_PASSWORD!);
+  const email = page.getByLabel('Email', { exact: true });
+  const password = page.getByLabel('Password', { exact: true });
+  await email.fill(process.env.SECURITY_TEST_MEMBER_EMAIL!);
+  await password.fill(process.env.SECURITY_TEST_MEMBER_PASSWORD!);
+  await expect(email).toHaveValue(process.env.SECURITY_TEST_MEMBER_EMAIL!);
+  await expect(password).toHaveValue(process.env.SECURITY_TEST_MEMBER_PASSWORD!);
   const tokenResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
     return url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password';
-  });
+  }, { timeout: 12_000 }).catch(() => null);
   await page.getByRole('button', { name: 'Log In', exact: true }).click();
-  expect((await tokenResponse).status(), 'Supabase password grant must succeed').toBe(200);
+  const response = await tokenResponse;
+  if (!response) {
+    await password.fill('');
+    await email.fill('');
+  }
+  expect(
+    response,
+    `Password-grant response missing. Requests: ${requestAudit.join('; ') || 'none'} | ` +
+      `Violations: ${violations.join('; ') || 'none'}`,
+  ).not.toBeNull();
+  expect(response!.status(), 'Supabase password grant must succeed').toBe(200);
 }
 
 test('Member CAS no-op leaves contact/profile data unchanged', async ({ context, page }) => {
   const violations: string[] = [];
+  const requestAudit: string[] = [];
   const state: {
     phone: string;
     instagram: string | null;
@@ -48,13 +67,14 @@ test('Member CAS no-op leaves contact/profile data unchanged', async ({ context,
       body = undefined;
     }
     const decision = classifyStagingContactNoopRequest(request.method(), request.url(), body, state);
+    let requestLabel = `${request.method()} invalid-url`;
+    try {
+      const requestUrl = new URL(request.url());
+      requestLabel = `${request.method()} ${requestUrl.origin}${requestUrl.pathname}`;
+    } catch {}
+    requestAudit.push(`${requestLabel} (${decision.reason})`);
     if (!decision.allowed) {
-      let label = `${request.method()} invalid-url`;
-      try {
-        const url = new URL(request.url());
-        label = `${request.method()} ${url.origin}${url.pathname}`;
-      } catch {}
-      violations.push(`${label} (${decision.reason})`);
+      violations.push(`${requestLabel} (${decision.reason})`);
       await route.abort('blockedbyclient');
       return;
     }
@@ -87,7 +107,7 @@ test('Member CAS no-op leaves contact/profile data unchanged', async ({ context,
   });
 
   try {
-    await beginMemberLogin(page);
+    await beginMemberLogin(page, requestAudit, violations);
     loggedIn = true;
     await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
     await page.goto('/profile');
