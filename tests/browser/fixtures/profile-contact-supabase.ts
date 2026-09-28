@@ -1,7 +1,14 @@
 type ContactArguments = {
+  expected_phone: string;
+  expected_instagram_username: string | null;
   new_phone: string;
   new_instagram_username: string;
 };
+
+type RecordedContactArguments = Pick<
+  ContactArguments,
+  'new_phone' | 'new_instagram_username'
+>;
 
 type EmailCall = {
   authorization: string | null;
@@ -11,7 +18,7 @@ type EmailCall = {
 export type ProfileContactFixtureState = {
   failNextContact: boolean;
   failNextEmail: boolean;
-  contactCalls: ContactArguments[];
+  contactCalls: RecordedContactArguments[];
   emailCalls: EmailCall[];
   trainingRequests: number;
 };
@@ -169,11 +176,27 @@ export function createClient() {
         return { data: [], error: null };
       }
 
-      if (name === 'update_my_contact_details' && args) {
-        fixtureState.contactCalls.push({ ...args });
+      if (name === 'update_my_contact_details_if_unchanged' && args) {
+        fixtureState.contactCalls.push({
+          new_phone: args.new_phone,
+          new_instagram_username: args.new_instagram_username,
+        });
         if (fixtureState.failNextContact) {
           fixtureState.failNextContact = false;
           return { data: null, error: new Error('Contact update rejected for retry.') };
+        }
+
+        if (
+          args.expected_phone !== profile.phone ||
+          args.expected_instagram_username !== profile.instagram_username
+        ) {
+          return {
+            data: null,
+            error: {
+              code: '40001',
+              message: 'Contact details changed elsewhere.',
+            },
+          };
         }
 
         let phone = args.new_phone.trim().replace(/[\s().-]+/g, '');
@@ -182,7 +205,7 @@ export function createClient() {
         const instagram = enteredInstagram || null;
         profile.phone = phone;
         profile.instagram_username = instagram;
-        return { data: [{ phone, instagram_username: instagram }], error: null };
+        return { data: [{ phone, instagram_username: instagram, changed: true }], error: null };
       }
 
       return { data: null, error: new Error(`Unexpected fixture RPC: ${name}`) };
