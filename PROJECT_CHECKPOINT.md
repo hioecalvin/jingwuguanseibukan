@@ -739,8 +739,10 @@ name as a deterministic tie-breaker.
    now covered across Chromium and WebKit. Verify no live member data is mutated.
 3. Complete the remaining authenticated mutation workflows in deployed staging;
    the regular-schedule browser mutation path is now covered locally across Chromium
-   and WebKit, as is the complete bulk-assessment preparation/finalization path.
-   Repeat relevant guarded WebKit coverage and run physical Safari/iOS.
+   and WebKit, as is the complete bulk-assessment preparation/finalization path. The
+   deployed Repository Draft create/edit/delete path now has guarded zero-residue
+   WebKit evidence. Repeat the other relevant guarded WebKit coverage and run physical
+   Safari/iOS.
 4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.
@@ -766,6 +768,25 @@ Admins no longer see the entry, and direct non-Super-Admin access is redirected.
 Production was not contacted. No production connection, deployment or merge is
 claimed by this checkpoint. Migration 053 was applied to staging only and its guarded
 acceptance completed; production remains unchanged.
+
+## Repository Draft mutation checkpoint — 28 September 2026
+
+- The deployed fixed staging alias completed one guarded Super Admin Repository Draft
+  lifecycle in WebKit: create as Draft, edit the same captured content UUID, and delete
+  it through the application UI.
+- The browser request gate allowed exactly one `create_repository_content`, one
+  `update_repository_content` and one `delete_repository_content` call in that order.
+  It rejected publishing, provider traffic, direct table writes, duplicate or
+  out-of-order mutations, and any update/delete not bound to the captured UUID.
+- The Supabase server credential remained in the parent cleanup process and was not
+  passed to Playwright. The parent verified the exact staging project, Super Admin
+  0001, fixture creator and fields, no video-pipeline row, an unchanged Repository
+  Uploader assignment-audit count, and an empty reserved-marker inventory afterward.
+- The guarded WebKit test passed 1/1. No Repository Uploader appointment, published
+  content, provider, production endpoint or deferred Mux/uploader file was touched.
+  Afterward, the fixed-host probes passed 11/11 and the isolated read-only WebKit
+  regression matrix passed 18/18 across desktop, tablet and mobile. The standard
+  read-only config now explicitly excludes mutation-only specs.
 
 ## Mux uploader checkpoint — 27 September 2026
 

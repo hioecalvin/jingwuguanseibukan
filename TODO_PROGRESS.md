@@ -3831,3 +3831,29 @@ tablet and mobile for anonymous registration and confirmation recovery, Member a
 scoped Admin boundaries, Super Admin read-only pages and certificate not-found
 handling. The suite made no application-data mutations. Deferred Mux and uploader
 files remained untouched.
+
+### Milestone 150 — deployed Repository Draft zero-residue mutation gate (28/09/2026)
+
+Added a staging-pinned WebKit harness for the smallest safe deployed mutation: one
+Super Admin Repository item created as Draft, edited and deleted. The guard enforces
+the exact fixed staging Vercel and Supabase targets, the protected Super Admin 0001
+identity, an exact create → captured-UUID update → same-UUID delete state machine and
+the deployed empty-video wire contract. Off-origin, provider, publishing, direct-table,
+duplicate and out-of-order browser mutations are blocked before network I/O.
+
+The Supabase server credential stays in the parent process. Before mutation the parent
+requires an empty reserved test-marker inventory and fingerprints Repository Uploader
+assignment audit history. On every normal exit or interruption it validates the exact
+fixture creator, scope and fields, refuses ambiguous or video-linked rows, deletes only
+the verified UUID when cleanup is necessary, then requires zero marker residue and an
+unchanged uploader-audit count. A later run fails closed if a hard host loss ever leaves
+a reserved marker.
+
+The local contract tests passed 3/3, targeted ESLint and TypeScript passed, and the
+approved live WebKit staging workflow passed 1/1 in 12.9 seconds. Its independent
+parent postflight completed successfully: the fixture inventory is empty, no video
+asset exists and uploader appointment/audit state did not change. No content was
+published, no provider or production endpoint was contacted, and deferred Mux/uploader
+files remained untouched. The post-mutation fixed-host gate passed 11/11 and the
+read-only WebKit matrix passed 18/18 across desktop, tablet and mobile after its config
+was updated to exclude mutation-only specs explicitly.
