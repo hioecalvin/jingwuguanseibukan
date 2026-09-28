@@ -3936,3 +3936,29 @@ the full local Chromium suite passes 38/38. Final GitHub run `36411271185` for
 implementation/test head `5dc869f` passes all five jobs: common lint/tests,
 Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. Deferred Mux/uploader
 files were neither staged, committed nor deployed.
+
+### Milestone 153 — pre-migration recovery baseline gate (29/09/2026)
+
+A staging-only, read-only catalog audit confirmed that the 006–055 migration chain is
+not a standalone schema baseline. The live `email_outbox` table has 21 columns, RLS
+enabled with no browser policies, service-role-only table access, four indexes plus
+its primary key, two profile foreign keys, a status constraint and the
+`normalize_email_outbox_trigger`. Its queue/claim/sent/failed functions are fixed-
+search-path security definers executable only by `service_role`, but they still depend
+on older untracked primitives such as `normalize_email_outbox()` and `clean_text()`.
+No table rows were queried and no database object or data was changed.
+
+Upgraded the offline recovery manifest to version 3. A restore can no longer pass on
+matching migration history alone: it must include an explicit verified pre-migration
+baseline component/check plus matching positive source/restored schema-catalog object
+counts and SHA-256 digests. Added a deterministic schema-catalog fingerprint tool that
+accepts exactly 18 schema-only JSON exports, rejects missing/extra JSON and empty or
+malformed evidence, normalizes key/row order and line endings, and never prints raw
+definitions. The recovery guide now consistently names the exact 006–055 contract.
+
+The focused recovery suite passes 18/18, targeted ESLint passes, TypeScript passes,
+and the intentionally incomplete template fails closed on every unverified recovery
+component including the new baseline proof. This strengthens the gate but does not
+claim a protected backup or disposable restore; those still require a separately
+authorized isolated restore target and protected catalog exports. No production,
+provider, member data or deferred Mux/uploader file was contacted or changed.

@@ -22,6 +22,8 @@ test("the recovery manifest template matches the immutable migration contract", 
   ));
   const { firstVersion, lastVersion, migrationCount, repositoryFilesSha256 } =
     template.migrationLedger;
+  assert.equal(template.manifestVersion, 3);
+  assert.equal(template.preMigrationBaseline.catalogFormatVersion, 1);
   assert.deepEqual(
     { firstVersion, lastVersion, migrationCount, repositoryFilesSha256 },
     RELEASE_MIGRATION_CONTRACT,

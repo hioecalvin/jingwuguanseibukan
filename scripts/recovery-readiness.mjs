@@ -7,6 +7,7 @@ export const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
 
 export const REQUIRED_COMPONENTS = Object.freeze([
   "applicationDatabase",
+  "preMigrationBaseline",
   "migrationLedger",
   "authUsersAndIdentities",
   "storageMetadata",
@@ -22,6 +23,7 @@ export const REQUIRED_COMPONENTS = Object.freeze([
 export const REQUIRED_CHECKS = Object.freeze([
   "restoreCompleted",
   "sourceRestoreFactsMatch",
+  "preMigrationBaselineVerified",
   "migrationHistoryExact",
   "authLoginRefreshVerified",
   "storageUploadDownloadVerified",
@@ -82,8 +84,8 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     };
   }
 
-  if (manifest.manifestVersion !== 2) {
-    add(blockers, "manifestVersion", "must equal 2");
+  if (manifest.manifestVersion !== 3) {
+    add(blockers, "manifestVersion", "must equal 3");
   }
   if (!isIsoDate(manifest.recordedAt)) {
     add(blockers, "recordedAt", "must be an ISO-8601 timestamp");
@@ -222,6 +224,40 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
   if (isSha256(ledger.sourceLedgerSha256) && isSha256(ledger.restoredLedgerSha256) &&
       ledger.sourceLedgerSha256.toLowerCase() !== ledger.restoredLedgerSha256.toLowerCase()) {
     add(blockers, "migrationLedger.restoredLedgerSha256", "must match the source ledger digest");
+  }
+
+  const baseline = isObject(manifest.preMigrationBaseline)
+    ? manifest.preMigrationBaseline
+    : {};
+  if (baseline.catalogFormatVersion !== 1) {
+    add(blockers, "preMigrationBaseline.catalogFormatVersion", "must equal 1");
+  }
+  for (const key of ["sourceCatalogSha256", "restoredCatalogSha256"]) {
+    if (!isSha256(baseline[key])) {
+      add(blockers, `preMigrationBaseline.${key}`, "must be a SHA-256 digest");
+    }
+  }
+  if (isSha256(baseline.sourceCatalogSha256) && isSha256(baseline.restoredCatalogSha256) &&
+      baseline.sourceCatalogSha256.toLowerCase() !== baseline.restoredCatalogSha256.toLowerCase()) {
+    add(
+      blockers,
+      "preMigrationBaseline.restoredCatalogSha256",
+      "must match the source schema-catalog digest",
+    );
+  }
+  for (const key of ["sourceObjectCount", "restoredObjectCount"]) {
+    if (!Number.isSafeInteger(baseline[key]) || baseline[key] <= 0) {
+      add(blockers, `preMigrationBaseline.${key}`, "must be a positive integer");
+    }
+  }
+  if (Number.isSafeInteger(baseline.sourceObjectCount) &&
+      Number.isSafeInteger(baseline.restoredObjectCount) &&
+      baseline.sourceObjectCount !== baseline.restoredObjectCount) {
+    add(
+      blockers,
+      "preMigrationBaseline.restoredObjectCount",
+      "must match the source schema-catalog object count",
+    );
   }
 
   const components = isObject(manifest.components) ? manifest.components : {};

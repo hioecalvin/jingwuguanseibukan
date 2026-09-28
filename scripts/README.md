@@ -49,8 +49,11 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 The checked-in template is intentionally incomplete and must fail validation.
-Manifest v2 also requires the exact 006–054 repository fingerprint, matching
-source/restored migration-ledger fingerprints and measured RPO/RTO timestamps.
+Manifest v3 also requires the exact 006–055 repository fingerprint, matching
+source/restored migration-ledger fingerprints, matching pre-migration schema-catalog
+fingerprints and object counts, and measured RPO/RTO timestamps. Generate the catalog
+fingerprints from schema-only protected exports with
+`node scripts/recovery-catalog-fingerprint.mjs <protected-catalog-directory>`.
 Generate fingerprints without printing ledger SQL using:
 
 ```powershell

@@ -13,7 +13,7 @@ const verifiedAt = "2026-09-16T02:00:00.000Z";
 
 function validManifest() {
   return {
-    manifestVersion: 2,
+    manifestVersion: 3,
     recordedAt: verifiedAt,
     source: { environment: "staging", projectRef: STAGING_PROJECT_REF },
     restoreTarget: { kind: "disposable-supabase", projectRef: "disposable-ref" },
@@ -28,6 +28,13 @@ function validManifest() {
       ...RELEASE_MIGRATION_CONTRACT,
       sourceLedgerSha256: "a".repeat(64),
       restoredLedgerSha256: "a".repeat(64),
+    },
+    preMigrationBaseline: {
+      catalogFormatVersion: 1,
+      sourceCatalogSha256: "b".repeat(64),
+      restoredCatalogSha256: "b".repeat(64),
+      sourceObjectCount: 500,
+      restoredObjectCount: 500,
     },
     controls: {
       backupEncrypted: true,
@@ -130,6 +137,19 @@ test("the exact 006-055 release contract and matching restored ledger are requir
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "migrationLedger.lastVersion"));
   assert.ok(result.blockers.some(({ path }) => path === "migrationLedger.restoredLedgerSha256"));
+});
+
+test("the pre-migration schema catalog must match the restored baseline exactly", () => {
+  const manifest = validManifest();
+  manifest.preMigrationBaseline.restoredCatalogSha256 = "c".repeat(64);
+  manifest.preMigrationBaseline.restoredObjectCount = 499;
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "preMigrationBaseline.restoredCatalogSha256"));
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "preMigrationBaseline.restoredObjectCount"));
 });
 
 test("unsafe evidence retention and an exceeded RTO fail closed", () => {

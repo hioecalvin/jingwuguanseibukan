@@ -1,5 +1,5 @@
 {
-  "manifestVersion": 2,
+  "manifestVersion": 3,
   "recordedAt": "REPLACE_WITH_ISO_TIMESTAMP",
   "source": {
     "environment": "staging",
@@ -32,6 +32,13 @@
     "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
     "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
   },
+  "preMigrationBaseline": {
+    "catalogFormatVersion": 1,
+    "sourceCatalogSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoredCatalogSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "sourceObjectCount": -1,
+    "restoredObjectCount": -1
+  },
   "controls": {
     "backupEncrypted": false,
     "accessRestricted": false,
@@ -42,6 +49,7 @@
   },
   "components": {
     "applicationDatabase": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "preMigrationBaseline": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
     "migrationLedger": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
     "authUsersAndIdentities": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
     "storageMetadata": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
@@ -56,6 +64,7 @@
   "checks": {
     "restoreCompleted": false,
     "sourceRestoreFactsMatch": false,
+    "preMigrationBaselineVerified": false,
     "migrationHistoryExact": false,
     "authLoginRefreshVerified": false,
     "storageUploadDownloadVerified": false,

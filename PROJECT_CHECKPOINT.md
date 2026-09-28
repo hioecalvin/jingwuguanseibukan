@@ -847,6 +847,28 @@ acceptance completed; production remains unchanged.
   Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. Deferred Mux/uploader
   work was not staged, committed, deployed or otherwise modified by this rollout.
 
+## Pre-migration recovery baseline checkpoint — 29 September 2026
+
+- A read-only staging catalog audit confirms that the checked-in 006–055 chain assumes
+  an older base schema. `email_outbox`, its normalization trigger and its four queue
+  worker RPCs exist and are hardened, but foundational definitions such as
+  `normalize_email_outbox()` and `clean_text()` predate the repository migrations.
+  Creating only an `email_outbox` migration would therefore give false restore
+  confidence and was deliberately rejected.
+- Recovery manifest version 3 now requires matching source/restored schema-catalog
+  SHA-256 values and positive object counts, an explicit verified pre-migration
+  baseline component, and a `preMigrationBaselineVerified` check in addition to the
+  exact 006–055 migration-ledger proof.
+- `scripts/recovery-catalog-fingerprint.mjs` fingerprints exactly 18 schema-only
+  public/storage catalog exports without printing their definitions. It rejects
+  missing, unexpected, malformed or empty JSON and normalizes cross-platform line
+  endings, object keys and row order.
+- The focused recovery contract passes 18/18 tests; targeted lint and TypeScript pass.
+  The template remains intentionally not ready until a protected source backup is
+  restored into a disposable isolated target and the two catalog fingerprints match.
+  No application row, database object, production endpoint, provider or deferred Mux
+  file was changed.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

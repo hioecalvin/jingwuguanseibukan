@@ -7,9 +7,9 @@ Vault/encryption material, platform configuration, schedules and external provid
 resources still need a protected disposable-target rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
-version 2 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–054,
-the checked-in migration-file fingerprint, matching source/restored ledger
-fingerprints and measured RPO/RTO timestamps. It represents the not-yet-created
+version 3 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–055,
+the checked-in migration-file fingerprint, matching source/restored ledger and
+pre-migration schema-catalog fingerprints, and measured RPO/RTO timestamps. It represents the not-yet-created
 production project explicitly instead of using a fake project reference. It never
 connects to Supabase or a provider. It validates a sanitized recovery manifest and
 exits non-zero until every required recovery component and post-restore check is
@@ -36,7 +36,7 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 Before and after the restore, export the ordered `version`, `name` and `statements`
-columns for migrations 006–054 from `supabase_migrations.schema_migrations` into
+columns for migrations 006–055 from `supabase_migrations.schema_migrations` into
 protected JSON arrays. Generate sanitized fingerprints without printing the SQL:
 
 ```powershell
@@ -49,6 +49,21 @@ The first command verifies the immutable repository contract. Put only the two
 resulting `ledgerSha256` values into the protected manifest; they must match. Do not
 commit the ledger exports or manifest.
 
+Export the source and restored schema catalogs into separate protected directories.
+Each directory must contain only the 18 schema-only JSON exports named by
+`scripts/recovery-catalog-fingerprint.mjs`; do not include row-data diagnostics such
+as profile identity values. Generate deterministic fingerprints with:
+
+```powershell
+node scripts/recovery-catalog-fingerprint.mjs C:\protected\evidence\source-catalog
+node scripts/recovery-catalog-fingerprint.mjs C:\protected\evidence\restored-catalog
+```
+
+Record only `catalogFormatVersion`, `catalogSha256` and `totalObjectCount` in the
+manifest. The source and restored digest and count must match. This is the explicit
+proof that the pre-006 baseline was restored; matching migration history alone is not
+sufficient.
+
 ## Application-specific recovery inventory
 
 The protected inventory for this application must include, without recording secret
@@ -56,7 +71,7 @@ values in Git:
 
 - the live `email_outbox` table and the pre-migration queue primitives
   `queue_email`, `claim_next_email`, `mark_email_sent` and `mark_email_failed`;
-  migrations 006–054 reference and validate these objects but do not create their
+  migrations 006–055 reference and validate these objects but do not create their
   baseline definitions, so the protected database backup and disposable restore must
   capture and exercise them explicitly;
 - any historical objects in the private Supabase Storage bucket
