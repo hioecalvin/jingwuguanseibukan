@@ -7,7 +7,10 @@ assertStagingBrowserRuntime();
 export default defineConfig({
   testDir: './tests/staging-browser',
   // Mutation suites have dedicated configs and explicit confirmation gates.
-  testIgnore: 'repository-draft.spec.ts',
+  testIgnore: [
+    'contact-noop.spec.ts',
+    'repository-draft.spec.ts',
+  ],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,

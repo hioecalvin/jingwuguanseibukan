@@ -3857,3 +3857,37 @@ published, no provider or production endpoint was contacted, and deferred Mux/up
 files remained untouched. The post-mutation fixed-host gate passed 11/11 and the
 read-only WebKit matrix passed 18/18 across desktop, tablet and mobile after its config
 was updated to exclude mutation-only specs explicitly.
+
+### Milestone 151 — contact concurrency boundary and next-gate safety review (28/09/2026)
+
+Prepared migration 055 and the matching Member profile update locally. The new
+`update_my_contact_details_if_unchanged` RPC locks the caller's profile, compares the
+exact phone and nullable Instagram values captured when editing began, and rejects a
+stale form with SQLSTATE `40001` before any profile or audit write. Exact no-op calls
+skip both the profile update and contact-audit insert. The existing two-argument RPC
+remains available for older deployed clients during the migration-first rollout.
+
+The profile editor now sends the captured baseline, refreshes current contact values
+and stays open when another session wins the race, and distinguishes an already-current
+no-op from a saved change. A staging-pinned contact no-op harness is prepared with an
+exact four-field CAS payload, Member-only identity checks, an explicit read-path
+allowlist, parent-only server credentials, and a postflight scoped to unchanged
+profile/contact-audit state. Expected Auth sign-in metadata is explicitly outside that
+guarantee. Rollback-contained SQL acceptance and an independent exact-ledger,
+zero-marker, ACL and fixed-search-path postflight are prepared but unrun.
+
+An independent review rejected the first disposable-registration harness before any
+live write: normal registration would retain both applicant and administrator email
+outbox rows, could race the email worker, and did not inventory all dependent history
+objects. Those unsafe harness files were removed. A real registration test remains
+blocked on a dedicated deliverable inbox plus an isolated staging class/dojo and a
+catalog-derived cleanup boundary; the JS Member ID sequence advance must remain an
+explicit irreversible staging side effect.
+
+The local migration/recovery contract is now the exact 50-file chain 006–055. Type-
+check and all 302 Node tests pass, repository-wide ESLint passes, the 51-route
+production build passes, the recovery fingerprint matches, YAML parsing passes and
+`git diff --check` reports no whitespace errors. GitHub Action references are prepared
+at immutable Node-24-compatible release SHAs, but none of this milestone has been
+committed, pushed, deployed or applied to staging. Staging remains at migration 054;
+production and deferred Mux/uploader work were not contacted or changed.

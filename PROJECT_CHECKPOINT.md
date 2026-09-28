@@ -788,6 +788,29 @@ acceptance completed; production remains unchanged.
   regression matrix passed 18/18 across desktop, tablet and mobile. The standard
   read-only config now explicitly excludes mutation-only specs.
 
+## Contact compare-and-swap candidate — 28 September 2026
+
+- Migration 055 is prepared locally, not applied. It adds a backward-compatible,
+  fixed-search-path `update_my_contact_details_if_unchanged` RPC that locks the
+  authenticated active Member's profile and rejects stale edit baselines atomically
+  with SQLSTATE `40001` before profile or audit writes.
+- The Member profile UI now captures the exact phone and nullable Instagram values
+  when editing starts, sends them with the proposed values, refreshes on a conflict
+  while keeping the editor open, and reports a true no-op separately from a change.
+- A guarded Member 0101 no-op browser harness and rollback-contained SQL acceptance
+  are prepared. They have not run against staging because migration 055 requires
+  explicit staging approval and must be applied before the UI is deployed.
+- Security review stopped and removed the first disposable-registration harness. It
+  could have queued applicant and administrator email to persistent outbox rows and
+  did not prove complete cleanup across all dependent history. No registration or
+  confirmation email was sent.
+- Local verification passes: TypeScript plus 302/302 Node tests, repository-wide
+  ESLint, the 51-route optimized production build, exact 006–055 recovery fingerprint,
+  workflow YAML parsing and whitespace validation. The immutable GitHub Action pin
+  refresh is prepared but uncommitted.
+- Current remote staging remains on exact migrations 006–054. Production, providers,
+  Vercel configuration and deferred Mux/uploader files were not contacted or changed.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

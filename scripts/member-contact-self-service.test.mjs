@@ -17,9 +17,12 @@ const profileSource = await readFile(
 
 test("profile UI exposes only the agreed contact self-service actions", () => {
   assert.match(profileSource, /instagram_username: string \| null/);
-  assert.match(profileSource, /\.rpc\(\s*"update_my_contact_details"/);
+  assert.match(profileSource, /\.rpc\(\s*"update_my_contact_details_if_unchanged"/);
+  assert.match(profileSource, /expected_phone:\s*contactBaseline\.phone/);
+  assert.match(profileSource, /expected_instagram_username:\s*contactBaseline\.instagramUsername/);
   assert.match(profileSource, /new_phone:\s*phoneInput/);
   assert.match(profileSource, /new_instagram_username:\s*instagramInput/);
+  assert.match(profileSource, /error\?\.code === "40001"/);
   assert.match(profileSource, /`@\$\{profile\.instagram_username\}`/);
   assert.match(profileSource, /fetch\(\s*"\/api\/account\/change-email"/);
   assert.match(profileSource, /Bearer \$\{session\.access_token\}/);

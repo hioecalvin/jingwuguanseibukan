@@ -195,6 +195,12 @@ export default function ProfilePage() {
   const [instagramInput, setInstagramInput] =
     useState("");
 
+  const [contactBaseline, setContactBaseline] =
+    useState<{
+      phone: string;
+      instagramUsername: string | null;
+    } | null>(null);
+
   const [newEmailInput, setNewEmailInput] =
     useState("");
 
@@ -768,18 +774,78 @@ export default function ProfilePage() {
     setMessage("");
     setMessageType("");
 
+    if (!contactBaseline) {
+      setMessage(
+        "Reload your contact details before saving."
+      );
+      setMessageType("error");
+      setProcessing(false);
+      return;
+    }
+
     const {
       data,
       error,
     } = await supabase.rpc(
-      "update_my_contact_details",
+      "update_my_contact_details_if_unchanged",
       {
+        expected_phone:
+          contactBaseline.phone,
+        expected_instagram_username:
+          contactBaseline.instagramUsername,
         new_phone:
           phoneInput,
         new_instagram_username:
           instagramInput,
       }
     );
+
+    if (error?.code === "40001") {
+      const {
+        data: currentContact,
+        error: refreshError,
+      } = await supabase
+        .from("profiles")
+        .select("phone, instagram_username")
+        .eq("id", profile?.id ?? "")
+        .single();
+
+      if (!refreshError && currentContact) {
+        const refreshedPhone =
+          currentContact.phone ?? "";
+        const refreshedInstagram =
+          currentContact.instagram_username ?? null;
+
+        setProfile((current) =>
+          current
+            ? {
+                ...current,
+                phone: refreshedPhone,
+                instagram_username:
+                  refreshedInstagram,
+              }
+            : current
+        );
+        setPhoneInput(refreshedPhone);
+        setInstagramInput(
+          refreshedInstagram ?? ""
+        );
+        setContactBaseline({
+          phone: refreshedPhone,
+          instagramUsername:
+            refreshedInstagram,
+        });
+      }
+
+      setMessage(
+        refreshError
+          ? "Your contact details changed elsewhere. Reload the page before trying again."
+          : "Your contact details changed elsewhere. Review the refreshed values and try again."
+      );
+      setMessageType("error");
+      setProcessing(false);
+      return;
+    }
 
     if (error) {
       setMessage(error.message);
@@ -821,9 +887,12 @@ export default function ProfilePage() {
     setInstagramInput(
       normalizedInstagram ?? ""
     );
+    setContactBaseline(null);
     setEditingContact(false);
     setMessage(
-      "Contact details updated successfully."
+      row?.changed === false
+        ? "Contact details are already up to date."
+        : "Contact details updated successfully."
     );
     setMessageType("success");
     setProcessing(false);
@@ -1597,9 +1666,24 @@ export default function ProfilePage() {
           {!editingContact && (
             <button
               type="button"
-              onClick={() =>
-                setEditingContact(true)
-              }
+              onClick={() => {
+                if (!profile) {
+                  return;
+                }
+
+                setPhoneInput(
+                  profile.phone ?? ""
+                );
+                setInstagramInput(
+                  profile.instagram_username ?? ""
+                );
+                setContactBaseline({
+                  phone: profile.phone ?? "",
+                  instagramUsername:
+                    profile.instagram_username,
+                });
+                setEditingContact(true);
+              }}
               className="self-start rounded-lg border border-sky-800 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-950/40"
             >
               Edit
@@ -1701,6 +1785,7 @@ export default function ProfilePage() {
                 type="button"
                 onClick={() => {
                   setEditingContact(false);
+                  setContactBaseline(null);
                   setPhoneInput(
                     profile?.phone ?? ""
                   );
