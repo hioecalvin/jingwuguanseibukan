@@ -33,6 +33,23 @@ also runs the three WebKit profiles on macOS. Playwright WebKit is not release
 Safari, and its iPhone/iPad profiles are emulations rather than physical devices;
 final release approval still requires current Safari on real macOS and iOS hardware.
 
+The deployed regular-schedule mutation gate is intentionally separate from the
+read-only matrix. It permits exactly one scoped-Admin create followed by one
+captured-UUID update/deactivation. The parent process validates the exact fixture
+and its one-or-two expected audit rows, then removes only those rows through the
+database-owner connection and requires an empty reserved-marker inventory. The
+browser never receives the database URL or server credential. Supply an audited
+temporary `pg` runtime directory; do not add a test-only cleanup RPC to the product.
+
+```powershell
+$env:JINGWUGUAN_PG_MODULE_DIR = 'C:\protected\runtime\node_modules'
+node .\scripts\staging-regular-schedule-smoke.mjs --confirm-staging-regular-schedule
+```
+
+This command mutates staging briefly and must not be run without explicit approval.
+It is pinned to `eomubndonbetszdbhsrj`, the fixed staging host, Admin 0002 and a
+Sydney Supabase pooler URL. Production and the retired project are rejected.
+
 ## Recovery readiness gate
 
 `recovery-readiness.mjs` validates a sanitized recovery manifest without contacting

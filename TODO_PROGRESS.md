@@ -3962,3 +3962,34 @@ component including the new baseline proof. This strengthens the gate but does n
 claim a protected backup or disposable restore; those still require a separately
 authorized isolated restore target and protected catalog exports. No production,
 provider, member data or deferred Mux/uploader file was contacted or changed.
+
+### Milestone 154 — guarded regular-schedule mutation gate (29/09/2026)
+
+Completed the next deployed mutation gate. The staging-pinned WebKit harness permits
+exactly one scoped Admin 0002 schedule create followed by one update that deactivates
+the same captured UUID. Its request state machine rejects a
+wrong dojo, altered fields, instructor assignment, duplicate/out-of-order calls,
+reactivation, direct-table traffic, the retired backend, providers and production.
+The selected time slot is collision-checked inside one actual Admin-managed scope,
+and regular schedules have no event, attendance, reminder or notification side
+effects.
+
+The server credential and database-owner URL remain in the parent process. On every
+normal exit or interruption the parent requires either the exact created state with
+one audit row or the exact updated/inactive state with two audit rows, locks that
+captured row through the staging database-owner connection, deletes only its audit
+rows and schedule UUID in one transaction, then requires the reserved marker
+inventory to be empty. Ambiguous or changed state fails closed for manual review.
+The cleanup connection is restricted to the recorded Sydney staging pooler; no
+test-only product RPC was added.
+
+The request-guard tests pass 3/3, targeted ESLint, TypeScript and whitespace checks
+pass, and the ordinary read-only staging matrix explicitly excludes this
+mutation-only spec. The approved live WebKit workflow passed 1/1 in 13.2 seconds.
+Parent postflight verified the exact inactive fixture and its two audit rows, removed
+only those rows in one database transaction, and confirmed an empty reserved-marker
+inventory. Expected Auth sign-in/session metadata is outside the zero-residue
+guarantee. A read-only GitHub API check confirms run `36473581644` at recovery-gate
+head `b0e8bcb` completed successfully across checks, Chromium/Linux, Firefox/Linux,
+WebKit/Linux and WebKit/macOS. Production, the retired project and deferred
+Mux/uploader files were not contacted or changed.

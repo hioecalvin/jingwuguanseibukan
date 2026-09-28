@@ -869,6 +869,29 @@ acceptance completed; production remains unchanged.
   No application row, database object, production endpoint, provider or deferred Mux
   file was changed.
 
+## Guarded regular-schedule staging checkpoint — 29 September 2026
+
+- A dedicated WebKit harness completed one Admin 0002 schedule create and one
+  captured-UUID edit/deactivation through the fixed staging application. It passed
+  1/1 in 13.2 seconds and is not part of the read-only staging matrix.
+- The browser gate allows only the exact collision-checked dojo/day/time, null
+  instructor, reserved marker fields and create-then-update state transition. The
+  browser receives neither the server key nor the database-owner URL.
+- Parent cleanup accepts only the exact created fixture with one audit row or the
+  exact updated fixture with two audit rows. It locks the captured UUID, deletes only
+  those audit rows and that schedule inside one transaction, and then requires zero
+  reserved-marker residue. Any ambiguity or field drift stops cleanup for manual
+  review. No test-only cleanup RPC was added to the application schema.
+- Parent postflight verified the exact inactive fixture and two audit rows, then
+  removed only those rows transactionally and confirmed an empty reserved-marker
+  inventory. Expected Auth sign-in/session metadata is outside this zero-residue
+  guarantee.
+- Local request-guard tests pass 3/3; targeted ESLint, TypeScript and whitespace
+  validation pass. GitHub run `36473581644` at recovery-gate head `b0e8bcb` passes
+  checks plus Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS.
+  Production, the retired Supabase project and deferred Mux/uploader files were not
+  contacted or changed.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.
