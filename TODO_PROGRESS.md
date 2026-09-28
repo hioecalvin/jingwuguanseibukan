@@ -3891,3 +3891,11 @@ production build passes, the recovery fingerprint matches, YAML parsing passes a
 at immutable Node-24-compatible release SHAs, but none of this milestone has been
 committed, pushed, deployed or applied to staging. Staging remains at migration 054;
 production and deferred Mux/uploader work were not contacted or changed.
+
+Post-commit guard correction: a requested read-only `migration list --linked` check
+revealed that the checkout's Supabase CLI link still names retired project
+`pkmllhaavadhaozmwapz`, not staging. The command only listed its migration ledger and
+made no schema or data mutation, but it did contact that retired project, so its output
+is not staging evidence and all further linked commands are blocked. Before migration
+055, the CLI must be safely relinked and re-verified against staging
+`eomubndonbetszdbhsrj`; production/retired-project mutation remains prohibited.

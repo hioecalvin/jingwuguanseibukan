@@ -810,6 +810,11 @@ acceptance completed; production remains unchanged.
   refresh is prepared but uncommitted.
 - Current remote staging remains on exact migrations 006–054. Production, providers,
   Vercel configuration and deferred Mux/uploader files were not contacted or changed.
+- A subsequent read-only CLI guard found the checkout still linked to retired project
+  `pkmllhaavadhaozmwapz`, not staging. `migration list --linked` listed only that
+  retired ledger and performed no write, but it did contact the retired project. Its
+  result is not staging evidence. No further linked command is permitted until the
+  checkout is explicitly relinked and verified as staging `eomubndonbetszdbhsrj`.
 
 ## Mux uploader checkpoint — 27 September 2026
 
