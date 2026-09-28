@@ -3899,3 +3899,40 @@ made no schema or data mutation, but it did contact that retired project, so its
 is not staging evidence and all further linked commands are blocked. Before migration
 055, the CLI must be safely relinked and re-verified against staging
 `eomubndonbetszdbhsrj`; production/retired-project mutation remains prohibited.
+
+### Milestone 152 — migration 055 staging rollout and contact CAS release gate (28/09/2026)
+
+Relinked the checkout to staging `eomubndonbetszdbhsrj` and verified the exact
+pre-apply ledger was 006–054 before a dry run named only migration 055. Applied only
+`055_contact_details_compare_and_swap.sql`; the remote ledger is now exactly 006–055.
+The rollback-contained contact compare-and-swap suite returned its expected success
+signal, and the independent postflight passed zero marker residue, exact ledger, ACL
+and fixed-search-path checks. Warning-level database lint reported no public-schema
+errors and the stricter repository database-security verifier passed.
+
+Deployed clean commit `c639e0d` to Ready staging Preview
+`dpl_otHaqRmeREfKMAeT653D4CN7Tugd` with the protected staging runtime/build values and
+assigned only `jingwuguanseibukan-staging.vercel.app`. An earlier manual Preview had
+inherited a retired backend URL; the browser request guard blocked that target before
+network I/O, the alias was restored immediately, and the corrected Preview was then
+verified. No request from the guarded browser reached the retired project or
+production.
+
+The guarded Member 0101 compare-and-swap no-op passed 1/1 in both Chromium and WebKit;
+its parent postflight proved the complete profile row and contact-audit history were
+unchanged. Auth sign-in/session metadata remains the explicitly documented exception.
+The staging role suite passed 12/12, and the fixed host passed 11/11 current route and
+security-header probes. The live WebKit read-only matrix passed 18/18 across desktop,
+tablet and mobile. Windows Schannel/WebKit temporarily failed every HTTPS navigation
+despite an independently authorized Vercel certificate, so the successful WebKit
+application runs used Playwright's transport bypass only after Node TLS validated the
+certificate and host. Both checked-in Playwright configs were restored to
+`ignoreHTTPSErrors: false`; this is qualified application evidence, not a claim that
+the local Windows WebKit TLS path passed.
+
+CI initially exposed a stale isolated profile-contact fixture that still recognized
+the legacy RPC. The fixture now models the four-field CAS call and conflict response;
+the full local Chromium suite passes 38/38. Final GitHub run `36411271185` for
+implementation/test head `5dc869f` passes all five jobs: common lint/tests,
+Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. Deferred Mux/uploader
+files were neither staged, committed nor deployed.

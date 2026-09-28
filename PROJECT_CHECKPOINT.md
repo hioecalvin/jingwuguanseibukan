@@ -746,7 +746,7 @@ name as a deterministic tie-breaker.
 4. Configure and monitor an external **email** worker scheduler, then verify real
    test-recipient delivery. Push remains an explicitly targeted per-user operation,
    not a scheduled queue worker; verify it separately with a dedicated test device.
-5. Rehearse a complete 006–054 managed-platform restore into a disposable isolated
+5. Rehearse a complete 006–055 managed-platform restore into a disposable isolated
    target, including Auth, Storage, roles/grants and post-restore security evidence.
 
 The three reusable staging dummy identities exist and their protected passwords were
@@ -815,6 +815,37 @@ acceptance completed; production remains unchanged.
   retired ledger and performed no write, but it did contact the retired project. Its
   result is not staging evidence. No further linked command is permitted until the
   checkout is explicitly relinked and verified as staging `eomubndonbetszdbhsrj`.
+
+## Contact compare-and-swap staging checkpoint — 28 September 2026
+
+- The checkout is now linked to exact staging project `eomubndonbetszdbhsrj`.
+  Migration 055 was the sole pending migration after the exact 006–054 preflight and
+  was applied only to staging. Rollback-contained semantic acceptance, independent
+  zero-residue/ACL/search-path postflight, exact 006–055 ledger verification,
+  warning-level database lint and the repository security verifier all pass.
+- Clean release commit `c639e0d` is deployed as Ready Preview
+  `dpl_otHaqRmeREfKMAeT653D4CN7Tugd` behind only
+  `jingwuguanseibukan-staging.vercel.app`. A first Preview inherited a retired backend
+  setting, but the browser target guard blocked it before network I/O and the alias was
+  immediately restored before the corrected deployment. Production and the retired
+  backend received no guarded browser request.
+- The Member 0101 contact CAS no-op passes 1/1 in Chromium and WebKit. The parent
+  postflight independently proves the complete profile record and contact-audit
+  history are unchanged; only expected Auth sign-in/session metadata is outside that
+  guarantee. The authenticated Member/scoped Admin/Super Admin security suite passes
+  12/12.
+- The fixed host passes 11/11 current route/method/security-header probes. Live
+  staging WebKit application acceptance passes 18/18 across desktop, tablet and
+  mobile. The Windows Schannel/WebKit certificate path failed locally despite the
+  same Vercel certificate being independently authorized by Node TLS; therefore the
+  successful WebKit application runs used a temporary Playwright transport bypass.
+  Both repository configs were restored to `ignoreHTTPSErrors: false`, so this is not
+  recorded as a native Windows WebKit TLS pass.
+- The isolated profile-contact browser fixture now models the four-argument CAS RPC
+  and its `40001` conflict boundary. Local Chromium passes 38/38. Final GitHub Actions
+  run `36411271185` at implementation/test commit `5dc869f` passes common checks,
+  Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS. Deferred Mux/uploader
+  work was not staged, committed, deployed or otherwise modified by this rollout.
 
 ## Mux uploader checkpoint — 27 September 2026
 
