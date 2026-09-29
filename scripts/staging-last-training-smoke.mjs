@@ -93,6 +93,12 @@ function stableValue(value) {
   return value;
 }
 
+function membershipBusinessState(membership) {
+  const businessState = { ...membership };
+  delete businessState.updated_at;
+  return businessState;
+}
+
 async function authUserId(account, label) {
   const matches = [];
   const perPage = 1000;
@@ -265,7 +271,10 @@ async function cleanupAndVerify({ baselineMembership, baselineAudit, fixture, ad
   );
   const expectedDate = phase === 'today' ? fixture.businessToday : fixture.correctionDate;
   const expectedMembership = { ...baselineMembership, last_training_session_date: expectedDate };
-  if (!isDeepStrictEqual(currentMembership, expectedMembership)) {
+  if (!isDeepStrictEqual(
+    membershipBusinessState(currentMembership),
+    membershipBusinessState(expectedMembership),
+  )) {
     throw new Error('Last-training cleanup refused because another membership field changed.');
   }
   const browserState = readState(stateFile);
@@ -320,7 +329,10 @@ async function cleanupAndVerify({ baselineMembership, baselineAudit, fixture, ad
 
   const finalMembership = await captureMembership(fixture.membershipId);
   const finalAudit = await auditRows(fixture.membershipId);
-  if (!isDeepStrictEqual(finalMembership, baselineMembership) ||
+  if (!isDeepStrictEqual(
+    membershipBusinessState(finalMembership),
+    membershipBusinessState(baselineMembership),
+  ) ||
       !isDeepStrictEqual(finalAudit, baselineAudit)) {
     throw new Error('Last-training zero-residue verification failed after cleanup.');
   }
@@ -398,7 +410,7 @@ try {
 if (interrupted || childCode !== 0) process.exitCode = 1;
 else {
   console.log(
-    'PASS: Member 0101 membership and complete last-training audit history match their exact baselines. ' +
-    'Expected Auth sign-in/session metadata is outside this zero-residue guarantee.',
+    'PASS: Member 0101 business membership fields and complete last-training audit history match their baselines. ' +
+    'The trigger-managed membership updated_at plus expected Auth sign-in/session metadata are outside this zero-residue guarantee.',
   );
 }

@@ -55,7 +55,9 @@ the exact active Member 0101 membership visible inside that Admin's scope. The
 browser performs one past-date correction followed by “trained today”; the parent
 captures the complete membership row and complete training-audit history first,
 removes only newly captured audit UUIDs, restores the original date, and requires
-both complete baselines to match afterward.
+every business membership field plus the complete audit baseline to match afterward.
+The existing membership trigger always advances `updated_at` on update, so that
+timestamp is an explicit metadata exception rather than a zero-residue claim.
 
 ```powershell
 $env:JINGWUGUAN_PG_MODULE_DIR = 'C:\protected\runtime\node_modules'

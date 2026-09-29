@@ -3994,10 +3994,10 @@ head `b0e8bcb` completed successfully across checks, Chromium/Linux, Firefox/Lin
 WebKit/Linux and WebKit/macOS. Production, the retired project and deferred
 Mux/uploader files were not contacted or changed.
 
-### Milestone 155 — guarded last-training mutation gate prepared (29/09/2026)
+### Milestone 155 — guarded last-training mutation gate (29/09/2026)
 
-Prepared, but did not run, the next deployed mutation gate for the existing
-last-training workflow. The staging-pinned WebKit harness searches exact dummy
+Completed the next deployed mutation gate for the existing last-training workflow.
+The staging-pinned WebKit harness searches exact dummy
 Member 0101 inside scoped Admin 0002's live administrative view, submits one safe
 past-date correction, and then marks that same captured membership trained today.
 Its request state machine permits only those two RPCs in that order and rejects a
@@ -4009,11 +4009,23 @@ complete append-only training-audit history. On every normal exit or interruptio
 accepts only the exact one-row correction or exact two-row correction/today sequence,
 locks the membership and newly captured audit UUIDs, removes only those audit rows,
 restores the original training date, then requires the full membership and audit
-baselines to match. Pre-existing audit drift, another membership-field change or an
-ambiguous row set fails closed. Server/database credentials stay out of Playwright.
+business baselines to match. The existing membership trigger advances `updated_at`
+on every update, so that timestamp is explicitly excluded from zero-residue while
+every business field remains exact. Pre-existing audit drift, another membership-
+field change or an ambiguous row set fails closed. Server/database credentials stay
+out of Playwright.
 
-The request-guard tests pass 3/3; syntax, targeted ESLint, TypeScript and whitespace
-checks pass. The read-only staging matrix explicitly excludes the mutation spec.
-This live test still requires explicit approval naming Admin 0002 and Member 0101.
-Production, the retired project, providers and deferred Mux/uploader files were not
-contacted or changed.
+The first approved run completed both application mutations, but a text-based button
+assertion missed the button's longer accessible name and postflight correctly stopped
+when the existing membership trigger advanced `updated_at`. A forensic read proved
+the exact two new audit UUIDs and `null → correction → today` transitions. The
+approved cleanup removed only those UUIDs and restored the original null date; an
+independent read confirmed zero training-audit rows. The harness now asserts the
+actual accessible button and treats only trigger-managed `updated_at` as metadata.
+
+The corrected WebKit run passed 1/1 in 10.8 seconds. Parent and independent
+postflight both confirmed the original null training date, exact business membership
+fields and zero audit rows; only `updated_at` plus expected Auth session metadata are
+outside the zero-residue guarantee. Request-guard tests pass 3/3; syntax, targeted
+ESLint, TypeScript and whitespace checks pass. Production, the retired project,
+providers and deferred Mux/uploader files were not contacted or changed.

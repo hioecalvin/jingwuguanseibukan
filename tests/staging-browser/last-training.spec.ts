@@ -111,9 +111,11 @@ test('Admin 0002 corrects Member 0101 then marks the same membership trained tod
     await expect(member.getByRole('status')).toHaveText('Training date corrected.');
     await expect(correction).toHaveValue(fixture.correctionDate);
 
-    await member.getByRole('button', { name: /as trained today for/ }).click();
+    const markToday = member.getByRole('button', { name: /as trained today for/ });
+    await markToday.click();
     await expect(member.getByRole('status')).toHaveText('Training recorded for today.');
-    await expect(member.getByRole('button', { name: 'Trained Today', exact: true })).toBeDisabled();
+    await expect(markToday).toHaveText('Trained Today');
+    await expect(markToday).toBeDisabled();
     expect(mutationCounts).toEqual({ correct: 1, today: 1 });
     expect(state.phase).toBe('today');
     expect(violations, 'No off-origin or unapproved mutation request').toEqual([]);

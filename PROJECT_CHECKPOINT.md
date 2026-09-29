@@ -892,20 +892,30 @@ acceptance completed; production remains unchanged.
   Production, the retired Supabase project and deferred Mux/uploader files were not
   contacted or changed.
 
-## Guarded last-training candidate — 29 September 2026
+## Guarded last-training staging checkpoint — 29 September 2026
 
-- A dedicated WebKit harness is prepared for scoped Admin 0002 to correct and then
+- A dedicated WebKit harness completed scoped Admin 0002 correcting and then
   mark trained today on the exact active Member 0101 membership visible in the
-  deployed staging member-management page. It has not run live.
+  deployed staging member-management page. The corrected run passed 1/1 in 10.8
+  seconds.
 - The browser allows only the captured membership's exact correction-date RPC
   followed by its mark-today RPC. Different identities, targets, dates, order,
   origins, direct-table writes and provider requests are denied before network I/O.
 - The parent snapshots the complete membership and audit baselines. Cleanup accepts
   only the exact newly appended audit transition(s), deletes those captured UUIDs,
-  restores the original date, and requires both full baselines to match. Credentials
-  remain outside Playwright and no test-only database function is added.
-- Local guard tests pass 3/3; syntax, targeted ESLint, TypeScript and whitespace
-  validation pass. Explicit approval is still required for the live staging run.
+  restores the original date, and requires every business membership field plus the
+  full audit baseline to match. The trigger-managed `updated_at` timestamp is an
+  explicit metadata exception. Credentials remain outside Playwright and no
+  test-only database function is added.
+- The first attempt completed both approved writes but failed a button-text locator;
+  postflight then refused its overly strict full-row comparison because the existing
+  membership trigger advanced `updated_at`. A staging-only forensic read identified
+  the exact two audit UUIDs and transitions. Cleanup removed only those rows and
+  restored the original null date before the corrected rerun.
+- Parent and independent final checks confirm the original null date, exact business
+  fields and zero training-audit rows. Only trigger-managed `updated_at` and expected
+  Auth metadata are excluded. Local guard tests pass 3/3; syntax, targeted ESLint,
+  TypeScript and whitespace validation pass.
 
 ## Mux uploader checkpoint — 27 September 2026
 
