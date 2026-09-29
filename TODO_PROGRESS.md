@@ -4058,3 +4058,32 @@ A local PostgreSQL 17 target is available as a narrower interim option, but it c
 substitute for managed Auth, Storage API and platform-configuration recovery proof.
 Production, the retired project, providers and deferred Mux/uploader files were not
 contacted or changed.
+
+### Milestone 157 — local PostgreSQL recovery rehearsal completed (30/09/2026)
+
+Restored the protected staging database package into a disposable, loopback-only
+PostgreSQL 17.11 cluster using a separate local bootstrap owner. The restored counts
+are exact: 67 public tables, 57 Auth users, 57 identities, two Storage buckets, one
+Storage object metadata row and 50 migrations. The 006–055 migration ledger is
+semantically exact.
+
+The restore emitted exactly eight expected `supabase_vault` errors and no unexpected
+errors because Supabase's managed Vault extension is unavailable in standalone
+PostgreSQL. After normalizing the three captured owner ACLs, 17 of 18 catalog files
+and 4,145 of 4,146 catalog objects match canonically; only the managed Vault extension
+is absent.
+
+The repository database-security verifier passes. Independent checks confirm 75 RLS
+relations, 11 forced-RLS relations, 69 policies, denial of sensitive-view access for
+both browser roles, 16 captured roles, 22 captured memberships, no direct membership
+for the local bootstrap owner, and no subscriptions, replication slots, foreign
+servers or cron schema. Supabase CLI 2.118.0 connected locally, but a new CLI-lint pass
+cannot be claimed because the standalone distribution lacks `plpgsql_check`.
+
+The cluster was fast-stopped and quarantined with no PID file, listener or PostgreSQL
+process remaining. Sanitized evidence is retained in the restricted local recovery
+workspace and the protected encrypted source evidence was not modified or deleted.
+Managed Auth, Storage object/API, managed-extension and platform-configuration restore
+proof remains open until a disposable Supabase target is available. Production, the
+retired project, remote staging, providers and deferred Mux/uploader files were not
+contacted or changed.

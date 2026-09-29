@@ -951,6 +951,39 @@ acceptance completed; production remains unchanged.
 - Production, the retired project, providers and deferred Mux/uploader files were not
   contacted or changed.
 
+## Local PostgreSQL recovery rehearsal — 30 September 2026
+
+- The protected staging database package was decrypted only into the restricted local
+  recovery workspace and restored into a disposable PostgreSQL 17.11 cluster bound to
+  `127.0.0.1:59827`. The cluster used a separate bootstrap owner so the restored
+  `postgres` role could retain its captured non-superuser attributes. All 16 captured
+  Supabase roles and 22 captured role memberships were restored; the local bootstrap
+  role has no direct memberships.
+- The custom-format restore completed with exactly eight expected errors and no
+  unexpected errors. Every error is caused by the managed `supabase_vault` 0.3.1
+  extension being unavailable in standalone PostgreSQL. The restored counts are 67
+  public tables, 57 Auth users, 57 identities, two Storage buckets, one Storage object
+  metadata row and 50 migrations.
+- The restored 006–055 ledger is semantically exact. Canonical comparison matches 17
+  of 18 catalog files and 4,145 of 4,146 catalog objects; the only missing object is
+  the managed `supabase_vault` extension. Explicit owner ACLs on two sequences and one
+  rate-limit table were normalized to the captured source before the final comparison.
+- `scripts/verify-database-security.sql` passes in a read-only transaction. Independent
+  checks confirm 75 RLS relations, 11 forced-RLS relations, 69 policies, expected denial
+  for both `anon` and `authenticated` on a sensitive view, no subscriptions, replication
+  slots, foreign servers or cron schema, and loopback-only networking.
+- Supabase CLI 2.118.0 reached the local database for linting but could not enable
+  `plpgsql_check`, which is not installed in this standalone distribution. Therefore a
+  new local CLI-lint success is not claimed; the repository security verifier and exact
+  catalog comparison are the applicable local evidence.
+- The cluster was fast-stopped and quarantined. Its PID file, listener and PostgreSQL
+  processes are absent. Sanitized evidence is retained under the restricted local
+  recovery workspace, while the protected encrypted source evidence remains unchanged.
+  A managed Supabase restore is still required to prove Auth API, Storage object/API,
+  managed extensions and platform configuration end to end.
+- Production, the retired project, remote staging, providers and deferred Mux/uploader
+  files were not contacted or changed during this local rehearsal.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.
