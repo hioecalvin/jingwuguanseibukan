@@ -169,7 +169,7 @@ export default function MemberIdManagementPage() {
         <header className="flex flex-col gap-5 border-b border-neutral-800 pb-7 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}

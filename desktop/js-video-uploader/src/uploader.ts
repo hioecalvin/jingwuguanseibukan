@@ -45,7 +45,7 @@ export class UploaderService {
         inputPath: video.path,
         tempRoot: this.tempRoot,
         ffmpegPath: this.ffmpegPath,
-        organisationLogoUrl: `${this.config.siteUrl}/js-logo.jpeg`,
+        organisationLogoUrl: `${this.config.siteUrl}/logos/organization/logo-js.png`,
         classLogoUrl: selectedClass.logoUrl,
         siteUrl: this.config.siteUrl,
         supabaseUrl: this.config.url,

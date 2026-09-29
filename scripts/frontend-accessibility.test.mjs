@@ -409,7 +409,10 @@ test('repository video displays logo-only organization and class watermarks', ()
   assert.match(page, /includeOrganizationLogo\s*\/>/);
   assert.match(page, /getYouTubeEmbedUrl/);
   assert.doesNotMatch(page, /cloudflare|vimeo|secureVideo/i);
-  assert.match(watermarks, /src="\/js-logo\.jpeg"/);
+  assert.match(
+    watermarks,
+    /src="\/logos\/organization\/logo-js\.png"/,
+  );
   assert.match(watermarks, /data-video-logo-watermarks/);
   assert.match(watermarks, /pointer-events-none/);
   assert.doesNotMatch(watermarks, /member number|member_id|email|viewer/i);

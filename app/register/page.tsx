@@ -184,7 +184,7 @@ export default function RegisterPage() {
       <div className="mx-auto w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl">
         <div className="mb-5 flex justify-center">
           <Image
-            src="/js-logo.jpeg"
+            src="/logos/organization/logo-js.png"
             alt="Jingwuguan Seibukan"
             width={120}
             height={120}

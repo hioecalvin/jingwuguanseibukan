@@ -33,7 +33,7 @@ $cases = @(
   [pscustomobject]@{ Name = "push worker route"; Path = "/api/push/send"; Status = @(405); Location = $null; ContentType = ""; BodyPattern = "" }
   [pscustomobject]@{ Name = "push subscription route"; Path = "/api/subscribe"; Status = @(405); Location = $null; ContentType = ""; BodyPattern = "" }
   [pscustomobject]@{ Name = "service worker"; Path = "/sw.js"; Status = @(200); Location = $null; ContentType = "(?i)^(application|text)/(javascript|x-javascript)"; BodyPattern = "" }
-  [pscustomobject]@{ Name = "logo asset"; Path = "/js-logo.jpeg"; Status = @(200); Location = $null; ContentType = "(?i)^image/jpeg\b"; BodyPattern = "" }
+  [pscustomobject]@{ Name = "logo asset"; Path = "/logos/organization/logo-js.png"; Status = @(200); Location = $null; ContentType = "(?i)^image/jpeg\b"; BodyPattern = "" }
 )
 
 $results = $cases | ForEach-Object -Parallel {

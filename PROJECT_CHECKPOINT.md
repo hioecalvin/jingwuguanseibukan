@@ -984,6 +984,32 @@ acceptance completed; production remains unchanged.
 - Production, the retired project, remote staging, providers and deferred Mux/uploader
   files were not contacted or changed during this local rehearsal.
 
+## Normalized organization, class and dojo logos — 30 September 2026
+
+- Ten user-supplied JPEG logos were converted from their original pixels into square
+  1024 × 1024 PNG assets. Each image is centered and aspect-fit on white without
+  cropping or stretching, giving video watermarks, certificates and responsive UI a
+  consistent rendering contract.
+- The assets are organized under `public/logos`: one organization logo, five class
+  logos (Taiji/Taijiquan, Karate, Xingyi/Xingyiquan, Aikido and Kungfu Kids), and four
+  dojo/affiliate logos (Chushin & Zhongxin, Kagami, UAC and Hayashitane). The app,
+  service worker, certificate routes, video watermark overlay and desktop uploader now
+  reference `/logos/organization/logo-js.png`; the old JPEG remains only as an
+  unreferenced compatibility asset.
+- Staging `eomubndonbetszdbhsrj` received exactly the five active class PNGs at
+  `class-logos/{class-id}/logo.png`. Their five `classes.logo_url` values now point to
+  that staging project. This repairs Aikido's retired-project URL and supplies the
+  previously missing Kungfu Kids logo. Read-only postflight downloaded all five
+  objects and confirmed exact byte matches, PNG signatures and 1024 × 1024 dimensions.
+- Existing target objects and database URLs were captured before mutation under the
+  protected local logo-upload evidence directory. The current schema has no dojo-logo
+  column or workflow, so the four dojo logos remain versioned static assets rather
+  than being written into an unrelated field.
+- Verified: ESLint passes, TypeScript passes, application tests pass 312/312, desktop
+  uploader tests pass 21/21, whitespace/stale-reference checks pass, and the 51-route
+  production build succeeds. No deployment was performed and production was not
+  contacted.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

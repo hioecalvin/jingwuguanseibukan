@@ -608,7 +608,7 @@ export default function AdminContentPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={70}
               height={70}

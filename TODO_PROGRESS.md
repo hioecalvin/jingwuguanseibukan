@@ -4087,3 +4087,24 @@ Managed Auth, Storage object/API, managed-extension and platform-configuration r
 proof remains open until a disposable Supabase target is available. Production, the
 retired project, remote staging, providers and deferred Mux/uploader files were not
 contacted or changed.
+
+### Milestone 158 — normalized logo library and staging class logos (30/09/2026)
+
+Converted all ten supplied logos to uniform 1024 × 1024 PNGs, centered and aspect-fit
+on white without cropping or stretching. Added the organization logo, five class logos
+and four dojo/affiliate logos under `public/logos`, documented their database-name
+mappings, and switched every active organization-logo reference from the old JPEG to
+`/logos/organization/logo-js.png`.
+
+Uploaded exactly the five active class logos to staging `eomubndonbetszdbhsrj` at
+`class-logos/{class-id}/logo.png` and updated their class logo URLs. Aikido no longer
+references the retired project and Kungfu Kids now has a logo. Postflight confirms all
+five remote objects are exact byte matches to the repository PNGs, with valid PNG
+signatures and 1024 × 1024 dimensions. Previous target-object and URL baselines were
+captured locally before mutation.
+
+Chushin & Zhongxin, Kagami, UAC and Hayashitane remain versioned static assets because
+the current database has no dojo-logo field or upload workflow. ESLint, TypeScript,
+312/312 application tests, 21/21 desktop-uploader tests, whitespace checks and the
+51-route production build pass. No deployment occurred; production and the retired
+project were not contacted.

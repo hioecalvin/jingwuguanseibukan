@@ -2234,7 +2234,7 @@ export default function MemberManagementPage() {
 
 
       const organisationLogoUrl =
-        `${window.location.origin}/js-logo.jpeg`;
+        `${window.location.origin}/logos/organization/logo-js.png`;
 
 
       const categoryLogoUrl =
@@ -3256,7 +3256,7 @@ export default function MemberManagementPage() {
 
 
       const logoUrl =
-        `${window.location.origin}/js-logo.jpeg`;
+        `${window.location.origin}/logos/organization/logo-js.png`;
 
 
       const blob =
@@ -3459,7 +3459,7 @@ export default function MemberManagementPage() {
 
 
       const organisationLogoUrl =
-        `${window.location.origin}/js-logo.jpeg`;
+        `${window.location.origin}/logos/organization/logo-js.png`;
 
 
       const categoryLogoUrl =
@@ -4554,7 +4554,7 @@ export default function MemberManagementPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}

@@ -12,7 +12,7 @@ cancelled.**
 - The application places two non-interactive client-side logos over the player:
   the Jingwuguan Seibukan logo and the current class logo.
 - Changing a class logo updates the overlay without re-uploading videos. Changing
-  `/public/js-logo.jpeg` updates the organization overlay after the application is
+  `/public/logos/organization/logo-js.png` updates the organization overlay after the application is
   redeployed.
 - No viewer name, member number, email address, or moving identity watermark is
   displayed.

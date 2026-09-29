@@ -33,7 +33,7 @@ try {
   assert.ok(selectedClass?.logoUrl, "Staging needs at least one current class logo");
   const configuredClassLogo = new URL(selectedClass.logoUrl, config.siteUrl);
   const allowedLogoOrigins = new Set([new URL(config.siteUrl).origin, new URL(config.url).origin]);
-  const classLogoUrl = allowedLogoOrigins.has(configuredClassLogo.origin) ? configuredClassLogo.toString() : `${config.siteUrl}/js-logo.jpeg`;
+  const classLogoUrl = allowedLogoOrigins.has(configuredClassLogo.origin) ? configuredClassLogo.toString() : `${config.siteUrl}/logos/organization/logo-js.png`;
   if (classLogoUrl !== configuredClassLogo.toString()) console.log(`BLOCKER: ${selectedClass.name} still references the retired class-logo origin ${configuredClassLogo.origin}; the smoke test will not contact it.`);
   const input = join(root, "source.mp4");
   const generated = spawnSync(ffmpeg, ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=navy:s=640x360:d=2", "-f", "lavfi", "-i", "sine=frequency=440:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", input], { windowsHide: true, encoding: "utf8" });
@@ -42,7 +42,7 @@ try {
     inputPath: input,
     tempRoot: root,
     ffmpegPath: ffmpeg,
-    organisationLogoUrl: `${config.siteUrl}/js-logo.jpeg`,
+    organisationLogoUrl: `${config.siteUrl}/logos/organization/logo-js.png`,
     classLogoUrl,
     siteUrl: config.siteUrl,
     supabaseUrl: config.url,

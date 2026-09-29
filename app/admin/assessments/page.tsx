@@ -528,7 +528,7 @@ export default function BulkAssessmentsPage() {
         certificates.push({
           record: promotion,
           audit,
-          organisationLogoUrl: `${window.location.origin}/js-logo.jpeg`,
+          organisationLogoUrl: `${window.location.origin}/logos/organization/logo-js.png`,
           categoryLogoUrl: promotion.class_logo_url
             ? promotion.class_logo_url.startsWith("http")
               ? promotion.class_logo_url

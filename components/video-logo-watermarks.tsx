@@ -44,7 +44,7 @@ export default function VideoLogoWatermarks({
       {includeOrganizationLogo && (
         <div className="absolute left-3 top-3 rounded-xl border border-white/15 bg-black/45 p-1.5 shadow-lg backdrop-blur-sm sm:left-4 sm:top-4 sm:p-2">
           <Image
-            src="/js-logo.jpeg"
+            src="/logos/organization/logo-js.png"
             alt=""
             width={72}
             height={72}

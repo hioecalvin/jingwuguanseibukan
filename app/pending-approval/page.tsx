@@ -22,7 +22,7 @@ export default async function PendingApprovalPage() {
         <header className="flex items-center justify-between gap-4 border-b border-neutral-800 pb-6">
           <div className="flex min-w-0 items-center gap-4">
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={64}
               height={64}

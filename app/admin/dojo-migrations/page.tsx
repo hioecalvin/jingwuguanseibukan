@@ -542,7 +542,7 @@ export default function DojoMigrationHistoryPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}

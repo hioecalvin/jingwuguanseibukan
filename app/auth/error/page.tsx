@@ -6,7 +6,7 @@ export default function AuthenticationErrorPage() {
     <main className="flex min-h-screen items-center justify-center bg-neutral-950 px-4 text-white">
       <section className="w-full max-w-md rounded-2xl border border-red-900 bg-neutral-900 p-8 text-center shadow-2xl">
         <Image
-          src="/js-logo.jpeg"
+          src="/logos/organization/logo-js.png"
           alt="Jingwuguan Seibukan"
           width={96}
           height={96}

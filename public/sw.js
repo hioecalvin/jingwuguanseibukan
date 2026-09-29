@@ -51,9 +51,9 @@ self.addEventListener("push", (event) => {
       data.body ||
       "You have a new notification.",
 
-    icon: "/js-logo.jpeg",
+    icon: "/logos/organization/logo-js.png",
 
-    badge: "/js-logo.jpeg",
+    badge: "/logos/organization/logo-js.png",
 
     data: {
       url:
