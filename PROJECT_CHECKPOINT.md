@@ -1032,3 +1032,25 @@ acceptance completed; production remains unchanged.
   next available Mux migration; deploy the release candidate; run the guarded SQL/security suite;
   perform one disposable real upload and signed Member playback; then rebuild, inspect,
   install, smoke-test and uninstall the Windows installer. Production remains untouched.
+
+## Normalized logo staging deployment — 30 September 2026
+
+- Release commits `c0e7310`, `9ab548b` and `2d939d1` are pushed to
+  `release/v1-readiness-20260918`. GitHub Actions run `36632559544` at exact head
+  `2d939d1` passes common checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and
+  WebKit/macOS.
+- Deployment input came from a clean archive of `2d939d1`; no uncommitted deferred
+  Mux/uploader file was present. An initial manual Preview inherited the retired
+  Supabase public URL. The browser request guard blocked every attempted retired-host
+  request before network I/O, and the staging alias was immediately restored.
+- The corrected build received the 13 protected staging values at build and runtime.
+  Ready Preview `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` now owns only
+  `jingwuguanseibukan-staging.vercel.app`; its deployment metadata names exact commit
+  `2d939d1` and branch `release/v1-readiness-20260918`.
+- The host probe now validates the organization logo as `image/png`. All 11 staging
+  route/method/security-header probes pass, followed by 18/18 guarded read-only WebKit
+  tests across desktop, tablet and mobile. Member 0101, scoped Admin 0002 and Super
+  Admin 0001 remained within the approved staging backend.
+- All ten deployed static logo assets return HTTP 200 `image/png`, have exact
+  1024 × 1024 dimensions, and SHA-256-match their committed files. Production was not
+  deployed or contacted; the retired project received no guarded browser request.

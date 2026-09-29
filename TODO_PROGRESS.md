@@ -4108,3 +4108,25 @@ the current database has no dojo-logo field or upload workflow. ESLint, TypeScri
 312/312 application tests, 21/21 desktop-uploader tests, whitespace checks and the
 51-route production build pass. No deployment occurred; production and the retired
 project were not contacted.
+
+### Milestone 159 — logo release deployed and accepted on staging (30/09/2026)
+
+Pushed release commits `c0e7310`, `9ab548b` and `2d939d1` to
+`release/v1-readiness-20260918`. GitHub Actions run `36632559544` at exact head
+`2d939d1` passed all five jobs: common checks, Chromium/Linux, Firefox/Linux,
+WebKit/Linux and WebKit/macOS.
+
+Created a clean deployment export from `2d939d1` so none of the unrelated deferred
+Mux/uploader working-tree files could be uploaded. The first manual Preview inherited
+the retired Supabase public URL; the staging browser request guard rejected it before
+network I/O, and the staging alias was immediately restored to the preceding verified
+Preview. Rebuilt the same commit with the 13 protected staging runtime/build values and
+assigned only `jingwuguanseibukan-staging.vercel.app` to Ready Preview
+`dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz`.
+
+Updated the read-only host probe to expect the new organization asset's `image/png`
+content type. The corrected deployment passes all 11 route/method/security-header
+probes and all 18 guarded read-only WebKit tests across desktop, tablet and mobile.
+Every one of the ten static logo URLs returns HTTP 200 `image/png`, is exactly
+1024 × 1024, and byte-for-byte matches the corresponding committed asset. Production
+was not deployed or contacted, and the retired project received no guarded request.
