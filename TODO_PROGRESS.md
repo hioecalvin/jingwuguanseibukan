@@ -4029,3 +4029,32 @@ fields and zero audit rows; only `updated_at` plus expected Auth session metadat
 outside the zero-residue guarantee. Request-guard tests pass 3/3; syntax, targeted
 ESLint, TypeScript and whitespace checks pass. Production, the retired project,
 providers and deferred Mux/uploader files were not contacted or changed.
+
+### Milestone 156 — protected staging recovery source captured (29/09/2026)
+
+Completed the source half of the managed-platform recovery rehearsal against only
+staging `eomubndonbetszdbhsrj`. The protected logical package contains the application
+database, Auth and Storage metadata and global role definitions with role passwords
+excluded. It is AES-256-CBC/PBKDF2 encrypted, passed decrypt-and-list verification and
+has SHA-256 `5c3ebb6079fbc8f1e0c8544bb78fca4b9e1b418c3020283dab6d40cb5d3d1ef2`.
+New plaintext dump/tar intermediates were removed after verification.
+
+The exact source ledger is 006–055 with 50 migrations and digest
+`e76ad2f14c8a7723d335d6b57a7517cad01fa969358ca415355fd1b7bbc94ce4`.
+The deterministic 18-file catalog contains 4,146 schema objects with digest
+`91dddeeadfb43b1d710dfa5574cb9d860a588ffbd103015aae01ffab27be2bd7`.
+Source inventory records 57 Auth users/identities, two Storage buckets and one
+1,580,749-byte Storage object. That byte object was downloaded from staging,
+size/SHA-256 verified, encrypted separately and decrypt/list verified; the encrypted
+archive digest is `ba7eecbd60e12ec9af6c25d7f6d99eefdd08506226df1066809a6299682b65f7`.
+Its plaintext copy was removed. Staging contains no database `cron` schema/job table.
+
+The approved free disposable Supabase project could not be created because the
+account already has two active free projects. Supabase rejected the request before
+creation; no payment, upgrade, pause, deletion or existing-project change occurred.
+The protected source evidence is complete, but restored catalog/ledger fingerprints,
+Auth/API login, Storage upload/download, RLS smoke and target quarantine remain open.
+A local PostgreSQL 17 target is available as a narrower interim option, but it cannot
+substitute for managed Auth, Storage API and platform-configuration recovery proof.
+Production, the retired project, providers and deferred Mux/uploader files were not
+contacted or changed.

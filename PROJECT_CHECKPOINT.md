@@ -917,6 +917,40 @@ acceptance completed; production remains unchanged.
   Auth metadata are excluded. Local guard tests pass 3/3; syntax, targeted ESLint,
   TypeScript and whitespace validation pass.
 
+## Protected staging recovery-source checkpoint — 29 September 2026
+
+- The exact staging project guard accepted only `eomubndonbetszdbhsrj`. A free-plan
+  disposable-project creation was attempted only after explicit approval, but the
+  Supabase control plane rejected it because the account already has two active free
+  projects. No project, payment, upgrade or existing-project change occurred.
+- A protected staging logical backup now captures the application database, Auth and
+  Storage metadata plus global role definitions with role passwords excluded. The
+  database package is encrypted with AES-256-CBC/PBKDF2 (600,000 iterations), passed
+  a decrypt-and-list verification and has SHA-256
+  `5c3ebb6079fbc8f1e0c8544bb78fca4b9e1b418c3020283dab6d40cb5d3d1ef2`.
+  Its temporary plaintext dump, globals file and tar archive were removed after
+  verification; the protected encryption key is outside Git.
+- The source migration ledger is exactly 006–055 (50 migrations) with digest
+  `e76ad2f14c8a7723d335d6b57a7517cad01fa969358ca415355fd1b7bbc94ce4`.
+  The 18-file schema catalog contains 4,146 objects and has digest
+  `91dddeeadfb43b1d710dfa5574cb9d860a588ffbd103015aae01ffab27be2bd7`.
+- Source inventory records 57 Auth users, 57 identities, two Storage buckets and one
+  1,580,749-byte Storage object. That object was downloaded from staging, size- and
+  SHA-256-verified, encrypted separately and passed decrypt-and-list verification;
+  its encrypted archive digest is
+  `ba7eecbd60e12ec9af6c25d7f6d99eefdd08506226df1066809a6299682b65f7`.
+  Temporary plaintext object bytes were removed. No `cron` schema/job table exists
+  in the staging database, so any worker schedule remains an external-platform item.
+- Recovery source evidence is under the access-restricted
+  `C:\protected\jingwuguan-recovery-source-20260929` directory and is not tracked by
+  Git. The source side is complete, but no restore is claimed: a disposable Supabase
+  target remains unavailable until a free project slot is released or a paid project
+  is separately authorized. PostgreSQL 17 local-cluster tools are present and can
+  provide interim database/ledger/catalog/RLS proof if that narrower target is
+  approved; it cannot prove managed Auth, Storage API or platform configuration.
+- Production, the retired project, providers and deferred Mux/uploader files were not
+  contacted or changed.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.
