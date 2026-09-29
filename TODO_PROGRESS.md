@@ -3993,3 +3993,27 @@ guarantee. A read-only GitHub API check confirms run `36473581644` at recovery-g
 head `b0e8bcb` completed successfully across checks, Chromium/Linux, Firefox/Linux,
 WebKit/Linux and WebKit/macOS. Production, the retired project and deferred
 Mux/uploader files were not contacted or changed.
+
+### Milestone 155 — guarded last-training mutation gate prepared (29/09/2026)
+
+Prepared, but did not run, the next deployed mutation gate for the existing
+last-training workflow. The staging-pinned WebKit harness searches exact dummy
+Member 0101 inside scoped Admin 0002's live administrative view, submits one safe
+past-date correction, and then marks that same captured membership trained today.
+Its request state machine permits only those two RPCs in that order and rejects a
+different membership, date, identity, backend, provider, duplicate or direct-table
+mutation.
+
+Before browser mutation, the parent captures the complete membership row and the
+complete append-only training-audit history. On every normal exit or interruption it
+accepts only the exact one-row correction or exact two-row correction/today sequence,
+locks the membership and newly captured audit UUIDs, removes only those audit rows,
+restores the original training date, then requires the full membership and audit
+baselines to match. Pre-existing audit drift, another membership-field change or an
+ambiguous row set fails closed. Server/database credentials stay out of Playwright.
+
+The request-guard tests pass 3/3; syntax, targeted ESLint, TypeScript and whitespace
+checks pass. The read-only staging matrix explicitly excludes the mutation spec.
+This live test still requires explicit approval naming Admin 0002 and Member 0101.
+Production, the retired project, providers and deferred Mux/uploader files were not
+contacted or changed.

@@ -892,6 +892,21 @@ acceptance completed; production remains unchanged.
   Production, the retired Supabase project and deferred Mux/uploader files were not
   contacted or changed.
 
+## Guarded last-training candidate — 29 September 2026
+
+- A dedicated WebKit harness is prepared for scoped Admin 0002 to correct and then
+  mark trained today on the exact active Member 0101 membership visible in the
+  deployed staging member-management page. It has not run live.
+- The browser allows only the captured membership's exact correction-date RPC
+  followed by its mark-today RPC. Different identities, targets, dates, order,
+  origins, direct-table writes and provider requests are denied before network I/O.
+- The parent snapshots the complete membership and audit baselines. Cleanup accepts
+  only the exact newly appended audit transition(s), deletes those captured UUIDs,
+  restores the original date, and requires both full baselines to match. Credentials
+  remain outside Playwright and no test-only database function is added.
+- Local guard tests pass 3/3; syntax, targeted ESLint, TypeScript and whitespace
+  validation pass. Explicit approval is still required for the live staging run.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

@@ -50,6 +50,21 @@ This command mutates staging briefly and must not be run without explicit approv
 It is pinned to `eomubndonbetszdbhsrj`, the fixed staging host, Admin 0002 and a
 Sydney Supabase pooler URL. Production and the retired project are rejected.
 
+The deployed last-training mutation gate is also separate. It uses Admin 0002 and
+the exact active Member 0101 membership visible inside that Admin's scope. The
+browser performs one past-date correction followed by “trained today”; the parent
+captures the complete membership row and complete training-audit history first,
+removes only newly captured audit UUIDs, restores the original date, and requires
+both complete baselines to match afterward.
+
+```powershell
+$env:JINGWUGUAN_PG_MODULE_DIR = 'C:\protected\runtime\node_modules'
+node .\scripts\staging-last-training-smoke.mjs --confirm-staging-last-training
+```
+
+This command also requires explicit live-staging approval. It rejects any other
+identity, membership, project, database region, mutation order or target date.
+
 ## Recovery readiness gate
 
 `recovery-readiness.mjs` validates a sanitized recovery manifest without contacting

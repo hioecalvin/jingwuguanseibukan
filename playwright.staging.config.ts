@@ -9,6 +9,7 @@ export default defineConfig({
   // Mutation suites have dedicated configs and explicit confirmation gates.
   testIgnore: [
     'contact-noop.spec.ts',
+    'last-training.spec.ts',
     'regular-schedule.spec.ts',
     'repository-draft.spec.ts',
   ],
