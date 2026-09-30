@@ -4175,3 +4175,29 @@ cannot prove managed Auth login/refresh, Storage API behavior, managed Vault/enc
 hosted provider configuration or final security acceptance on a managed restore target.
 Those checks still require a disposable Supabase project slot. No remote system was
 contacted and no protected source evidence was modified.
+
+### Milestone 162 — email scheduler platform boundary verified (30/09/2026)
+
+Rechecked the disposable managed-restore prerequisite: the Supabase organization still
+has exactly two active projects, staging `eomubndonbetszdbhsrj` and the historical
+project `pkmllhaavadhaozmwapz`. No free disposable project slot is available. Neither
+project was paused, deleted or modified.
+
+Ran the committed worker/provider security suite locally. All 28 focused checks pass,
+covering wrong-secret denial before database/provider work, durable rate-limit failure,
+empty and capped batches, retry-state persistence, acknowledgement failure, sanitized
+queue health, delayed/exhausted email visibility, memorial processing and provider-
+configuration separation.
+
+Verified from current official Vercel documentation that Vercel Cron calls only the
+project's production deployment with `GET`, Hobby permits only daily execution, and
+one-minute execution requires Pro or Enterprise. Vercel also does not retry failed
+cron invocations and can overlap or duplicate them. The current accepted worker instead
+requires authenticated `POST` once per minute to the fixed staging Preview host, so a
+Vercel Cron entry would be misleading and was not added. The runbook now requires a
+separately authorized external staging scheduler or a future reviewed production-only
+Vercel adapter and paid-plan decision.
+
+Real Resend delivery, scheduler monitoring, backlog/retry/exhaustion acceptance and the
+dedicated-inbox Auth flows remain external gates. Production, the historical project,
+provider settings and deferred Mux/uploader files were not contacted or changed.

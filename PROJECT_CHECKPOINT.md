@@ -5,8 +5,8 @@ Checkpoint date: 30/09/2026
 ## Current release checkpoint — 30 September 2026
 
 - Branch `release/v1-readiness-20260918` is synchronized with its remote. GitHub
-  Actions run `36634978973` passes common checks plus Chromium/Linux, Firefox/Linux,
-  WebKit/Linux and WebKit/macOS at the latest runtime/probe checkpoint `0f2e7ab`.
+  Actions run `36651880146` passes common checks plus Chromium/Linux, Firefox/Linux,
+  WebKit/Linux and WebKit/macOS at the latest evidence checkpoint `fa36635`.
   The deployed application tree is `2d939d1`; later commits contain only accepted
   probe, runbook and evidence updates.
 - Ready Preview `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
@@ -27,6 +27,26 @@ Checkpoint date: 30/09/2026
   production-only secrets/DNS/redirect configuration and an approved release/rollback
   window. Mux remains deferred and is not a gate for the non-Mux release candidate.
 - Production and the retired Supabase project were not contacted by this checkpoint.
+
+## Email scheduler feasibility checkpoint — 30 September 2026
+
+- The committed worker/provider suite passes 28/28 focused tests, including wrong-
+  secret denial before database/provider access, durable rate-limit failure behavior,
+  empty and 20-message batches, retry persistence, acknowledgement failure, queue
+  health normalization and memorial-processor observability.
+- A current read-only Supabase project inventory still shows both available projects
+  active, so the approved disposable managed-restore rehearsal remains blocked by the
+  missing free project slot. Neither existing project was paused, deleted or changed.
+- Current Vercel documentation confirms that Cron targets the project's production
+  deployment with `GET`; Hobby runs at most daily, while one-minute execution requires
+  Pro or Enterprise. It also does not retry failures and may overlap/duplicate runs.
+  Therefore no Vercel Cron entry was added to this Preview-only staging release.
+- Staging still needs a separately authorized one-minute external `POST` scheduler,
+  monitored real Resend delivery to a dedicated staging inbox and the complete retry/
+  exhaustion acceptance record. Production still needs an independently reviewed
+  scheduler choice and must not inherit a staging Preview assumption.
+- Production, the retired project, provider settings and the deferred Mux/uploader
+  working tree were not contacted or changed.
 
 ## Fixed staging alias and guarded WebKit gate verified (28/09/2026)
 

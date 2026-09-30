@@ -39,6 +39,30 @@ checks, not live provider evidence.
 
 ## Resend and email-worker scheduler
 
+### Scheduler platform decision — 30 September 2026
+
+Do not add a Vercel Cron entry to the current staging Preview. Vercel Cron invokes
+the project's production deployment with `GET`, while the accepted staging worker
+contract is an authenticated `POST` to the fixed Preview host. Vercel Hobby also
+permits only daily cron execution; the required one-minute interval needs Pro or
+Enterprise. Vercel does not retry failed cron invocations and may overlap or duplicate
+runs, so queue idempotency does not replace external failure monitoring.
+
+For staging acceptance, use a separately authorized scheduler that can send `POST`
+once per minute to the exact fixed staging origin and keep `x-worker-secret` in its
+secret store. For production, choose one of these reviewed paths before cutover:
+
+1. An external scheduler with the same `POST` contract, independent retry/alerting
+   and an exact production-origin allowlist.
+2. Vercel Pro/Enterprise Cron only after a dedicated `GET` bearer-authenticated
+   adapter has been implemented, reviewed, deployed and proved against the real
+   production deployment. Do not reuse the Preview acceptance result as that proof.
+
+Official constraints are recorded at
+<https://vercel.com/docs/cron-jobs/manage-cron-jobs> and
+<https://vercel.com/docs/cron-jobs/usage-and-pricing>. Recheck them at cutover because
+hosted-service limits can change.
+
 1. Verify the staging sending domain, sender, SPF, DKIM, and DMARC.
 2. Schedule `POST /api/system/email-worker` once per minute with
    `x-worker-secret` stored only in the host secret store.
