@@ -6,8 +6,9 @@ current non-Mux release candidate is accepted on staging. Sydney staging
 or remote gap. The pinned read-only strict database-security verifier passes, including
 the reviewed managed-platform default-privilege boundary.
 
-Branch `release/v1-readiness-20260918` is synchronized at `0f2e7ab`. GitHub Actions
-run `36634978973` passes all five jobs. Ready Preview
+Branch `release/v1-readiness-20260918` is synchronized with its remote. GitHub Actions
+run `36634978973` passes all five jobs at the latest runtime/probe checkpoint
+`0f2e7ab`. Ready Preview
 `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz`, built from application commit `2d939d1`, serves
 only `jingwuguanseibukan-staging.vercel.app`; the later branch commit contains only
 probe/checkpoint changes. The fixed host passes 11/11 read-only route, method, asset and

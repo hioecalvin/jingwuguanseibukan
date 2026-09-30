@@ -1,10 +1,19 @@
 # Recovery evidence gate
 
-The project has proved a scoped restore of the staging `public` schema and migration
-ledger. That is useful application-database evidence, but it is not complete Supabase
-disaster recovery. Managed Auth, Storage metadata and object bytes, roles/grants,
-Vault/encryption material, platform configuration, schedules and external provider
-resources still need a protected disposable-target rehearsal.
+The project has captured a protected staging package containing the application
+database, Auth and Storage metadata, database roles, and the retained Storage object's
+bytes. A disposable loopback-only PostgreSQL 17.11 rehearsal restored the exact
+006–055 migration ledger, critical row counts, roles/grants and RLS/security boundary.
+Canonical catalog comparison matched 17 of 18 files and 4,145 of 4,146 objects; the
+only absent object was Supabase's managed Vault extension, which standalone PostgreSQL
+cannot provide. See `../release-evidence/local-recovery-rehearsal-20260930.md`.
+
+That rehearsal is strong database and metadata evidence, but it is not complete
+managed Supabase disaster recovery. Auth login/refresh, Storage API upload/download,
+managed extensions and encryption-root custody, hosted configuration, schedules and
+external provider resources still need a protected disposable Supabase-target drill.
+The offline gate therefore remains intentionally blocked until those checks are proved;
+do not mark managed components verified based only on the local PostgreSQL rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
 version 3 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–055,

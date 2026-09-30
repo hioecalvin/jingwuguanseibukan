@@ -4,10 +4,11 @@ Checkpoint date: 30/09/2026
 
 ## Current release checkpoint — 30 September 2026
 
-- Branch `release/v1-readiness-20260918` is synchronized at `0f2e7ab`. GitHub Actions
-  run `36634978973` passes common checks plus Chromium/Linux, Firefox/Linux,
-  WebKit/Linux and WebKit/macOS. The deployed application tree is `2d939d1`;
-  `0f2e7ab` contains only accepted probe/documentation updates.
+- Branch `release/v1-readiness-20260918` is synchronized with its remote. GitHub
+  Actions run `36634978973` passes common checks plus Chromium/Linux, Firefox/Linux,
+  WebKit/Linux and WebKit/macOS at the latest runtime/probe checkpoint `0f2e7ab`.
+  The deployed application tree is `2d939d1`; later commits contain only accepted
+  probe, runbook and evidence updates.
 - Ready Preview `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
   `jingwuguanseibukan-staging.vercel.app`. It passes 11/11 host and security-header
   probes, 18/18 guarded read-only WebKit checks and exact verification of all ten
@@ -18,6 +19,8 @@ Checkpoint date: 30/09/2026
 - Protected database/Auth/Storage metadata, role and Storage-object source evidence is
   captured. A disposable local PostgreSQL 17 restore proves the exact ledger, critical
   counts, roles, grants, RLS and all catalog objects except the managed Vault extension.
+  Sanitized results are recorded in
+  `release-evidence/local-recovery-rehearsal-20260930.md`.
 - Production remains blocked on a new Singapore Supabase project, managed-platform
   restore/cutover proof, real email scheduler/delivery, dedicated-inbox Auth workflows,
   targeted push and physical Safari/iOS evidence, removal of weak staging test accounts,

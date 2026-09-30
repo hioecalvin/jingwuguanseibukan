@@ -4,12 +4,11 @@ Last updated: 30/09/2026
 
 ## Release status
 
-The current release-branch head is `0f2e7ab` on
-`release/v1-readiness-20260918`; it is synchronized with the remote branch. The
-deployed application tree is `2d939d1`, while `0f2e7ab` changes only the staging host
-probe and checkpoint documentation. GitHub Actions run `36634978973` passes all five
-jobs at `0f2e7ab`: common checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and
-WebKit/macOS.
+Branch `release/v1-readiness-20260918` is synchronized with its remote. The deployed
+application tree is `2d939d1`; `0f2e7ab` and later checkpoint commits change only
+release probes and documentation. GitHub Actions run `36634978973` passes all five
+jobs at the latest runtime/probe checkpoint `0f2e7ab`: common checks, Chromium/Linux,
+Firefox/Linux, WebKit/Linux and WebKit/macOS.
 
 Sydney staging `eomubndonbetszdbhsrj` is verified at exact migration history 006–055.
 The read-only strict database-security verifier passes. Ready Preview
@@ -4163,3 +4162,16 @@ managed default-privilege boundary as open, or omit the completed protected sour
 local PostgreSQL recovery rehearsal. Production remains blocked only on the explicitly
 recorded external/managed-platform gates. Production, the retired project and deferred
 Mux files were not contacted or changed.
+
+### Milestone 161 — sanitized recovery evidence published (30/09/2026)
+
+Updated the recovery guide to reflect the completed protected source capture and
+loopback-only PostgreSQL 17.11 rehearsal at exact ledger 006–055. Added a sanitized,
+versioned evidence record containing only counts, digests, security results and explicit
+limitations; it contains no dump, object bytes, credential or personal identity value.
+
+The recovery gate continues to fail closed for the right reason: standalone PostgreSQL
+cannot prove managed Auth login/refresh, Storage API behavior, managed Vault/encryption,
+hosted provider configuration or final security acceptance on a managed restore target.
+Those checks still require a disposable Supabase project slot. No remote system was
+contacted and no protected source evidence was modified.
