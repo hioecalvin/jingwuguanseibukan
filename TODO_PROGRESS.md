@@ -4262,7 +4262,9 @@ change that value, and tests that an inherited external value is discarded. The
 focused origin/config suite passes 7/7. A clean archive of commit `41b1deb` plus only
 this two-file fix completed a production browser build and passed the full Chromium
 desktop suite 38/38. Local Playwright Firefox remains unavailable on this Windows host,
-so cross-engine proof must come from the replacement GitHub Actions run.
+so cross-engine proof came from GitHub Actions run `36677366204` at exact commit
+`9eb570a`: common checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS
+all pass.
 
 No application runtime, live credential, staging resource or provider was changed.
 Production, the historical project and deferred Mux/uploader files were not contacted

@@ -1106,8 +1106,9 @@ acceptance completed; production remains unchanged.
   external origins are discarded. The focused suite passes 7/7.
 - A clean archive of exact commit `41b1deb` with only the two-file harness correction
   completed the production browser build and passed Chromium desktop 38/38. This
-  Windows host cannot launch Playwright Firefox; Linux Firefox and Linux/macOS WebKit
-  remain pending the replacement GitHub Actions run.
+  Windows host cannot launch Playwright Firefox; replacement GitHub Actions run
+  `36677366204` at exact commit `9eb570a` passes common checks, Chromium/Linux,
+  Firefox/Linux, WebKit/Linux and WebKit/macOS.
 - No live target was contacted. Production, staging, the historical project, providers
   and deferred Mux/uploader work remain unchanged.
 
