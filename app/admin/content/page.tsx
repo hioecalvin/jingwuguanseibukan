@@ -63,6 +63,7 @@ export default function AdminContentPage() {
   const [description, setDescription] = useState("");
 
   const [videoInput, setVideoInput] = useState("");
+  const [editingVideoProvider, setEditingVideoProvider] = useState<string | null>(null);
 
   const [status, setStatus] = useState("draft");
   const [sortOrder, setSortOrder] = useState(1);
@@ -288,6 +289,7 @@ export default function AdminContentPage() {
     setDescription("");
 
     setVideoInput("");
+    setEditingVideoProvider(null);
 
     setStatus("draft");
     setSortOrder(1);
@@ -316,6 +318,7 @@ export default function AdminContentPage() {
     }
 
     if (
+      editingVideoProvider !== "mux" &&
       videoInput.trim() &&
       !parsedVideoId
     ) {
@@ -350,12 +353,16 @@ export default function AdminContentPage() {
             description.trim(),
 
           provider:
-            videoInput.trim()
-              ? "youtube"
-              : "",
+            editingVideoProvider === "mux"
+              ? "mux"
+              : videoInput.trim()
+                ? "youtube"
+                : "",
 
           provider_video_id:
-            parsedVideoId,
+            editingVideoProvider === "mux"
+              ? videoInput
+              : parsedVideoId,
 
           content_status:
             status,
@@ -480,6 +487,9 @@ export default function AdminContentPage() {
 
     setVideoInput(
       item.video_id ?? ""
+    );
+    setEditingVideoProvider(
+      item.video_provider
     );
 
     setStatus(
@@ -913,7 +923,9 @@ export default function AdminContentPage() {
                 </label>
 
                 <div className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white">
-                  YouTube (Unlisted)
+                  {editingVideoProvider === "mux"
+                    ? "Mux (Signed Playback)"
+                    : "YouTube (Legacy)"}
                 </div>
 
               </div>
@@ -935,10 +947,15 @@ export default function AdminContentPage() {
                     )
                   }
                   placeholder="Paste an unlisted YouTube URL or video ID"
+                  disabled={editingVideoProvider === "mux"}
                   className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
                 />
 
-                {videoInput.trim() && (
+                {editingVideoProvider === "mux" ? (
+                  <p className="mt-2 text-xs text-neutral-400">
+                    Mux identifiers are managed by JS Video Uploader and cannot be replaced here.
+                  </p>
+                ) : videoInput.trim() && (
 
                   <p
                     className={`mt-2 text-xs ${

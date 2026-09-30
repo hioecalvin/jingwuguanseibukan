@@ -14,6 +14,7 @@ const connectSources = [
   "data:",
   supabaseUrl,
   supabaseUrl?.replace(/^https:/, "wss:"),
+  "https://*.mux.com",
 ].filter((value): value is string => Boolean(value));
 
 const contentSecurityPolicy = [
@@ -31,7 +32,7 @@ const contentSecurityPolicy = [
   "font-src 'self' data:",
   `connect-src ${connectSources.join(" ")}`,
   "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-  "media-src 'self' blob: https:",
+  "media-src 'self' blob: https://*.mux.com",
   "worker-src 'self' blob:",
   process.env.NODE_ENV === "production" && !isolatedBrowserSmoke
     ? "upgrade-insecure-requests"

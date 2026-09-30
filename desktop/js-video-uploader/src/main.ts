@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, dialog, shell, type IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, ipcMain, session, dialog, type IpcMainInvokeEvent } from "electron";
 import { readFileSync } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import { DesktopAuth } from "./auth";
@@ -48,7 +48,7 @@ else {
     const ffmpegPath = app.isPackaged
       ? join(process.resourcesPath, "ffmpeg", "ffmpeg.exe")
       : join(__dirname, "..", "node_modules", "ffmpeg-static", "ffmpeg.exe");
-    const uploader = new UploaderService(auth, config, () => window, tempRoot, ffmpegPath, url => shell.openExternal(url));
+    const uploader = new UploaderService(auth, config, () => window, tempRoot, ffmpegPath);
     const validate = (event: IpcMainInvokeEvent) => {
       if (!window || event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame || !trustedFrame(event.senderFrame?.url, page)) {
         throw new Error("Untrusted application frame.");
@@ -56,7 +56,7 @@ else {
     };
     ipcMain.handle("shell:info", (event): ShellInfo => {
       validate(event);
-      return { name: app.getName(), version: app.getVersion(), platform: "win32", stage: "G", configured: !!config, youtubeConfigured: !!config?.googleClientId && !!config?.youtubeChannelId, environment: config?.environment ?? "Unconfigured" };
+      return { name: app.getName(), version: app.getVersion(), platform: "win32", stage: "G", configured: !!config, provider: "Mux", environment: config?.environment ?? "Unconfigured" };
     });
     ipcMain.handle("auth:sign-in", (event, email: unknown, password: unknown) => { validate(event); return auth.signIn(email, password); });
     ipcMain.handle("auth:refresh", event => { validate(event); return auth.refresh(); });

@@ -19,8 +19,6 @@ const config = publicConfig({
   key: protectedValues.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || protectedValues.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   environment: "Staging",
   siteUrl: protectedValues.NEXT_PUBLIC_SITE_URL,
-  googleClientId: null,
-  youtubeChannelId: null,
 });
 assert.ok(config);
 const auth = new DesktopAuth(config);

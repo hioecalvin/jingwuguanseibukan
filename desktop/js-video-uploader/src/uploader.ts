@@ -1,7 +1,6 @@
 import type { BrowserWindow } from "electron";
-import { authorizeYouTube } from "./oauth";
 import { processVideo, validateVideo } from "./video-processing";
-import { uploadToYouTube } from "./youtube";
+import { uploadToMux } from "./mux";
 import type { UploadProgress, UploadRequest, UploadResult } from "./contracts";
 import type { PublicConfig } from "./config";
 import type { DesktopAuth } from "./auth";
@@ -14,7 +13,6 @@ export class UploaderService {
     private window: () => BrowserWindow | null,
     private tempRoot: string,
     private ffmpegPath: string,
-    private openExternal: (url: string) => Promise<void>,
   ) {}
   private report(phase: UploadProgress["phase"], percent: number, message: string) {
     this.window()?.webContents.send("upload:progress", { phase, percent, message } satisfies UploadProgress);
@@ -22,16 +20,16 @@ export class UploaderService {
   cancel() { if (!this.controller) return false; this.controller.abort(); return true; }
   async run(request: UploadRequest): Promise<UploadResult> {
     if (this.controller) return { ok: false, message: "Another upload is already running." };
-    if (!this.config?.googleClientId || !this.config.youtubeChannelId) return { ok: false, message: "Google OAuth and the organization YouTube channel are not configured in this installer." };
+    if (!this.config) return { ok: false, message: "This installer is not configured for the JS Super App." };
     this.controller = new AbortController();
     const signal = this.controller.signal;
     let cleanup: (() => Promise<void>) | null = null;
-    let youtubeVideoId: string | undefined;
+    let muxAssetId: string | undefined;
+    let muxPlaybackId: string | undefined;
     try {
       this.report("validating", 0, "Validating JS access and repository selections");
       const video = await validateVideo(request.videoPath);
       if (!request.title.trim() || request.title.trim().length > 100) throw new Error("Title must contain 1 to 100 characters.");
-      if (!(["private", "unlisted", "public"] as const).includes(request.privacyStatus)) throw new Error("Choose a valid YouTube privacy setting.");
       const auth = await this.auth.refresh();
       const selectedClass = auth.user?.classes.find(item => item.id === request.classId);
       const selectedRank = selectedClass?.ranks.find(item => item.id === request.rankId);
@@ -53,16 +51,47 @@ export class UploaderService {
         progress: (percent, message) => this.report("processing", percent, message),
       });
       cleanup = processed.cleanup;
-      this.report("authorizing", 0, "Choose the organization Google account in your browser");
-      const authorization = await authorizeYouTube({ clientId: this.config.googleClientId, expectedChannelId: this.config.youtubeChannelId }, this.openExternal, signal);
-      this.report("uploading", 0, `Uploading to ${authorization.channelTitle}`);
-      youtubeVideoId = await uploadToYouTube(processed.outputPath, authorization.accessToken, request, selectedClass.name, selectedRank.name, selectedTier.name, signal, (percent, message) => this.report("uploading", percent, message));
+      this.report("authorizing", 0, "Requesting a one-time signed Mux upload URL");
+      const upload = await this.auth.createMuxUpload(request);
+      this.report("uploading", 0, "Uploading directly to Mux");
+      await uploadToMux(
+        processed.outputPath,
+        upload.uploadUrl,
+        signal,
+        (percent, message) => this.report("uploading", percent, message),
+      );
+      this.report("provider-processing", 100, "Mux is preparing secure adaptive playback");
+      for (let attempt = 0; attempt < 240; attempt += 1) {
+        if (attempt) await new Promise<void>((resolve, reject) => {
+          const onAbort = () => {
+            clearTimeout(timer);
+            reject(new Error("Upload cancelled."));
+          };
+          const timer = setTimeout(() => {
+            signal.removeEventListener("abort", onAbort);
+            resolve();
+          }, 5_000);
+          signal.addEventListener("abort", onAbort, { once: true });
+        });
+        const status = await this.auth.getMuxUploadStatus(upload.uploadId);
+        if (status.status === "failed") throw new Error("Mux could not process this video.");
+        if (status.status === "ready") {
+          muxAssetId = status.assetId;
+          muxPlaybackId = status.playbackId;
+          break;
+        }
+      }
+      if (!muxAssetId || !muxPlaybackId) {
+        throw new Error("Mux processing is taking longer than expected. Keep the upload ID and retry later.");
+      }
       this.report("saving", 0, "Saving the uploaded video as a JS repository Draft");
-      const repositoryContentId = await this.auth.saveDraft(request, youtubeVideoId);
+      const finalized = await this.auth.finalizeMuxUpload(upload.uploadId, request);
+      muxAssetId = finalized.assetId;
+      muxPlaybackId = finalized.playbackId;
       this.report("complete", 100, "Upload complete and repository Draft saved");
-      return { ok: true, message: "Video uploaded and saved as a JS repository Draft.", youtubeVideoId, repositoryContentId };
+      return { ok: true, message: "Video uploaded to Mux and saved as a JS repository Draft.", muxAssetId, muxPlaybackId, repositoryContentId: finalized.contentId };
     } catch (error) {
-      return { ok: false, message: error instanceof Error ? error.message : "Upload failed.", ...(youtubeVideoId ? { youtubeVideoId } : {}) };
+      return { ok: false, message: error instanceof Error ? error.message : "Upload failed.", ...(muxAssetId ? { muxAssetId } : {}), ...(muxPlaybackId ? { muxPlaybackId } : {}) };
     } finally {
       if (cleanup) await cleanup().catch(() => undefined);
       this.controller = null;

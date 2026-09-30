@@ -6,8 +6,6 @@ const config = {
   key: "sb_publishable_test",
   environment: "Staging",
   siteUrl: "https://jingwuguanseibukan-staging.vercel.app",
-  googleClientId: null,
-  youtubeChannelId: null,
 };
 function fake(options = {}) {
   const state = { permissions: ["a"], active: true, ...options, signouts: [] };
@@ -16,6 +14,7 @@ function fake(options = {}) {
     auth: {
       signInWithPassword: async () => { if (state.wait) await state.wait; return { error: state.badPassword ? {} : null }; },
       getUser: async () => state.expired ? { error: {} } : response({ user: { id: "u" } }),
+      getSession: async () => response({ session: { access_token: "desktop-user-token" } }),
       stopAutoRefresh() {},
       signOut: async options => { state.signouts.push(options); },
     },
@@ -42,10 +41,6 @@ function fake(options = {}) {
 test("installer config accepts only staging with a public key", () => {
   assert.deepEqual(publicConfig(config), config);
   for (const override of [{ key: "sb_secret_test" }, { url: "https://production.supabase.co" }, { environment: "Production" }, { key: `a.${Buffer.from('{"role":"service_role"}').toString("base64url")}.b` }]) assert.equal(publicConfig({ ...config, ...override }), null);
-  const youtube = { googleClientId: "123456-example.apps.googleusercontent.com", youtubeChannelId: "UC1234567890123456789012" };
-  assert.deepEqual(publicConfig({ ...config, ...youtube }), { ...config, ...youtube });
-  assert.equal(publicConfig({ ...config, googleClientId: youtube.googleClientId }), null);
-  assert.equal(publicConfig({ ...config, youtubeChannelId: youtube.youtubeChannelId }), null);
 });
 test("class Admin sees only database-authorized classes; no token crosses bridge", async () => {
   const { auth } = fake();
@@ -95,4 +90,42 @@ test("invalid IPC input does not reach Supabase", async () => {
   const auth = new DesktopAuth(config, () => { throw new Error("must not run"); });
   assert.equal((await auth.signIn({}, [])).user, null);
   assert.equal((await auth.signIn("", "")).user, null);
+});
+test("Mux finalization sends only repository metadata to the verifying Super App route", async () => {
+  const { auth } = fake();
+  await auth.signIn("uploader@example.test", "password");
+  const originalFetch = globalThis.fetch;
+  let captured;
+  globalThis.fetch = async (input, init) => {
+    captured = { input: String(input), init };
+    return Response.json({
+      status: "complete",
+      contentId: "8d1da6da-8f72-4d65-867d-8a4dd7291ec6",
+      assetId: "MuxAssetIdentifier054",
+      playbackId: "MuxPlaybackIdentifier054",
+    });
+  };
+  try {
+    const result = await auth.finalizeMuxUpload("MuxUploadIdentifier054", {
+      classId: "dcbad4d5-d2d3-4c87-a2c4-0cf959231e76",
+      rankId: "81ce5e7d-7488-41f9-8847-b3d60bd75648",
+      tierId: "ace11141-81fe-4f72-93a8-33c2aba67771",
+      title: "Aikido ukemi",
+      description: "Safe falling",
+      section: "Basics",
+      sortOrder: 4,
+      videoPath: "C:\\video.mp4",
+    });
+    assert.equal(result.assetId, "MuxAssetIdentifier054");
+    assert.equal(captured.input, `${config.siteUrl}/api/repository/mux/uploads/MuxUploadIdentifier054`);
+    assert.equal(captured.init.method, "POST");
+    assert.equal(captured.init.headers.Authorization, "Bearer desktop-user-token");
+    assert.equal(captured.init.headers.Origin, config.siteUrl);
+    const body = JSON.parse(captured.init.body);
+    assert.equal(body.title, "Aikido ukemi");
+    assert.equal("assetId" in body, false);
+    assert.equal("playbackId" in body, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

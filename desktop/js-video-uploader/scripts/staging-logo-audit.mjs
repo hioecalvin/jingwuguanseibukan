@@ -12,8 +12,6 @@ const config = publicConfig({
   key: env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   environment: "Staging",
   siteUrl: env.NEXT_PUBLIC_SITE_URL,
-  googleClientId: null,
-  youtubeChannelId: null,
 });
 assert.ok(config, "Only the approved staging project is allowed");
 const email = "0001@dummy.jingwuguan.test";

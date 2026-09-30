@@ -9,7 +9,7 @@ export const makeClient = (config: PublicConfig) => createClient(config.url, con
 });
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const videoIdPattern = /^[A-Za-z0-9_-]{11}$/;
+const muxIdPattern = /^[A-Za-z0-9_-]{10,255}$/;
 
 async function allowedUser(client: SupabaseClient): Promise<AuthState> {
   const identity = await client.auth.getUser();
@@ -123,17 +123,63 @@ export class DesktopAuth {
     return this.state;
   }
 
-  async saveDraft(request: UploadRequest, youtubeVideoId: string): Promise<string> {
+  private async accessToken() {
     if (!this.client || !this.state.user) throw new Error("Please sign in again.");
-    const current = await allowedUser(this.client);
-    this.state = current;
-    if (!current.user) throw new Error("Please sign in again.");
+    const { data: { session }, error } = await this.client.auth.getSession();
+    if (error || !session?.access_token) throw new Error("Please sign in again.");
+    return session.access_token;
+  }
+
+  private async muxApi(path: string, init: RequestInit) {
+    if (!this.config) throw new Error("This installer is not configured for Mux.");
+    const accessToken = await this.accessToken();
+    const response = await fetch(`${this.config.siteUrl}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Origin: this.config.siteUrl,
+        "Content-Type": "application/json",
+        ...init.headers,
+      },
+      redirect: "error",
+      signal: AbortSignal.timeout(30_000),
+    });
+    const result = await response.json().catch(() => ({})) as Record<string, unknown>;
+    if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "The Super App could not authorize Mux.");
+    return result;
+  }
+
+  async createMuxUpload(request: UploadRequest) {
+    const result = await this.muxApi("/api/repository/mux/uploads", {
+      method: "POST",
+      body: JSON.stringify({
+        classId: request.classId,
+        rankId: request.rankId,
+        tierId: request.tierId,
+        title: request.title.trim(),
+      }),
+    });
+    if (!muxIdPattern.test(String(result.uploadId)) || typeof result.uploadUrl !== "string") {
+      throw new Error("The Super App returned an invalid Mux upload session.");
+    }
+    return { uploadId: String(result.uploadId), uploadUrl: result.uploadUrl };
+  }
+
+  async getMuxUploadStatus(uploadId: string) {
+    if (!muxIdPattern.test(uploadId)) throw new Error("Mux upload identifier is invalid.");
+    const result = await this.muxApi(`/api/repository/mux/uploads/${encodeURIComponent(uploadId)}`, { method: "GET" });
+    if (result.status === "processing" || result.status === "failed") {
+      return { status: result.status as "processing" | "failed" };
+    }
+    if (result.status === "ready" && muxIdPattern.test(String(result.assetId)) && muxIdPattern.test(String(result.playbackId))) {
+      return { status: "ready" as const, assetId: String(result.assetId), playbackId: String(result.playbackId) };
+    }
+    throw new Error("The Super App returned an invalid Mux processing status.");
+  }
+
+  async finalizeMuxUpload(uploadId: string, request: UploadRequest) {
+    if (!muxIdPattern.test(uploadId)) throw new Error("Mux upload identifier is invalid.");
     if (![request.classId, request.rankId, request.tierId].every(value => uuidPattern.test(value))) throw new Error("The repository selection is invalid.");
-    if (!videoIdPattern.test(youtubeVideoId)) throw new Error("YouTube returned an invalid video identifier.");
-    const selectedClass = current.user.classes.find(item => item.id === request.classId);
-    const selectedRank = selectedClass?.ranks.find(item => item.id === request.rankId);
-    const selectedTier = selectedRank?.tiers.find(item => item.id === request.tierId);
-    if (!selectedClass || !selectedRank || !selectedTier) throw new Error("Repository access changed. Refresh and try again.");
     const title = request.title.trim();
     if (!title || title.length > 100) throw new Error("Title must contain 1 to 100 characters.");
     const description = request.description.trim();
@@ -141,18 +187,26 @@ export class DesktopAuth {
     const repositoryDescription = [section ? `Section: ${section}` : "", description].filter(Boolean).join("\n\n");
     if (repositoryDescription.length > 5000) throw new Error("Description and section must be 5,000 characters or fewer.");
     if (!Number.isSafeInteger(request.sortOrder) || request.sortOrder < 0 || request.sortOrder > 1_000_000) throw new Error("Sort order is invalid.");
-    const result = await this.client.rpc("create_repository_content", {
-      target_class: request.classId,
-      target_rank: request.rankId,
-      target_sub_rank: request.tierId,
-      content_title: title,
-      content_description: repositoryDescription,
-      provider: "youtube",
-      provider_video_id: youtubeVideoId,
-      content_status: "draft",
-      content_sort_order: request.sortOrder,
+    const result = await this.muxApi(`/api/repository/mux/uploads/${encodeURIComponent(uploadId)}`, {
+      method: "POST",
+      body: JSON.stringify({
+        classId: request.classId,
+        rankId: request.rankId,
+        tierId: request.tierId,
+        title,
+        description,
+        section,
+        sortOrder: request.sortOrder,
+      }),
     });
-    if (result.error || typeof result.data !== "string") throw new Error("YouTube upload completed, but the JS repository Draft could not be saved. Keep the video ID shown and add it manually.");
-    return result.data;
+    if (
+      result.status !== "complete" || typeof result.contentId !== "string" ||
+      !muxIdPattern.test(String(result.assetId)) || !muxIdPattern.test(String(result.playbackId))
+    ) throw new Error("Mux upload completed, but the JS repository Draft could not be saved. Keep the Mux Asset ID shown for recovery.");
+    return {
+      contentId: result.contentId,
+      assetId: String(result.assetId),
+      playbackId: String(result.playbackId),
+    };
   }
 }

@@ -4313,3 +4313,50 @@ Focused push/service-worker coverage passes 12/12, including disabled/deceased d
 private database-detail suppression and proof that subscription access never occurs for
 an ineligible recipient. No schema change or migration was needed. No live target or
 provider was contacted; the push UI remains deliberately hidden.
+
+### Milestone 168 — Mux activation candidate verified locally (30/09/2026)
+
+Resumed the previously deferred Mux repository-video tranche without touching
+production or the retired project. Promoted the reviewed SQL to the next available
+ordered migration, `056_mux_repository_video.sql`, and updated its guarded
+rollback-contained acceptance, exact-ledger/zero-residue postflight and immutable
+recovery fingerprint. A staging-linked read-only ledger check proves remote staging is
+still exactly 006–055; a dry run names only migration 056. Migration 056 has not been
+applied.
+
+The candidate preserves existing YouTube content while sending every new desktop
+upload directly to Mux through a one-time provider URL. The server re-verifies upload
+ownership and ready state, stores only a Draft through a service-only fixed-search-path
+RPC, and authorizes Member playback through short-lived signed tokens after the normal
+repository RLS check. Mux token and signing secrets remain server-only; raw route
+exceptions were removed from logs.
+
+The complete application suite passes 330/330, the desktop uploader passes 21/21,
+ESLint, TypeScript, the optimized 51-route production build, migration-layout/recovery
+fingerprint and whitespace checks pass. The four protected staging Mux values are still
+absent, and the available Mux dashboard is at its login screen. Provider key creation,
+Vercel Preview secret upload, migration 056 application, disposable upload/playback
+acceptance and installer packaging remain blocked until Mux sign-in and an explicit
+staging-only migration approval. No production or retired-project endpoint was
+contacted.
+
+### Milestone 169 — staging Mux credentials provisioned and rotated (30/09/2026)
+
+Configured the existing empty Mux environment as `JS Super App Staging`. Created one
+least-privilege API token with only Mux Video read/write permissions and one playback-
+signing key. A first token was treated as exposed after its one-time secret appeared in
+a local browser proof image; it was never saved or deployed, was explicitly revoked,
+and the local proof image was removed. Exactly one replacement staging token and one
+signing key remain active.
+
+Saved `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_SIGNING_KEY_ID` and the base64 RSA
+`MUX_SIGNING_PRIVATE_KEY` directly to `C:\protected\jingwuguan-staging.env` without
+printing their values. Presence/shape checks pass, and the complete offline staging
+provider-readiness command reports `ready: true` with zero blockers. No secret was
+added to Git or the desktop installer.
+
+Migration 056 remains unapplied and no Vercel environment was changed. The next
+consequential gate is an explicit staging-only approval to upload the four variables to
+Vercel Preview, apply migration 056, redeploy, and run guarded disposable Mux upload,
+signed-playback, rollback-residue, ledger, database-lint and role-security acceptance.
+Production and the retired project were not contacted.

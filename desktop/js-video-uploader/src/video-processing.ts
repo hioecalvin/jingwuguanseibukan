@@ -10,7 +10,7 @@ export async function validateVideo(path: string) {
   if (typeof path !== "string" || !allowedVideoExtensions.has(extname(path).toLowerCase())) throw new Error("Choose a supported video file.");
   const file = await stat(path);
   if (!file.isFile() || file.size <= 0) throw new Error("The selected video is empty or unavailable.");
-  if (file.size > 256 * 1024 * 1024 * 1024) throw new Error("The selected video exceeds YouTube's 256 GB limit.");
+  if (file.size > 256 * 1024 * 1024 * 1024) throw new Error("The selected video exceeds the uploader's 256 GB safety limit.");
   return { path, name: basename(path), size: file.size };
 }
 

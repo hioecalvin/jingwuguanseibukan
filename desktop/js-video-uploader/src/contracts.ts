@@ -12,7 +12,7 @@ export type ShellInfo = {
   platform: "win32";
   stage: "G";
   configured: boolean;
-  youtubeConfigured: boolean;
+  provider: "Mux";
   environment: string;
 };
 export type AuthState = { user: UploaderUser | null; message: string };
@@ -26,17 +26,17 @@ export type UploadRequest = {
   description: string;
   section: string;
   sortOrder: number;
-  privacyStatus: "private" | "unlisted" | "public";
 };
 export type UploadProgress = {
-  phase: "validating" | "processing" | "authorizing" | "uploading" | "saving" | "complete";
+  phase: "validating" | "processing" | "authorizing" | "uploading" | "provider-processing" | "saving" | "complete";
   percent: number;
   message: string;
 };
 export type UploadResult = {
   ok: boolean;
   message: string;
-  youtubeVideoId?: string;
+  muxAssetId?: string;
+  muxPlaybackId?: string;
   repositoryContentId?: string;
 };
 export type DesktopBridge = {

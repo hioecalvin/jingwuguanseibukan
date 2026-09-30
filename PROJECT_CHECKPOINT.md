@@ -13,9 +13,13 @@ Checkpoint date: 30/09/2026
   `jingwuguanseibukan-staging.vercel.app`. It passes 11/11 host and security-header
   probes, 18/18 guarded read-only WebKit checks and exact verification of all ten
   normalized 1024 × 1024 PNG assets.
-- Staging `eomubndonbetszdbhsrj` has an exact local/remote migration ledger 006–055.
-  The pinned read-only strict database-security verifier passes. The committed non-Mux
-  provider configuration gate reports ready with zero blockers.
+- Staging `eomubndonbetszdbhsrj` has an exact remote migration ledger 006–055. The
+  locally verified Mux activation candidate is the sole pending migration 056; a
+  staging-linked dry run names only `056_mux_repository_video.sql`, and it has not been
+  applied. The Mux staging environment now has exactly one replacement video read/write
+  token and one playback-signing key; all four protected values are saved outside Git,
+  and the complete offline provider-readiness gate passes with zero blockers. The
+  pinned read-only strict database-security verifier passes.
 - Protected database/Auth/Storage metadata, role and Storage-object source evidence is
   captured. A disposable local PostgreSQL 17 restore proves the exact ledger, critical
   counts, roles, grants, RLS and all catalog objects except the managed Vault extension.
@@ -25,7 +29,9 @@ Checkpoint date: 30/09/2026
   restore/cutover proof, real email scheduler/delivery, dedicated-inbox Auth workflows,
   targeted push and physical Safari/iOS evidence, removal of weak staging test accounts,
   production-only secrets/DNS/redirect configuration and an approved release/rollback
-  window. Mux remains deferred and is not a gate for the non-Mux release candidate.
+  window. Mux is now a locally verified optional activation candidate with protected
+  staging credentials complete, but Vercel Preview secret upload, migration 056 and
+  live disposable upload/playback proof remain incomplete.
 - Production and the retired Supabase project were not contacted by this checkpoint.
 
 ## Email scheduler feasibility checkpoint — 30 September 2026

@@ -1,4 +1,4 @@
-import { createECDH, timingSafeEqual } from "node:crypto";
+import { createECDH, createPrivateKey, timingSafeEqual } from "node:crypto";
 import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
 import { pathToFileURL } from "node:url";
@@ -11,6 +11,10 @@ const SERVER_ONLY_NAMES = Object.freeze([
   "VAPID_PRIVATE_KEY",
   "PUSH_API_SECRET",
   "DURABLE_RATE_LIMIT_SECRET",
+  "MUX_TOKEN_ID",
+  "MUX_TOKEN_SECRET",
+  "MUX_SIGNING_KEY_ID",
+  "MUX_SIGNING_PRIVATE_KEY",
 ]);
 
 const PLACEHOLDER = /(?:change[-_ ]?me|example|dummy|fixture|local[-_ ]?only|test[-_ ]?only|unit[-_ ]?only)/i;
@@ -109,6 +113,10 @@ export function evaluateProviderConfiguration(env, options = {}) {
   const vapidPrivate = requireValue(blockers, env, "VAPID_PRIVATE_KEY");
   const vapidSubject = requireValue(blockers, env, "VAPID_SUBJECT");
   const pushSecret = requireValue(blockers, env, "PUSH_API_SECRET");
+  const muxTokenId = requireValue(blockers, env, "MUX_TOKEN_ID");
+  const muxTokenSecret = requireValue(blockers, env, "MUX_TOKEN_SECRET");
+  const muxSigningKeyId = requireValue(blockers, env, "MUX_SIGNING_KEY_ID");
+  const muxSigningPrivateKey = requireValue(blockers, env, "MUX_SIGNING_PRIVATE_KEY");
   if (vapidSubject && !/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(vapidSubject) && !/^https:\/\/[^\s]+$/i.test(vapidSubject)) {
     add(blockers, "VAPID_SUBJECT", "must be a mailto mailbox or HTTPS URL");
   }
@@ -127,6 +135,24 @@ export function evaluateProviderConfiguration(env, options = {}) {
       if (!blockers.some(({ path }) => path === "VAPID_PRIVATE_KEY")) {
         add(blockers, "VAPID_PRIVATE_KEY", "and the public key must be a valid matching P-256 VAPID pair");
       }
+    }
+  }
+
+  if (muxTokenId && !/^[A-Za-z0-9_-]{10,255}$/.test(muxTokenId)) {
+    add(blockers, "MUX_TOKEN_ID", "must have a valid Mux identifier shape");
+  }
+  if (muxSigningKeyId && !/^[A-Za-z0-9_-]{10,255}$/.test(muxSigningKeyId)) {
+    add(blockers, "MUX_SIGNING_KEY_ID", "must have a valid Mux identifier shape");
+  }
+  if (muxTokenSecret && (muxTokenSecret.length < 20 || PLACEHOLDER.test(muxTokenSecret))) {
+    add(blockers, "MUX_TOKEN_SECRET", "must be a non-placeholder secret with at least 20 characters");
+  }
+  if (muxSigningPrivateKey) {
+    try {
+      const key = createPrivateKey(Buffer.from(muxSigningPrivateKey, "base64").toString("utf8"));
+      if (key.asymmetricKeyType !== "rsa") throw new Error("not RSA");
+    } catch {
+      add(blockers, "MUX_SIGNING_PRIVATE_KEY", "must be a base64-encoded RSA private key");
     }
   }
 

@@ -9,7 +9,7 @@ import {
   verifyReleaseMigrationContract,
 } from "./recovery-ledger-fingerprint.mjs";
 
-test("the checked-in migration files match the immutable 006-055 recovery contract", async () => {
+test("the checked-in migration files match the immutable 006-056 recovery contract", async () => {
   const result = await verifyReleaseMigrationContract();
   assert.equal(result.matches, true);
   assert.deepEqual(result.actual, RELEASE_MIGRATION_CONTRACT);
@@ -45,7 +45,7 @@ test("source and restored ledger exports have a stable order-independent fingerp
 });
 
 test("ledger fingerprints fail closed on gaps and malformed statement evidence", () => {
-  assert.throws(() => fingerprintLedgerRows(ledgerRows().slice(1)), /006 through 055/);
+  assert.throws(() => fingerprintLedgerRows(ledgerRows().slice(1)), /006 through 056/);
   const malformed = ledgerRows();
   malformed[0].statements = [null];
   assert.throws(() => fingerprintLedgerRows(malformed), /version, name, and a string statements array/);
@@ -54,7 +54,7 @@ test("ledger fingerprints fail closed on gaps and malformed statement evidence",
 test("the recovery fingerprint covers every ordered SQL migration", async () => {
   const fingerprint = await fingerprintMigrationDirectory();
   assert.equal(fingerprint.firstVersion, "006");
-  assert.equal(fingerprint.lastVersion, "055");
-  assert.equal(fingerprint.migrationCount, 50);
+  assert.equal(fingerprint.lastVersion, "056");
+  assert.equal(fingerprint.migrationCount, 51);
   assert.match(fingerprint.repositoryFilesSha256, /^[a-f0-9]{64}$/);
 });

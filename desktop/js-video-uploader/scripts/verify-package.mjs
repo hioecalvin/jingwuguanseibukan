@@ -10,7 +10,7 @@ const config = JSON.parse(extractFile(archive, "dist/public-config.json").toStri
 assert.equal(config.url, "https://eomubndonbetszdbhsrj.supabase.co");
 assert.equal(config.environment, "Staging");
 assert.equal(config.siteUrl, "https://jingwuguanseibukan-staging.vercel.app");
-assert.equal(config.googleClientId === null, config.youtubeChannelId === null);
+assert.deepEqual(Object.keys(config).sort(), ["environment", "key", "siteUrl", "url"]);
 assert.ok(entries.includes("\\dist\\public-config.json") || entries.includes("/dist/public-config.json"));
 for (const path of ["release/win-unpacked/resources/ffmpeg/ffmpeg.exe", "release/win-unpacked/resources/ffmpeg/LICENSE.txt", "release/win-unpacked/resources/ffmpeg/README.txt"]) {
   const file = await stat(path);

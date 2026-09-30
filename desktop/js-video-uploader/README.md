@@ -1,10 +1,10 @@
-# JS Video Uploader — provider-ready Stage G candidate (v0.8.1)
+# JS Video Uploader — Mux candidate (v0.9.0)
 
 Windows-only Electron + React + TypeScript desktop app within the existing
 Jingwuguan Seibukan Super App repository. It supports database-authorized Repository
 Uploader/Super Admin sign-in, database-driven class/rank/tier selection, local FFmpeg
-processing with current organization and class logo watermarks, Google desktop OAuth,
-resumable YouTube upload and an RPC-guarded repository Draft save.
+processing with current organization and class logo watermarks, direct Mux upload,
+signed Mux playback, and an RPC-guarded repository Draft save.
 
 ## Install the preview
 
@@ -12,8 +12,8 @@ Run `release/JS-Video-Uploader-Setup.exe` on Windows x64, choose the installatio
 folder and launch JS Video Uploader. Node.js, VS Code and scripts are not required.
 The current candidate connects only to the approved **staging** Supabase project.
 Use an existing staging Repository Uploader or Super Admin account; production is
-not connected. A build without the public Google OAuth client ID and expected
-organization YouTube channel ID remains installable but upload is deliberately disabled.
+not connected. Mux credentials never enter the installer: the Super App server issues
+one-time direct-upload URLs after authenticating the uploader and class scope.
 
 The installer is per-user, unsigned, uses the default Electron icon and does not
 run automatically after installation. Windows ARM64/32-bit are not verified. The
@@ -42,10 +42,10 @@ node scripts/smoke.mjs C:\protected\jingwuguan-staging.env
 node scripts/verify-package.mjs C:\protected\jingwuguan-staging.env
 ```
 
-`build-staging.mjs` passes only the public URL/key to the builder; it does not copy
-the protected file. It may also pass the public installed-app OAuth client ID and
-public YouTube channel ID. The URL is pinned to project `eomubndonbetszdbhsrj`.
-Secret and service-role keys are rejected. `npm test`, `npm start` and usual packaging
+`build-staging.mjs` passes only the public URL/key and site URL to the builder; it does
+not copy the protected file. The URL is pinned to project `eomubndonbetszdbhsrj`.
+Supabase secret/service-role and Mux credentials are rejected from the desktop build.
+`npm test`, `npm start` and usual packaging
 scripts rebuild without staging configuration unless JS_UPLOADER_PUBLIC_URL,
 JS_UPLOADER_PUBLIC_KEY and JS_UPLOADER_ENVIRONMENT=Staging are set.
 
@@ -80,18 +80,23 @@ the Aikido logo still on the retired Supabase project, and no Kungfu Kids logo.
 - Renderer sandbox/context isolation, no Node/webviews, denied navigation/popups,
   denied network/browser permissions, packaged-only CSP.
 - Main-process Supabase requests use the staging public key and signed-in user's token,
-  a 15-second timeout and no redirects. No service key or Google credentials.
+  a 15-second timeout and no redirects. No service key or Mux credential is packaged.
+- The processed MP4 travels directly from the desktop to the one-time, HTTPS Mux
+  upload address. The uploader accepts only Mux's exact Google Storage host/path shape.
+- The Super App verifies the upload owner and current class appointment before it
+  exposes processing status, and the database creates every completed item as Draft.
 - Independent desktop package/lockfile; root TypeScript/ESLint/Vercel exclude it.
 
 ## Provider requirements
 
-- Enable YouTube Data API v3 in the organization Google Cloud project.
-- Create an OAuth client of type **Desktop app**, then provide its public client ID.
-- Provide the exact organization YouTube channel ID. The app verifies it before upload.
-- Google requires API-project verification/audit before new projects may upload as
-  Unlisted/Public; otherwise YouTube forces uploaded videos to Private.
-- Google access tokens, JS passwords and JS sessions remain memory-only.
-- Videos go directly from the desktop to YouTube and never through Vercel or Supabase Storage.
-- Every successful video is saved to JS as **Draft**, never auto-published.
-- Resumable upload addresses are accepted only from the exact HTTPS Google API
-  upload endpoint and must carry an upload session ID.
+- Create one Mux API access token with video read/write permission and configure
+  `MUX_TOKEN_ID` and `MUX_TOKEN_SECRET` on the Super App server only.
+- Create a Mux URL-signing key and configure `MUX_SIGNING_KEY_ID` plus the private
+  key PEM encoded as base64 in `MUX_SIGNING_PRIVATE_KEY`, also server-only.
+- Assign and apply the deferred Mux repository migration before enabling Mux uploads. It preserves legacy
+  YouTube items, while all new uploader-created videos use Mux signed playback.
+- Every successful upload is saved to JS as **Draft**, never auto-published.
+- JS passwords and Supabase sessions remain memory-only. The installer contains no
+  Mux API token, signing key, service-role key, or other provider secret.
+- Member playback first passes the existing repository RLS rules, then receives a
+  short-lived signed playback token. A copied Mux playback ID alone is not playable.

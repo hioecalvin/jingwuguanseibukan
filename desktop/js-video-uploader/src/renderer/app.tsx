@@ -77,7 +77,7 @@ function App() {
       setResult(await window.jsUploader.uploadVideo({
         videoPath: video.path, classId: selectedClass.id, rankId: selectedRank.id, tierId: selectedTier.id,
         title: String(form.get("title") ?? ""), description: String(form.get("description") ?? ""), section: String(form.get("section") ?? ""),
-        sortOrder: Number(form.get("sortOrder") ?? 1), privacyStatus: String(form.get("privacyStatus") ?? "unlisted") as "private" | "unlisted" | "public",
+        sortOrder: Number(form.get("sortOrder") ?? 1),
       }));
     } catch { setResult({ ok: false, message: "The uploader stopped unexpectedly. Restart it and try again." }); }
     finally { setUploading(false); }
@@ -87,7 +87,7 @@ function App() {
     <header><div className="wordmark">JINGWUGUAN SEIBUKAN</div><span className="badge">{info?.environment ?? "WINDOWS"} · UPLOADER</span></header>
     <main>
       <p className="eyebrow">LOCAL VIDEO WORKSPACE</p><h1>JS Video Uploader</h1>
-      <p className="intro">Process both logo watermarks on this computer, upload to the organization YouTube channel, then save a repository Draft.</p>
+      <p className="intro">Process both logo watermarks on this computer, upload directly to Mux, then save a repository Draft.</p>
       {!auth.user ? <section className="card welcome" aria-labelledby="welcome-title"><div className="mark" aria-hidden="true">JS</div><div className="account">
         <h2 id="welcome-title">Repository Uploader sign-in</h2><form onSubmit={signIn}>
           <label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="username" maxLength={320} required disabled={busy || !info?.configured} />
@@ -97,7 +97,6 @@ function App() {
         </form><p className="message" role="status" aria-live="polite">{auth.message}</p>
       </div></section> : <>
         <section className="account-bar"><div><strong>{auth.user.name}</strong><span>{auth.user.role} · {auth.user.classes.length} class{auth.user.classes.length === 1 ? "" : "es"}</span></div><button type="button" onClick={signOut} disabled={busy || uploading}>Sign out</button></section>
-        {!info?.youtubeConfigured && <div className="notice error"><strong>YouTube setup required.</strong> This build needs the organization Google OAuth client ID and YouTube channel ID before it can upload.</div>}
         <form className="card upload-form" onSubmit={upload}>
           <div className="grid three"><label>Class<select value={selectedClass?.id ?? ""} onChange={event => setClassId(event.target.value)} disabled={uploading}>{auth.user.classes.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
             <label>Official Rank<select value={selectedRank?.id ?? ""} onChange={event => setRankId(event.target.value)} disabled={uploading}>{selectedClass?.ranks.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
@@ -106,15 +105,15 @@ function App() {
           <label>Title<input name="title" maxLength={100} required disabled={uploading} placeholder="Example: Tai no Henko" /></label>
           <div className="grid two"><label>Optional Section<input name="section" maxLength={120} disabled={uploading} placeholder="Example: Standing practice" /></label><label>Sort Order<input name="sortOrder" type="number" min={0} max={1000000} defaultValue={1} required disabled={uploading} /></label></div>
           <label>Description<textarea name="description" maxLength={4800} rows={4} disabled={uploading} placeholder="Training notes or explanation" /></label>
-          <label>YouTube Privacy<select name="privacyStatus" defaultValue="unlisted" disabled={uploading}><option value="unlisted">Unlisted — recommended</option><option value="private">Private</option><option value="public">Public</option></select></label>
+          <p className="provider-note">Provider: Mux with signed, Member-authorized adaptive playback.</p>
           <p className="watermark-note">Watermarks: current JS organization logo at top-left and current {selectedClass?.name ?? "class"} logo at top-right. The logos are downloaded when processing begins.</p>
           {uploading && <div className="progress"><div><span>{progress.message}</span><strong>{progress.percent}%</strong></div><progress max={100} value={progress.percent} /><button type="button" className="danger" onClick={() => window.jsUploader.cancelUpload()}>Cancel upload</button></div>}
-          {result && <div className={`notice ${result.ok ? "success" : "error"}`} role="status"><strong>{result.ok ? "Complete" : "Not completed"}</strong> {result.message}{result.youtubeVideoId && <span className="video-id">YouTube ID: {result.youtubeVideoId}</span>}</div>}
-          <button className="primary" type="submit" disabled={uploading || !video || !selectedClass || !selectedRank || !selectedTier || !info?.youtubeConfigured}>{uploading ? "Processing and uploading…" : "Process, Upload and Save Draft"}</button>
+          {result && <div className={`notice ${result.ok ? "success" : "error"}`} role="status"><strong>{result.ok ? "Complete" : "Not completed"}</strong> {result.message}{result.muxAssetId && <span className="video-id">Mux Asset ID: {result.muxAssetId}</span>}</div>}
+          <button className="primary" type="submit" disabled={uploading || !video || !selectedClass || !selectedRank || !selectedTier}>{uploading ? "Processing and uploading…" : "Process, Upload and Save Draft"}</button>
         </form>
       </>}
     </main>
-    <footer><span>JS and Google sessions remain memory-only.</span><span>{info ? `v${info.version} · Stage ${info.stage}` : "Starting…"}</span></footer>
+    <footer><span>JS sessions remain memory-only; Mux secrets stay on the server.</span><span>{info ? `v${info.version} · Stage ${info.stage}` : "Starting…"}</span></footer>
   </div>;
 }
 createRoot(document.getElementById("root")!).render(<App />);

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createECDH, randomBytes } from "node:crypto";
+import { createECDH, generateKeyPairSync, randomBytes } from "node:crypto";
 import test from "node:test";
 
 import { evaluateProviderConfiguration } from "./provider-config-readiness.mjs";
@@ -7,6 +7,7 @@ import { evaluateProviderConfiguration } from "./provider-config-readiness.mjs";
 function validEnvironment() {
   const ecdh = createECDH("prime256v1");
   ecdh.setPrivateKey(randomBytes(32));
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   return {
     NEXT_PUBLIC_SITE_URL: "https://staging.example.org/",
     NEXT_PUBLIC_SUPABASE_URL: "https://staging-ref.supabase.co",
@@ -21,6 +22,12 @@ function validEnvironment() {
     VAPID_PRIVATE_KEY: ecdh.getPrivateKey().toString("base64url"),
     VAPID_SUBJECT: "mailto:admin@example.org",
     PUSH_API_SECRET: "push-123456789012-abcdefghijklmnopqrstuvwxyz",
+    MUX_TOKEN_ID: "mux-token-unit-1234",
+    MUX_TOKEN_SECRET: "mux-secret-1234567890-abcdefghijklmnopqrstuvwxyz",
+    MUX_SIGNING_KEY_ID: "mux-signing-unit-1234",
+    MUX_SIGNING_PRIVATE_KEY: Buffer.from(
+      privateKey.export({ type: "pkcs8", format: "pem" }),
+    ).toString("base64"),
   };
 }
 

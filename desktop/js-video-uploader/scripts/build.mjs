@@ -7,8 +7,6 @@ const requested = {
   key: process.env.JS_UPLOADER_PUBLIC_KEY,
   environment: process.env.JS_UPLOADER_ENVIRONMENT,
   siteUrl: process.env.JS_UPLOADER_SITE_URL,
-  googleClientId: process.env.JS_UPLOADER_GOOGLE_CLIENT_ID,
-  youtubeChannelId: process.env.JS_UPLOADER_YOUTUBE_CHANNEL_ID,
 };
 const config = publicConfig(requested);
 if (Object.values(requested).some(Boolean) && !config) throw new Error("Only approved staging URL, Staging label and public anonymous key are allowed.");

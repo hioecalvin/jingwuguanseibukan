@@ -17,6 +17,7 @@ import {
 } from "@/lib/supabase/client";
 
 import VideoLogoWatermarks from "@/components/video-logo-watermarks";
+import MuxRepositoryPlayer from "@/components/mux-repository-player";
 import { getYouTubeEmbedUrl } from "@/lib/video/youtube";
 
 type ClassBrand = {
@@ -1277,15 +1278,17 @@ export default function RepositoryTierPage() {
              */}
 
             {(() => {
+              const normalizedProvider =
+                selectedContent.video_provider
+                  ?.trim()
+                  .toLowerCase();
               const embedUrl =
                 getEmbedUrl(
                   selectedContent.video_provider,
                   selectedContent.video_id
                 );
 
-              if (
-                !embedUrl
-              ) {
+              if (!embedUrl && normalizedProvider !== "mux") {
                 return (
                   <div
                     className="
@@ -1303,7 +1306,7 @@ export default function RepositoryTierPage() {
                         text-neutral-500
                       "
                     >
-                      No supported YouTube video is attached to this reference.
+                      No supported video is attached to this reference.
                     </p>
                   </div>
                 );
@@ -1327,30 +1330,23 @@ export default function RepositoryTierPage() {
                       aspect-video
                     "
                   >
-                    <iframe
-                      src={
-                        embedUrl
-                      }
-
-                      title={
-                        selectedContent.title
-                      }
-
-                      className="
-                        h-full
-                        w-full
-                      "
-
-                      loading="lazy"
-
-                      referrerPolicy="strict-origin-when-cross-origin"
-
-                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
-
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-
-                      allowFullScreen
-                    />
+                    {normalizedProvider === "mux" ? (
+                      <MuxRepositoryPlayer
+                        contentId={selectedContent.id}
+                        title={selectedContent.title}
+                      />
+                    ) : (
+                      <iframe
+                        src={embedUrl ?? undefined}
+                        title={selectedContent.title}
+                        className="h-full w-full"
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    )}
 
                     <VideoLogoWatermarks
                       classLogoUrl={
