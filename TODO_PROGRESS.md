@@ -4360,3 +4360,39 @@ consequential gate is an explicit staging-only approval to upload the four varia
 Vercel Preview, apply migration 056, redeploy, and run guarded disposable Mux upload,
 signed-playback, rollback-residue, ledger, database-lint and role-security acceptance.
 Production and the retired project were not contacted.
+
+### Milestone 170 — staging Mux activation and signed-playback acceptance (01/10/2026)
+
+Uploaded only the four protected `MUX_*` values to the branch-scoped Vercel Preview
+environment for `release/v1-readiness-20260918`. Applied only migration
+`056_mux_repository_video.sql` to staging `eomubndonbetszdbhsrj`; the exact remote
+ledger is now 006–056 and database lint reports no findings. Production and the retired
+project were not contacted.
+
+Deployed the release branch through a Git-reference Preview. Guarded live acceptance
+found that Mux now returns regional OCI signed-upload addresses under
+`direct-uploads-*.mux.com/upload/{id}`, while the original candidate trusted only the
+legacy Google Storage form. Added bounded failure-category logging with no provider
+body, headers, URL, identifier or credential; then narrowed the URL rule to HTTPS,
+credential-free, default-port regional Mux upload hosts with the exact identifier path,
+while retaining the legacy Google Storage boundary. Host, path-traversal and lookalike-
+domain regressions pass.
+
+All disposable sessions created while diagnosing the old URL rule were identified by
+their unique acceptance marker and cancelled before media upload. The final guarded
+run created exactly one disposable Mux asset and one linked Repository Draft, promoted
+the same row only long enough to verify the RS256 playback token and signed HLS
+manifest, restored it to Draft, and deleted the exact content row and Mux asset. The
+captured asset returns provider 404, the deleted playback route returns application
+404, and independent database postflight confirms zero application residue. Mux may
+retain its normal Direct Upload control-plane/audit records; no live video asset or
+Repository Draft remains.
+
+Ready Preview `dpl_AZK7CPjTCcbeQCytugpwyEtbgFBv` at application commit `8caa3e9`
+serves only `jingwuguanseibukan-staging.vercel.app`. Final evidence passes: 11/11 host
+and security-header probes, 12/12 role-security checks, 18/18 read-only WebKit checks
+across desktop/tablet/mobile, strict database verification, exact ledger, database
+lint, migration-056 postflight, 332/332 application tests, 21/21 desktop uploader
+tests, ESLint, TypeScript and the optimized 51-route production build. The guarded
+acceptance harness now also cancels marker-matched waiting sessions during recovery
+and on pre-asset failures.

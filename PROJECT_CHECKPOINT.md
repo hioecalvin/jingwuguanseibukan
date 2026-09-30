@@ -1,25 +1,29 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-Checkpoint date: 30/09/2026
+Checkpoint date: 01/10/2026
 
-## Current release checkpoint — 30 September 2026
+## Current release checkpoint — 1 October 2026
 
-- Branch `release/v1-readiness-20260918` is synchronized with its remote. GitHub
-  Actions run `36651880146` passes common checks plus Chromium/Linux, Firefox/Linux,
-  WebKit/Linux and WebKit/macOS at the latest evidence checkpoint `fa36635`.
-  The deployed application tree is `2d939d1`; later commits contain only accepted
-  probe, runbook and evidence updates.
-- Ready Preview `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
-  `jingwuguanseibukan-staging.vercel.app`. It passes 11/11 host and security-header
-  probes, 18/18 guarded read-only WebKit checks and exact verification of all ten
-  normalized 1024 × 1024 PNG assets.
-- Staging `eomubndonbetszdbhsrj` has an exact remote migration ledger 006–055. The
-  locally verified Mux activation candidate is the sole pending migration 056; a
-  staging-linked dry run names only `056_mux_repository_video.sql`, and it has not been
-  applied. The Mux staging environment now has exactly one replacement video read/write
-  token and one playback-signing key; all four protected values are saved outside Git,
-  and the complete offline provider-readiness gate passes with zero blockers. The
-  pinned read-only strict database-security verifier passes.
+- Branch `release/v1-readiness-20260918` is synchronized with its remote through
+  application deployment commit `8caa3e9`. The branch-scoped Preview contains only the
+  four protected `MUX_*` additions required by this activation; their values remain
+  outside Git.
+- Ready Preview `dpl_AZK7CPjTCcbeQCytugpwyEtbgFBv` serves only
+  `jingwuguanseibukan-staging.vercel.app`. It passes 11/11 host/security-header probes,
+  12/12 role-security checks and 18/18 read-only WebKit checks across desktop, tablet
+  and mobile.
+- Staging `eomubndonbetszdbhsrj` has the exact remote migration ledger 006–056.
+  Migration 056 is applied only there; database lint, strict database verification and
+  the independent migration-056 security/zero-residue postflight pass.
+- Guarded live Mux acceptance created one disposable asset and linked Repository Draft,
+  verified a short-lived RS256 playback token plus signed HLS, restored the row to
+  Draft and deleted the exact row and asset. Provider asset 404, application playback
+  404 and database baselines prove no live asset or application fixture remains.
+- Mux's current regional OCI Direct Upload URL shape is now accepted through a narrow
+  HTTPS host/path allowlist. Lookalike hosts, traversal paths, credentials, custom
+  ports and fragments remain rejected. Failure logs expose only bounded categories.
+- Final local evidence passes 332/332 application tests, 21/21 desktop uploader tests,
+  ESLint, TypeScript and the optimized 51-route production build.
 - Protected database/Auth/Storage metadata, role and Storage-object source evidence is
   captured. A disposable local PostgreSQL 17 restore proves the exact ledger, critical
   counts, roles, grants, RLS and all catalog objects except the managed Vault extension.
@@ -29,10 +33,26 @@ Checkpoint date: 30/09/2026
   restore/cutover proof, real email scheduler/delivery, dedicated-inbox Auth workflows,
   targeted push and physical Safari/iOS evidence, removal of weak staging test accounts,
   production-only secrets/DNS/redirect configuration and an approved release/rollback
-  window. Mux is now a locally verified optional activation candidate with protected
-  staging credentials complete, but Vercel Preview secret upload, migration 056 and
-  live disposable upload/playback proof remain incomplete.
+  window. Mux activation is complete and verified on staging; it has not been configured
+  or deployed to production.
 - Production and the retired Supabase project were not contacted by this checkpoint.
+
+## Staging Mux activation checkpoint — 1 October 2026
+
+- Only the four `MUX_*` secrets were added to the branch-scoped Vercel Preview; no
+  Production environment variable was changed.
+- Migration 056 was applied only after the staging URL guard and exact 006–055 ledger
+  check. The final ledger is exactly 006–056 with no database-lint findings.
+- The live acceptance uses the protected Super Admin staging account and a 5,044-byte
+  disposable MP4. It creates at most one asset and one Draft, validates server-side
+  ownership/finalization, signed token claims, unsigned playback denial and signed HLS,
+  then removes the captured database row and provider asset.
+- Earlier pre-upload failures created no asset or Draft. Their marker-matched waiting
+  Direct Upload sessions were cancelled with provider 200 responses. The successful
+  run verified provider 404 for its deleted asset and application 404 for its deleted
+  content.
+- Exact deployment, database, browser and security results are recorded in milestone
+  170 of `TODO_PROGRESS.md`. Production and `pkmllhaavadhaozmwapz` were not contacted.
 
 ## Email scheduler feasibility checkpoint — 30 September 2026
 

@@ -7,6 +7,9 @@ const expectedOrigin = "https://jingwuguanseibukan-staging.vercel.app";
 const expectedSupabase = "https://eomubndonbetszdbhsrj.supabase.co";
 const confirmation = "--confirm-staging-mux-disposable";
 const muxApiOrigin = "https://api.mux.com";
+const disposablePrefix = "__MUX_056_DISPOSABLE_";
+const muxDirectUploadHostPattern = /^direct-uploads-[a-z0-9-]+\.mux\.com$/;
+const muxDirectUploadPathPattern = /^\/upload\/[A-Za-z0-9_-]{10,255}$/;
 
 if (process.argv[2] !== confirmation || !process.argv[3]) {
   throw new Error(`Usage: node --env-file=<protected staging env> scripts/staging-mux-live-acceptance.mjs ${confirmation} <video.mp4>`);
@@ -29,7 +32,7 @@ if ([publishableKey, secretKey, superEmail, superPassword, tokenId, tokenSecret]
 }
 
 const videoPath = process.argv[3];
-const marker = `__MUX_056_DISPOSABLE_${Date.now()}_${randomBytes(4).toString("hex")}__`;
+const marker = `${disposablePrefix}${Date.now()}_${randomBytes(4).toString("hex")}__`;
 const description = "Disposable staging-only Mux signed-playback acceptance. Delete immediately.";
 const section = "Staging acceptance";
 const repositoryDescription = `Section: ${section}\n\n${description}`;
@@ -107,6 +110,57 @@ async function resolveAssetFromUpload() {
   if (typeof result?.data?.asset_id === "string") assetId = result.data.asset_id;
 }
 
+async function cancelDisposableWaitingUploads() {
+  const response = await muxRequest("/video/v1/uploads?limit=100");
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new Error(`Disposable Mux upload inventory failed (${response.status}).`);
+  }
+  const result = await response.json();
+  const stale = (result?.data ?? []).filter(item =>
+    item?.status === "waiting" &&
+    typeof item?.id === "string" &&
+    typeof item?.new_asset_settings?.meta?.title === "string" &&
+    item.new_asset_settings.meta.title.startsWith(disposablePrefix)
+  );
+  for (const item of stale) {
+    const cancel = await muxRequest(`/video/v1/uploads/${encodeURIComponent(item.id)}/cancel`, {
+      method: "PUT",
+      body: "{}",
+    });
+    if (!cancel.ok) {
+      await cancel.body?.cancel().catch(() => undefined);
+      throw new Error(`Stale disposable Mux upload cleanup failed (${cancel.status}).`);
+    }
+    await cancel.body?.cancel().catch(() => undefined);
+  }
+}
+
+async function cancelCapturedUpload() {
+  if (!uploadId || assetId) return;
+  const response = await muxRequest(`/video/v1/uploads/${encodeURIComponent(uploadId)}`);
+  if (!response.ok) {
+    await response.body?.cancel().catch(() => undefined);
+    throw new Error(`Captured Mux upload lookup failed (${response.status}).`);
+  }
+  const result = await response.json();
+  if (typeof result?.data?.asset_id === "string") {
+    assetId = result.data.asset_id;
+    return;
+  }
+  if (result?.data?.status === "waiting") {
+    const cancel = await muxRequest(`/video/v1/uploads/${encodeURIComponent(uploadId)}/cancel`, {
+      method: "PUT",
+      body: "{}",
+    });
+    if (!cancel.ok) {
+      await cancel.body?.cancel().catch(() => undefined);
+      throw new Error(`Captured Mux upload cancellation failed (${cancel.status}).`);
+    }
+    await cancel.body?.cancel().catch(() => undefined);
+  }
+}
+
 async function deleteCapturedContent() {
   if (!contentId) return;
   const { error } = await publicClient.rpc("delete_repository_content", { target_content: contentId });
@@ -164,7 +218,16 @@ async function verifyDatabaseResidue() {
 
 async function uploadVideo(uploadUrl) {
   const trusted = new URL(uploadUrl);
-  if (trusted.protocol !== "https:" || trusted.hostname !== "storage.googleapis.com" || !trusted.pathname.startsWith("/video-storage-")) {
+  const googleUpload = trusted.hostname === "storage.googleapis.com" && trusted.pathname.startsWith("/video-storage-");
+  const muxUpload = muxDirectUploadHostPattern.test(trusted.hostname) && muxDirectUploadPathPattern.test(trusted.pathname);
+  if (
+    trusted.protocol !== "https:" ||
+    trusted.username ||
+    trusted.password ||
+    trusted.port ||
+    trusted.hash ||
+    (!googleUpload && !muxUpload)
+  ) {
     throw new Error("The staging app returned an untrusted upload URL.");
   }
   const bytes = await readFile(videoPath);
@@ -247,6 +310,7 @@ try {
   const signIn = await publicClient.auth.signInWithPassword({ email: superEmail, password: superPassword });
   if (signIn.error || !signIn.data.session?.access_token) throw new Error("Protected Super Admin staging sign-in failed.");
   accessToken = signIn.data.session.access_token;
+  await cancelDisposableWaitingUploads();
 
   const [{ data: scopes, error: scopesError }, legacyAssets, uploaderAudit, staleMuxFixtures] = await Promise.all([
     publicClient.rpc("get_my_repository_upload_scopes"),
@@ -324,6 +388,7 @@ try {
 } finally {
   try {
     await deleteCapturedContent();
+    await cancelCapturedUpload();
     await deleteCapturedAsset();
     await verifyProviderDeletion();
     await verifyDatabaseResidue();
