@@ -67,8 +67,27 @@ begin
     null;
   end;
 
-  perform set_config('request.jwt.claim.sub', super_id::text, false);
   perform set_config('request.jwt.claim.role', 'service_role', false);
+  begin
+    perform public.create_repository_mux_content(
+      denied_user_id,
+      target_class_id,
+      target_rank_id,
+      target_tier_id,
+      '__MUX_056_NON_UPLOADER_DENIED__',
+      'must not persist',
+      'MuxPlaybackDenied056',
+      'MuxAssetDenied056',
+      540001
+    );
+    raise exception 'Service path unexpectedly accepted a non-uploader';
+  exception when insufficient_privilege then
+    if sqlerrm <> 'Not authorised to upload for this class' then
+      raise;
+    end if;
+  end;
+
+  perform set_config('request.jwt.claim.sub', super_id::text, false);
 
   mux_content_id := public.create_repository_mux_content(
     super_id,

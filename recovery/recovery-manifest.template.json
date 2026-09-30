@@ -28,7 +28,7 @@
     "firstVersion": "006",
     "lastVersion": "056",
     "migrationCount": 51,
-    "repositoryFilesSha256": "075678c71ca66de5d67de46f155e12c23f4292e4628e897db0c096ca8f860293",
+    "repositoryFilesSha256": "e5f55e45dbed1beb759fd1ac88cb3e68da6af1d9caaf2408402390b70775ec6e",
     "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
     "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
   },

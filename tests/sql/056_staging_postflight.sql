@@ -11,7 +11,7 @@ begin
 
   if versions is distinct from array(
     select lpad(value::text, 3, '0')
-    from generate_series(6, 54) as value
+    from generate_series(6, 56) as value
   ) then
     raise exception 'Migration ledger is not exactly 006 through 056';
   end if;
@@ -30,6 +30,7 @@ begin
     from public.content
     where title in (
       '__MUX_056_DENIED__',
+      '__MUX_056_NON_UPLOADER_DENIED__',
       '__MUX_056_ROLLBACK__',
       '__MUX_056_ROLLBACK_RETRY__',
       '__MUX_056_MUTATION_DENIED__',

@@ -47,12 +47,15 @@ alter table public.content
     )
     or (
       video_provider = 'youtube'
+      and video_id is not null
       and video_id ~ '^[A-Za-z0-9_-]{11}$'
       and video_asset_id is null
     )
     or (
       video_provider = 'mux'
+      and video_id is not null
       and video_id ~ '^[A-Za-z0-9_-]{10,255}$'
+      and video_asset_id is not null
       and video_asset_id ~ '^[A-Za-z0-9_-]{10,255}$'
     )
   ) not valid;
@@ -183,7 +186,9 @@ begin
     raise exception 'Description must contain 5,000 characters or fewer';
   end if;
 
-  if mux_playback_id !~ '^[A-Za-z0-9_-]{10,255}$'
+  if mux_playback_id is null
+     or mux_playback_id !~ '^[A-Za-z0-9_-]{10,255}$'
+     or mux_asset_id is null
      or mux_asset_id !~ '^[A-Za-z0-9_-]{10,255}$'
   then
     raise exception 'Mux identifiers are invalid';
