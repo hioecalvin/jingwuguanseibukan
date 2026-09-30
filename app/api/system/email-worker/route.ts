@@ -44,7 +44,7 @@ type EmailQueueHealth = {
     oldestReadyAgeSeconds: number | null;
     duplicateDedupeKeys: number;
   };
-  checkedAt: string | null;
+  checkedAt: string;
 };
 
 
@@ -54,14 +54,14 @@ type MemorialProcessorHealth = {
 };
 
 
-function nonnegativeInteger(
+function strictNonnegativeInteger(
   value: unknown,
 ) {
   return typeof value === "number" &&
     Number.isInteger(value) &&
     value >= 0
     ? value
-    : 0;
+    : null;
 }
 
 
@@ -91,52 +91,82 @@ function normaliseQueueHealth(
     return null;
   }
 
+  const stuckProcessingEmails =
+    strictNonnegativeInteger(
+      rawChecks.stuck_processing_emails,
+    );
+  const exhaustedFailures =
+    strictNonnegativeInteger(
+      rawChecks.failed_emails_exhausted,
+    );
   const oldPendingEmails =
-    nonnegativeInteger(
+    strictNonnegativeInteger(
       rawChecks.old_pending_emails,
     );
+  const overdueReadyEmails =
+    strictNonnegativeInteger(
+      rawChecks.overdue_ready_emails,
+    );
+  const queuedEmails =
+    strictNonnegativeInteger(
+      rawChecks.queued_emails,
+    );
+  const dueEmails =
+    strictNonnegativeInteger(
+      rawChecks.due_emails,
+    );
+  const oldestReadyAgeSeconds =
+    rawChecks.oldest_ready_age_seconds === null
+      ? null
+      : strictNonnegativeInteger(
+          rawChecks.oldest_ready_age_seconds,
+        );
+  const duplicateDedupeKeys =
+    strictNonnegativeInteger(
+      rawChecks.duplicate_dedupe_keys,
+    );
+  const checkedAt =
+    typeof raw.checked_at === "string" &&
+    raw.checked_at.trim().length > 0 &&
+    /^\d{4}-\d{2}-\d{2}T/.test(
+      raw.checked_at,
+    ) &&
+    Number.isFinite(
+      Date.parse(raw.checked_at),
+    )
+      ? raw.checked_at
+      : null;
+
+  if (
+    stuckProcessingEmails === null ||
+    exhaustedFailures === null ||
+    oldPendingEmails === null ||
+    overdueReadyEmails === null ||
+    queuedEmails === null ||
+    dueEmails === null ||
+    (
+      rawChecks.oldest_ready_age_seconds !== null &&
+      oldestReadyAgeSeconds === null
+    ) ||
+    duplicateDedupeKeys === null ||
+    checkedAt === null
+  ) {
+    return null;
+  }
 
   return {
     status: raw.status,
     checks: {
-      stuckProcessingEmails:
-        nonnegativeInteger(
-          rawChecks.stuck_processing_emails,
-        ),
-      exhaustedFailures:
-        nonnegativeInteger(
-          rawChecks.failed_emails_exhausted,
-        ),
+      stuckProcessingEmails,
+      exhaustedFailures,
       oldPendingEmails,
-      overdueReadyEmails:
-        rawChecks.overdue_ready_emails === undefined
-          ? oldPendingEmails
-          : nonnegativeInteger(
-              rawChecks.overdue_ready_emails,
-            ),
-      queuedEmails:
-        nonnegativeInteger(
-          rawChecks.queued_emails,
-        ),
-      dueEmails:
-        nonnegativeInteger(
-          rawChecks.due_emails,
-        ),
-      oldestReadyAgeSeconds:
-        rawChecks.oldest_ready_age_seconds === null
-          ? null
-          : nonnegativeInteger(
-              rawChecks.oldest_ready_age_seconds,
-            ),
-      duplicateDedupeKeys:
-        nonnegativeInteger(
-          rawChecks.duplicate_dedupe_keys,
-        ),
+      overdueReadyEmails,
+      queuedEmails,
+      dueEmails,
+      oldestReadyAgeSeconds,
+      duplicateDedupeKeys,
     },
-    checkedAt:
-      typeof raw.checked_at === "string"
-        ? raw.checked_at
-        : null,
+    checkedAt,
   };
 }
 
@@ -308,13 +338,21 @@ export async function POST(
         ? memorialData as Record<string, unknown>
         : null;
 
-    memorialProcessor = {
-      status: "PASS",
-      createdAnnouncements:
-        nonnegativeInteger(
-          rawMemorial?.created_count,
-        ),
-    };
+    const createdAnnouncements =
+      strictNonnegativeInteger(
+        rawMemorial?.created_count,
+      );
+
+    memorialProcessor =
+      createdAnnouncements === null
+        ? {
+            status: "FAIL",
+            createdAnnouncements: null,
+          }
+        : {
+            status: "PASS",
+            createdAnnouncements,
+          };
   }
 
 

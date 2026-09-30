@@ -98,11 +98,11 @@ self.addEventListener(
           type: "window",
           includeUncontrolled: true,
         })
-        .then((windowClients) => {
+        .then(async (windowClients) => {
           for (const client of windowClients) {
             if ("focus" in client) {
               if ("navigate" in client) {
-                client.navigate(url);
+                await client.navigate(url);
               }
 
               return client.focus();

@@ -231,6 +231,54 @@ test('email queue health failures are not reported as successful or exposed', as
   assert.doesNotMatch(JSON.stringify(body), /private monitoring detail/);
 });
 
+test('email queue health rejects every missing or malformed required field', async () => {
+  const counterFields = [
+    'stuck_processing_emails',
+    'failed_emails_exhausted',
+    'old_pending_emails',
+    'overdue_ready_emails',
+    'queued_emails',
+    'due_emails',
+    'duplicate_dedupe_keys',
+  ];
+
+  for (const field of counterFields) {
+    for (const replacement of [undefined, '0', -1, 0.5]) {
+      const checks = { ...healthyEmailQueue.checks };
+      if (replacement === undefined) delete checks[field];
+      else checks[field] = replacement;
+      const route = worker({ queueHealth: { ...healthyEmailQueue, checks } });
+      const response = await route.run();
+      assert.equal(response.status, 500, `${field}: ${replacement}`);
+      assert.equal((await response.json()).error, 'Email queue health returned an invalid result.');
+    }
+  }
+
+  for (const oldestReadyAgeSeconds of [undefined, '0', -1, 0.5]) {
+    const checks = { ...healthyEmailQueue.checks };
+    if (oldestReadyAgeSeconds === undefined) delete checks.oldest_ready_age_seconds;
+    else checks.oldest_ready_age_seconds = oldestReadyAgeSeconds;
+    assert.equal((await worker({ queueHealth: { ...healthyEmailQueue, checks } }).run()).status, 500);
+  }
+
+  for (const checkedAt of [undefined, null, '', '0', 'not-a-timestamp']) {
+    const queueHealth = { ...healthyEmailQueue, checked_at: checkedAt };
+    assert.equal((await worker({ queueHealth }).run()).status, 500);
+  }
+});
+
+test('malformed memorial success payloads cannot report a healthy worker run', async () => {
+  for (const memorialData of [null, [], {}, { created_count: '0' }, { created_count: -1 }, { created_count: 0.5 }]) {
+    const route = worker({ memorialData });
+    const response = await route.run();
+    assert.equal(response.status, 503, JSON.stringify(memorialData));
+    assert.deepEqual((await response.json()).memorialProcessor, {
+      status: 'FAIL',
+      createdAnnouncements: null,
+    });
+  }
+});
+
 function subscription(authenticated = true) {
   const calls = [];
   return {

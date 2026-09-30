@@ -112,30 +112,42 @@ test("push worker rejects cross-origin and backslash notification targets", asyn
 });
 
 test("a provider delivery failure is an observable non-success response", async () => {
+  const privateEndpoint = "https://push.example/private-endpoint-token";
+  const privateBody = "private provider response body";
+  const privateHeader = "private provider response header";
   const loaded = route({
     subscriptions: [{ id: "subscription-1", endpoint: "https://push.example/1", p256dh: "key", auth: "auth" }],
-    sendError: new Error("private provider detail"),
+    sendError: {
+      statusCode: 503,
+      endpoint: privateEndpoint,
+      body: privateBody,
+      headers: { "x-provider-detail": privateHeader },
+    },
   });
   const response = await loaded.POST(request(validBody));
   assert.equal(response.status, 502);
   assert.deepEqual(await response.json(), { success: false, sent: 0, failed: 1, stateFailed: 0, total: 1 });
   assert.equal(loaded.calls.filter(({ name }) => name === "update").length, 1);
+  const logs = JSON.stringify(loaded.logs);
+  assert.match(logs, /503/);
+  assert.doesNotMatch(logs, /private-endpoint-token|private provider response/);
 });
 
 test("push subscription state persistence failures are observable", async () => {
   const loaded = route({
     subscriptions: [{ id: "subscription-1", endpoint: "https://push.example/1", p256dh: "key", auth: "auth" }],
-    updateError: new Error("private persistence detail"),
+    updateError: { message: "private persistence detail", row: "private database row" },
   });
   const response = await loaded.POST(request(validBody));
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { success: false, sent: 1, failed: 0, stateFailed: 1, total: 1 });
+  assert.doesNotMatch(JSON.stringify(loaded.logs), /private persistence detail|private database row/);
 });
 
 test("subscription query failures do not expose internal details", async () => {
-  const loaded = route({ subscriptionError: new Error("private database detail") });
+  const loaded = route({ subscriptionError: { message: "private database detail", row: "private database row" } });
   const response = await loaded.POST(request(validBody));
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { error: "Push delivery failed." });
-  assert.doesNotMatch(JSON.stringify(await Promise.resolve(loaded.logs)), /private database detail/);
+  assert.doesNotMatch(JSON.stringify(loaded.logs), /private database detail|private database row/);
 });

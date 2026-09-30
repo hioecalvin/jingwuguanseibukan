@@ -4269,3 +4269,33 @@ all pass.
 No application runtime, live credential, staging resource or provider was changed.
 Production, the historical project and deferred Mux/uploader files were not contacted
 or modified.
+
+### Milestone 166 — fail-closed worker health and dormant push/Auth hardening (30/09/2026)
+
+Ran parallel read-only audits of the remaining scheduler, dedicated-inbox Auth and
+hidden push/PWA gates. The audits contacted no remote system and identified three
+offline defects that could be resolved without choosing a provider or exposing the
+unfinished push UI.
+
+The email worker now rejects every missing, malformed, negative or fractional required
+queue-health counter and rejects missing/invalid monitoring timestamps instead of
+coercing them to a false zero/null healthy result. A malformed memorial processor
+success payload is likewise reported as failed and makes the worker unhealthy.
+
+Push delivery logs now retain only a bounded provider status code and generic failure
+category. Subscription endpoints, provider response bodies/headers and raw database
+errors no longer enter application logs. Notification clicks now await same-origin
+client navigation before focus, preventing an early service-worker termination from
+losing navigation on Safari-compatible engines.
+
+Added six stateful offline tests around the privileged Admin password-reset apply route:
+authentication and scope denial, 16-character class-complete temporary-password
+secrecy, normalized queueing, idempotent existing-email retry, lost queue-response
+recovery and mark-failure recovery. Focused worker/push tests pass 27/27 and password-
+reset tests pass 6/6.
+
+Real one-minute scheduler cadence/dead-man alerting, real Resend and dedicated-inbox
+evidence, provider endpoint policy, intentionally shipping the PWA/push UI, and
+physical Safari/iOS delivery remain external or consequential decisions. Production,
+staging, the historical project, providers and deferred Mux/uploader files were not
+contacted or changed.

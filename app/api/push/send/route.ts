@@ -150,10 +150,9 @@ export async function POST(
           },
         );
       }
-    } catch (error) {
+    } catch {
       console.error(
-        "Push worker rate-limit error:",
-        error,
+        "Push worker rate-limit persistence failed.",
       );
       return NextResponse.json(
         {
@@ -345,8 +344,7 @@ export async function POST(
             1;
 
           console.error(
-            "Push subscription state persistence failed:",
-            stateError
+            "Push subscription state persistence failed.",
           );
         }
       } catch (
@@ -354,12 +352,6 @@ export async function POST(
       ) {
         failed +=
           1;
-
-
-        console.error(
-          "Push delivery failed:",
-          error
-        );
 
 
         const statusCode =
@@ -377,6 +369,20 @@ export async function POST(
                 ).statusCode
               )
             : null;
+
+
+        console.error(
+          "Push provider delivery failed.",
+          {
+            statusCode:
+              Number.isInteger(statusCode) &&
+              statusCode !== null &&
+              statusCode >= 100 &&
+              statusCode <= 599
+                ? statusCode
+                : null,
+          },
+        );
 
 
         /*
@@ -418,8 +424,7 @@ export async function POST(
               1;
 
             console.error(
-              "Push subscription state persistence failed:",
-              stateError
+              "Push subscription state persistence failed.",
             );
           }
         } else {
@@ -447,8 +452,7 @@ export async function POST(
               1;
 
             console.error(
-              "Push subscription state persistence failed:",
-              stateError
+              "Push subscription state persistence failed.",
             );
           }
         }
@@ -477,12 +481,9 @@ export async function POST(
             ? 502
             : 200,
     });
-  } catch (
-    error: unknown
-  ) {
+  } catch {
     console.error(
-      "Push API error:",
-      error
+      "Push API request failed.",
     );
 
 

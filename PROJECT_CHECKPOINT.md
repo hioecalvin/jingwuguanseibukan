@@ -1112,6 +1112,27 @@ acceptance completed; production remains unchanged.
 - No live target was contacted. Production, staging, the historical project, providers
   and deferred Mux/uploader work remain unchanged.
 
+## Worker monitoring, push logging and password-reset hardening — 30 September 2026
+
+- Parallel audits found that malformed queue-health counters were silently converted
+  to zero. The email worker now requires every migration-033 counter, the nullable
+  oldest-ready age and a valid monitoring timestamp. Invalid queue data follows the
+  existing sanitized HTTP 500 path; malformed memorial results make the worker
+  unhealthy instead of reporting zero created announcements.
+- Push delivery no longer logs raw provider or database errors. Only a generic category
+  and bounded numeric provider status are retained, protecting subscription endpoint
+  tokens and provider response contents. The service worker awaits client navigation
+  before focus for reliable Safari-compatible notification clicks.
+- A new six-test stateful suite exercises the privileged Admin password-reset apply
+  route: caller/scope denial, strong temporary-password secrecy, queue payload and
+  dedupe contract, existing-email idempotency, lost-response recovery and mark-failure
+  retry. No generated password is returned or logged.
+- Focused worker/push coverage passes 27/27; password-reset coverage passes 6/6. All
+  tests are hermetic and use fictional data.
+- External scheduler ownership/cadence/dead-man alerts, real Resend and dedicated-inbox
+  evidence, push endpoint policy/PWA shipping and physical Safari/iOS remain open. No
+  live target was contacted; deferred Mux/uploader work remains untouched.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

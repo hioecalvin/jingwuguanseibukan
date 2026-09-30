@@ -135,4 +135,28 @@ test("the service worker replaces unsafe push and click targets at runtime", asy
   });
   await pending;
   assert.equal(opened.at(-1), "/notifications?filter=unread#latest");
+
+  const navigationOrder = [];
+  clients.matchAll = async () => [{
+    async navigate(url) {
+      navigationOrder.push(`navigate:${url}`);
+    },
+    async focus() {
+      navigationOrder.push("focus");
+    },
+  }];
+  listeners.get("notificationclick")({
+    notification: {
+      data: { url: "/notifications?filter=recent" },
+      close() {},
+    },
+    waitUntil(promise) {
+      pending = promise;
+    },
+  });
+  await pending;
+  assert.deepEqual(navigationOrder, [
+    "navigate:/notifications?filter=recent",
+    "focus",
+  ]);
 });
