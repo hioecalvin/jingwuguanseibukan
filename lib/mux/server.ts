@@ -6,6 +6,7 @@ const MUX_API_ORIGIN = "https://api.mux.com";
 const MUX_ID_PATTERN = /^[A-Za-z0-9_-]{10,255}$/;
 const MUX_API_FAILURE_PATTERN = /^Mux API request failed \(([1-5][0-9]{2})\)\.$/;
 const MUX_DIRECT_UPLOAD_HOST_PATTERN = /^direct-uploads-[a-z0-9-]+\.mux\.com$/;
+const MUX_DIRECT_UPLOAD_PATH_PATTERN = /^\/upload\/[A-Za-z0-9_-]{10,255}$/;
 
 type MuxDirectUpload = {
   id: string;
@@ -46,7 +47,10 @@ export function isTrustedMuxDirectUploadUrl(url: URL) {
   if (url.hostname === "storage.googleapis.com") {
     return url.pathname.startsWith("/video-storage-");
   }
-  return MUX_DIRECT_UPLOAD_HOST_PATTERN.test(url.hostname) && url.pathname === "/upload";
+  return (
+    MUX_DIRECT_UPLOAD_HOST_PATTERN.test(url.hostname) &&
+    MUX_DIRECT_UPLOAD_PATH_PATTERN.test(url.pathname)
+  );
 }
 
 function credentials() {

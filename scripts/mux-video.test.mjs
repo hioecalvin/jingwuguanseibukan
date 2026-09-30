@@ -57,7 +57,7 @@ test("Mux session creation uses server credentials and signed playback without e
     captured = { input: String(input), init };
     return Response.json({ data: {
       id: "MuxUploadIdentifier1234",
-      url: "https://direct-uploads-oci-us-ashburn-1-vop1.mux.com/upload?Signature=signed",
+      url: "https://direct-uploads-oci-us-ashburn-1-vop1.mux.com/upload/MuxUploadIdentifier1234?Signature=signed",
       status: "waiting",
     } }, { status: 201 });
   };
@@ -87,7 +87,7 @@ test("Mux direct-upload URL trust is narrow across supported provider hosts", as
     "https://storage.googleapis.com/video-storage-us-east1-uploads/upload?Signature=signed",
   )), true);
   assert.equal(mux.isTrustedMuxDirectUploadUrl(new URL(
-    "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com/upload?token=signed",
+    "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com/upload/MuxUploadIdentifier1234?token=signed",
   )), true);
   assert.equal(mux.isTrustedMuxDirectUploadUrl(new URL(
     "https://api.mux.com/upload?token=signed",
@@ -96,7 +96,10 @@ test("Mux direct-upload URL trust is narrow across supported provider hosts", as
     "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com/other?token=signed",
   )), false);
   assert.equal(mux.isTrustedMuxDirectUploadUrl(new URL(
-    "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com.evil.example/upload?token=signed",
+    "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com/upload/../admin?token=signed",
+  )), false);
+  assert.equal(mux.isTrustedMuxDirectUploadUrl(new URL(
+    "https://direct-uploads-oci-us-phoenix-1-vop1.mux.com.evil.example/upload/MuxUploadIdentifier1234?token=signed",
   )), false);
 });
 
