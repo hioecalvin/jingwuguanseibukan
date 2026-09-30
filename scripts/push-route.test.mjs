@@ -48,14 +48,23 @@ function route({ subscriptions = [], subscriptionError = null, sendError = null,
     },
     "@/lib/supabase/admin": { createAdminClient: () => supabase },
     "@/lib/security/durable-rate-limit": allowRateLimit,
+    "@/lib/security/constant-time-secret": {
+      matchesSecret: (received, expected) =>
+        typeof received === "string" && typeof expected === "string" &&
+        expected.length > 0 && received === expected,
+    },
   }, { PUSH_API_SECRET: "unit-push-secret" });
   return { ...loaded, calls };
 }
 
 function request(body, secret = "unit-push-secret") {
+  const headers = secret === null
+    ? {}
+    : { "x-push-secret": secret };
+
   return new Request("http://localhost/api/push/send", {
     method: "POST",
-    headers: { "x-push-secret": secret },
+    headers,
     body,
   });
 }
@@ -65,6 +74,15 @@ const validBody = JSON.stringify({
   title: "Class update",
   body: "Training starts at 6 pm.",
   url: "/notifications",
+});
+
+test("push worker rejects incorrect or missing secrets before database or provider work", async () => {
+  for (const secret of ["incorrect", "", null]) {
+    const loaded = route();
+    const response = await loaded.POST(request(validBody, secret));
+    assert.equal(response.status, 401);
+    assert.deepEqual(loaded.calls, []);
+  }
 });
 
 test("push worker rejects non-object JSON before database or provider work", async () => {

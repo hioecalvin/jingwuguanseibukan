@@ -46,6 +46,11 @@ function worker({
     } }) },
     '@/lib/email/render-email': { renderEmail: () => '<p>Unit</p>' },
     '@/lib/security/durable-rate-limit': allowRateLimit,
+    '@/lib/security/constant-time-secret': {
+      matchesSecret: (received, expected) =>
+        typeof received === 'string' && typeof expected === 'string' &&
+        expected.length > 0 && received === expected,
+    },
     resend: { Resend: class {
       emails = { send: async (message, options) => {
         calls.push({ name: 'send', message, options });
@@ -53,12 +58,21 @@ function worker({
       } };
     } },
   }, { EMAIL_WORKER_SECRET: 'unit-only', RESEND_API_KEY: 'unit-only', EMAIL_FROM_ADDRESS: 'unit@example.invalid' });
-  return { ...route, calls, run: (secret = 'unit-only') => route.POST(new Request('http://localhost/api/system/email-worker', { method: 'POST', headers: { 'x-worker-secret': secret } })) };
+  return {
+    ...route,
+    calls,
+    run: (secret = 'unit-only') => {
+      const headers = secret === null ? {} : { 'x-worker-secret': secret };
+      return route.POST(new Request('http://localhost/api/system/email-worker', { method: 'POST', headers }));
+    },
+  };
 }
 
 test('email worker rejects incorrect secrets before any database/provider action', async () => {
   const route = worker();
-  assert.equal((await route.run('incorrect')).status, 401);
+  for (const secret of ['incorrect', '', null]) {
+    assert.equal((await route.run(secret)).status, 401);
+  }
   assert.deepEqual(route.calls, []);
 });
 

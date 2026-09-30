@@ -19,6 +19,9 @@ import {
   consumeDurableRateLimit,
   durableRateLimitHeaders,
 } from "@/lib/security/durable-rate-limit";
+import {
+  matchesSecret,
+} from "@/lib/security/constant-time-secret";
 
 
 export const runtime =
@@ -125,22 +128,12 @@ function authorised(
   request:
     NextRequest
 ) {
-  const secret =
-    process.env
-      .EMAIL_WORKER_SECRET;
-
-
-  if (
-    !secret
-  ) {
-    return false;
-  }
-
-
-  return (
+  return matchesSecret(
     request.headers.get(
       "x-worker-secret"
-    ) === secret
+    ),
+    process.env
+      .EMAIL_WORKER_SECRET,
   );
 }
 

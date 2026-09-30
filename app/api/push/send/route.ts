@@ -15,6 +15,9 @@ import {
   consumeDurableRateLimit,
   durableRateLimitHeaders,
 } from "@/lib/security/durable-rate-limit";
+import {
+  matchesSecret,
+} from "@/lib/security/constant-time-secret";
 
 
 type PushRequest = {
@@ -62,9 +65,10 @@ export async function POST(
 
 
     if (
-      !process.env.PUSH_API_SECRET ||
-      secret !==
-        process.env.PUSH_API_SECRET
+      !matchesSecret(
+        secret,
+        process.env.PUSH_API_SECRET,
+      )
     ) {
       return NextResponse.json(
         {

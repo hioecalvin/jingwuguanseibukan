@@ -48,6 +48,20 @@ Checkpoint date: 30/09/2026
 - Production, the retired project, provider settings and the deferred Mux/uploader
   working tree were not contacted or changed.
 
+## Privileged worker secret hardening — 30 September 2026
+
+- The email-worker and push-delivery routes now use one server-only constant-time
+  comparison helper. Both supplied and configured values are SHA-256 digested before
+  `timingSafeEqual`, so a wrong-length header follows the same fixed-length comparison
+  boundary while a missing or empty configured secret continues to fail closed.
+- Regression coverage proves exact-match acceptance, missing/empty/wrong-value denial,
+  fixed 32-byte digest comparison for different-length input and rejection before any
+  database or provider work. The complete local application suite passes 315/315,
+  TypeScript passes, targeted ESLint passes and the intended diff is whitespace-clean.
+- No secret value changed, no environment variable was exposed and no live worker was
+  invoked. Staging, production, the historical project and external providers were not
+  contacted; deferred Mux/uploader changes remain outside this milestone.
+
 ## Fixed staging alias and guarded WebKit gate verified (28/09/2026)
 
 The fixed staging alias `https://jingwuguanseibukan-staging.vercel.app` was reassigned

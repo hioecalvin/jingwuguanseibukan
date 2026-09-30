@@ -4201,3 +4201,21 @@ Vercel adapter and paid-plan decision.
 Real Resend delivery, scheduler monitoring, backlog/retry/exhaustion acceptance and the
 dedicated-inbox Auth flows remain external gates. Production, the historical project,
 provider settings and deferred Mux/uploader files were not contacted or changed.
+
+### Milestone 163 — privileged worker secrets use constant-time verification (30/09/2026)
+
+Replaced direct string equality at both privileged server-to-server boundaries with a
+shared server-only verifier. Email-worker and push-delivery secret headers are now
+SHA-256 digested and compared with Node's `timingSafeEqual`, providing fixed-length
+comparison for wrong-length input. Missing, empty and incorrect values still fail
+closed before rate-limit, database or provider work.
+
+Added focused runtime tests for exact matching, absent/empty/wrong values and the
+fixed 32-byte digest contract, plus route regressions proving both workers reject bad
+credentials before side effects. The focused security suite passes 30/30; the complete
+local application suite passes 315/315. TypeScript, targeted ESLint and whitespace
+validation also pass.
+
+This change rotates no secret and invokes no deployed route. Staging, production, the
+historical project and providers were not contacted, and unrelated deferred Mux/
+uploader files remain outside the intended change set.
