@@ -12,6 +12,9 @@ function confirmationRoute({ otpError = null, codeError = null } = {}) {
         redirect: (target) => Response.redirect(target),
       },
     },
+    "@/lib/application-origin": {
+      configuredApplicationOrigin: () => "https://app.example.invalid",
+    },
     "@/lib/supabase/server": {
       createClient: async () => ({
         auth: {
@@ -30,11 +33,10 @@ function confirmationRoute({ otpError = null, codeError = null } = {}) {
 
   return {
     calls,
-    run(path) {
-      const url = new URL(path, "https://app.example.invalid");
+    run(path, requestOrigin = "https://app.example.invalid") {
+      const url = new URL(path, requestOrigin);
       return route.GET({
         url: url.toString(),
-        nextUrl: { clone: () => new URL(url) },
       });
     },
   };
@@ -49,7 +51,8 @@ test("email OTP confirmation redirects to sanitized verified login", async () =>
 
   assert.equal(target.pathname, "/login");
   assert.equal(target.searchParams.get("verified"), "true");
-  assert.equal(target.searchParams.get("campaign"), "welcome");
+  assert.equal(target.origin, "https://app.example.invalid");
+  assert.equal(target.searchParams.has("campaign"), false);
   assert.equal(target.searchParams.has("token_hash"), false);
   assert.equal(target.searchParams.has("type"), false);
   assert.equal(fixture.calls.length, 1);
@@ -69,6 +72,19 @@ test("PKCE confirmation exchanges its code and removes it from the redirect", as
   assert.deepEqual(fixture.calls, [
     { method: "exchangeCodeForSession", code: "private-code" },
   ]);
+});
+
+test("confirmation redirects ignore an untrusted request host", async () => {
+  const fixture = confirmationRoute();
+  const response = await fixture.run(
+    "/auth/confirm?token_hash=secret-token&type=signup",
+    "https://attacker.example.test",
+  );
+  const target = new URL(response.headers.get("location"));
+
+  assert.equal(target.origin, "https://app.example.invalid");
+  assert.equal(target.pathname, "/login");
+  assert.equal(target.searchParams.get("verified"), "true");
 });
 
 test("invalid and missing confirmations reach a real generic error page", async () => {

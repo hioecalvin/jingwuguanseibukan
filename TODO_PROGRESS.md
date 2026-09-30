@@ -4219,3 +4219,32 @@ validation also pass.
 This change rotates no secret and invokes no deployed route. Staging, production, the
 historical project and providers were not contacted, and unrelated deferred Mux/
 uploader files remain outside the intended change set.
+
+### Milestone 164 — parallel Auth, email-monitoring and push hardening (30/09/2026)
+
+Ran three read-only audits in parallel for the remaining scheduler/Resend,
+dedicated-inbox Auth and Web Push/Safari gates, while independently auditing privileged
+server modules. The audits contacted no live target and changed no data.
+
+Added one shared exact application-origin validator. Registration confirmation and
+account-email replacement callbacks now use `NEXT_PUBLIC_SITE_URL`; `/auth/confirm`
+always redirects success or failure to that canonical origin rather than cloning the
+incoming host. Unrelated and credential-bearing query parameters are dropped. Tests
+cover HTTPS normalization, permitted loopback development origins, insecure/path/
+credential/query/fragment rejection and an attacker-controlled request host.
+
+Exposed the queue telemetry already returned by migration 033 but previously discarded
+by the API: `queuedEmails`, `dueEmails` and `oldestReadyAgeSeconds`. Empty queues retain
+a null oldest age, and unhealthy response coverage proves the sanitized numeric values
+reach monitoring without recipients, message bodies or provider identifiers.
+
+Marked every module that reads or transports the Supabase service key, VAPID private
+key or durable rate-limit HMAC secret as `server-only`, with a regression inventory.
+Hardened the service worker so JSON `null`, arrays and primitive push payloads use safe
+title/body/path fallbacks rather than throwing.
+
+The external gates remain explicit: select and configure a one-minute staging
+scheduler, use a dedicated inbox for real Auth/Resend evidence, decide whether to ship
+the currently hidden push/PWA settings tranche, and test actual installed iOS/iPadOS
+and macOS Safari delivery. Production, staging, the historical project, providers and
+deferred Mux/uploader files were not contacted or changed.

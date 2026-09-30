@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { configuredApplicationOrigin } from "@/lib/application-origin";
 import { createClient } from "@/lib/supabase/client";
 
 type ClassItem = {
@@ -160,7 +161,8 @@ export default function RegisterPage() {
           requested_dojo_id: selectedDojoId || null,
           requested_dojo_name: selectedDojo?.name ?? null,
         },
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        emailRedirectTo:
+          `${configuredApplicationOrigin()}/auth/confirm`,
       },
     });
 

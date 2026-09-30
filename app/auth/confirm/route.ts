@@ -1,5 +1,6 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
+import { configuredApplicationOrigin } from "@/lib/application-origin";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -9,12 +10,11 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
 
-  const redirectTo = request.nextUrl.clone();
-
-  redirectTo.pathname = "/login";
-  redirectTo.searchParams.delete("token_hash");
-  redirectTo.searchParams.delete("type");
-  redirectTo.searchParams.delete("code");
+  const redirectTo =
+    new URL(
+      "/login",
+      configuredApplicationOrigin(),
+    );
 
   if (token_hash && type) {
     const supabase = await createClient();
@@ -40,6 +40,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  redirectTo.pathname = "/auth/error";
-  return NextResponse.redirect(redirectTo);
+  return NextResponse.redirect(
+    new URL(
+      "/auth/error",
+      configuredApplicationOrigin(),
+    ),
+  );
 }

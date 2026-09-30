@@ -39,6 +39,9 @@ type EmailQueueHealth = {
     exhaustedFailures: number;
     oldPendingEmails: number;
     overdueReadyEmails: number;
+    queuedEmails: number;
+    dueEmails: number;
+    oldestReadyAgeSeconds: number | null;
     duplicateDedupeKeys: number;
   };
   checkedAt: string | null;
@@ -110,6 +113,20 @@ function normaliseQueueHealth(
           ? oldPendingEmails
           : nonnegativeInteger(
               rawChecks.overdue_ready_emails,
+            ),
+      queuedEmails:
+        nonnegativeInteger(
+          rawChecks.queued_emails,
+        ),
+      dueEmails:
+        nonnegativeInteger(
+          rawChecks.due_emails,
+        ),
+      oldestReadyAgeSeconds:
+        rawChecks.oldest_ready_age_seconds === null
+          ? null
+          : nonnegativeInteger(
+              rawChecks.oldest_ready_age_seconds,
             ),
       duplicateDedupeKeys:
         nonnegativeInteger(

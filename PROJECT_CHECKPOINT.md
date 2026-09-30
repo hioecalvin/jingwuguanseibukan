@@ -62,6 +62,27 @@ Checkpoint date: 30/09/2026
   invoked. Staging, production, the historical project and external providers were not
   contacted; deferred Mux/uploader changes remain outside this milestone.
 
+## Parallel external-gate hardening — 30 September 2026
+
+- Parallel read-only audits covered the email scheduler/Resend gate, dedicated-inbox
+  Auth flows and Web Push/Safari readiness. No audit contacted a live system.
+- Registration, account-email replacement and `/auth/confirm` now share one exact
+  configured-origin validator. Registration no longer derives its callback from the
+  browser host, and confirmation success/error redirects no longer inherit an
+  untrusted request host or unrelated query parameters. HTTPS is required except for
+  explicit localhost/loopback development origins.
+- Email-worker responses now retain migration 033's existing sanitized backlog
+  telemetry: total queued messages, due messages and oldest-ready age. This closes the
+  local monitoring gap for growing-queue alerts without changing the database.
+- Modules that access the Supabase service key, VAPID private key or durable rate-limit
+  secret are explicitly `server-only`. The service worker now treats JSON `null`,
+  arrays and primitive push payloads as safe empty payloads and uses notification
+  fallbacks instead of throwing.
+- Real inbox delivery, external scheduler monitoring, the intentionally hidden push
+  settings UI/PWA installation tranche and physical Safari/iOS delivery remain open.
+  Production, staging, the historical project, providers and deferred Mux/uploader
+  files were not contacted or changed.
+
 ## Fixed staging alias and guarded WebKit gate verified (28/09/2026)
 
 The fixed staging alias `https://jingwuguanseibukan-staging.vercel.app` was reassigned

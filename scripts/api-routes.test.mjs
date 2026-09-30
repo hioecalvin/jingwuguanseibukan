@@ -16,6 +16,9 @@ const healthyEmailQueue = {
     failed_emails_exhausted: 0,
     old_pending_emails: 0,
     overdue_ready_emails: 0,
+    queued_emails: 0,
+    due_emails: 0,
+    oldest_ready_age_seconds: null,
     duplicate_dedupe_keys: 0,
   },
   checked_at: '2026-09-17T00:00:00.000Z',
@@ -96,6 +99,9 @@ test('an empty email queue is a successful zero-work run', async () => {
         exhaustedFailures: 0,
         oldPendingEmails: 0,
         overdueReadyEmails: 0,
+        queuedEmails: 0,
+        dueEmails: 0,
+        oldestReadyAgeSeconds: null,
         duplicateDedupeKeys: 0,
       },
       checkedAt: '2026-09-17T00:00:00.000Z',
@@ -197,6 +203,9 @@ test('email queue delay or exhausted retries produce an observable unhealthy res
         ...healthyEmailQueue.checks,
         overdue_ready_emails: 2,
         failed_emails_exhausted: 1,
+        queued_emails: 7,
+        due_emails: 4,
+        oldest_ready_age_seconds: 185,
       },
     },
   });
@@ -206,6 +215,9 @@ test('email queue delay or exhausted retries produce an observable unhealthy res
   assert.equal(body.success, false);
   assert.equal(body.queueHealth.checks.overdueReadyEmails, 2);
   assert.equal(body.queueHealth.checks.exhaustedFailures, 1);
+  assert.equal(body.queueHealth.checks.queuedEmails, 7);
+  assert.equal(body.queueHealth.checks.dueEmails, 4);
+  assert.equal(body.queueHealth.checks.oldestReadyAgeSeconds, 185);
 });
 
 test('email queue health failures are not reported as successful or exposed', async () => {

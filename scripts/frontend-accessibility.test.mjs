@@ -47,6 +47,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
     'next/image': { default: 'img' },
     'next/link': { default: 'a' },
     'next/navigation': { useRouter: () => ({ replace: href => redirects.push(href), refresh() {} }), usePathname: () => '/profile' },
+    '@/lib/application-origin': { configuredApplicationOrigin: () => 'https://configured.example.test' },
     '@/lib/supabase/client': { createClient: () => supabase },
     ...extras,
   };
@@ -275,6 +276,7 @@ test('successful registration sends normalized metadata and selected catalog nam
   assert.equal(signups[0].options.data.requested_class_name, 'Class A');
   assert.equal(signups[0].options.data.registration_number, undefined);
   assert.equal(signups[0].options.data.username, undefined);
+  assert.equal(signups[0].options.emailRedirectTo, 'https://configured.example.test/auth/confirm');
   assert.match(ui.text(), /Registration successful/);
 });
 

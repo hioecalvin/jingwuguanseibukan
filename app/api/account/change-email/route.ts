@@ -8,6 +8,9 @@ import {
 } from "@supabase/supabase-js";
 
 import {
+  configuredApplicationOrigin,
+} from "@/lib/application-origin";
+import {
   configuredRateLimit,
   consumeDurableRateLimit,
   durableRateLimitHeaders,
@@ -44,47 +47,6 @@ function normalizeEmail(
   }
 
   return normalized;
-}
-
-
-function configuredSiteOrigin() {
-  const raw =
-    process.env
-      .NEXT_PUBLIC_SITE_URL;
-
-  if (!raw) {
-    throw new Error(
-      "NEXT_PUBLIC_SITE_URL is missing.",
-    );
-  }
-
-  const url = new URL(raw);
-  const loopback =
-    url.hostname === "localhost" ||
-    url.hostname === "127.0.0.1" ||
-    url.hostname === "[::1]";
-
-  if (
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash ||
-    (url.pathname !== "/" &&
-      url.pathname !== "") ||
-    (
-      url.protocol !== "https:" &&
-      !(
-        loopback &&
-        url.protocol === "http:"
-      )
-    )
-  ) {
-    throw new Error(
-      "NEXT_PUBLIC_SITE_URL must be an exact secure origin.",
-    );
-  }
-
-  return url.origin;
 }
 
 
@@ -134,7 +96,7 @@ export async function POST(
 ) {
   try {
     const siteOrigin =
-      configuredSiteOrigin();
+      configuredApplicationOrigin();
     const requestOrigin =
       request.headers.get(
         "origin",

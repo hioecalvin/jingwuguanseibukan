@@ -29,6 +29,9 @@ test("the email scheduler response exposes only a normalized queue-health summar
   assert.match(source, /email_backend_health_check/);
   assert.match(source, /normaliseQueueHealth/);
   assert.match(source, /overdueReadyEmails/);
+  assert.match(source, /queuedEmails/);
+  assert.match(source, /dueEmails/);
+  assert.match(source, /oldestReadyAgeSeconds/);
   assert.match(source, /queueHealthy[\s\S]*status[\s\S]*503/);
 });
 
@@ -101,6 +104,23 @@ test("the service worker replaces unsafe push and click targets at runtime", asy
     });
     await pending;
     assert.equal(opened.at(-1), "/notifications");
+  }
+
+  for (const payload of [null, [], "text"]) {
+    let pending;
+    listeners.get("push")({
+      data: { json: () => payload },
+      waitUntil(promise) {
+        pending = promise;
+      },
+    });
+    await pending;
+    assert.equal(shown.at(-1).title, "Jingwuguan Seibukan");
+    assert.equal(
+      shown.at(-1).options.body,
+      "You have a new notification.",
+    );
+    assert.equal(shown.at(-1).options.data.url, "/notifications");
   }
 
   let pending;

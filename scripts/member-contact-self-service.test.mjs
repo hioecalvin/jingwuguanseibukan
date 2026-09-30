@@ -97,6 +97,10 @@ function emailRoute({
       "@supabase/supabase-js": {
         createClient: () => authenticatedClient,
       },
+      "@/lib/application-origin": {
+        configuredApplicationOrigin: () =>
+          "https://staging.example.test",
+      },
       "@/lib/security/durable-rate-limit": rateLimit,
       "@/lib/supabase/admin": {
         createAdminClient: () => ({

@@ -31,7 +31,17 @@ self.addEventListener("push", (event) => {
   let data = {};
 
   try {
-    data = event.data ? event.data.json() : {};
+    const parsed =
+      event.data
+        ? event.data.json()
+        : {};
+
+    data =
+      parsed &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed)
+        ? parsed
+        : {};
   } catch {
     data = {
       title: "Jingwuguan Seibukan",
