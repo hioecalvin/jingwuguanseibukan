@@ -4,6 +4,7 @@ import { createPrivateKey, createSign } from "node:crypto";
 
 const MUX_API_ORIGIN = "https://api.mux.com";
 const MUX_ID_PATTERN = /^[A-Za-z0-9_-]{10,255}$/;
+const MUX_API_FAILURE_PATTERN = /^Mux API request failed \(([1-5][0-9]{2})\)\.$/;
 
 type MuxDirectUpload = {
   id: string;
@@ -19,6 +20,19 @@ type MuxAsset = {
   passthrough?: string;
   playback_ids?: Array<{ id: string; policy: "public" | "signed" | "drm" }>;
 };
+
+export function muxFailureCategory(error: unknown) {
+  if (!(error instanceof Error)) return "unknown";
+  const apiFailure = MUX_API_FAILURE_PATTERN.exec(error.message);
+  if (apiFailure) return `api_status_${apiFailure[1]}`;
+  switch (error.message) {
+    case "Mux API credentials are missing.": return "credentials_missing";
+    case "Mux API returned an invalid response.": return "invalid_api_response";
+    case "Mux did not return a valid direct upload.": return "invalid_direct_upload";
+    case "Mux returned an untrusted direct-upload address.": return "untrusted_upload_address";
+    default: return "unknown";
+  }
+}
 
 function credentials() {
   const tokenId = process.env.MUX_TOKEN_ID?.trim();

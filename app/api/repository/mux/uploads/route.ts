@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateMuxRequest } from "@/lib/mux/request";
-import { createMuxDirectUpload } from "@/lib/mux/server";
+import { createMuxDirectUpload, muxFailureCategory } from "@/lib/mux/server";
 import { configuredRateLimit, consumeDurableRateLimit, durableRateLimitHeaders } from "@/lib/security/durable-rate-limit";
 
 export const runtime = "nodejs";
@@ -51,8 +51,10 @@ export async function POST(request: NextRequest) {
       passthrough: `${auth.user.id}:${classId}`,
     });
     return NextResponse.json({ uploadId: upload.id, uploadUrl: upload.url });
-  } catch {
-    console.error("Mux direct-upload creation failed.");
+  } catch (error) {
+    console.error("Mux direct-upload creation failed.", {
+      category: muxFailureCategory(error),
+    });
     return NextResponse.json({ error: "Unable to prepare the secure Mux upload." }, { status: 500 });
   }
 }

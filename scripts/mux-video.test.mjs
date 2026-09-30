@@ -81,6 +81,15 @@ test("Mux session creation uses server credentials and signed playback without e
   }
 });
 
+test("Mux failures are reduced to bounded categories without exposing provider details", async () => {
+  const mux = await loadMuxServer();
+  assert.equal(mux.muxFailureCategory(new Error("Mux API credentials are missing.")), "credentials_missing");
+  assert.equal(mux.muxFailureCategory(new Error("Mux API request failed (401).")), "api_status_401");
+  assert.equal(mux.muxFailureCategory(new Error("Mux API request failed (503).")), "api_status_503");
+  assert.equal(mux.muxFailureCategory(new Error("secret provider response body")), "unknown");
+  assert.equal(mux.muxFailureCategory({ message: "Mux API request failed (401)." }), "unknown");
+});
+
 test("signed playback JWT is RS256, short-lived and bound to the playback ID", async () => {
   const mux = await loadMuxServer();
   const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
@@ -143,4 +152,5 @@ test("Mux API failures keep provider and credential details out of server logs",
   for (const route of routes) {
     assert.doesNotMatch(route, /console\.error\([^;]*,\s*error\s*\)/);
   }
+  assert.match(routes[0], /category:\s*muxFailureCategory\(error\)/);
 });
