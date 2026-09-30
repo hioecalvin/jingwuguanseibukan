@@ -5,6 +5,7 @@ import { createPrivateKey, createSign } from "node:crypto";
 const MUX_API_ORIGIN = "https://api.mux.com";
 const MUX_ID_PATTERN = /^[A-Za-z0-9_-]{10,255}$/;
 const MUX_API_FAILURE_PATTERN = /^Mux API request failed \(([1-5][0-9]{2})\)\.$/;
+const MUX_DIRECT_UPLOAD_HOST_PATTERN = /^direct-uploads-[a-z0-9-]+\.mux\.com$/;
 
 type MuxDirectUpload = {
   id: string;
@@ -32,6 +33,20 @@ export function muxFailureCategory(error: unknown) {
     case "Mux returned an untrusted direct-upload address.": return "untrusted_upload_address";
     default: return "unknown";
   }
+}
+
+export function isTrustedMuxDirectUploadUrl(url: URL) {
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.port ||
+    url.hash
+  ) return false;
+  if (url.hostname === "storage.googleapis.com") {
+    return url.pathname.startsWith("/video-storage-");
+  }
+  return MUX_DIRECT_UPLOAD_HOST_PATTERN.test(url.hostname) && url.pathname === "/upload";
 }
 
 function credentials() {
@@ -83,12 +98,9 @@ export async function createMuxDirectUpload(options: { title: string; passthroug
     throw new Error("Mux did not return a valid direct upload.");
   }
   const uploadUrl = new URL(upload.url);
-  if (
-    uploadUrl.protocol !== "https:" ||
-    uploadUrl.hostname !== "storage.googleapis.com" ||
-    uploadUrl.username || uploadUrl.password ||
-    !uploadUrl.pathname.startsWith("/video-storage-")
-  ) throw new Error("Mux returned an untrusted direct-upload address.");
+  if (!isTrustedMuxDirectUploadUrl(uploadUrl)) {
+    throw new Error("Mux returned an untrusted direct-upload address.");
+  }
   return { id: upload.id, url: uploadUrl.toString() };
 }
 
