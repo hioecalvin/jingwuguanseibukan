@@ -221,6 +221,58 @@ export async function POST(
 
     const {
       data:
+        activeRecipient,
+
+      error:
+        activeRecipientError,
+    } =
+      await supabase
+        .from(
+          "profiles"
+        )
+        .select(
+          "id"
+        )
+        .eq(
+          "id",
+          userId
+        )
+        .eq(
+          "account_status",
+          "active"
+        )
+        .is(
+          "date_of_passing",
+          null
+        )
+        .maybeSingle();
+
+
+    if (
+      activeRecipientError
+    ) {
+      throw new Error(
+        "Unable to verify push recipient eligibility.",
+      );
+    }
+
+
+    if (
+      !activeRecipient
+    ) {
+      return NextResponse.json({
+        success:
+          true,
+        sent:
+          0,
+        message:
+          "User is not eligible for push notifications.",
+      });
+    }
+
+
+    const {
+      data:
         subscriptions,
 
       error:

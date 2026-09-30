@@ -4299,3 +4299,17 @@ evidence, provider endpoint policy, intentionally shipping the PWA/push UI, and
 physical Safari/iOS delivery remain external or consequential decisions. Production,
 staging, the historical project, providers and deferred Mux/uploader files were not
 contacted or changed.
+
+### Milestone 167 — push recipient lifecycle enforcement (30/09/2026)
+
+The privileged push-delivery route now performs a narrow server-only profile eligibility
+probe before reading subscriptions or contacting a push provider, requiring the target
+account to be active and to have no Date of Passing. Disabled and deceased accounts
+therefore receive no push delivery even if an older active subscription row remains.
+Eligibility-query failures fail closed with a sanitized HTTP 500 response and no
+provider call.
+
+Focused push/service-worker coverage passes 12/12, including disabled/deceased denial,
+private database-detail suppression and proof that subscription access never occurs for
+an ineligible recipient. No schema change or migration was needed. No live target or
+provider was contacted; the push UI remains deliberately hidden.

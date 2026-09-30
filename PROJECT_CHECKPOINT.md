@@ -1133,6 +1133,16 @@ acceptance completed; production remains unchanged.
   evidence, push endpoint policy/PWA shipping and physical Safari/iOS remain open. No
   live target was contacted; deferred Mux/uploader work remains untouched.
 
+## Push recipient lifecycle enforcement — 30 September 2026
+
+- The service-role push route now verifies the target with a narrow server-only profile
+  query requiring active status and no Date of Passing before subscription access or
+  provider delivery. Disabled and deceased accounts cannot receive push through stale
+  active subscription rows.
+- Eligibility lookup errors fail closed and expose no database detail. Focused push and
+  service-worker tests pass 12/12. No schema change was introduced and no live system
+  was contacted.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

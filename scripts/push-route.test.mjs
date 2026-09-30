@@ -9,10 +9,26 @@ const allowRateLimit = {
   durableRateLimitHeaders: () => ({}),
 };
 
-function route({ subscriptions = [], subscriptionError = null, sendError = null, updateError = null } = {}) {
+function route({ activeRecipient = true, activeRecipientError = null, subscriptions = [], subscriptionError = null, sendError = null, updateError = null } = {}) {
   const calls = [];
   const supabase = {
     from(name) {
+      if (name === "profiles") {
+        const filters = [];
+        const builder = {
+          select() { return builder; },
+          eq(field, value) { filters.push([field, value]); return builder; },
+          is(field, value) { filters.push([field, value]); return builder; },
+          async maybeSingle() {
+            calls.push({ name: "eligibility", filters });
+            return {
+              data: activeRecipient ? { id: "12345678-1234-4123-8123-123456789abc" } : null,
+              error: activeRecipientError,
+            };
+          },
+        };
+        return builder;
+      }
       assert.equal(name, "push_subscriptions");
       return {
         select() {
@@ -109,6 +125,41 @@ test("push worker rejects cross-origin and backslash notification targets", asyn
     assert.equal(response.status, 400, JSON.stringify(url));
     assert.deepEqual(loaded.calls, []);
   }
+});
+
+test("disabled or deceased recipients are excluded before subscription access", async () => {
+  const loaded = route({
+    activeRecipient: false,
+    subscriptions: [{ id: "subscription-1", endpoint: "https://push.example/1", p256dh: "key", auth: "auth" }],
+  });
+  const response = await loaded.POST(request(validBody));
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    success: true,
+    sent: 0,
+    message: "User is not eligible for push notifications.",
+  });
+  assert.equal(loaded.calls.length, 1);
+  assert.equal(loaded.calls[0].name, "eligibility");
+  assert.deepEqual(
+    loaded.calls[0].filters.map(([field, value]) => [field, value]),
+    [
+      ["id", "12345678-1234-4123-8123-123456789abc"],
+      ["account_status", "active"],
+      ["date_of_passing", null],
+    ],
+  );
+});
+
+test("recipient eligibility failures do not expose database details or deliver", async () => {
+  const loaded = route({
+    activeRecipientError: { message: "private eligibility detail", row: "private profile row" },
+  });
+  const response = await loaded.POST(request(validBody));
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { error: "Push delivery failed." });
+  assert.equal(loaded.calls.some(({ name }) => name === "send"), false);
+  assert.doesNotMatch(JSON.stringify(loaded.logs), /private eligibility detail|private profile row/);
 });
 
 test("a provider delivery failure is an observable non-success response", async () => {
