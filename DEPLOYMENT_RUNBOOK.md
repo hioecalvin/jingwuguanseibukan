@@ -1,39 +1,32 @@
 # Staging promotion, production deployment, and rollback
 
-Last updated: 25/09/2026. Release is **BLOCKED**. Sydney staging
-`eomubndonbetszdbhsrj` is at exact persisted migration history **006–047**.
-Migrations 040–047 are persisted there and the guarded memorial, annual-reminder,
-bulk-assessment, prepared-certificate/QR, zero-residue, migration-ledger and direct
-database role-boundary acceptance passed. Migration 046 repairs migration 045's
-last-training audit insert; its rollback-contained semantic, audit, idempotency,
-scope, zero-residue, lint and exact-ledger checks pass. The authenticated role suite
-passes 12/12 and the current combined local gate passes 233/233 tests. Production was not
-contacted.
+Last updated: 30/09/2026. Release remains **BLOCKED** from Production, while the
+current non-Mux release candidate is accepted on staging. Sydney staging
+`eomubndonbetszdbhsrj` has exact persisted migration history **006–055** with no local
+or remote gap. The pinned read-only strict database-security verifier passes, including
+the reviewed managed-platform default-privilege boundary.
 
-The strict database security verifier still stops at the known platform-owned
-`supabase_admin` future-object default-privilege finding. An unqualified production
-release therefore remains blocked. Read-only catalog evidence confirms that the
-connected `postgres` role cannot assume `supabase_admin`; use a supported owner-level
-remediation or an explicitly reviewed exception, never speculative escalation. The
-deployed authenticated Member/scoped Admin/Super Admin browser matrix, real
-email/push/scheduler delivery, physical Safari/iOS coverage, production
-secrets/configuration and complete current recovery proof also remain release gates.
+Branch `release/v1-readiness-20260918` is synchronized at `0f2e7ab`. GitHub Actions
+run `36634978973` passes all five jobs. Ready Preview
+`dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz`, built from application commit `2d939d1`, serves
+only `jingwuguanseibukan-staging.vercel.app`; the later branch commit contains only
+probe/checkpoint changes. The fixed host passes 11/11 read-only route, method, asset and
+security-header probes plus 18/18 guarded WebKit checks. Only the staging alias is a
+Deployment Protection exception; generated Preview URLs remain protected. Never add a
+Production domain to this exception or store bypass credentials in source or logs.
 
-Vercel Preview `dpl_Eh1NP7nSfrz2WhJm9Spwcguz7iJ9` is Ready and the fixed staging
-alias is assigned. Only `jingwuguanseibukan-staging.vercel.app` is a Deployment
-Protection exception; generated Preview URLs remain protected. The direct 11-route
-host probe now passes pages, assets, method guards and security headers. Never add a
-Production domain to this exception or store bypass credentials in source, command
-output or logs.
+Protected source recovery evidence now includes the staging database, Auth and Storage
+metadata, role definitions and the single Storage object's bytes. A loopback-only
+PostgreSQL 17 restore proves exact ledger 006–055, critical counts, roles/grants, RLS
+and 4,145 of 4,146 catalog objects; only Supabase's managed Vault extension is absent.
+This is strong database recovery evidence, but it is not managed Auth/Storage API or
+hosted-platform recovery proof. A disposable managed Supabase target remains required.
 
-Migration 047 repaired the anonymous catalog gate without granting anonymous access to
-`is_active_app_user(uuid)`. Guarded API, disabled/deceased, ACL, exact-ledger, lint,
-role-security and zero-residue acceptance all pass. Staging has no `pg_cron`, so the
-one-minute worker/memorial schedule must be external and use the application worker
-secret.
-The retained restore rehearsal stops at ledger 006–026 and is not recovery proof for
-current ledger 006–047. The v2 offline recovery gate is now prepared for an exact
-006–047 disposable-target drill, but preparation is not restore evidence.
+The committed non-Mux provider configuration passes its offline consistency gate.
+Staging still has no `pg_cron`, so the one-minute email worker and memorial scheduler
+must be externally configured with protected application secrets. Real Resend sender
+and transactional delivery, dedicated-inbox Auth flows, targeted push, and physical
+Safari/iOS behavior remain release gates.
 
 There is **no current production Supabase project reference or host**. The intended
 production target is a new Singapore project that has not been created. Historical

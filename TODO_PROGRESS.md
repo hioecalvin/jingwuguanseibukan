@@ -1,19 +1,23 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 28/09/2026
+Last updated: 30/09/2026
 
 ## Release status
 
-The implementation release checkpoint on `release/v1-readiness-20260918` is commit
-`3a118f7`; later commits contain release evidence and recovery metadata only.
-GitHub CI passes all five release checks, and the locale-safe finance assertion passes
-114/114 local Playwright WebKit checks. Sydney staging `eomubndonbetszdbhsrj` is
-verified at the exact migration history 006–054. Migration 054 passed its independent
-zero-residue/security postflight and all 12 authenticated Member, scoped Admin and
-Super Admin role-security checks. The fixed staging alias now resolves to Ready Preview
-deployment `dpl_F4XyZHYKcFdgjeqmtmjxnL2DD8XP`; its 11/11 read-only host probes and
-18/18 guarded WebKit desktop/tablet/mobile checks pass. Production was not contacted
-or modified.
+The current release-branch head is `0f2e7ab` on
+`release/v1-readiness-20260918`; it is synchronized with the remote branch. The
+deployed application tree is `2d939d1`, while `0f2e7ab` changes only the staging host
+probe and checkpoint documentation. GitHub Actions run `36634978973` passes all five
+jobs at `0f2e7ab`: common checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and
+WebKit/macOS.
+
+Sydney staging `eomubndonbetszdbhsrj` is verified at exact migration history 006–055.
+The read-only strict database-security verifier passes. Ready Preview
+`dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
+`jingwuguanseibukan-staging.vercel.app`; 11/11 route/method/security-header probes and
+18/18 guarded WebKit desktop/tablet/mobile checks pass. All ten normalized static logo
+assets are exact 1024 × 1024 PNG matches, and all five active class-logo objects are
+verified on staging. Production was not contacted or modified.
 
 The exact three dedicated staging security-test accounts were audited and received
 password-only rotations. Public email login remains disabled; the guarded runner
@@ -84,16 +88,24 @@ and WebKit and verifies visible, non-overflowing controls at desktop, tablet and
 mobile sizes. The React-PDF WebAssembly CSP requirement is now permitted narrowly
 without enabling general production `unsafe-eval`.
 
-The application is **not approved for production deployment yet**. The scoped
-staging application-schema restore is proven, but complete Supabase managed Auth,
-Storage-object and platform-configuration recovery proof, email-worker scheduling,
-email and targeted-push delivery, physical Safari/iOS coverage, remaining guarded
-provider/mutation workflows, and current-Preview browser acceptance through the fixed
-staging alias are still
-required. Mux remains explicitly deferred and is not an operational gate for the
-current non-Mux release candidate. Production's migration ledger remains unverified
-because production was not contacted. Staging alone is verified at the exact
-006–054 migration ledger.
+The application is **not approved for production deployment yet**. The protected
+staging database/Auth/Storage metadata package and object bytes were captured, and a
+loopback-only PostgreSQL 17 restore proves the exact 006–055 ledger, critical counts,
+roles/grants, RLS and all catalog objects except Supabase's managed Vault extension.
+End-to-end managed Supabase Auth API, Storage API/object, managed-extension and hosted
+configuration recovery proof remains blocked until a disposable project slot exists.
+
+Remaining external gates are: create and independently verify the new Singapore
+production project; prove the managed-platform restore/cutover; configure and monitor
+the external email-worker scheduler; verify real Resend sender-domain and transactional
+delivery; complete dedicated-inbox registration/password-reset acceptance; verify real
+targeted push plus physical Safari/iOS behavior; remove deliberately weak test accounts
+before production; provision production-only secrets/redirects/DNS; and approve a
+specific release window, rollback owner and recovery point. The managed default-ACL
+finding is resolved by the current strict verifier and current-object ownership proof.
+Mux remains explicitly deferred and is not a gate for this non-Mux release candidate.
+Production's project and migration ledger remain unverified because no production
+project has been created or contacted.
 
 The exact migration ledger is not a complete schema baseline: the live
 `email_outbox` table and its core queue/claim/acknowledgement RPCs are referenced and
@@ -202,10 +214,10 @@ Historical verification from the prior audit (current results below):
 - [ ] Create and independently verify the eventual production Supabase primary in
   Singapore (`ap-southeast-1`), then migrate through the reviewed recovery/cutover plan.
 - [x] Obtain portable PostgreSQL 17.11 client tools (no service/PATH changes).
-- [ ] Take protected restorable role/schema/data backups and prove a restore.
-  - [x] Prove a protected staging `public` plus `supabase_migrations` logical
-    backup/restore into isolated PostgreSQL 17 with matching catalog totals,
-    critical table counts and exact history 006–026.
+- [ ] Complete protected managed-platform recovery proof.
+  - [x] Capture the protected staging database/Auth/Storage metadata, object bytes and
+    roles, then restore the database package into isolated PostgreSQL 17 with exact
+    critical counts, role/RLS/security checks and migration history 006–055.
   - [ ] Prove the separate managed Auth, Storage metadata/object bytes, roles,
     secrets, schedules and provider-configuration recovery procedure.
 - [x] Pull and review a complete schema baseline, including all tables, views,
@@ -232,7 +244,8 @@ Historical verification from the prior audit (current results below):
   then review its transfer/class-request notification, zero-residue and role-security
   results before considering a separate apply approval.
 - [ ] Remove the deliberately weak legacy dummy accounts before production.
-- [ ] Resolve the platform-owned `supabase_admin` unsafe default privileges.
+- [x] Resolve the platform-owned `supabase_admin` default-privilege finding through
+  current-object ownership proof and the strict managed-platform verifier boundary.
 - [x] Require clean database lint through an explicitly verified staging connection
   (`supabase db lint --db-url $env:STAGING_DB_URL --level warning`), never the production link.
 
@@ -4130,3 +4143,23 @@ probes and all 18 guarded read-only WebKit tests across desktop, tablet and mobi
 Every one of the ten static logo URLs returns HTTP 200 `image/png`, is exactly
 1024 × 1024, and byte-for-byte matches the corresponding committed asset. Production
 was not deployed or contacted, and the retired project received no guarded request.
+
+### Milestone 160 — current release boundary reconciled (30/09/2026)
+
+Revalidated the checkout's staging-only link before network use. A read-only migration
+listing proves an exact 50-entry local/remote ledger from 006 through 055 with no gap or
+pending file. The pinned strict database-security verifier completed successfully in
+read-only mode against only `eomubndonbetszdbhsrj`.
+
+The committed non-Mux provider-readiness script at branch head was executed from a
+clean Git archive against `C:\protected\jingwuguan-staging.env`; it reports ready with
+zero blockers. The dirty working-tree version additionally requires Mux credentials,
+but those files belong to the explicitly deferred uploader work and are not evidence
+for this release candidate.
+
+Reconciled the current status, checkpoint and deployment runbook so they no longer
+claim staging is at 054 or 047, identify an obsolete Preview, treat the resolved
+managed default-privilege boundary as open, or omit the completed protected source and
+local PostgreSQL recovery rehearsal. Production remains blocked only on the explicitly
+recorded external/managed-platform gates. Production, the retired project and deferred
+Mux files were not contacted or changed.

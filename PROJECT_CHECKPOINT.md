@@ -1,6 +1,29 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-Checkpoint date: 28/09/2026
+Checkpoint date: 30/09/2026
+
+## Current release checkpoint — 30 September 2026
+
+- Branch `release/v1-readiness-20260918` is synchronized at `0f2e7ab`. GitHub Actions
+  run `36634978973` passes common checks plus Chromium/Linux, Firefox/Linux,
+  WebKit/Linux and WebKit/macOS. The deployed application tree is `2d939d1`;
+  `0f2e7ab` contains only accepted probe/documentation updates.
+- Ready Preview `dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
+  `jingwuguanseibukan-staging.vercel.app`. It passes 11/11 host and security-header
+  probes, 18/18 guarded read-only WebKit checks and exact verification of all ten
+  normalized 1024 × 1024 PNG assets.
+- Staging `eomubndonbetszdbhsrj` has an exact local/remote migration ledger 006–055.
+  The pinned read-only strict database-security verifier passes. The committed non-Mux
+  provider configuration gate reports ready with zero blockers.
+- Protected database/Auth/Storage metadata, role and Storage-object source evidence is
+  captured. A disposable local PostgreSQL 17 restore proves the exact ledger, critical
+  counts, roles, grants, RLS and all catalog objects except the managed Vault extension.
+- Production remains blocked on a new Singapore Supabase project, managed-platform
+  restore/cutover proof, real email scheduler/delivery, dedicated-inbox Auth workflows,
+  targeted push and physical Safari/iOS evidence, removal of weak staging test accounts,
+  production-only secrets/DNS/redirect configuration and an approved release/rollback
+  window. Mux remains deferred and is not a gate for the non-Mux release candidate.
+- Production and the retired Supabase project were not contacted by this checkpoint.
 
 ## Fixed staging alias and guarded WebKit gate verified (28/09/2026)
 
