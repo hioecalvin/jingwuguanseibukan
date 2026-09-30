@@ -1091,6 +1091,26 @@ acceptance completed; production remains unchanged.
   production build succeeds. No deployment was performed and production was not
   contacted.
 
+## Isolated browser callback-origin repair — 30 September 2026
+
+- GitHub Actions run `36675538878` passed common checks and failed Chromium/Linux,
+  Firefox/Linux, WebKit/Linux and WebKit/macOS in their browser steps. Public logs do
+  not expose the individual assertion, but the retained artifacts and identical job
+  boundary show a shared harness failure rather than a Firefox-only release defect.
+- Source inspection found that the isolated browser environment removed inherited
+  external target URLs without assigning `NEXT_PUBLIC_SITE_URL`. The canonical
+  callback-origin boundary therefore failed closed during the valid registration
+  submission exercised by every browser project.
+- The fixture now binds `NEXT_PUBLIC_SITE_URL` to its fixed loopback `APP_ORIGIN`, and
+  direct browser runs reject any replacement. Regression tests prove inherited
+  external origins are discarded. The focused suite passes 7/7.
+- A clean archive of exact commit `41b1deb` with only the two-file harness correction
+  completed the production browser build and passed Chromium desktop 38/38. This
+  Windows host cannot launch Playwright Firefox; Linux Firefox and Linux/macOS WebKit
+  remain pending the replacement GitHub Actions run.
+- No live target was contacted. Production, staging, the historical project, providers
+  and deferred Mux/uploader work remain unchanged.
+
 ## Mux uploader checkpoint — 27 September 2026
 
 - Local release work now uses Mux Direct Uploads for all new JS Video Uploader videos.

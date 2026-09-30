@@ -4248,3 +4248,22 @@ scheduler, use a dedicated inbox for real Auth/Resend evidence, decide whether t
 the currently hidden push/PWA settings tranche, and test actual installed iOS/iPadOS
 and macOS Safari delivery. Production, staging, the historical project, providers and
 deferred Mux/uploader files were not contacted or changed.
+
+### Milestone 165 — isolated browser origin regression repaired (30/09/2026)
+
+GitHub Actions run `36675538878` passed common checks but failed all four browser jobs.
+Parallel read-only CI and source audits traced the shared failure to the isolated
+browser harness: it deliberately removed inherited target URLs but did not replace
+`NEXT_PUBLIC_SITE_URL`, which the new canonical callback-origin boundary requires when
+the registration test submits a valid application.
+
+The harness now supplies only its fixed loopback `APP_ORIGIN`, rejects direct runs that
+change that value, and tests that an inherited external value is discarded. The
+focused origin/config suite passes 7/7. A clean archive of commit `41b1deb` plus only
+this two-file fix completed a production browser build and passed the full Chromium
+desktop suite 38/38. Local Playwright Firefox remains unavailable on this Windows host,
+so cross-engine proof must come from the replacement GitHub Actions run.
+
+No application runtime, live credential, staging resource or provider was changed.
+Production, the historical project and deferred Mux/uploader files were not contacted
+or modified.

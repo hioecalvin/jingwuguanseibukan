@@ -35,6 +35,7 @@ test('browser smoke environment drops real credentials and target overrides', ()
   assert.equal(env.PATH, 'node-path');
   assert.equal(env.SystemRoot, 'system-root');
   assert.equal(env.CI, 'true');
+  assert.equal(env.NEXT_PUBLIC_SITE_URL, APP_ORIGIN);
   assert.equal(env.NEXT_PUBLIC_SUPABASE_URL, MOCK_BACKEND_ORIGIN);
   assert.equal(env.SECURITY_TEST_MEMBER_PASSWORD, undefined);
   assert.equal(env.NODE_OPTIONS, undefined);
@@ -46,7 +47,7 @@ test('browser smoke environment drops real credentials and target overrides', ()
 
 test('direct browser runs reject missing isolation or modified credentials/targets', () => {
   assert.throws(() => assertSmokeEnvironment({}), /Refusing/);
-  for (const key of ['BROWSER_SMOKE_MODE', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY']) {
+  for (const key of ['BROWSER_SMOKE_MODE', 'NEXT_PUBLIC_SITE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY']) {
     assert.throws(() => assertSmokeEnvironment({ ...smokeEnvironment({}), [key]: 'wrong' }), /Refusing/);
   }
 });
