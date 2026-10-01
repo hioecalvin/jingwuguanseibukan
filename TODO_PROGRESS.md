@@ -4674,3 +4674,33 @@ capture production secrets/provider/scheduler/monitoring evidence, run physical 
 and signed-installer acceptance, prove the production identity inventory is clean, and
 approve the exact release window. Production remains blocked until the completed
 protected evidence packet passes.
+
+### Milestone 179 — semantic rollback evidence gate (01/10/2026)
+
+Closed the remaining rollback-evidence integrity gap without contacting any live
+system. Added a fail-closed protected rollback manifest and validator for the exact
+candidate and known-good commits/deployments, staging application rollback rehearsal,
+replacement-target managed database recovery, ledger `006-056`, catalog/lint/RLS/role
+security, deadline/RTO compliance, zero residue and canonical independent review.
+
+The command rejects repository, link, network and oversized inputs and provides a safe
+`--print-review-digest` mode that prints only the canonical digest after every other
+field passes. Impossible dates, substituted deployment identities, understated
+durations, reused evidence hashes, production/provider contact and destructive down
+migrations fail closed.
+
+The final evidence packet now reruns rollback semantics from the independently bound
+release-window identities and requires the decision deadline to match. Correct hashes
+can no longer make placeholder, substituted or deadline-divergent rollback evidence
+pass. Independent review findings were fixed before integration.
+
+Verification passes 488/488 application tests, 33/33 focused rollback/window/packet
+tests, 27/27 uploader tests, ESLint, TypeScript, whitespace validation, the optimized
+51-route build, and full/production/uploader audits with zero reported vulnerabilities.
+No live system or provider was contacted.
+
+Production readiness remains approximately 9.4/10. Remaining work is still the
+operator-controlled execution evidence: create and verify the Singapore production
+project, complete managed restore, production secrets/provider/scheduler/monitoring,
+physical Safari, signed installer acceptance, clean production identities, production
+cutover/database evidence, and final release-window approval.

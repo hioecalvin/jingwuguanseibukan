@@ -314,6 +314,26 @@ npm.cmd run release:evidence:check -- `
   --expected-production-project-ref=<production-project-ref>
 ```
 
+`rollback-readiness.mjs` validates the protected, sanitized application rollback and
+replacement-target database recovery rehearsal. It binds the exact candidate and
+known-good commits/deployments, rejects production/provider contact and destructive
+down migrations, enforces the decision deadline/RTO, and requires a canonical
+independent review digest:
+
+Add `--print-review-digest` while the protected manifest still contains the digest
+placeholder. The command prints only the digest after every other field passes. Save
+it into `attestation.reviewDigest`, then rerun without the flag. Repository files,
+links, network paths and oversized inputs are rejected.
+
+```powershell
+npm.cmd run rollback:check -- `
+  --manifest=C:\protected\evidence\rollback-evidence.json `
+  --expected-commit=<exact-release-sha> `
+  --expected-deployment-id=<candidate-deployment-id> `
+  --expected-previous-commit=<known-good-sha> `
+  --expected-previous-deployment-id=<known-good-deployment-id>
+```
+
 The packet verifier performs no network, database, deployment, inbox or provider
 action and does not authorize a production release.
 

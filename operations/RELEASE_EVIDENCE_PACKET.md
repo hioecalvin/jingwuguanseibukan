@@ -20,7 +20,13 @@ npm.cmd run release:evidence:check -- `
 ```
 
 The command first revalidates the release-window semantics, then hashes all eleven
-protected evidence files and compares them with that manifest. It prints only bounded
-status information; it never prints file contents or performs network, deployment,
-database or provider actions. A passing result is necessary but does not itself
-authorize a release.
+protected evidence files and compares them with that manifest. It also reruns the
+rollback evidence semantic validator against the exact candidate and known-good
+commit/deployment identities and rollback decision deadline from the protected
+release-window record. Hash-correct but semantically invalid or independently misbound
+rollback JSON cannot pass. The remaining child gates must still be run individually
+before packet assembly.
+
+The checker prints only bounded status information; it never prints file contents or
+performs network, deployment, database or provider actions. A passing result is
+necessary but does not itself authorize a release.

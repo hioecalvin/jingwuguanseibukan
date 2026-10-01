@@ -4,6 +4,7 @@ import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { evaluateReleaseWindow } from "./release-window-readiness.mjs";
+import { evaluateRollbackReadiness } from "./rollback-readiness.mjs";
 
 export const EVIDENCE_KEYS = Object.freeze([
   "recovery",
@@ -124,6 +125,7 @@ export async function verifyEvidenceFiles(
   }
 
   const resolvedFiles = [];
+  let semanticallyVerifiedFiles = 0;
   for (const key of EVIDENCE_KEYS) {
     const expected = expectedDigest(object(releaseManifest), key);
     if (!/^[a-f0-9]{64}$/.test(expected ?? "") || /^(.)\1{63}$/.test(expected)) {
@@ -150,6 +152,30 @@ export async function verifyEvidenceFiles(
     if (loaded.digest !== expected) {
       blockers.push(blocker(`evidenceFiles.${key}`, "file SHA-256 does not match the release manifest"));
     }
+    if (key === "rollback") {
+      const release = object(releaseManifest.release);
+      const semanticResult = evaluateRollbackReadiness(loaded.parsed, {
+        expectedCommit: release.commitSha,
+        expectedDeploymentId: release.deploymentId,
+        expectedPreviousCommit: release.previousCommitSha,
+        expectedPreviousDeploymentId: release.previousDeploymentId,
+      });
+      if (!semanticResult.ready) {
+        for (const item of semanticResult.blockers) {
+          blockers.push(blocker(`evidenceFiles.rollback.${item.path}`, item.message));
+        }
+      } else if (
+        semanticResult.summary.decisionDeadlineMinutes !==
+        object(releaseManifest.rollback).decisionDeadlineMinutes
+      ) {
+        blockers.push(blocker(
+          "evidenceFiles.rollback.timings.decisionDeadlineMinutes",
+          "must match the rollback deadline in the release manifest",
+        ));
+      } else {
+        semanticallyVerifiedFiles += 1;
+      }
+    }
   }
 
   if (resolvedFiles.length !== EVIDENCE_KEYS.length || new Set(resolvedFiles).size !== EVIDENCE_KEYS.length) {
@@ -162,7 +188,10 @@ export async function verifyEvidenceFiles(
     warnings: [
       "This offline check binds protected evidence files only; it does not authorize or execute a release.",
     ],
-    summary: blockers.length === 0 ? { verifiedEvidenceFiles: EVIDENCE_KEYS.length } : null,
+    summary: blockers.length === 0 ? {
+      verifiedEvidenceFiles: EVIDENCE_KEYS.length,
+      semanticallyVerifiedEvidenceFiles: semanticallyVerifiedFiles,
+    } : null,
   };
 }
 

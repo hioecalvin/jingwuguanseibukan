@@ -1437,3 +1437,23 @@ acceptance completed; production remains unchanged.
   optimized 51-route build, and full/production/uploader audits with zero reported
   vulnerabilities. No staging, production, retired project, database, deployment,
   inbox, scheduler or provider was contacted.
+
+## Semantic rollback evidence gate — 1 October 2026
+
+- Added `rollback-readiness.mjs`, a protected template and operator guide. The gate
+  binds the exact release and known-good commits/deployments to a non-production
+  application rollback rehearsal and replacement-target managed database recovery.
+- It requires staging auth/authorization/host probes, restoration of the candidate,
+  exact ledger `006-056`, catalog/lint/grants/RLS/role checks, decision deadline and
+  RTO compliance, distinct evidence digests, zero production/provider contact and
+  deletion or quarantine of the disposable target.
+- The CLI enforces protected regular files outside the repository and provides a safe
+  digest-generation pass. Canonical review covers every accepted evidence field;
+  impossible dates, understated durations and substituted Vercel deployment IDs fail.
+- The release evidence packet now semantically validates rollback evidence using the
+  release-window identities and cross-checks `decisionDeadlineMinutes`. A valid hash
+  cannot substitute invalid or self-bound rollback JSON.
+- Verification passes 488/488 application tests, 33/33 focused tests, 27/27 uploader
+  tests, ESLint, TypeScript, whitespace validation, the optimized 51-route build and
+  all three dependency audits with zero reported vulnerabilities. No live system was
+  contacted.

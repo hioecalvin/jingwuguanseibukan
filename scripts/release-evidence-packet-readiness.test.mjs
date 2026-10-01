@@ -10,6 +10,27 @@ import {
   runCli,
   verifyEvidenceFiles,
 } from "./release-evidence-packet-readiness.mjs";
+import { calculateRollbackReviewDigest } from "./rollback-readiness.mjs";
+
+const COMMIT = "ab".repeat(20);
+const PREVIOUS_COMMIT = "cd".repeat(20);
+const DEPLOYMENT = "dpl_candidate_123";
+const PREVIOUS_DEPLOYMENT = "dpl_known_good_456";
+
+function rollbackEvidence() {
+  const manifest = {
+    manifestVersion: 1,
+    policy: "jingwuguan-production-rollback-v1",
+    release: { branch: "release/v1-readiness-20260918", commitSha: COMMIT, deploymentId: DEPLOYMENT, previousCommitSha: PREVIOUS_COMMIT, previousDeploymentId: PREVIOUS_DEPLOYMENT },
+    rehearsal: { environment: "staging", origin: "https://jingwuguanseibukan-staging.vercel.app", supabaseProjectRef: "eomubndonbetszdbhsrj", startedAt: new Date(Date.now() - 1_380_000).toISOString(), completedAt: new Date(Date.now() - 900_000).toISOString(), candidateDeploymentVerified: true, knownGoodDeploymentActivated: true, authenticationPassed: true, authorizationPassed: true, hostProbesPassed: true, candidateRestoredAfterTest: true, evidenceBundleSha256: "12".repeat(32) },
+    databaseRecovery: { strategy: "replacement-target-restore", sourceProjectRef: "eomubndonbetszdbhsrj", targetKind: "disposable-managed", backupSha256: "34".repeat(32), evidenceBundleSha256: "56".repeat(32), migrationLedger: "006-056", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, grantsAndRlsPassed: true, roleSecurityPassed: true, restoreCompleted: true, zeroResidueVerified: true },
+    timings: { decisionDeadlineMinutes: 15, applicationRollbackMinutes: 8, databaseRecoveryMinutes: 75, rtoMinutes: 90, completedWithinRto: true },
+    safety: { productionContacted: false, productionMutated: false, destructiveDownMigrationUsed: false, historicalDataRewritten: false, outboundProvidersContacted: false, temporaryTargetDeletedOrQuarantined: true },
+    attestation: { recordedByRole: "release-operator", reviewedByRole: "independent-reviewer", reviewedAt: new Date(Date.now() - 900_000).toISOString(), evidenceReviewed: true, allFindingsResolved: true, reviewDigest: "" },
+  };
+  manifest.attestation.reviewDigest = calculateRollbackReviewDigest(manifest);
+  return manifest;
+}
 
 async function fixture() {
   const directory = await mkdtemp(join(tmpdir(), "jingwuguan-release-packet-"));
@@ -17,15 +38,19 @@ async function fixture() {
   const digests = {};
   for (const [index, key] of EVIDENCE_KEYS.entries()) {
     const path = join(directory, `${key}.json`);
-    const bytes = Buffer.from(JSON.stringify({ manifestVersion: 1, key, sequence: index + 1 }));
+    const evidence = key === "rollback"
+      ? rollbackEvidence()
+      : { manifestVersion: 1, key, sequence: index + 1 };
+    const bytes = Buffer.from(JSON.stringify(evidence));
     await writeFile(path, bytes);
     evidenceFiles[key] = path;
     digests[key] = createHash("sha256").update(bytes).digest("hex");
   }
 
   const releaseManifest = {
+    release: { commitSha: COMMIT, deploymentId: DEPLOYMENT, previousCommitSha: PREVIOUS_COMMIT, previousDeploymentId: PREVIOUS_DEPLOYMENT },
     recovery: { manifestSha256: digests.recovery },
-    rollback: { manifestSha256: digests.rollback },
+    rollback: { manifestSha256: digests.rollback, decisionDeadlineMinutes: 15 },
     gateEvidence: Object.fromEntries(
       EVIDENCE_KEYS.slice(2).map(key => [key, { manifestSha256: digests[key] }]),
     ),
@@ -43,8 +68,68 @@ test("binds all eleven distinct protected evidence files to the release manifest
   const data = await fixture();
   t.after(() => rm(data.directory, { recursive: true, force: true }));
   const result = await verifyEvidenceFiles(data.index, data.releaseManifest);
-  assert.equal(result.ready, true);
-  assert.deepEqual(result.summary, { verifiedEvidenceFiles: 11 });
+  assert.equal(result.ready, true, JSON.stringify(result.blockers));
+  assert.deepEqual(result.summary, { verifiedEvidenceFiles: 11, semanticallyVerifiedEvidenceFiles: 1 });
+});
+
+test("hash-correct but semantically invalid rollback evidence fails closed", async t => {
+  const data = await fixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+  const invalid = Buffer.from(JSON.stringify({ manifestVersion: 1, result: "passed" }));
+  await writeFile(data.evidenceFiles.rollback, invalid);
+  data.releaseManifest.rollback.manifestSha256 = createHash("sha256").update(invalid).digest("hex");
+  await writeFile(data.index.releaseWindowManifest, JSON.stringify(data.releaseManifest));
+  const result = await verifyEvidenceFiles(data.index, data.releaseManifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(item => item.path.startsWith("evidenceFiles.rollback.")));
+});
+
+test("hash-correct rollback identities cannot self-bind independently of the release record", async t => {
+  const data = await fixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+
+  const rollback = JSON.parse(await readFile(data.evidenceFiles.rollback, "utf8"));
+  Object.assign(rollback.release, {
+    commitSha: "ef".repeat(20),
+    deploymentId: "dpl_substituted_candidate",
+    previousCommitSha: "01".repeat(20),
+    previousDeploymentId: "dpl_substituted_known_good",
+  });
+  rollback.attestation.reviewDigest = calculateRollbackReviewDigest(rollback);
+  const bytes = Buffer.from(JSON.stringify(rollback));
+  await writeFile(data.evidenceFiles.rollback, bytes);
+  data.releaseManifest.rollback.manifestSha256 = createHash("sha256").update(bytes).digest("hex");
+  await writeFile(data.index.releaseWindowManifest, JSON.stringify(data.releaseManifest));
+
+  const result = await verifyEvidenceFiles(data.index, data.releaseManifest);
+  assert.equal(result.ready, false);
+  for (const path of ["commitSha", "deploymentId", "previousCommitSha", "previousDeploymentId"]) {
+    assert.ok(result.blockers.some(item => item.path === `evidenceFiles.rollback.release.${path}`), path);
+  }
+  assert.ok(!result.blockers.some(item => item.path === "evidenceFiles.rollback" && /SHA-256/.test(item.message)));
+  assert.ok(!result.blockers.some(item => item.path === "evidenceFiles.rollback.attestation.reviewDigest"));
+});
+
+test("hash-correct rollback deadline must match the independent release record", async t => {
+  const data = await fixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+
+  const rollback = JSON.parse(await readFile(data.evidenceFiles.rollback, "utf8"));
+  rollback.timings.decisionDeadlineMinutes = 30;
+  rollback.attestation.reviewDigest = calculateRollbackReviewDigest(rollback);
+  const bytes = Buffer.from(JSON.stringify(rollback));
+  await writeFile(data.evidenceFiles.rollback, bytes);
+  data.releaseManifest.rollback.manifestSha256 = createHash("sha256").update(bytes).digest("hex");
+  await writeFile(data.index.releaseWindowManifest, JSON.stringify(data.releaseManifest));
+
+  const result = await verifyEvidenceFiles(data.index, data.releaseManifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(item =>
+    item.path === "evidenceFiles.rollback.timings.decisionDeadlineMinutes" &&
+    /release manifest/.test(item.message),
+  ), JSON.stringify(result.blockers));
+  assert.ok(!result.blockers.some(item => item.path === "evidenceFiles.rollback" && /SHA-256/.test(item.message)));
+  assert.ok(!result.blockers.some(item => item.path === "evidenceFiles.rollback.attestation.reviewDigest"));
 });
 
 test("digest drift and reused evidence files fail closed", async t => {

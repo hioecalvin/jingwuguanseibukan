@@ -23,6 +23,7 @@
     "production:secrets:check": "node scripts/production-secrets-readiness.mjs",
     "release:window:check": "node scripts/release-window-readiness.mjs",
     "release:evidence:check": "node scripts/release-evidence-packet-readiness.mjs",
+    "rollback:check": "node scripts/rollback-readiness.mjs",
     "email-scheduler:check": "node scripts/email-scheduler-readiness.mjs",
     "safari:physical:check": "node scripts/physical-safari-readiness.mjs",
     "production:identity:check": "node scripts/production-identity-readiness.mjs",

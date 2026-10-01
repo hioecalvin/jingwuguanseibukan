@@ -378,9 +378,11 @@ must be distinct from staging and from historical project
 
 After all staging gates pass and the user separately authorizes a release window:
 
-Before step 1, copy `release/release-window-manifest.template.json` to protected
-operator storage and complete it. Bind it to the independently observed immutable
-commit; the checked-in template must fail:
+Before step 1, first complete and validate the protected rollback rehearsal record
+using the command below, including the documented `--print-review-digest` pass. Then
+copy `release/release-window-manifest.template.json` to protected operator storage,
+insert the validated rollback digest, and complete it. Bind it to the independently
+observed immutable commit; the checked-in template must fail:
 
 ```powershell
 npm.cmd run release:window:check -- `
@@ -402,6 +404,24 @@ signed interactive installer manifests. These digests must also differ from the
 rollback and recovery-point manifest digests. Their exact commit, deployment, project,
 Singapore region, endpoint, policy and installer-artifact bindings must match the release
 record; bare approval booleans are insufficient.
+
+Complete the sanitized rollback rehearsal record and validate it independently before
+the release-window command above. This step performs no deployment or restore itself;
+follow `operations/ROLLBACK_READINESS.md` to generate and insert the canonical review
+digest before running:
+
+```powershell
+npm.cmd run rollback:check -- `
+  --manifest=C:\protected\evidence\rollback-evidence.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-candidate-deployment-id> `
+  --expected-previous-commit=<40-character-known-good-commit> `
+  --expected-previous-deployment-id=<exact-known-good-deployment-id>
+if ($LASTEXITCODE -ne 0) { throw 'Rollback rehearsal evidence is incomplete' }
+```
+
+The final packet reruns this semantic check from the release-window identities, so a
+digest-matching placeholder rollback document cannot authorize a release.
 
 1. Freeze schema changes. Capture and prove fresh recovery points for every source
    that will be imported and for the new target before release mutations. Confirm
