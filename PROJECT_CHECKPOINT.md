@@ -1284,3 +1284,31 @@ acceptance completed; production remains unchanged.
   50/50 focused release tests, ESLint, TypeScript, whitespace validation, and the
   optimized 51-route production build. No staging, production, retired project,
   deployment, database, scheduler, inbox, or provider was contacted.
+
+## Production configuration, restore evidence and release-window gates — 1 October 2026
+
+- Production provider validation now binds the future exact production Supabase URL
+  and project reference to role-correct publishable/secret credentials. It accepts the
+  reviewed modern key formats or legacy JWTs with exact role/project claims, and
+  rejects aliases, placeholders, control characters, staging/test residue and any
+  non-production Vercel environment. Values remain redacted.
+- The recovery manifest is now version 4 and cryptographically identifies the exact
+  protected backup payload by source project, capture time, format, byte count and
+  SHA-256. Placeholder provenance, stale evidence, incomplete Auth/Storage recovery,
+  ledger drift and production mutation fail closed.
+- A two-pass offline staging Auth/email acceptance preflight now requires the exact
+  staging target, dedicated inbox, three protected security-test identities, isolated
+  class/dojo UUIDs, strong disposable passwords, current catalog evidence and a
+  reviewed cleanup plan covering Auth users and identities, profiles, class requests,
+  password-reset requests and email outbox rows. Its second-pass authorization token
+  is an HMAC over non-secret scope. The live registration/confirmation/delivery test
+  remains intentionally unrun until current catalog and cleanup evidence are supplied.
+- A release-window validator now binds the release and rollback SHAs, deployment IDs,
+  Sydney time window, named owners, independent commit verification, a recovery point
+  captured within 24 hours, tested rollback, external approvals and explicit stop
+  conditions. The checked-in template is deliberately incomplete and cannot authorize
+  a release.
+- Combined verification passes 367/367 application tests and 42/42 focused gate tests,
+  ESLint, TypeScript, whitespace validation, and the optimized 51-route production
+  build. No staging, production, retired project, deployment, database, inbox,
+  scheduler or provider was contacted.

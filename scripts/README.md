@@ -1,5 +1,22 @@
 # Project scripts
 
+## Release-window readiness gate
+
+`release-window-readiness.mjs` validates a protected release-window manifest without
+contacting any service. It binds the approved release to an independently supplied
+commit and known-good rollback revision, requires a fresh protected recovery point,
+named owners, tested rollback, bounded Sydney release window, stop conditions, and
+completion of every external production gate. The checked-in template is deliberately
+incomplete and must fail.
+
+```powershell
+npm.cmd run release:window:check -- `
+  --manifest=C:\protected\jingwuguan-release-window.json `
+  --expected-commit=<40-character-reviewed-commit>
+```
+
+A passing result records readiness only; it does not authorize or execute a release.
+
 ## Production target identity gate
 
 `production-target-readiness.mjs` is an offline, fail-closed check for the future
@@ -17,6 +34,26 @@ Set `PRODUCTION_PROJECT_REF`, `PRODUCTION_REGION=ap-southeast-1`,
 `NEXT_PUBLIC_SUPABASE_URL` and `PRODUCTION_DB_URL` in the protected operator
 environment first. A passing offline result does not prove project ownership or
 dashboard region; independently verify both before any connection command.
+
+## Production provider and secret gate
+
+Run the offline provider gate separately against the exact future production
+deployment environment. In production mode it requires role-correct Supabase key
+shapes, binds legacy anon/service-role JWTs to `PRODUCTION_PROJECT_REF`, rejects
+ambiguous legacy aliases, and refuses staging, dummy-account, security-test, or
+Preview-environment residue. It reports variable names and failure categories only;
+it never prints credential values.
+
+```powershell
+node scripts/provider-config-readiness.mjs --environment=production `
+  --expected-origin=https://jingwuguanseibukan.com `
+  --expected-supabase-host="$($env:PRODUCTION_PROJECT_REF).supabase.co" `
+  --env-file=C:\protected\jingwuguan-production.env
+```
+
+A passing result validates offline consistency only. It does not prove that a key is
+active, least-privileged, provider-scoped, or different from a staging credential;
+verify those properties in each provider dashboard under the approved release gate.
 
 ## Read-only staging database verifier
 
@@ -101,9 +138,10 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 The checked-in template is intentionally incomplete and must fail validation.
-Manifest v3 also requires the exact 006–056 repository fingerprint, matching
+Manifest v4 also requires the exact 006–056 repository fingerprint, matching
 source/restored migration-ledger fingerprints, matching pre-migration schema-catalog
-fingerprints and object counts, and measured RPO/RTO timestamps. Generate the catalog
+fingerprints and object counts, an exact SHA-256 and byte-count match between the
+protected backup payload and isolated restore input, and measured RPO/RTO timestamps. Generate the catalog
 fingerprints from schema-only protected exports with
 `node scripts/recovery-catalog-fingerprint.mjs <protected-catalog-directory>`.
 Generate fingerprints without printing ledger SQL using:

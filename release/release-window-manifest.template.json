@@ -1,0 +1,54 @@
+{
+  "manifestVersion": 1,
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "previousCommitSha": "REPLACE_WITH_40_CHARACTER_ROLLBACK_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "previousDeploymentId": "REPLACE_WITH_KNOWN_GOOD_DEPLOYMENT_ID"
+  },
+  "owners": {
+    "deployment": "REPLACE_WITH_OWNER",
+    "rollback": "REPLACE_WITH_OWNER",
+    "monitoring": "REPLACE_WITH_OWNER"
+  },
+  "window": {
+    "approvedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "startsAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "endsAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "timeZone": "Australia/Sydney"
+  },
+  "recovery": {
+    "pointId": "REPLACE_WITH_PROTECTED_RECOVERY_POINT_ID",
+    "manifestSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER"
+  },
+  "rollback": {
+    "applicationTested": false,
+    "databaseRecoveryTested": false,
+    "decisionDeadlineMinutes": 0
+  },
+  "approvals": {
+    "explicitReleaseApproval": false,
+    "productionTargetVerified": false,
+    "productionSecretsVerified": false,
+    "managedRestoreVerified": false,
+    "providerDeliveryVerified": false,
+    "physicalSafariVerified": false,
+    "monitoringReady": false,
+    "weakTestAccountsRemoved": false,
+    "pushHiddenOrVerified": false
+  },
+  "stopConditions": {
+    "authenticationFailure": false,
+    "authorizationFailure": false,
+    "databaseSecurityFailure": false,
+    "migrationOrRestoreMismatch": false,
+    "emailWorkerFailure": false,
+    "rollbackAccessFailure": false,
+    "maxServerErrorRatePercent": 0,
+    "maxOldestReadyEmailSeconds": 0
+  }
+}

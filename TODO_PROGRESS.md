@@ -4478,3 +4478,36 @@ Combined evidence passes 346/346 application tests, 22/22 uploader tests, 50/50
 focused production/recovery/email/memorial tests, ESLint, TypeScript, whitespace
 validation, and the optimized 51-route production build. No staging, production,
 retired project, database, deployment, inbox, scheduler, or provider was contacted.
+
+### Milestone 174 — production configuration, restore evidence and release-window gates (01/10/2026)
+
+Completed four production-readiness tracks in parallel without contacting a live
+system. Hardened provider configuration so production requires an exact production
+project binding, role-correct Supabase credentials and a production Vercel context,
+while refusing aliases, placeholders, control characters, staging/test residue and
+role-confused modern or legacy credentials.
+
+Upgraded the recovery evidence contract to manifest version 4. A rehearsal must now
+identify the exact protected source backup by project, capture time, format, byte count
+and SHA-256, and placeholder provenance cannot pass. Existing ledger, catalog,
+Auth/Storage, RLS/grant, freshness, RTO and no-production-mutation requirements remain
+fail closed.
+
+Added a two-pass offline staging Auth/email preflight. It binds the exact staging host
+and project, dedicated inbox, protected Member/Admin/Super Admin accounts, isolated
+class/dojo UUIDs, strong disposable passwords, current catalog digest and reviewed
+cleanup scopes for Auth users and identities, profiles, class requests, password reset
+requests and email outbox. The second pass uses an EMAIL_WORKER_SECRET-keyed HMAC review
+token. No registration, message delivery or cleanup was run; guarded live acceptance
+still requires current catalog and cleanup evidence.
+
+Added a production release-window gate requiring exact release/rollback revisions,
+deployment IDs, named owners, an independently verified commit, Sydney time bounds,
+a recovery point captured within 24 hours, tested rollback, every external approval
+and explicit stop conditions. The repository template intentionally fails until those
+operator-controlled facts exist.
+
+Verification passes 367/367 application tests, 42/42 focused gate tests, ESLint,
+TypeScript, whitespace validation, and the optimized 51-route production build. No
+staging, production, retired project, database, deployment, inbox, scheduler or
+provider was contacted.

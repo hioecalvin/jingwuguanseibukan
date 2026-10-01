@@ -362,6 +362,23 @@ must be distinct from staging and from historical project
 
 After all staging gates pass and the user separately authorizes a release window:
 
+Before step 1, copy `release/release-window-manifest.template.json` to protected
+operator storage and complete it. Bind it to the independently observed immutable
+commit; the checked-in template must fail:
+
+```powershell
+npm.cmd run release:window:check -- `
+  --manifest=C:\protected\jingwuguan-release-window.json `
+  --expected-commit=<40-character-reviewed-commit>
+if ($LASTEXITCODE -ne 0) { throw 'Release window is not approved and ready' }
+```
+
+This offline gate requires the release and prior rollback revisions/deployments, a
+15-to-240-minute Sydney window, a recovery point captured within 24 hours, named
+deployment/rollback/monitoring owners, tested application and database recovery,
+bounded stop thresholds, and explicit completion of every external gate. It records
+approval but cannot grant it and never connects to production.
+
 1. Freeze schema changes. Capture and prove fresh recovery points for every source
    that will be imported and for the new target before release mutations. Confirm
    the reviewed immutable commit, baseline/import plan, migration hashes, rollback

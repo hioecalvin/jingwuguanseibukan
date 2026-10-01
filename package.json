@@ -16,7 +16,9 @@
     "recovery:check": "node scripts/recovery-readiness.mjs",
     "recovery:fingerprint": "node scripts/recovery-ledger-fingerprint.mjs",
     "provider:check": "node scripts/provider-config-readiness.mjs",
-    "production:target:check": "node scripts/production-target-readiness.mjs"
+    "auth-email:staging:preflight": "node scripts/staging-auth-email-readiness.mjs --confirm-offline-preflight",
+    "production:target:check": "node scripts/production-target-readiness.mjs",
+    "release:window:check": "node scripts/release-window-readiness.mjs"
   },
   "dependencies": {
     "@mux/mux-player-react": "^3.13.4",
