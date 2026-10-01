@@ -37,6 +37,33 @@ const options = {
   expectedSupabaseHost: "staging-ref.supabase.co",
 };
 
+const productionProjectRef = "abcdefghijklmnopqrst";
+const productionOptions = {
+  environment: "production",
+  expectedOrigin: "https://jingwuguanseibukan.com",
+  expectedSupabaseHost: `${productionProjectRef}.supabase.co`,
+};
+
+function productionEnvironment() {
+  return {
+    ...validEnvironment(),
+    PRODUCTION_PROJECT_REF: productionProjectRef,
+    NEXT_PUBLIC_SITE_URL: "https://jingwuguanseibukan.com",
+    NEXT_PUBLIC_SUPABASE_URL: `https://${productionProjectRef}.supabase.co`,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: `sb_publishable_${"a".repeat(32)}`,
+    SUPABASE_SECRET_KEY: `sb_secret_${"b".repeat(32)}`,
+    EMAIL_FROM_ADDRESS: "membership@jingwuguanseibukan.com",
+  };
+}
+
+function legacyJwt(claims) {
+  return [
+    Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url"),
+    Buffer.from(JSON.stringify(claims)).toString("base64url"),
+    Buffer.alloc(32, 7).toString("base64url"),
+  ].join(".");
+}
+
 test("a coherent staging provider configuration passes without revealing values", () => {
   const result = evaluateProviderConfiguration(validEnvironment(), options);
   assert.equal(result.ready, true);
@@ -95,4 +122,73 @@ test("server credentials exposed through NEXT_PUBLIC names fail closed", () => {
   const result = evaluateProviderConfiguration(env, options);
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "NEXT_PUBLIC_RESEND_API_KEY"));
+});
+
+test("a production configuration requires role-correct Supabase credentials and exact project binding", () => {
+  const result = evaluateProviderConfiguration(productionEnvironment(), productionOptions);
+  assert.equal(result.ready, true);
+  assert.deepEqual(result.blockers, []);
+});
+
+test("weak and role-confused Supabase production credentials fail closed", () => {
+  const env = productionEnvironment();
+  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "fixture-public-key";
+  env.SUPABASE_SECRET_KEY = legacyJwt({
+    role: "anon",
+    ref: productionProjectRef,
+  });
+  const result = evaluateProviderConfiguration(env, productionOptions);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"));
+  assert.ok(result.blockers.some(({ path }) => path === "SUPABASE_SECRET_KEY"));
+});
+
+test("production refuses placeholder Supabase credentials and control characters", () => {
+  const env = productionEnvironment();
+  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = `sb_publishable_fixture_${"a".repeat(24)}`;
+  env.SUPABASE_SECRET_KEY = `sb_secret_change_me_${"b".repeat(24)}`;
+  env.EMAIL_WORKER_SECRET = `${env.EMAIL_WORKER_SECRET}\n`;
+  const result = evaluateProviderConfiguration(env, productionOptions);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" && message.includes("placeholder")
+  ));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "SUPABASE_SECRET_KEY" && message.includes("placeholder")
+  ));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "EMAIL_WORKER_SECRET" && message.includes("control")
+  ));
+});
+
+test("legacy Supabase JWTs must carry the correct role and production project reference", () => {
+  const env = productionEnvironment();
+  env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = legacyJwt({ role: "anon", ref: productionProjectRef });
+  env.SUPABASE_SECRET_KEY = legacyJwt({ role: "service_role", ref: "zyxwvutsrqponmlkjihg" });
+  const result = evaluateProviderConfiguration(env, productionOptions);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "SUPABASE_SECRET_KEY" && message.includes("PRODUCTION_PROJECT_REF")
+  ));
+});
+
+test("production refuses ambiguous legacy aliases and staging or test-account residue", () => {
+  const env = productionEnvironment();
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY = legacyJwt({ role: "anon", ref: productionProjectRef });
+  env.SUPABASE_SERVICE_ROLE_KEY = legacyJwt({ role: "service_role", ref: productionProjectRef });
+  env.STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
+  env.SECURITY_TEST_MEMBER_PASSWORD = "must-not-deploy";
+  env.VERCEL_ENV = "preview";
+  const result = evaluateProviderConfiguration(env, productionOptions);
+  assert.equal(result.ready, false);
+  for (const path of [
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "STAGING_PROJECT_REF",
+    "SECURITY_TEST_MEMBER_PASSWORD",
+    "VERCEL_ENV",
+  ]) {
+    assert.ok(result.blockers.some((blocker) => blocker.path === path), path);
+  }
+  assert.doesNotMatch(JSON.stringify(result), /must-not-deploy|eomubndonbetszdbhsrj/);
 });
