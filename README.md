@@ -143,14 +143,17 @@ overdue-ready threshold.
 
 ## Authorization smoke test
 
-Use dedicated, disposable accounts with Member, scoped Admin, and Super Admin
-roles. Set these server-side variables (do not commit them):
+On staging, use dedicated, disposable accounts with Member, scoped Admin, and Super
+Admin roles. For an explicitly authorized `production-read-only` check, do not create
+or retain disposable/test identities: use only reviewed existing live accounts from
+the separately protected account/role roster. Set these server-side variables (do not
+commit them):
 
 - `SECURITY_TEST_MEMBER_EMAIL` / `SECURITY_TEST_MEMBER_PASSWORD`
 - `SECURITY_TEST_ADMIN_EMAIL` / `SECURITY_TEST_ADMIN_PASSWORD`
 - `SECURITY_TEST_SUPER_EMAIL` / `SECURITY_TEST_SUPER_PASSWORD`
-- `SECURITY_TEST_ENVIRONMENT=staging` (use `production-read-only` only for an
-  explicitly authorized production check)
+- `SECURITY_TEST_ENVIRONMENT=staging` (use `production-read-only` only for a
+  separately authorized production check with the protected existing-account roster)
 - `SECURITY_TEST_EXPECTED_HOST` matching the Supabase URL host exactly
 
 Then run:

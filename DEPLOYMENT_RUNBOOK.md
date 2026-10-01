@@ -381,26 +381,45 @@ After all staging gates pass and the user separately authorizes a release window
 Before step 1, first complete and validate the protected rollback rehearsal record
 using the command below, including the documented `--print-review-digest` pass. Then
 copy `release/release-window-manifest.template.json` to protected operator storage,
-insert the validated rollback digest, and complete it. Bind it to the independently
-observed immutable commit; the checked-in template must fail:
+insert the validated rollback digest, and complete every pre-cutover field. Bind it
+to the independently observed immutable commit; the checked-in template must fail.
+The user must separately authorize the exact production actions and window before
+they begin. The final `release:window:check` occurs in step 8 after fresh cutover
+evidence exists; it records the completed approvals and evidence but cannot grant
+authorization itself.
+
+That final offline gate requires the release and prior rollback revisions/deployments,
+a 15-to-240-minute Sydney window, a recovery point captured within 24 hours, named
+deployment/rollback/monitoring owners, tested application and database recovery,
+bounded stop thresholds, and explicit completion of every external gate. It never
+connects to production.
+
+Production preparation requires its own explicit authorization before the release
+window: create and verify the project, create the immutable unpromoted Vercel
+candidate, configure production-scoped secrets/providers/scheduler with public
+traffic disabled, and gather every non-cutover evidence record. This is preparation,
+not cutover authorization.
+
+Before the first cutover mutation or public traffic switch, complete every
+non-cutover field and run the
+pre-cutover phase. It independently binds the commit and immutable deployment and
+must pass after `approvedAt` and no later than `window.endsAt`, immediately before
+the first cutover action; the post-cutover placeholder
+is intentionally ignored only in this phase:
 
 ```powershell
 npm.cmd run release:window:check -- `
   --manifest=C:\protected\jingwuguan-release-window.json `
   --expected-commit=<40-character-reviewed-commit> `
-  --expected-production-project-ref=<exact-20-character-production-ref>
-if ($LASTEXITCODE -ne 0) { throw 'Release window is not approved and ready' }
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --expected-production-project-ref=<exact-20-character-production-ref> `
+  --phase=pre-cutover
+if ($LASTEXITCODE -ne 0) { throw 'Pre-cutover release prerequisites are incomplete' }
 ```
-
-This offline gate requires the release and prior rollback revisions/deployments, a
-15-to-240-minute Sydney window, a recovery point captured within 24 hours, named
-deployment/rollback/monitoring owners, tested application and database recovery,
-bounded stop thresholds, and explicit completion of every external gate. It records
-approval but cannot grant it and never connects to production.
 The release-window record must include distinct SHA-256 digests of passing physical
 Safari, production monitoring, production identity, managed restore, production
-target, production secrets, provider delivery/dedicated inbox, email scheduler and
-signed interactive installer manifests. These digests must also differ from the
+target, production secrets, production cutover, provider delivery/dedicated inbox,
+email scheduler and signed interactive installer manifests. These digests must also differ from the
 rollback and recovery-point manifest digests. Their exact commit, deployment, project,
 Singapore region, endpoint, policy and installer-artifact bindings must match the release
 record; bare approval booleans are insufficient.
@@ -464,19 +483,82 @@ $env:SECURITY_TEST_EXPECTED_HOST=([uri]$env:NEXT_PUBLIC_SUPABASE_URL).Authority
 npm.cmd run test:security
 ```
 
-4. Confirm the runner uses authorized dedicated live accounts and live public
-   configuration. Never exercise mutation workflows in production.
-5. Build the reviewed source with PRODUCTION environment values through the
-   existing Vercel project and promote that immutable build. Deployment project
-   identifiers and release/rollback access must be verified before the window;
-   neither has been validated at this checkpoint.
+4. Confirm the runner uses the reviewed existing live accounts selected in the
+   separately protected account/role roster and live public configuration. Never
+   create test identities or exercise mutation workflows in production.
+5. Before promotion, enable a pre-approved Vercel Firewall maintenance rule on the
+   production project that denies public traffic and allowlists only the named release
+   operators and monitoring probes. Record the rule identifier and independent proof
+   that the production custom domain is covered. Promote the already-created and
+   independently identified immutable production candidate through that gate. Do not
+   rebuild it during cutover. Use the allowlisted operator path for the exact-domain
+   probes below. Deployment project identifiers, firewall access and release/rollback
+   access must be verified before the window; none has been validated at this
+   checkpoint.
 6. Check read-only login/approval/role boundaries and monitor auth errors, API
    5xx, outbox age/retries, push failures, and database logs. Stop on an
    authorization failure; do not weaken grants to accommodate old UI.
 
-No production release may start until the platform-default-ACL finding is resolved
+7. After the approved production database, deployment, domain and read-only checks
+   finish, create the sanitized protected cutover record described in
+   `operations/PRODUCTION_CUTOVER_READINESS.md`. It must contain no personal data or
+   secrets and must prove exact ledger 006–056, strict database/security checks,
+   default-ACL disposition, reviewed-existing-account read-only role acceptance, exact domain/Auth
+   configuration, all 11 host probes, rollback reachability and zero application/
+   domain acceptance writes. Expected Auth session/refresh/audit writes from login
+   and logout must be retained and reviewed separately. Generate its canonical
+   review digest, then require this offline check:
+
+```powershell
+npm.cmd run production:cutover:check -- `
+  --manifest=C:\protected\evidence\production-cutover.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --expected-production-project-ref=<exact-20-character-production-ref> `
+  --expected-window-starts-at=<approved-window-start-with-offset> `
+  --expected-window-ends-at=<approved-window-end-with-offset>
+if ($LASTEXITCODE -ne 0) { throw 'Production cutover evidence is incomplete' }
+```
+
+8. Insert that exact file digest and sanitized passing summary into the protected
+   release-window record, rerun `release:window:check`, and assemble the twelve-file
+   protected index. The final packet semantically rechecks both rollback and
+   production-cutover evidence. Finish steps 7 and 8 before `window.endsAt`; they do
+   not authorize the release or replace the
+   separate approval for production actions:
+
+```powershell
+npm.cmd run release:window:check -- `
+  --manifest=C:\protected\jingwuguan-release-window.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --expected-production-project-ref=<exact-20-character-production-ref>
+if ($LASTEXITCODE -ne 0) { throw 'Final release-window record is incomplete' }
+
+npm.cmd run release:evidence:check -- `
+  --index=C:\protected\jingwuguan-release-evidence-index.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --expected-production-project-ref=<exact-20-character-production-ref>
+if ($LASTEXITCODE -ne 0) { throw 'Final release evidence packet is incomplete' }
+```
+
+9. Only after steps 7 and 8 pass, and while enough time remains to finish this step
+   before `window.endsAt`, an authorized operator may remove the recorded maintenance
+   rule to enable customer traffic. Immediately rerun the 11 unauthenticated host
+   probes without an operator bypass and monitor authentication/API errors. Both the
+   traffic switch and immediate public smoke must complete inside the approved window.
+   If there is insufficient time, keep the maintenance rule enabled and obtain a new
+   approved window. On any mismatch, restore the maintenance rule and execute the
+   approved immutable-deployment rollback. Record this traffic-enable action and smoke
+   result in the protected release log; it must not silently replace or weaken the
+   already validated cutover evidence.
+
+Customer traffic must remain blocked by the recorded maintenance rule through step 8.
+No customer traffic may be accepted and no production release may be declared
+complete until the platform-default-ACL finding is resolved
 through a supported owner action or accepted as a documented narrow risk decision;
-dedicated authenticated Member/Admin/Super Admin tests pass; email, push and
+reviewed existing authenticated Member/Admin/Super Admin tests pass; email, push and
 scheduler/provider behavior is verified; physical Safari/iOS and required responsive
 coverage pass; secrets, redirects, domains and monitoring are production-scoped; and
 the fresh recovery point, release window, rollback owner and exact target receive

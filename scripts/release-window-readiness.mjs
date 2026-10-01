@@ -12,10 +12,12 @@ const PRODUCTION_ORIGIN = "https://jingwuguanseibukan.com";
 const PRODUCTION_EMAIL_WORKER = `${PRODUCTION_ORIGIN}/api/system/email-worker`;
 const DEDICATED_INBOX_POLICY = "dedicated-non-role-inbox";
 const INSTALLER_ACCEPTANCE_POLICY = "interactive-install-launch-uninstall";
+const PRODUCTION_CUTOVER_POLICY = "jingwuguan-production-cutover-v1";
 const PROJECT_REF = /^[a-z0-9]{20}$/;
 
 const SHA = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
+const DEPLOYMENT_ID = /^dpl_[A-Za-z0-9_-]{3,}$/;
 const ISO_WITH_ZONE =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 const REQUIRED_APPROVALS = Object.freeze([
@@ -28,6 +30,7 @@ const REQUIRED_APPROVALS = Object.freeze([
   "monitoringReady",
   "weakTestAccountsRemoved",
   "pushHiddenOrVerified",
+  "productionCutoverVerified",
 ]);
 const REQUIRED_STOP_CONDITIONS = Object.freeze([
   "authenticationFailure",
@@ -116,7 +119,9 @@ export function evaluateReleaseWindow(
   manifest,
   {
     expectedCommit,
+    expectedDeploymentId,
     expectedProductionProjectRef,
+    phase = "final",
     now = Date.now(),
   } = {},
 ) {
@@ -146,6 +151,8 @@ export function evaluateReleaseWindow(
   if (!SHA.test(expectedCommit ?? "")) {
     add(blockers, "expectedCommit", "must be the exact lowercase 40-character release SHA");
   }
+  if (!DEPLOYMENT_ID.test(expectedDeploymentId ?? "")) add(blockers, "expectedDeploymentId", "must independently supply the exact immutable deployment ID");
+  if (!["pre-cutover", "final"].includes(phase)) add(blockers, "phase", "must equal pre-cutover or final");
 
   const release = object(manifest.release);
   if (release.branch !== RELEASE_BRANCH) {
@@ -162,6 +169,7 @@ export function evaluateReleaseWindow(
     add(blockers, "release.previousCommitSha", "must differ from the release commit");
   }
   requireText(blockers, release.deploymentId, "release.deploymentId");
+  if (DEPLOYMENT_ID.test(expectedDeploymentId ?? "") && release.deploymentId !== expectedDeploymentId) add(blockers, "release.deploymentId", "must equal the independently supplied deployment ID");
   requireText(blockers, release.previousDeploymentId, "release.previousDeploymentId");
   if (
     typeof release.deploymentId === "string" &&
@@ -193,12 +201,14 @@ export function evaluateReleaseWindow(
     if (approvedAt > startsAt) {
       add(blockers, "window.approvedAt", "must not be later than startsAt");
     }
+    if (!Number.isFinite(now) || approvedAt > now) add(blockers, "window.approvedAt", "must not be in the future");
     if (durationMinutes < 15 || durationMinutes > 240) {
       add(blockers, "window.endsAt", "must define a 15-to-240-minute release window");
     }
     if (!Number.isFinite(now) || now > endsAt) {
       add(blockers, "window.endsAt", "release window has expired");
     }
+    if (Number.isFinite(now) && now < startsAt) add(blockers, "window.startsAt", `${phase} validation must run within the approved release window`);
     if (Number.isFinite(now) && startsAt - now > 14 * 24 * 60 * 60 * 1000) {
       add(blockers, "window.startsAt", "must be no more than 14 days ahead");
     }
@@ -222,6 +232,8 @@ export function evaluateReleaseWindow(
     if (verifiedAt < capturedAt) {
       add(blockers, "recovery.verifiedAt", "must not be earlier than capturedAt");
     }
+    if (!Number.isFinite(now) || capturedAt > now + 5 * 60 * 1000) add(blockers, "recovery.capturedAt", "must not be in the future");
+    if (!Number.isFinite(now) || verifiedAt > now + 5 * 60 * 1000) add(blockers, "recovery.verifiedAt", "must not be in the future");
     if (
       timestamp(window.startsAt) &&
       Date.parse(window.startsAt) - capturedAt > 24 * 60 * 60 * 1000
@@ -254,7 +266,7 @@ export function evaluateReleaseWindow(
   }
 
   const approvals = object(manifest.approvals);
-  for (const key of REQUIRED_APPROVALS) {
+  for (const key of REQUIRED_APPROVALS.filter(key => phase === "final" || key !== "productionCutoverVerified")) {
     if (approvals[key] !== true) {
       add(blockers, `approvals.${key}`, "must be true");
     }
@@ -324,6 +336,18 @@ export function evaluateReleaseWindow(
     release,
   });
 
+  const productionCutover = object(gateEvidence.productionCutover);
+  if (phase === "final") {
+    requirePassingEvidence(blockers, productionCutover, "gateEvidence.productionCutover");
+    bindProductionEvidence(blockers, productionCutover, "gateEvidence.productionCutover", {
+      expectedProductionProjectRef,
+      release,
+    });
+    if (productionCutover.origin !== PRODUCTION_ORIGIN) add(blockers, "gateEvidence.productionCutover.origin", `must equal ${PRODUCTION_ORIGIN}`);
+    if (productionCutover.migrationLedger !== "006-056") add(blockers, "gateEvidence.productionCutover.migrationLedger", "must equal 006-056");
+    if (productionCutover.policy !== PRODUCTION_CUTOVER_POLICY) add(blockers, "gateEvidence.productionCutover.policy", `must equal ${PRODUCTION_CUTOVER_POLICY}`);
+  }
+
   const providerDelivery = object(gateEvidence.providerDelivery);
   requirePassingEvidence(blockers, providerDelivery, "gateEvidence.providerDelivery");
   bindProductionEvidence(blockers, providerDelivery, "gateEvidence.providerDelivery", {
@@ -376,12 +400,14 @@ export function evaluateReleaseWindow(
     managedRestore.manifestSha256,
     productionTarget.manifestSha256,
     productionSecrets.manifestSha256,
+    ...(phase === "final" ? [productionCutover.manifestSha256] : []),
     providerDelivery.manifestSha256,
     emailScheduler.manifestSha256,
     installer.manifestSha256,
   ].filter(value => SHA256.test(value ?? ""));
-  if (gateDigests.length !== 11 || new Set(gateDigests).size !== 11) {
-    add(blockers, "gateEvidence", "must bind eleven distinct rollback, recovery and release-gate manifests");
+  const expectedGateCount = phase === "final" ? 12 : 11;
+  if (gateDigests.length !== expectedGateCount || new Set(gateDigests).size !== expectedGateCount) {
+    add(blockers, "gateEvidence", `must bind ${expectedGateCount} distinct rollback, recovery and release-gate manifests`);
   }
 
   const stopConditions = object(manifest.stopConditions);
@@ -422,6 +448,7 @@ export function evaluateReleaseWindow(
           startsAt: window.startsAt,
           endsAt: window.endsAt,
           timeZone: window.timeZone,
+          phase,
         }
       : null,
   };
@@ -435,7 +462,7 @@ function option(argv, name) {
 
 function usage() {
   return [
-    "Usage: node scripts/release-window-readiness.mjs --manifest=<protected-json> --expected-commit=<40-char-sha> --expected-production-project-ref=<20-char-ref>",
+    "Usage: node scripts/release-window-readiness.mjs --manifest=<protected-json> --expected-commit=<40-char-sha> --expected-deployment-id=<id> --expected-production-project-ref=<20-char-ref> [--phase=pre-cutover|final]",
     "The check is offline and does not authorize or execute a release.",
   ].join("\n");
 }
@@ -450,11 +477,13 @@ export async function runCli(
 
   const manifestPath = option(argv, "--manifest");
   const expectedCommit = option(argv, "--expected-commit");
+  const expectedDeploymentId = option(argv, "--expected-deployment-id");
   const expectedProductionProjectRef = option(argv, "--expected-production-project-ref");
-  if (!manifestPath || !expectedCommit || !expectedProductionProjectRef) {
+  const phase = option(argv, "--phase") ?? "final";
+  if (!manifestPath || !expectedCommit || !expectedDeploymentId || !expectedProductionProjectRef) {
     console.error(JSON.stringify({
       ready: false,
-      error: "Manifest path, expected commit and expected production project ref are required.",
+      error: "Manifest path, expected commit, deployment ID and expected production project ref are required.",
     }, null, 2));
     return 2;
   }
@@ -474,7 +503,7 @@ export async function runCli(
 
   const result = evaluateReleaseWindow(
     manifest,
-    { expectedCommit, expectedProductionProjectRef },
+    { expectedCommit, expectedDeploymentId, expectedProductionProjectRef, phase },
   );
   console.log(JSON.stringify(result, null, 2));
   return result.ready ? 0 : 1;

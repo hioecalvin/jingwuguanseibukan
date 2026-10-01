@@ -4704,3 +4704,38 @@ operator-controlled execution evidence: create and verify the Singapore producti
 project, complete managed restore, production secrets/provider/scheduler/monitoring,
 physical Safari, signed installer acceptance, clean production identities, production
 cutover/database evidence, and final release-window approval.
+
+### Milestone 180 — production cutover evidence gate (01/10/2026)
+
+Added a fail-closed protected production-cutover record and validator without
+contacting any live environment. It requires an independently supplied Singapore
+production project and exact immutable release/deployment, dashboard ownership and
+region verification, exact ledger 006–056, catalog, database lint, strict security,
+grants/RLS, and a resolved platform default ACL or the documented narrow independently
+reviewed exception expiring within 30 days.
+
+Fresh read-only Member, scoped Admin and Super Admin checks use reviewed existing
+accounts, acknowledge expected Auth session writes, and prohibit application
+mutations. The exact production domain, valid TLS, Site URL,
+`/auth/confirm` redirect and public project binding must agree; all 11 host probes,
+browser auth, redirects and security headers must pass with zero server errors and
+zero application/domain acceptance writes. Member mutation, new test accounts, outbound-provider,
+staging or retired-project contact fails closed, and the known-good rollback
+deployment must remain reachable.
+
+The release-window gate now requires this passing summary and approval. The final
+packet contains twelve distinct protected evidence files and semantically revalidates
+both rollback and production cutover against independent identities. Operator docs
+now make the sequence explicit: separate authorization precedes production action;
+fresh post-cutover evidence then closes the release window and final packet.
+
+Local verification passes 507/507 application tests, 40/40 focused tests and 27/27
+uploader tests. ESLint, TypeScript, whitespace validation, the optimized 51-route
+build and all three dependency audits pass with zero reported vulnerabilities. No
+live system or provider was contacted.
+
+Production readiness is approximately 9.5/10. Remaining work is operator-controlled
+execution evidence and separate authorization: create/verify the Singapore production
+project, managed restore, production secrets/provider/scheduler/monitoring, physical
+Safari, signed installer acceptance, clean production identities, approved cutover,
+and the final protected release-window plus twelve-file evidence packet.

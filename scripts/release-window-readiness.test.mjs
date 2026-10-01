@@ -8,8 +8,13 @@ import {
 
 const RELEASE_SHA = "a".repeat(40);
 const PREVIOUS_SHA = "b".repeat(40);
-const NOW = Date.parse("2026-10-02T08:00:00+10:00");
+const NOW = Date.parse("2026-10-02T10:00:00+10:00");
 const PRODUCTION_PROJECT_REF = "abcdefghijklmnopqrst";
+const DEPLOYMENT_ID = "dpl_release_candidate";
+
+function options(overrides = {}) {
+  return { expectedCommit: RELEASE_SHA, expectedDeploymentId: DEPLOYMENT_ID, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW, ...overrides };
+}
 
 function validManifest(overrides = {}) {
   const manifest = {
@@ -60,6 +65,7 @@ function validManifest(overrides = {}) {
       monitoringReady: true,
       weakTestAccountsRemoved: true,
       pushHiddenOrVerified: true,
+      productionCutoverVerified: true,
     },
     gateEvidence: {
       physicalSafari: {
@@ -110,6 +116,17 @@ function validManifest(overrides = {}) {
         projectRef: PRODUCTION_PROJECT_REF,
         commitSha: RELEASE_SHA,
         deploymentId: "dpl_release_candidate",
+      },
+      productionCutover: {
+        manifestSha256: "25".repeat(32),
+        result: "passed",
+        environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
+        deploymentId: "dpl_release_candidate",
+        origin: "https://jingwuguanseibukan.com",
+        migrationLedger: "006-056",
+        policy: "jingwuguan-production-cutover-v1",
       },
       providerDelivery: {
         manifestSha256: "de".repeat(32),
@@ -163,17 +180,39 @@ function validManifest(overrides = {}) {
 test("accepts a complete time-bounded release and rollback record", () => {
   const result = evaluateReleaseWindow(
     validManifest(),
-    {
-      expectedCommit: RELEASE_SHA,
-      expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-      now: NOW,
-    },
+    options(),
   );
 
   assert.equal(result.ready, true);
   assert.deepEqual(result.blockers, []);
   assert.equal(result.summary.commitSha, RELEASE_SHA);
   assert.doesNotMatch(JSON.stringify(result), /Release operator|Recovery verifier/);
+});
+
+test("pre-cutover validates every prerequisite without requiring post-cutover evidence", () => {
+  const manifest = validManifest();
+  manifest.approvals.productionCutoverVerified = false;
+  manifest.gateEvidence.productionCutover = {};
+  const result = evaluateReleaseWindow(manifest, options({
+    phase: "pre-cutover",
+    now: Date.parse("2026-10-02T09:00:00+10:00"),
+  }));
+  assert.equal(result.ready, true, JSON.stringify(result.blockers));
+  assert.equal(result.summary.phase, "pre-cutover");
+});
+
+test("final validation requires independent deployment identity and an active approved window", () => {
+  let result = evaluateReleaseWindow(validManifest(), options({ expectedDeploymentId: "dpl_substituted" }));
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "release.deploymentId"));
+
+  result = evaluateReleaseWindow(validManifest(), options({ now: Date.parse("2026-10-02T08:45:00+10:00") }));
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "window.startsAt"));
+
+  result = evaluateReleaseWindow(validManifest(), options({ now: Date.parse("2026-10-02T08:00:00+10:00") }));
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "window.approvedAt"));
 });
 
 test("binds the approved release to the independent commit and rollback revision", () => {
@@ -188,7 +227,7 @@ test("binds the approved release to the independent commit and rollback revision
   ]) {
     assert.equal(evaluateReleaseWindow(
       validManifest({ release }),
-      { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
+      options(),
     ).ready, false);
   }
 });
@@ -224,8 +263,24 @@ test("rejects expired, excessive, unapproved, and stale-recovery windows", () =>
   for (const manifest of cases) {
     assert.equal(evaluateReleaseWindow(
       manifest,
-      { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
+      options(),
     ).ready, false);
+  }
+});
+
+test("pre-cutover and final phases reject future recovery claims", () => {
+  const manifest = validManifest({
+    recovery: {
+      ...validManifest().recovery,
+      capturedAt: "2026-10-02T10:30:00+10:00",
+      verifiedAt: "2026-10-02T10:45:00+10:00",
+    },
+  });
+  for (const phase of ["pre-cutover", "final"]) {
+    const result = evaluateReleaseWindow(manifest, options({ phase }));
+    assert.equal(result.ready, false);
+    assert.ok(result.blockers.some(({ path }) => path === "recovery.capturedAt"));
+    assert.ok(result.blockers.some(({ path }) => path === "recovery.verifiedAt"));
   }
 });
 
@@ -241,7 +296,7 @@ test("requires every external approval and stop condition", () => {
   };
   const result = evaluateReleaseWindow(
     validManifest({ approvals, stopConditions }),
-    { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
+    options(),
   );
 
   assert.equal(result.ready, false);
@@ -272,7 +327,7 @@ test("rejects placeholders, missing owners, and untested rollback", () => {
         decisionDeadlineMinutes: 0,
       },
     }),
-    { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
+    options(),
   );
 
   assert.equal(result.ready, false);
@@ -283,11 +338,7 @@ test("recovery verification is independent from release ownership", () => {
   const manifest = validManifest();
   manifest.owners.rollback = "Rollback Owner";
   manifest.recovery.verifiedBy = "  rollback owner  ";
-  const result = evaluateReleaseWindow(manifest, {
-    expectedCommit: RELEASE_SHA,
-    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-    now: NOW,
-  });
+  const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "recovery.verifiedBy"));
 });
@@ -299,11 +350,7 @@ test("requires distinct gate manifests bound to the exact release and production
   manifest.gateEvidence.monitoring.projectRef = "zyxwvutsrqponmlkjihg";
   manifest.gateEvidence.productionIdentity.projectRef = "zyxwvutsrqponmlkjihg";
   manifest.gateEvidence.monitoring.manifestSha256 = manifest.gateEvidence.physicalSafari.manifestSha256;
-  const result = evaluateReleaseWindow(manifest, {
-    expectedCommit: RELEASE_SHA,
-    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-    now: NOW,
-  });
+  const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.physicalSafari.commitSha"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.monitoring.deploymentId"));
@@ -312,23 +359,20 @@ test("requires distinct gate manifests bound to the exact release and production
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
 });
 
-test("bare approval booleans cannot replace managed restore, target, secrets, provider, scheduler, or installer evidence", () => {
+test("bare approval booleans cannot replace managed restore, target, secrets, cutover, provider, scheduler, or installer evidence", () => {
   const manifest = validManifest();
   manifest.gateEvidence = {
     physicalSafari: manifest.gateEvidence.physicalSafari,
     monitoring: manifest.gateEvidence.monitoring,
     productionIdentity: manifest.gateEvidence.productionIdentity,
   };
-  const result = evaluateReleaseWindow(manifest, {
-    expectedCommit: RELEASE_SHA,
-    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-    now: NOW,
-  });
+  const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   for (const gate of [
     "managedRestore",
     "productionTarget",
     "productionSecrets",
+    "productionCutover",
     "providerDelivery",
     "emailScheduler",
     "installerAcceptance",
@@ -342,19 +386,17 @@ test("every referenced gate must have a passing result and exact production/rele
   manifest.gateEvidence.managedRestore.result = "failed";
   manifest.gateEvidence.productionTarget.region = "us-east-1";
   manifest.gateEvidence.productionSecrets.projectRef = "zyxwvutsrqponmlkjihg";
+  manifest.gateEvidence.productionCutover.migrationLedger = "006-055";
   manifest.gateEvidence.providerDelivery.dedicatedInboxPolicy = "shared-role-inbox";
   manifest.gateEvidence.emailScheduler.endpoint = "https://example.invalid/worker";
   manifest.gateEvidence.installerAcceptance.authenticodeStatus = "NotSigned";
-  const result = evaluateReleaseWindow(manifest, {
-    expectedCommit: RELEASE_SHA,
-    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-    now: NOW,
-  });
+  const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   for (const path of [
     "gateEvidence.managedRestore.result",
     "gateEvidence.productionTarget.region",
     "gateEvidence.productionSecrets.projectRef",
+    "gateEvidence.productionCutover.migrationLedger",
     "gateEvidence.providerDelivery.dedicatedInboxPolicy",
     "gateEvidence.emailScheduler.endpoint",
     "gateEvidence.installerAcceptance.authenticodeStatus",
@@ -366,11 +408,7 @@ test("every referenced gate must have a passing result and exact production/rele
 test("all recovery and gate manifest digests must be distinct", () => {
   const manifest = validManifest();
   manifest.gateEvidence.emailScheduler.manifestSha256 = manifest.gateEvidence.productionSecrets.manifestSha256;
-  const result = evaluateReleaseWindow(manifest, {
-    expectedCommit: RELEASE_SHA,
-    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
-    now: NOW,
-  });
+  const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
 });

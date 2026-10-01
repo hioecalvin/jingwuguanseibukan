@@ -1457,3 +1457,35 @@ acceptance completed; production remains unchanged.
   tests, ESLint, TypeScript, whitespace validation, the optimized 51-route build and
   all three dependency audits with zero reported vulnerabilities. No live system was
   contacted.
+
+## Production cutover evidence gate — 1 October 2026
+
+- Added an offline, fail-closed production-cutover validator and deliberately
+  incomplete protected manifest template. It binds the exact immutable release and
+  deployment to an independently supplied Singapore production project, dashboard
+  ownership/region evidence, exact migration ledger 006–056, catalog, database lint,
+  strict security verification, grants and RLS.
+- The gate requires the managed-platform future-object default ACL to be resolved or
+  covered by the single documented narrow exception with independent security review
+  and an expiry within 30 days. It also requires fresh read-only Member, scoped Admin
+  and Super Admin acceptance with reviewed existing accounts, expected Auth-session
+  writes and no attempted application mutation.
+- Production DNS/TLS, exact Site URL and `/auth/confirm` redirect, public Supabase
+  binding, all 11 host probes, browser auth, redirects, security headers, zero server
+  errors, zero application/domain acceptance writes and rollback reachability are mandatory. Staging,
+  retired-project, provider, test-account and member-record contact all fail closed.
+- The release-window gate now requires the production-cutover approval and sanitized
+  passing summary. The final evidence packet expands to twelve distinct protected
+  files and semantically reruns both rollback and cutover validators against
+  independently supplied identities; matching hashes cannot make placeholders or
+  self-bound records pass.
+- Verification passes 507/507 application tests, 40/40 focused cutover/window/packet
+  tests, 27/27 uploader tests, ESLint, TypeScript, whitespace validation, the optimized
+  51-route production build, and full/production/uploader dependency audits with zero
+  reported vulnerabilities. No live host, database, deployment, account, inbox,
+  provider, production or retired project was contacted.
+- Production readiness remains approximately 9.5/10. Remaining work is execution of
+  the operator-controlled gates and separate production authorization: create and
+  verify the Singapore project, managed restore, production secrets and delivery,
+  scheduler/monitoring, physical Safari, signed installer, identity cleanup, approved
+  cutover, then the final protected release-window and twelve-file evidence packet.

@@ -121,21 +121,56 @@ commit and known-good rollback revision, requires a fresh protected recovery poi
 named owners, tested rollback, bounded Sydney release window, stop conditions, and
 completion of every external production gate. The checked-in template is deliberately
 incomplete and must fail. The Safari, monitoring, production-identity, managed-restore,
-production-target, production-secret, provider-delivery/dedicated-inbox,
-email-scheduler and signed installer-acceptance manifests are all required with
+production-target, production-secret, production-cutover,
+provider-delivery/dedicated-inbox, email-scheduler and signed installer-acceptance
+manifests are all required with
 passing results. Their SHA-256 digests must also be distinct from one another and from
 the rollback and recovery-point manifests. Exact commit, deployment and
 production-project metadata is cross-checked, so bare approval booleans cannot replace
 any gate result.
 
+Run `--phase=pre-cutover` inside the approved window and immediately before the first
+cutover mutation or public traffic switch. It
+validates all prerequisites except the necessarily post-cutover evidence. Run the
+default final phase during the same approved window after that evidence is complete.
+Both phases independently bind the immutable deployment ID.
+
 ```powershell
 npm.cmd run release:window:check -- `
   --manifest=C:\protected\jingwuguan-release-window.json `
   --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --phase=pre-cutover `
   --expected-production-project-ref=<exact-20-character-production-ref>
 ```
 
 A passing result records readiness only; it does not authorize or execute a release.
+
+## Production cutover evidence gate
+
+`production-cutover-readiness.mjs` validates the sanitized, protected record created
+after the specifically approved production database, domain and read-only acceptance
+steps. It binds the exact immutable release deployment and independently supplied
+Singapore production project to exact migration history 006–056, catalog/lint/
+security results, default-ACL resolution or a narrow time-bounded exception,
+read-only Member/Admin/Super Admin checks, the production domain and exact Auth
+redirect, all 11 host probes, rollback reachability and zero application/domain
+acceptance writes. Expected Supabase Auth session, refresh, audit and last-sign-in
+writes are retained and reviewed separately. Evidence must be fresh, ordered,
+independently reviewed and represented only by distinct SHA-256 digests.
+
+```powershell
+npm.cmd run production:cutover:check -- `
+  --manifest=C:\protected\evidence\production-cutover.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment-id=<exact-production-deployment-id> `
+  --expected-production-project-ref=<exact-20-character-production-ref> `
+  --expected-window-starts-at=<approved-window-start-with-offset> `
+  --expected-window-ends-at=<approved-window-end-with-offset>
+```
+
+Follow `operations/PRODUCTION_CUTOVER_READINESS.md`. This command is offline and
+cannot perform or authorize the production actions whose evidence it validates.
 
 ## Production target identity gate
 
@@ -299,10 +334,13 @@ npm.cmd run production:secrets:check -- `
 
 `release-evidence-packet-readiness.mjs` closes the gap between recorded SHA-256
 references and the actual protected evidence files. It first revalidates the complete
-release-window manifest, then verifies that all eleven evidence files exist outside
+release-window manifest, then verifies that all twelve evidence files exist outside
 the repository, are bounded regular JSON files, are distinct, and hash to the exact
 digests in that release record. Network-share paths, links, malformed JSON, duplicate
 files and digest drift fail closed.
+
+The rollback and production-cutover evidence files receive full semantic validation;
+the other child validators must also pass individually before packet assembly.
 
 Copy `release/release-evidence-index.template.json` to protected storage and follow
 `operations/RELEASE_EVIDENCE_PACKET.md` after every individual gate passes:
@@ -311,6 +349,7 @@ Copy `release/release-evidence-index.template.json` to protected storage and fol
 npm.cmd run release:evidence:check -- `
   --index=C:\protected\jingwuguan-release-evidence-index.json `
   --expected-commit=<release-sha> `
+  --expected-deployment-id=<exact-production-deployment-id> `
   --expected-production-project-ref=<production-project-ref>
 ```
 

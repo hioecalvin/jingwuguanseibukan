@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { evaluateReleaseWindow } from "./release-window-readiness.mjs";
 import { evaluateRollbackReadiness } from "./rollback-readiness.mjs";
+import { evaluateProductionCutoverReadiness } from "./production-cutover-readiness.mjs";
 
 export const EVIDENCE_KEYS = Object.freeze([
   "recovery",
@@ -15,6 +16,7 @@ export const EVIDENCE_KEYS = Object.freeze([
   "managedRestore",
   "productionTarget",
   "productionSecrets",
+  "productionCutover",
   "providerDelivery",
   "emailScheduler",
   "installerAcceptance",
@@ -98,6 +100,8 @@ export async function verifyEvidenceFiles(
   {
     repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), ".."),
     indexSourcePath,
+    expectedDeploymentId,
+    expectedProductionProjectRef,
   } = {},
 ) {
   const blockers = [];
@@ -121,7 +125,7 @@ export async function verifyEvidenceFiles(
 
   const evidenceFiles = object(index?.evidenceFiles);
   if (!exactKeys(evidenceFiles, EVIDENCE_KEYS)) {
-    blockers.push(blocker("evidenceFiles", "must contain exactly the eleven documented evidence entries"));
+    blockers.push(blocker("evidenceFiles", "must contain exactly the twelve documented evidence entries"));
   }
 
   const resolvedFiles = [];
@@ -175,11 +179,28 @@ export async function verifyEvidenceFiles(
       } else {
         semanticallyVerifiedFiles += 1;
       }
+    } else if (key === "productionCutover") {
+      const release = object(releaseManifest.release);
+      const semanticResult = evaluateProductionCutoverReadiness(loaded.parsed, {
+        expectedCommit: release.commitSha,
+        expectedDeploymentId,
+        expectedProductionProjectRef,
+        expectedWindowStartsAt: object(releaseManifest.window).startsAt,
+        expectedWindowEndsAt: object(releaseManifest.window).endsAt,
+      });
+      if (!semanticResult.ready) {
+        for (const item of semanticResult.blockers) blockers.push(blocker(`evidenceFiles.productionCutover.${item.path}`, item.message));
+      } else {
+        const summary = object(object(releaseManifest.gateEvidence).productionCutover);
+        if (semanticResult.summary.origin !== summary.origin || semanticResult.summary.migrationLedger !== summary.migrationLedger || semanticResult.summary.policy !== summary.policy) {
+          blockers.push(blocker("evidenceFiles.productionCutover", "semantic result must match the release-window cutover summary"));
+        } else semanticallyVerifiedFiles += 1;
+      }
     }
   }
 
   if (resolvedFiles.length !== EVIDENCE_KEYS.length || new Set(resolvedFiles).size !== EVIDENCE_KEYS.length) {
-    blockers.push(blocker("evidenceFiles", "all eleven evidence files must be present and distinct"));
+    blockers.push(blocker("evidenceFiles", "all twelve evidence files must be present and distinct"));
   }
 
   return {
@@ -202,7 +223,7 @@ function option(argv, name) {
 
 function usage() {
   return [
-    "Usage: node scripts/release-evidence-packet-readiness.mjs --index=<protected-json> --expected-commit=<40-char-sha> --expected-production-project-ref=<20-char-ref>",
+    "Usage: node scripts/release-evidence-packet-readiness.mjs --index=<protected-json> --expected-commit=<40-char-sha> --expected-deployment-id=<id> --expected-production-project-ref=<20-char-ref>",
     "The protected index and all referenced evidence files must remain outside the repository.",
   ].join("\n");
 }
@@ -215,8 +236,9 @@ export async function runCli(argv = process.argv.slice(2)) {
 
   const indexPath = option(argv, "--index");
   const expectedCommit = option(argv, "--expected-commit");
+  const expectedDeploymentId = option(argv, "--expected-deployment-id");
   const expectedProductionProjectRef = option(argv, "--expected-production-project-ref");
-  if (!indexPath || !expectedCommit || !expectedProductionProjectRef) {
+  if (!indexPath || !expectedCommit || !expectedDeploymentId || !expectedProductionProjectRef) {
     console.error(JSON.stringify({ ready: false, error: "Protected index and independent release identity are required." }, null, 2));
     return 2;
   }
@@ -237,11 +259,15 @@ export async function runCli(argv = process.argv.slice(2)) {
 
   const releaseResult = evaluateReleaseWindow(loadedRelease.parsed, {
     expectedCommit,
+    expectedDeploymentId,
     expectedProductionProjectRef,
+    phase: "final",
   });
   const packetResult = await verifyEvidenceFiles(loadedIndex.parsed, loadedRelease.parsed, {
     repositoryRoot,
     indexSourcePath: loadedIndex.sourcePath,
+    expectedDeploymentId,
+    expectedProductionProjectRef,
   });
   const result = {
     ready: releaseResult.ready && packetResult.ready,

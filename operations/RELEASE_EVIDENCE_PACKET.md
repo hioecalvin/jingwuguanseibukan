@@ -1,6 +1,6 @@
 # Release evidence packet
 
-The final release-window record contains eleven SHA-256 evidence references. Those
+The final release-window record contains twelve SHA-256 evidence references. Those
 references are not sufficient on their own: the protected files must still exist and
 their exact bytes must match the reviewed digests.
 
@@ -16,16 +16,21 @@ Run the packet check only after every individual gate passes:
 npm.cmd run release:evidence:check -- `
   --index=C:\protected\jingwuguan-release-evidence-index.json `
   --expected-commit=<exact-40-character-release-sha> `
+  --expected-deployment-id=<exact-production-deployment-id> `
   --expected-production-project-ref=<exact-20-character-production-ref>
 ```
 
-The command first revalidates the release-window semantics, then hashes all eleven
+The command first revalidates the release-window semantics, then hashes all twelve
 protected evidence files and compares them with that manifest. It also reruns the
 rollback evidence semantic validator against the exact candidate and known-good
 commit/deployment identities and rollback decision deadline from the protected
 release-window record. Hash-correct but semantically invalid or independently misbound
-rollback JSON cannot pass. The remaining child gates must still be run individually
-before packet assembly.
+rollback JSON cannot pass. It separately reruns the production-cutover semantic
+validator against the independently supplied production project, release commit and
+deployment, and cross-checks its origin, exact 006–056 ledger and policy against the
+release-window record. Hash-correct cutover placeholders or self-bound identities
+cannot pass. The remaining child gates must still be run individually before packet
+assembly.
 
 The checker prints only bounded status information; it never prints file contents or
 performs network, deployment, database or provider actions. A passing result is
