@@ -2,7 +2,7 @@
 
 This runbook covers release gates that source tests cannot prove: Resend delivery,
 the email-worker scheduler, Supabase Auth redirects/templates, Web Push/VAPID, and
-the organization-owned YouTube channel. Production remains out of scope until the
+Mux video delivery. Legacy YouTube embeds remain supported. Production remains out of scope until the
 staging record is complete and a separate production change is approved.
 
 Never place API keys, worker secrets, VAPID private keys, full push subscriptions,
@@ -97,7 +97,23 @@ hosted-service limits can change.
    proof of iOS Web Push or Home Screen behavior.
 5. Keep notification targets on local application paths.
 
-## YouTube Unlisted video
+## Mux repository video
+
+1. Keep the Mux Video read/write token and playback-signing private key server-only.
+   Never place them in the desktop installer or browser environment.
+2. Permit desktop uploads only through the one-time HTTPS Mux address returned by the
+   Super App. Accept the reviewed regional `direct-uploads-*.mux.com/upload/{id}` form
+   and legacy Google Storage form; reject credentials, custom ports, fragments,
+   deceptive hosts and unrelated paths.
+3. Verify uploader/class authorization again on the server, require signed playback,
+   and save successful uploads as Repository Drafts only.
+4. For guarded acceptance, use one uniquely marked disposable asset and Draft. Restore
+   any temporary publish state, delete the exact row and asset, and independently prove
+   application 404, provider asset 404 and zero database residue.
+5. Production requires independently created production Mux credentials, branch-scoped
+   secret review, a fresh disposable upload/playback proof and rollback ownership.
+
+## Legacy YouTube Unlisted video
 
 1. Use an organization-owned channel protected by two-factor authentication and
    reviewed recovery contacts.

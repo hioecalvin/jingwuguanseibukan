@@ -1,18 +1,17 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 30/09/2026
+Last updated: 01/10/2026
 
 ## Release status
 
 Branch `release/v1-readiness-20260918` is synchronized with its remote. The deployed
-application tree is `2d939d1`; `0f2e7ab` and later checkpoint commits change only
-release probes and documentation. GitHub Actions run `36634978973` passes all five
-jobs at the latest runtime/probe checkpoint `0f2e7ab`: common checks, Chromium/Linux,
+application tree is `8caa3e9`; branch head `789bef6` adds guarded release evidence.
+GitHub Actions run `36773969039` passes all five jobs at exact head `789bef6`: common checks, Chromium/Linux,
 Firefox/Linux, WebKit/Linux and WebKit/macOS.
 
-Sydney staging `eomubndonbetszdbhsrj` is verified at exact migration history 006–055.
+Sydney staging `eomubndonbetszdbhsrj` is verified at exact migration history 006–056.
 The read-only strict database-security verifier passes. Ready Preview
-`dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz` serves only
+`dpl_AZK7CPjTCcbeQCytugpwyEtbgFBv` serves only
 `jingwuguanseibukan-staging.vercel.app`; 11/11 route/method/security-header probes and
 18/18 guarded WebKit desktop/tablet/mobile checks pass. All ten normalized static logo
 assets are exact 1024 × 1024 PNG matches, and all five active class-logo objects are
@@ -102,13 +101,15 @@ targeted push plus physical Safari/iOS behavior; remove deliberately weak test a
 before production; provision production-only secrets/redirects/DNS; and approve a
 specific release window, rollback owner and recovery point. The managed default-ACL
 finding is resolved by the current strict verifier and current-object ownership proof.
-Mux remains explicitly deferred and is not a gate for this non-Mux release candidate.
+Mux is active and guarded on staging: one disposable upload, signed playback and exact
+Draft/asset cleanup passed with zero application/provider asset residue. Production
+Mux credentials and activation remain a production release gate.
 Production's project and migration ledger remain unverified because no production
 project has been created or contacted.
 
 The exact migration ledger is not a complete schema baseline: the live
 `email_outbox` table and its core queue/claim/acknowledgement RPCs are referenced and
-validated by later migrations but are not created by migrations 006–054. The protected
+validated by later migrations but are not created by migrations 006–056. The protected
 backup and disposable restore must capture and exercise those objects explicitly.
 
 The approved production-region plan is a separate Supabase primary in Singapore
@@ -4396,3 +4397,29 @@ lint, migration-056 postflight, 332/332 application tests, 21/21 desktop uploade
 tests, ESLint, TypeScript and the optimized 51-route production build. The guarded
 acceptance harness now also cancels marker-matched waiting sessions during recovery
 and on pre-asset failures.
+
+### Milestone 171 — current Mux installer and retired-target guardrails (01/10/2026)
+
+Closed the desktop/server URL-boundary mismatch discovered after live Mux activation.
+The Electron uploader now accepts the verified regional
+`direct-uploads-*.mux.com/upload/{id}` address as well as Mux's legacy Google Storage
+form, with exact HTTPS host/path constraints and denial of credentials, custom ports,
+fragments, malformed identifiers and deceptive hosts. Desktop coverage passes 22/22.
+
+Built a fresh staging-only x64 NSIS package and inspected its ASAR. It contains only
+the approved staging public configuration, both reviewed Mux URL forms, bundled FFmpeg
+and license files; it contains no protected credential, environment file or test
+fixture. The installer is 156,411,382 bytes with SHA-256
+`1B4C760EB6FEF6A36B819DDFBA6877D66466B77C5004E8EA7F0A820578F67464`. Read-only
+staging role acceptance passes for Member, Admin and Super Admin, and a generated MP4
+processes and decodes with two current watermarks. The package remains unsigned and
+staging-pinned. Restricted-runner GUI automation and the silent uninstall registry
+path were not accepted as proof, so ordinary interactive install/launch/uninstall on
+the user's Windows session remains open.
+
+Removed obsolete script assumptions that the retired project
+`pkmllhaavadhaozmwapz` is production. Security probes and dummy-user cleanup now reject
+that project in every mode. Future production read-only probes require a separately
+supplied exact active project ref, while staging rotation stays pinned to
+`eomubndonbetszdbhsrj`. The focused cleanup/target/rotation suite passes 18/18.
+Production and the retired project were not contacted.

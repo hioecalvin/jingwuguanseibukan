@@ -1,29 +1,30 @@
 # Staging promotion, production deployment, and rollback
 
-Last updated: 30/09/2026. Release remains **BLOCKED** from Production, while the
-current non-Mux release candidate is accepted on staging. Sydney staging
-`eomubndonbetszdbhsrj` has exact persisted migration history **006–055** with no local
+Last updated: 01/10/2026. Release remains **BLOCKED** from Production, while the
+current Mux release candidate is accepted on staging. Sydney staging
+`eomubndonbetszdbhsrj` has exact persisted migration history **006–056** with no local
 or remote gap. The pinned read-only strict database-security verifier passes, including
 the reviewed managed-platform default-privilege boundary.
 
 Branch `release/v1-readiness-20260918` is synchronized with its remote. GitHub Actions
-run `36634978973` passes all five jobs at the latest runtime/probe checkpoint
-`0f2e7ab`. Ready Preview
-`dpl_D5FDeemduJDLfd86SGZ9Vmjg6Xcz`, built from application commit `2d939d1`, serves
-only `jingwuguanseibukan-staging.vercel.app`; the later branch commit contains only
-probe/checkpoint changes. The fixed host passes 11/11 read-only route, method, asset and
+run `36773969039` passes all five jobs at exact branch head `789bef6`. Ready Preview
+`dpl_AZK7CPjTCcbeQCytugpwyEtbgFBv`, built from application commit `8caa3e9`, serves
+only `jingwuguanseibukan-staging.vercel.app`; the later branch commit contains guarded
+acceptance evidence. The fixed host passes 11/11 read-only route, method, asset and
 security-header probes plus 18/18 guarded WebKit checks. Only the staging alias is a
 Deployment Protection exception; generated Preview URLs remain protected. Never add a
 Production domain to this exception or store bypass credentials in source or logs.
 
 Protected source recovery evidence now includes the staging database, Auth and Storage
-metadata, role definitions and the single Storage object's bytes. A loopback-only
-PostgreSQL 17 restore proves exact ledger 006–055, critical counts, roles/grants, RLS
+metadata, role definitions and the single Storage object's bytes. The loopback-only
+PostgreSQL 17 rehearsal predates migration 056 and proves exact ledger 006–055, critical counts, roles/grants, RLS
 and 4,145 of 4,146 catalog objects; only Supabase's managed Vault extension is absent.
 This is strong database recovery evidence, but it is not managed Auth/Storage API or
-hosted-platform recovery proof. A disposable managed Supabase target remains required.
+hosted-platform recovery proof. Capture a fresh 006–056 source backup before the
+managed-platform drill. A disposable managed Supabase target remains required.
 
-The committed non-Mux provider configuration passes its offline consistency gate.
+The committed Mux provider configuration and guarded disposable upload/signed-playback
+acceptance pass on staging with zero application/provider asset residue.
 Staging still has no `pg_cron`, so the one-minute email worker and memorial scheduler
 must be externally configured with protected application secrets. Real Resend sender
 and transactional delivery, dedicated-inbox Auth flows, targeted push, and physical
@@ -37,7 +38,7 @@ operator instructions.
 
 ## Current release boundary — supersedes historical milestone notes
 
-- Staging is Sydney project `eomubndonbetszdbhsrj`, exact persisted ledger 006–047.
+- Staging is Sydney project `eomubndonbetszdbhsrj`, exact persisted ledger 006–056.
   Do not reapply those migrations. The staging database password has been rotated and
   verified.
 - Production must be a separately created and dashboard-verified Singapore
@@ -163,7 +164,7 @@ the copied target until test-only destinations are verified.
 Preserve immutable, secret-scanned baseline evidence outside the active migration
 chain. The current migration directory starts at 006 and cannot prove how an empty
 managed project acquires its earlier prerequisite schema. Before creating the new
-production database, review and rehearse the exact baseline/import plus 006–047
+production database, review and rehearse the exact baseline/import plus 006–056
 sequence on a disposable managed target. Retain legacy root SQL and prior baseline
 evidence until the clean restore proves complete coverage; never replay legacy SQL
 or manufacture ledger rows merely to make migration history appear current.
@@ -181,7 +182,7 @@ external provider resources have all been restored or recovered and verified.
 Manifest v2 must name exact staging project `eomubndonbetszdbhsrj`, represent the
 absence of a production project with `production.exists=false` and a null reference,
 match the immutable repository migration fingerprint, and contain equal sanitized
-source/restored ledger fingerprints for versions 006–047. Its recovery-point,
+source/restored ledger fingerprints for versions 006–056. Its recovery-point,
 rehearsal-start and completion timestamps must satisfy the declared RPO/RTO. Produce
 the repository and protected ledger fingerprints with `npm.cmd run
 recovery:fingerprint`; never retain SQL statements in repository evidence.
@@ -195,12 +196,12 @@ flag does not authorize or perform production access.
 
 ## Current staging verification and future migration apply
 
-Staging is at exact history 006–047. Its database password was rotated and the new
-protected connection was verified. Migration 047's reviewed SHA-256 is
-`B0402BC01EBF9CE455F5797BAA224F5B87EB391DD04D0746C871D73C3CB131B4`.
-The rollback-contained active/disabled/deceased semantic suite, anonymous API checks,
-independent zero-residue postflight, exact ledger, database lint and authenticated
-role-security suite all pass. A post-apply dry run reports the database is up to date.
+Staging is at exact history 006–056. Its database password was rotated and the new
+protected connection was verified. Migration 056's reviewed SHA-256 is
+`E7BDD92ACB7DAA795A8EB22D77EF5032A4D9552078638A1F05E92057CE44A557`.
+The guarded Mux upload/signed-playback suite, independent zero-residue postflight,
+exact ledger, database lint, strict database verifier and authenticated role-security
+suite all pass. A post-apply dry run reports the database is up to date.
 
 ```powershell
 npx.cmd --yes supabase@2.117.0 migration list --db-url $env:STAGING_DB_URL

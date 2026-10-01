@@ -37,6 +37,26 @@ Checkpoint date: 01/10/2026
   or deployed to production.
 - Production and the retired Supabase project were not contacted by this checkpoint.
 
+## Desktop installer and retired-target guardrail checkpoint — 1 October 2026
+
+- The desktop uploader now accepts the same narrow regional Mux Direct Upload URL
+  shape proved by staging while retaining the legacy Google Storage form. Host/path
+  lookalikes, credentials, custom ports, fragments and malformed identifiers fail
+  closed. The uploader suite passes 22/22.
+- A new staging-only NSIS installer was built and inspected. Its ASAR contains the
+  approved staging public configuration, current regional and legacy Mux guards,
+  bundled FFmpeg/license files, and no protected credentials, environment files or
+  test fixtures. SHA-256 is
+  `1B4C760EB6FEF6A36B819DDFBA6877D66466B77C5004E8EA7F0A820578F67464`.
+- Read-only staging role acceptance passes for Member, Admin and Super Admin, and a
+  synthetic MP4 processes and decodes with the two current watermarks. The package
+  remains staging-pinned, x64 and unsigned. GUI automation could not be completed in
+  the restricted Windows runner, so ordinary interactive launch/uninstall remains a
+  user-host acceptance item rather than a claimed pass.
+- Release scripts no longer label retired project `pkmllhaavadhaozmwapz` as
+  production. Security probes and dummy cleanup reject it in every mode; any future
+  production read-only probe requires an exact separately supplied active project ref.
+
 ## Staging Mux activation checkpoint — 1 October 2026
 
 - Only the four `MUX_*` secrets were added to the branch-scoped Vercel Preview; no
