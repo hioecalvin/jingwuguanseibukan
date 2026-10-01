@@ -4445,3 +4445,36 @@ production build pass. Push/PWA settings remain intentionally hidden. Physical
 Safari/iOS delivery, live provider failure handling, and the product decision to ship
 push remain external gates. No staging, production, retired project, database,
 deployment, or provider was contacted.
+
+### Milestone 173 — production target, worker runtime and installer gate hardening (01/10/2026)
+
+Ran three offline production-readiness tracks in parallel. Added a secret-safe,
+fail-closed production target validator that requires the future exact Supabase project
+reference, approved Singapore region, matching public origin and an exact direct or
+Singapore session-pooler database URL on port 5432 with `sslmode=require`. It rejects
+the staging and retired projects, wrong regions, mismatched project identities,
+transaction-pooler connections and unsupported connection options. It cannot prove
+dashboard ownership/region, so a second operator check remains mandatory before the
+first read-only production connection.
+
+Bounded the email worker to a default 45-second run budget and each Resend request to a
+default 10 seconds, with narrow validated overrides. Budget exhaustion stops further
+claims and returns monitored HTTP 503. This reduces scheduler overlap risk without
+weakening the existing idempotency, retry, acknowledgement or queue-health contracts.
+Privileged deceased-member and memorial routes now log category-only failures rather
+than raw database/Auth error objects; regression coverage proves private details stay
+out of responses and logs.
+
+Added a guided Windows installer acceptance runner. It fingerprints the candidate,
+refuses an existing exact per-user installation, requires a visible launched window,
+closes only its captured process, invokes the exact registered uninstaller, verifies
+registry and installation-directory removal, and always emits JSON evidence. The
+current staging installer preflight passes at 156,411,382 bytes and SHA-256
+`1B4C760EB6FEF6A36B819DDFBA6877D66466B77C5004E8EA7F0A820578F67464`;
+ordinary interactive install/launch/uninstall remains unclaimed and the installer is
+still unsigned.
+
+Combined evidence passes 346/346 application tests, 22/22 uploader tests, 50/50
+focused production/recovery/email/memorial tests, ESLint, TypeScript, whitespace
+validation, and the optimized 51-route production build. No staging, production,
+retired project, database, deployment, inbox, scheduler, or provider was contacted.

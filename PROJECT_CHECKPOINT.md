@@ -4,8 +4,8 @@ Checkpoint date: 01/10/2026
 
 ## Current release checkpoint — 1 October 2026
 
-- Branch `release/v1-readiness-20260918` is synchronized with its remote through
-  application deployment commit `8caa3e9`. The branch-scoped Preview contains only the
+- Branch `release/v1-readiness-20260918` remains the active release candidate. The
+  latest staging application deployment is exact commit `8caa3e9`, and its Preview contains only the
   four protected `MUX_*` additions required by this activation; their values remain
   outside Git.
 - Ready Preview `dpl_AZK7CPjTCcbeQCytugpwyEtbgFBv` serves only
@@ -22,7 +22,7 @@ Checkpoint date: 01/10/2026
 - Mux's current regional OCI Direct Upload URL shape is now accepted through a narrow
   HTTPS host/path allowlist. Lookalike hosts, traversal paths, credentials, custom
   ports and fragments remain rejected. Failure logs expose only bounded categories.
-- Final local evidence passes 332/332 application tests, 21/21 desktop uploader tests,
+- Final local evidence passes 346/346 application tests, 22/22 desktop uploader tests,
   ESLint, TypeScript and the optimized 51-route production build.
 - Protected database/Auth/Storage metadata, role and Storage-object source evidence is
   captured. A disposable local PostgreSQL 17 restore proves the exact ledger, critical
@@ -1255,3 +1255,32 @@ acceptance completed; production remains unchanged.
   service, staging, production, retired project, or other provider was contacted.
   Physical Safari/iOS delivery, real provider failure behavior, and the product
   decision to expose push remain external gates.
+
+## Production-target, email-runtime and installer acceptance hardening — 1 October 2026
+
+- A new offline production-target gate binds the future exact 20-character project
+  reference to Singapore (`ap-southeast-1`), its HTTPS Supabase origin, and either its
+  direct database host or Singapore session pooler on port 5432 with
+  `sslmode=require`. It rejects staging, the retired project, wrong/mismatched regions
+  and projects, the transaction pooler, unsupported connection options, and never
+  prints the database URL or password. Dashboard ownership and region still require an
+  independent operator check before the first read-only connection.
+- The email worker now has a default 45-second invocation budget and 10-second Resend
+  request timeout. Both accept only bounded overrides. It stops claiming new messages
+  once the budget is exhausted and returns monitored HTTP 503 rather than overlapping
+  the next scheduler tick silently. Existing idempotency and retry handling remain in
+  force.
+- Privileged deceased-member and memorial API failures now log only bounded failure
+  categories. Database/Auth error objects, identifiers, hints, and provider detail are
+  excluded from both responses and server logs.
+- The Windows uploader now includes a guided acceptance runner that verifies the exact
+  installer hash, refuses to overwrite an existing per-user installation, requires a
+  visible installed application window, invokes only the captured product uninstaller,
+  verifies registry/install-directory removal, and writes JSON evidence even on
+  failure. Preflight passes for the current 156,411,382-byte staging installer at the
+  approved SHA-256; full interactive install/launch/uninstall remains a real-desktop
+  user acceptance step, and the package remains unsigned.
+- Combined verification passes 346/346 application tests, 22/22 uploader tests,
+  50/50 focused release tests, ESLint, TypeScript, whitespace validation, and the
+  optimized 51-route production build. No staging, production, retired project,
+  deployment, database, scheduler, inbox, or provider was contacted.
