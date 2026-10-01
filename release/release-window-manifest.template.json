@@ -41,6 +41,24 @@
     "weakTestAccountsRemoved": false,
     "pushHiddenOrVerified": false
   },
+  "gateEvidence": {
+    "physicalSafari": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_SAFARI_MANIFEST_SHA256",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "stagingDeploymentId": "REPLACE_WITH_TESTED_STAGING_DEPLOYMENT_ID"
+    },
+    "monitoring": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_MONITORING_MANIFEST_SHA256",
+      "environment": "production",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
+    },
+    "productionIdentity": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_IDENTITY_MANIFEST_SHA256",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "policy": "jingwuguan-production-identity-v1"
+    }
+  },
   "stopConditions": {
     "authenticationFailure": false,
     "authorizationFailure": false,

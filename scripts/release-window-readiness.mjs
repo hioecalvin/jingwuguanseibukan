@@ -3,6 +3,10 @@ import { pathToFileURL } from "node:url";
 
 export const RELEASE_BRANCH =
   "release/v1-readiness-20260918";
+const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
+const RETIRED_PROJECT_REF = "pkmllhaavadhaozmwapz";
+const PRODUCTION_IDENTITY_POLICY = "jingwuguan-production-identity-v1";
+const PROJECT_REF = /^[a-z0-9]{20}$/;
 
 const SHA = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
@@ -59,10 +63,19 @@ function requireText(blockers, value, path) {
   return true;
 }
 
+function requireDigest(blockers, value, path) {
+  if (!SHA256.test(value ?? "") || /^(.)\1{63}$/.test(value)) {
+    add(blockers, path, "must be a non-placeholder 64-character SHA-256 digest");
+    return false;
+  }
+  return true;
+}
+
 export function evaluateReleaseWindow(
   manifest,
   {
     expectedCommit,
+    expectedProductionProjectRef,
     now = Date.now(),
   } = {},
 ) {
@@ -197,6 +210,29 @@ export function evaluateReleaseWindow(
     }
   }
 
+  const gateEvidence = object(manifest.gateEvidence);
+  const safari = object(gateEvidence.physicalSafari);
+  requireDigest(blockers, safari.manifestSha256, "gateEvidence.physicalSafari.manifestSha256");
+  if (safari.commitSha !== release.commitSha) add(blockers, "gateEvidence.physicalSafari.commitSha", "must bind the Safari evidence to the release commit");
+  requireText(blockers, safari.stagingDeploymentId, "gateEvidence.physicalSafari.stagingDeploymentId");
+  if (safari.stagingDeploymentId === release.deploymentId) add(blockers, "gateEvidence.physicalSafari.stagingDeploymentId", "must identify the separately tested staging deployment");
+
+  const monitoring = object(gateEvidence.monitoring);
+  requireDigest(blockers, monitoring.manifestSha256, "gateEvidence.monitoring.manifestSha256");
+  if (monitoring.environment !== "production") add(blockers, "gateEvidence.monitoring.environment", "must equal production");
+  if (monitoring.commitSha !== release.commitSha) add(blockers, "gateEvidence.monitoring.commitSha", "must bind monitoring evidence to the release commit");
+  if (monitoring.deploymentId !== release.deploymentId) add(blockers, "gateEvidence.monitoring.deploymentId", "must bind monitoring evidence to the production deployment");
+
+  const identity = object(gateEvidence.productionIdentity);
+  requireDigest(blockers, identity.manifestSha256, "gateEvidence.productionIdentity.manifestSha256");
+  if (!PROJECT_REF.test(expectedProductionProjectRef ?? "") || [STAGING_PROJECT_REF, RETIRED_PROJECT_REF].includes(expectedProductionProjectRef)) {
+    add(blockers, "expectedProductionProjectRef", "must independently supply the exact active production project ref");
+  }
+  if (identity.projectRef !== expectedProductionProjectRef) add(blockers, "gateEvidence.productionIdentity.projectRef", "must equal the independently supplied production project ref");
+  if (identity.policy !== PRODUCTION_IDENTITY_POLICY) add(blockers, "gateEvidence.productionIdentity.policy", `must equal ${PRODUCTION_IDENTITY_POLICY}`);
+  const gateDigests = [safari.manifestSha256, monitoring.manifestSha256, identity.manifestSha256].filter(value => SHA256.test(value ?? ""));
+  if (new Set(gateDigests).size !== 3) add(blockers, "gateEvidence", "must bind three distinct gate manifests");
+
   const stopConditions = object(manifest.stopConditions);
   for (const key of REQUIRED_STOP_CONDITIONS) {
     if (stopConditions[key] !== true) {
@@ -248,7 +284,7 @@ function option(argv, name) {
 
 function usage() {
   return [
-    "Usage: node scripts/release-window-readiness.mjs --manifest=<protected-json> --expected-commit=<40-char-sha>",
+    "Usage: node scripts/release-window-readiness.mjs --manifest=<protected-json> --expected-commit=<40-char-sha> --expected-production-project-ref=<20-char-ref>",
     "The check is offline and does not authorize or execute a release.",
   ].join("\n");
 }
@@ -263,10 +299,11 @@ export async function runCli(
 
   const manifestPath = option(argv, "--manifest");
   const expectedCommit = option(argv, "--expected-commit");
-  if (!manifestPath || !expectedCommit) {
+  const expectedProductionProjectRef = option(argv, "--expected-production-project-ref");
+  if (!manifestPath || !expectedCommit || !expectedProductionProjectRef) {
     console.error(JSON.stringify({
       ready: false,
-      error: "Manifest path and independently supplied expected commit are required.",
+      error: "Manifest path, expected commit and expected production project ref are required.",
     }, null, 2));
     return 2;
   }
@@ -286,7 +323,7 @@ export async function runCli(
 
   const result = evaluateReleaseWindow(
     manifest,
-    { expectedCommit },
+    { expectedCommit, expectedProductionProjectRef },
   );
   console.log(JSON.stringify(result, null, 2));
   return result.ready ? 0 : 1;

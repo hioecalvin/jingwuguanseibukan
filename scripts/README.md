@@ -1,5 +1,53 @@
 # Project scripts
 
+## Monitoring and production-identity evidence gates
+
+The offline monitoring gate validates the sanitized operational record described in
+`operations/MONITORING_READINESS.md`. The production identity gate validates only
+fresh aggregate, independently reviewed account-inventory evidence described in
+`scripts/PRODUCTION_IDENTITY_ACCEPTANCE.md`. Neither command contacts a service or
+authorizes production.
+
+```powershell
+npm.cmd run monitoring:check -- `
+  --manifest=C:\protected\evidence\monitoring-readiness.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment=<exact-deployment-id>
+
+npm.cmd run production:identity:check -- `
+  --manifest=C:\protected\evidence\production-identity-inventory.json `
+  --expected-project-ref=<exact-20-character-production-ref>
+```
+
+## Physical Safari acceptance gate
+
+`physical-safari-readiness.mjs` validates a sanitized, protected evidence manifest
+without opening a browser or contacting any host. It deliberately does not accept
+Playwright WebKit, emulators or simulators as physical Safari evidence. A passing
+record requires current Safari on one physical Mac, iPhone and iPad, all bound to the
+independently supplied release commit and the exact staging host.
+
+Each device must complete login/logout, public navigation, read-only Member, Admin and
+Super Admin workflows, public certificate verification, responsive-layout review and
+manual accessibility checks including VoiceOver. The manifest records only SHA-256
+digests of the protected session evidence: do not put screenshots, names, member
+numbers, email addresses, passwords, cookies, tokens or secret values in it.
+
+```powershell
+npm.cmd run safari:physical:check -- `
+  --manifest=C:\protected\evidence\physical-safari-manifest.json `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment=<exact-staging-deployment-id> `
+  --minimum-macos=<minimum-os,minimum-safari> `
+  --minimum-ios=<minimum-os,minimum-safari> `
+  --minimum-ipados=<minimum-os,minimum-safari>
+```
+
+The checked-in template intentionally fails until real device evidence is recorded
+and independently reviewed. A passing result is a staging-only, read-only acceptance
+record; it does not authorize production or replace the separate Playwright browser
+matrix.
+
 ## Email scheduler readiness gate
 
 `email-scheduler-readiness.mjs` validates a sanitized scheduler evidence manifest
@@ -24,12 +72,15 @@ contacting any service. It binds the approved release to an independently suppli
 commit and known-good rollback revision, requires a fresh protected recovery point,
 named owners, tested rollback, bounded Sydney release window, stop conditions, and
 completion of every external production gate. The checked-in template is deliberately
-incomplete and must fail.
+incomplete and must fail. The three Safari, monitoring and production-identity gate
+manifests are bound by distinct SHA-256 digests; bare approval booleans cannot replace
+their results.
 
 ```powershell
 npm.cmd run release:window:check -- `
   --manifest=C:\protected\jingwuguan-release-window.json `
-  --expected-commit=<40-character-reviewed-commit>
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-production-project-ref=<exact-20-character-production-ref>
 ```
 
 A passing result records readiness only; it does not authorize or execute a release.

@@ -1340,3 +1340,40 @@ acceptance completed; production remains unchanged.
   27/27 uploader tests, ESLint, TypeScript, whitespace validation and the optimized
   51-route production build. No software was installed, launched or uninstalled and
   no live host, database, inbox, provider, production or retired project was contacted.
+
+## Release evidence binding and dependency security — 1 October 2026
+
+- A current dependency audit found the installed Next.js 16.3.4 line affected by the
+  published authorization-bypass advisory. Next.js and `eslint-config-next` are now
+  pinned to 16.3.8; transitive `brace-expansion` copies are updated to 1.1.21 and
+  5.0.12. Full and production-only application audits and the JS Video Uploader audit
+  each report zero known vulnerabilities.
+- Added a physical-Safari evidence gate for one real Mac, iPhone and iPad. Every
+  session must be read-only, use dedicated non-personal accounts, meet independently
+  supplied minimum OS/Safari versions, and bind its protected evidence hashes to the
+  exact release commit and staging deployment. WebKit, simulators and emulators do
+  not count. Unknown fields and sensitive field names cannot be echoed.
+- Added a production identity-inventory gate. Separate Auth and read-only database
+  captures must be fresh, complete and count-consistent, use three distinct non-PII
+  actor fingerprints, and carry canonical project/policy/query-bound provenance and
+  review-attestation hashes. Dummy, security-test, unreviewed, missing, orphaned or
+  duplicate identities remain hard blockers.
+- Added a strict monitoring/incident/rollback evidence gate bound to the exact release
+  commit and deployment. It requires an exact sanitized schema, all-non-success email
+  worker alerting, application/Auth/database/Mux coverage, tested escalation and
+  rollback, and either hidden Web Push or complete push failure monitoring and alert
+  acceptance.
+- The final release-window gate now requires three distinct SHA-256 manifest digests
+  for physical Safari, production monitoring and production identity evidence. Their
+  commit, deployment, project and policy bindings must agree with the release record;
+  bare approval booleans can no longer certify these gates.
+- Verification passes 408/408 application tests, 35/35 focused readiness tests,
+  ESLint, TypeScript, whitespace validation, JSON-template parsing, dependency-tree
+  verification, and the optimized 51-route Next.js 16.3.8 production build. No live
+  host, database, account, deployment, inbox, provider, production or retired project
+  was contacted or changed.
+- Production remains blocked on operator-controlled evidence: creation and independent
+  verification of the Singapore production project, managed Supabase restore,
+  dedicated-inbox Auth/email delivery, external scheduler and live monitoring,
+  physical Safari devices, interactive signed-installer acceptance, removal of any
+  production test identities, and a separately approved release window.

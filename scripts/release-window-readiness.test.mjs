@@ -9,6 +9,7 @@ import {
 const RELEASE_SHA = "a".repeat(40);
 const PREVIOUS_SHA = "b".repeat(40);
 const NOW = Date.parse("2026-10-02T08:00:00+10:00");
+const PRODUCTION_PROJECT_REF = "abcdefghijklmnopqrst";
 
 function validManifest(overrides = {}) {
   const manifest = {
@@ -54,6 +55,24 @@ function validManifest(overrides = {}) {
       weakTestAccountsRemoved: true,
       pushHiddenOrVerified: true,
     },
+    gateEvidence: {
+      physicalSafari: {
+        manifestSha256: "12".repeat(32),
+        commitSha: RELEASE_SHA,
+        stagingDeploymentId: "dpl_staging_candidate",
+      },
+      monitoring: {
+        manifestSha256: "34".repeat(32),
+        environment: "production",
+        commitSha: RELEASE_SHA,
+        deploymentId: "dpl_release_candidate",
+      },
+      productionIdentity: {
+        manifestSha256: "56".repeat(32),
+        projectRef: PRODUCTION_PROJECT_REF,
+        policy: "jingwuguan-production-identity-v1",
+      },
+    },
     stopConditions: {
       authenticationFailure: true,
       authorizationFailure: true,
@@ -77,6 +96,7 @@ test("accepts a complete time-bounded release and rollback record", () => {
     validManifest(),
     {
       expectedCommit: RELEASE_SHA,
+      expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
       now: NOW,
     },
   );
@@ -99,7 +119,7 @@ test("binds the approved release to the independent commit and rollback revision
   ]) {
     assert.equal(evaluateReleaseWindow(
       validManifest({ release }),
-      { expectedCommit: RELEASE_SHA, now: NOW },
+      { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
     ).ready, false);
   }
 });
@@ -135,7 +155,7 @@ test("rejects expired, excessive, unapproved, and stale-recovery windows", () =>
   for (const manifest of cases) {
     assert.equal(evaluateReleaseWindow(
       manifest,
-      { expectedCommit: RELEASE_SHA, now: NOW },
+      { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
     ).ready, false);
   }
 });
@@ -152,7 +172,7 @@ test("requires every external approval and stop condition", () => {
   };
   const result = evaluateReleaseWindow(
     validManifest({ approvals, stopConditions }),
-    { expectedCommit: RELEASE_SHA, now: NOW },
+    { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
   );
 
   assert.equal(result.ready, false);
@@ -182,9 +202,27 @@ test("rejects placeholders, missing owners, and untested rollback", () => {
         decisionDeadlineMinutes: 0,
       },
     }),
-    { expectedCommit: RELEASE_SHA, now: NOW },
+    { expectedCommit: RELEASE_SHA, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW },
   );
 
   assert.equal(result.ready, false);
   assert.ok(result.blockers.length >= 6);
+});
+
+test("requires distinct gate manifests bound to the exact release and production project", () => {
+  const manifest = validManifest();
+  manifest.gateEvidence.physicalSafari.commitSha = PREVIOUS_SHA;
+  manifest.gateEvidence.monitoring.deploymentId = "dpl_other_deployment";
+  manifest.gateEvidence.productionIdentity.projectRef = "zyxwvutsrqponmlkjihg";
+  manifest.gateEvidence.monitoring.manifestSha256 = manifest.gateEvidence.physicalSafari.manifestSha256;
+  const result = evaluateReleaseWindow(manifest, {
+    expectedCommit: RELEASE_SHA,
+    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
+    now: NOW,
+  });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.physicalSafari.commitSha"));
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.monitoring.deploymentId"));
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.productionIdentity.projectRef"));
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
 });

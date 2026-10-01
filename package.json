@@ -19,7 +19,10 @@
     "auth-email:staging:preflight": "node scripts/staging-auth-email-readiness.mjs --confirm-offline-preflight",
     "production:target:check": "node scripts/production-target-readiness.mjs",
     "release:window:check": "node scripts/release-window-readiness.mjs",
-    "email-scheduler:check": "node scripts/email-scheduler-readiness.mjs"
+    "email-scheduler:check": "node scripts/email-scheduler-readiness.mjs",
+    "safari:physical:check": "node scripts/physical-safari-readiness.mjs",
+    "production:identity:check": "node scripts/production-identity-readiness.mjs",
+    "monitoring:check": "node scripts/monitoring-readiness.mjs"
   },
   "dependencies": {
     "@mux/mux-player-react": "^3.13.4",
@@ -27,7 +30,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "@types/qrcode": "^1.5.6",
-    "next": "16.3.4",
+    "next": "16.3.8",
     "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -45,7 +48,7 @@
     "@types/web-push": "^3.6.4",
     "esbuild": "0.28.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

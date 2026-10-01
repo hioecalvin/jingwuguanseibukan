@@ -1,0 +1,132 @@
+{
+  "manifestVersion": 1,
+  "environment": "staging",
+  "applicationOrigin": "https://jingwuguanseibukan-staging.vercel.app",
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_EXACT_DEPLOYMENT_ID"
+  },
+  "owners": {
+    "monitoring": "REPLACE_WITH_OWNER",
+    "incidentCommander": "REPLACE_WITH_OWNER",
+    "rollback": "REPLACE_WITH_OWNER",
+    "security": "REPLACE_WITH_OWNER"
+  },
+  "evidence": {
+    "configuredAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER",
+    "protectedReference": "REPLACE_WITH_PROTECTED_EVIDENCE_REFERENCE"
+  },
+  "application": {
+    "httpStatusCaptured": false,
+    "routeAndMethodCaptured": false,
+    "deploymentIdCaptured": false,
+    "latencyCaptured": false,
+    "alertOnErrorRate": false,
+    "alertOnMissingTelemetry": false,
+    "maxServerErrorRatePercent": 0,
+    "errorRateWindowMinutes": 0
+  },
+  "auth": {
+    "failedLoginRateMonitored": false,
+    "adminAuthorizationFailuresMonitored": false,
+    "passwordResetAbuseMonitored": false,
+    "alertContainsNoIdentityData": false,
+    "maxFailedLoginsPerFiveMinutes": 0
+  },
+  "database": {
+    "availabilityMonitored": false,
+    "connectionSaturationMonitored": false,
+    "migrationLedgerDriftMonitored": false,
+    "rlsOrGrantRegressionMonitored": false,
+    "privilegedAuditEventsMonitored": false,
+    "backupFailureMonitored": false
+  },
+  "emailWorker": {
+    "missingInvocationAlert": false,
+    "staleClaimAlert": false,
+    "exhaustedAttemptAlert": false,
+    "queueGrowthAlert": false,
+    "responseCountersCaptured": false,
+    "alertOnEveryNonSuccessStatus": false,
+    "maxInvocationGapSeconds": 0,
+    "maxOldestReadyEmailSeconds": 0,
+    "alertHttpStatuses": [401, 429, 500, 502, 503],
+    "queueHealthFields": [
+      "stuckProcessingEmails",
+      "exhaustedFailures",
+      "oldPendingEmails",
+      "overdueReadyEmails",
+      "queuedEmails",
+      "dueEmails",
+      "duplicateDedupeKeys",
+      "oldestReadyAgeSeconds"
+    ]
+  },
+  "push": {
+    "disposition": "hidden",
+    "providerFailuresMonitored": false,
+    "persistenceFailuresMonitored": false,
+    "deliveryFailuresMonitored": false,
+    "alertDeliveryTested": false
+  },
+  "mux": {
+    "apiFailuresMonitored": false,
+    "credentialFailuresMonitored": false,
+    "uploadProcessingFailuresMonitored": false,
+    "signedPlaybackFailuresMonitored": false,
+    "orphanAssetInventoryMonitored": false,
+    "providerDetailsRedacted": false
+  },
+  "incident": {
+    "runbookReference": "REPLACE_WITH_RUNBOOK_REFERENCE",
+    "primaryAlertChannel": "REPLACE_WITH_PRIMARY_CHANNEL",
+    "backupAlertChannel": "REPLACE_WITH_INDEPENDENT_BACKUP_CHANNEL",
+    "criticalAcknowledgeMinutes": 0,
+    "escalationTested": false,
+    "alertDeliveryTested": false,
+    "providerStatusChecksDocumented": false,
+    "incidentTimelineRetained": false
+  },
+  "rollback": {
+    "knownGoodDeploymentReference": "REPLACE_WITH_PROTECTED_DEPLOYMENT_REFERENCE",
+    "recoveryPointReference": "REPLACE_WITH_PROTECTED_RECOVERY_REFERENCE",
+    "applicationRollbackTested": false,
+    "databaseRecoveryTested": false,
+    "accessVerified": false,
+    "monitoringContinuesDuringRollback": false,
+    "decisionDeadlineMinutes": 0
+  },
+  "releaseStopSignals": {
+    "authenticationFailure": false,
+    "authorizationFailure": false,
+    "databaseSecurityFailure": false,
+    "migrationOrRestoreMismatch": false,
+    "emailWorkerFailure": false,
+    "muxFailure": false,
+    "serverErrorRateBreach": false,
+    "rollbackAccessFailure": false,
+    "pushFailure": false
+  },
+  "redaction": {
+    "authorizationHeaders": false,
+    "cookiesAndSessions": false,
+    "secretValues": false,
+    "emailRecipientsAndBodies": false,
+    "providerIdentifiers": false,
+    "rawDatabaseErrors": false,
+    "retentionDays": 0
+  },
+  "acceptance": {
+    "applicationAlertDelivered": false,
+    "authAlertDelivered": false,
+    "databaseAlertDelivered": false,
+    "emailWorkerAlertDelivered": false,
+    "pushAlertDelivered": false,
+    "muxAlertDelivered": false,
+    "rollbackAlertDelivered": false,
+    "noProductionMutation": false
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "environment": "production",
+  "projectRef": "REPLACE_WITH_PRODUCTION_REF",
+  "classificationPolicy": "jingwuguan-production-identity-v1",
+  "authEvidence": {
+    "source": "supabase-auth-admin-api",
+    "collectorRole": "auth-inventory-collector",
+    "projectRef": "REPLACE_WITH_PRODUCTION_REF",
+    "capturedAt": "1970-01-01T00:00:00Z",
+    "inventoryComplete": false,
+    "paginationComplete": false,
+    "snapshotSha256": "REPLACE_WITH_PROTECTED_AUTH_INVENTORY_SHA256",
+    "inventoryQueryVersion": "REPLACE_WITH_REVIEWED_AUTH_QUERY_VERSION",
+    "collectorFingerprint": "REPLACE_WITH_64_CHARACTER_NON_PII_COLLECTOR_FINGERPRINT",
+    "provenanceSha256": "REPLACE_WITH_CANONICAL_AUTH_PROVENANCE_SHA256",
+    "totalAccounts": 0,
+    "classifications": {
+      "dummyMetadata": 1,
+      "dummyDomain": 1,
+      "reservedDomain": 1,
+      "securityTest": 1,
+      "testMarker": 1,
+      "unreviewed": 1
+    }
+  },
+  "databaseEvidence": {
+    "source": "postgres-owner-read-only",
+    "collectorRole": "database-identity-collector",
+    "projectRef": "REPLACE_WITH_PRODUCTION_REF",
+    "capturedAt": "1970-01-01T00:00:00Z",
+    "inventoryComplete": false,
+    "transactionReadOnly": false,
+    "snapshotSha256": "REPLACE_WITH_PROTECTED_DATABASE_INVENTORY_SHA256",
+    "inventoryQueryVersion": "REPLACE_WITH_REVIEWED_DATABASE_QUERY_VERSION",
+    "collectorFingerprint": "REPLACE_WITH_64_CHARACTER_NON_PII_COLLECTOR_FINGERPRINT",
+    "provenanceSha256": "REPLACE_WITH_CANONICAL_DATABASE_PROVENANCE_SHA256",
+    "authAccountCount": 0,
+    "profileCount": 0,
+    "authWithoutProfile": 1,
+    "orphanProfiles": 1,
+    "orphanMemberships": 1,
+    "duplicateProfileIdentities": 1,
+    "classifications": {
+      "dummyProfiles": 1,
+      "dummyMemberships": 1,
+      "securityTestProfiles": 1,
+      "testMarkerProfiles": 1,
+      "unreviewedProfiles": 1
+    }
+  },
+  "independentReview": {
+    "reviewerRole": "release-security-reviewer",
+    "reviewedAt": "1970-01-01T00:00:00Z",
+    "result": "pending",
+    "authSnapshotSha256": "REPLACE_WITH_PROTECTED_AUTH_INVENTORY_SHA256",
+    "databaseSnapshotSha256": "REPLACE_WITH_PROTECTED_DATABASE_INVENTORY_SHA256",
+    "authProvenanceSha256": "REPLACE_WITH_CANONICAL_AUTH_PROVENANCE_SHA256",
+    "databaseProvenanceSha256": "REPLACE_WITH_CANONICAL_DATABASE_PROVENANCE_SHA256",
+    "reviewerFingerprint": "REPLACE_WITH_64_CHARACTER_NON_PII_REVIEWER_FINGERPRINT",
+    "attestationSha256": "REPLACE_WITH_CANONICAL_REVIEW_ATTESTATION_SHA256",
+    "zeroForbiddenAccountsConfirmed": false
+  }
+}

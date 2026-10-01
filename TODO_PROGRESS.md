@@ -4549,3 +4549,42 @@ Verification passes 378/378 application tests, 37/37 combined focused gate tests
 51-route production build. No software was installed, launched or uninstalled and no
 staging host, database, inbox, scheduler, provider, production or retired project was
 contacted.
+
+### Milestone 176 — release evidence binding and dependency security (01/10/2026)
+
+Ran the remaining offline release-readiness tracks in parallel and independently
+reviewed their fail-closed behavior. A fresh dependency audit identified the installed
+Next.js 16.3.4 line as affected by the current authorization-bypass advisory. Updated
+Next.js and `eslint-config-next` to 16.3.8 and refreshed vulnerable transitive
+`brace-expansion` copies to 1.1.21/5.0.12. Full, production-only and uploader audits
+now report zero known vulnerabilities.
+
+Added strict evidence validators and deliberately incomplete templates for physical
+Safari, production identity cleanup and monitoring/incident/rollback readiness.
+Physical device records bind real Mac/iPhone/iPad Safari sessions to the exact staging
+deployment, release commit and independently supplied minimum versions. Production
+identity evidence now has project/policy/query-bound canonical provenance, three
+distinct non-PII actor fingerprints, matching Auth/profile counts and an independent
+review attestation. Monitoring now uses exact schemas, release/deployment binding,
+all-non-success worker alerts and a fail-closed hidden-or-fully-monitored Web Push
+disposition.
+
+Hardened the release-window gate so three distinct SHA-256 manifest digests—not bare
+checkboxes—bind physical Safari, production monitoring and production identity
+results to the exact release, deployment and production project. Focused regression
+coverage passes 35/35 and the complete suite passes 408/408. ESLint, TypeScript,
+whitespace validation, all JSON templates and the optimized 51-route Next.js 16.3.8
+build pass. No live host, database, provider, inbox, deployment, production or retired
+project was contacted.
+
+The JS Video Uploader continues to burn the two logo watermarks locally and upload the
+finished media directly to Mux; Supabase stores the Repository Draft plus provider
+identifiers/metadata, not video bytes. Existing YouTube records remain legacy-readable.
+The guarded staging Mux upload, signed playback and exact cleanup evidence remain valid.
+
+Production readiness is approximately 9.3/10. Remaining work is external evidence and
+operations, not another broad feature build: create/verify the Singapore production
+project, prove managed restore, complete dedicated-inbox Auth/email delivery, select
+and verify the scheduler plus live alerts, run physical Safari and interactive signed
+installer acceptance, prove production identity cleanup, then obtain an exact release
+window approval. Production remains blocked until every gate passes.

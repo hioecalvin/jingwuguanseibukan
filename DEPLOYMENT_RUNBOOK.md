@@ -375,7 +375,8 @@ commit; the checked-in template must fail:
 ```powershell
 npm.cmd run release:window:check -- `
   --manifest=C:\protected\jingwuguan-release-window.json `
-  --expected-commit=<40-character-reviewed-commit>
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-production-project-ref=<exact-20-character-production-ref>
 if ($LASTEXITCODE -ne 0) { throw 'Release window is not approved and ready' }
 ```
 
@@ -384,6 +385,10 @@ This offline gate requires the release and prior rollback revisions/deployments,
 deployment/rollback/monitoring owners, tested application and database recovery,
 bounded stop thresholds, and explicit completion of every external gate. It records
 approval but cannot grant it and never connects to production.
+The release-window record must include distinct SHA-256 digests of passing physical
+Safari, production monitoring and production identity manifests. Their commit,
+deployment, project and policy bindings must match the release record; bare approval
+booleans are insufficient.
 
 1. Freeze schema changes. Capture and prove fresh recovery points for every source
    that will be imported and for the new target before release mutations. Confirm
