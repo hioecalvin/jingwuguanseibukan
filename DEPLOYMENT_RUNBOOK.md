@@ -368,16 +368,25 @@ After all staging gates pass and the user separately authorizes a release window
    owner and stop conditions. Never treat a staging dump alone as production
    recovery proof.
 2. Only after the new reference exists, set `PRODUCTION_PROJECT_REF` and
-   `PRODUCTION_DB_URL` from its dashboard-verified TLS connection. Guard that the
-   URL resolves to that exact new reference and rejects both staging and the
-   historical reference before running read-only preflight:
+   `PRODUCTION_DB_URL` from its dashboard-verified TLS connection, set
+   `PRODUCTION_REGION=ap-southeast-1`, and set `NEXT_PUBLIC_SUPABASE_URL` to the
+   exact new project origin. Run the offline target-identity gate before any
+   connection command. It accepts only the exact project direct connection or the
+   Singapore session pooler on port 5432, requires TLS, rejects staging and the
+   historical reference, and never prints credentials or the database URL:
 
 ```powershell
 if (-not $env:PRODUCTION_PROJECT_REF -or -not $env:PRODUCTION_DB_URL) { throw 'Verified production target is required' }
-if ($env:PRODUCTION_PROJECT_REF -in @('eomubndonbetszdbhsrj', 'pkmllhaavadhaozmwapz')) { throw 'Refusing staging or historical project' }
+npm.cmd run production:target:check
+if ($LASTEXITCODE -ne 0) { throw 'Production target identity check failed' }
 npx.cmd --yes supabase@2.117.0 migration list --db-url $env:PRODUCTION_DB_URL
 npx.cmd --yes supabase@2.117.0 db push --db-url $env:PRODUCTION_DB_URL --skip-vault --dry-run
 ```
+
+The gate validates operator-supplied evidence; it cannot prove the dashboard region
+or project ownership. A second operator must still compare its sanitized output with
+the Supabase dashboard before the first read-only connection. Transaction-pooler port
+6543 is deliberately rejected for migrations and recovery work.
 
 3. Stop unless the observed baseline and pending list exactly match the separately
    reviewed new-project migration plan. The repository starts at 006, so an empty

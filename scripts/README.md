@@ -1,5 +1,23 @@
 # Project scripts
 
+## Production target identity gate
+
+`production-target-readiness.mjs` is an offline, fail-closed check for the future
+Singapore production target. It binds the exact project reference to the public
+Supabase origin and to either that project's direct database host or the Singapore
+session pooler on port 5432. It requires `sslmode=require`, rejects staging, the
+retired project and transaction-pooler connections, and never prints the password or
+database URL.
+
+```powershell
+npm.cmd run production:target:check
+```
+
+Set `PRODUCTION_PROJECT_REF`, `PRODUCTION_REGION=ap-southeast-1`,
+`NEXT_PUBLIC_SUPABASE_URL` and `PRODUCTION_DB_URL` in the protected operator
+environment first. A passing offline result does not prove project ownership or
+dashboard region; independently verify both before any connection command.
+
 ## Read-only staging database verifier
 
 `run-staging-database-verifier.ps1` is pinned to staging project
@@ -83,7 +101,7 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 The checked-in template is intentionally incomplete and must fail validation.
-Manifest v3 also requires the exact 006–055 repository fingerprint, matching
+Manifest v3 also requires the exact 006–056 repository fingerprint, matching
 source/restored migration-ledger fingerprints, matching pre-migration schema-catalog
 fingerprints and object counts, and measured RPO/RTO timestamps. Generate the catalog
 fingerprints from schema-only protected exports with

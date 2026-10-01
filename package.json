@@ -15,7 +15,8 @@
     "test:browser:staging:read-only": "node scripts/staging-browser-smoke.mjs --confirm-staging",
     "recovery:check": "node scripts/recovery-readiness.mjs",
     "recovery:fingerprint": "node scripts/recovery-ledger-fingerprint.mjs",
-    "provider:check": "node scripts/provider-config-readiness.mjs"
+    "provider:check": "node scripts/provider-config-readiness.mjs",
+    "production:target:check": "node scripts/production-target-readiness.mjs"
   },
   "dependencies": {
     "@mux/mux-player-react": "^3.13.4",

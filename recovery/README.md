@@ -16,7 +16,7 @@ The offline gate therefore remains intentionally blocked until those checks are 
 do not mark managed components verified based only on the local PostgreSQL rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
-version 3 binds the drill to staging `eomubndonbetszdbhsrj`, migrations 006–055,
+version 3 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–056,
 the checked-in migration-file fingerprint, matching source/restored ledger and
 pre-migration schema-catalog fingerprints, and measured RPO/RTO timestamps. It represents the not-yet-created
 production project explicitly instead of using a fake project reference. It never
@@ -45,7 +45,7 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 Before and after the restore, export the ordered `version`, `name` and `statements`
-columns for migrations 006–055 from `supabase_migrations.schema_migrations` into
+columns for migrations 006–056 from `supabase_migrations.schema_migrations` into
 protected JSON arrays. Generate sanitized fingerprints without printing the SQL:
 
 ```powershell
@@ -80,7 +80,7 @@ values in Git:
 
 - the live `email_outbox` table and the pre-migration queue primitives
   `queue_email`, `claim_next_email`, `mark_email_sent` and `mark_email_failed`;
-  migrations 006–055 reference and validate these objects but do not create their
+  migrations 006–056 reference and validate these objects but do not create their
   baseline definitions, so the protected database backup and disposable restore must
   capture and exercise them explicitly;
 - any historical objects in the private Supabase Storage bucket
@@ -93,14 +93,15 @@ values in Git:
 - the email-worker and push scheduler definitions, disabled on the restore target
   until test-only recipients are confirmed;
 - Resend sender/domain resources, Web Push VAPID key-pair custody and subscription
-  reset procedure, and organization YouTube channel ownership/recovery controls;
+  reset procedure, and Mux token, signing-key and asset ownership/recovery controls;
 - hosting environment-variable names and scope assignments for Supabase, Resend,
   email worker, and push/VAPID configuration. Record custody and rotation
   instructions, never the values themselves.
 
 Migrations 024–025 remain historical staging schema. Reconcile any legacy video
-source/asset rows and Storage objects before retiring them; the active application
-uses unlisted YouTube embeds and does not depend on those resources.
+source/asset rows and Storage objects before retiring them; migration 056 establishes
+the active Mux upload and signed-playback lifecycle, whose asset and signing-key
+recovery evidence must be captured separately from the database backup.
 
 For a production-source backup, the operator must also acknowledge that fact. This
 flag does not connect to production or authorize a backup, restore, mutation or
