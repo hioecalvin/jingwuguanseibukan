@@ -11,6 +11,7 @@ complete it from independently reviewed monitoring evidence, then run:
 ```powershell
 node scripts/monitoring-readiness.mjs `
   --manifest=C:\protected\evidence\monitoring-readiness.json `
+  --expected-project-ref=<exact-20-character-project-ref> `
   --expected-commit=<40-character-reviewed-commit> `
   --expected-deployment=<exact-deployment-id>
 ```
@@ -34,7 +35,7 @@ The checked-in template must fail. A pass requires:
 - explicit redaction of authorization headers, sessions, secrets, recipients,
   message bodies, provider identifiers and raw database errors.
 
-The manifest is bound to the independently supplied release commit and deployment,
+The manifest is bound to the independently supplied project, release commit and deployment,
 and every object uses an exact field allow-list. Never put alert credentials,
 database URLs, session values, personal information,
 email bodies, recipient addresses, provider IDs or raw errors in this manifest.
@@ -44,7 +45,9 @@ secret-bearing fields and credential shapes, but that guard is not a substitute 
 evidence review.
 
 A passing offline manifest is not evidence that a live alert is still configured.
-Re-verify it within 30 days and again immediately before the release window. Keep
+Record the live alert acceptance after configuration, have a person independent from
+all operational owners verify it, and run the gate within 24 hours of that review.
+Re-verify immediately before the release window. Keep
 monitoring active throughout rollback. Any required signal that cannot be observed,
 any failed alert delivery, or any lost rollback access is a release stop condition.
 

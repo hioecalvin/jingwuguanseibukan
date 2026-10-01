@@ -56,6 +56,10 @@ function add(blockers, path, message) {
   blockers.push({ path, message });
 }
 
+function normalizedIdentity(value) {
+  return typeof value === "string" ? value.trim().toLocaleLowerCase("en-US") : "";
+}
+
 function requireText(blockers, value, path) {
   if (
     typeof value !== "string" ||
@@ -209,6 +213,9 @@ export function evaluateReleaseWindow(
     }
   }
   requireText(blockers, recovery.verifiedBy, "recovery.verifiedBy");
+  if (Object.values(owners).map(normalizedIdentity).includes(normalizedIdentity(recovery.verifiedBy))) {
+    add(blockers, "recovery.verifiedBy", "must be independent from deployment, rollback and monitoring ownership");
+  }
   if (timestamp(recovery.capturedAt) && timestamp(recovery.verifiedAt)) {
     const capturedAt = Date.parse(recovery.capturedAt);
     const verifiedAt = Date.parse(recovery.verifiedAt);
@@ -263,6 +270,7 @@ export function evaluateReleaseWindow(
   const monitoring = object(gateEvidence.monitoring);
   requirePassingEvidence(blockers, monitoring, "gateEvidence.monitoring");
   if (monitoring.environment !== "production") add(blockers, "gateEvidence.monitoring.environment", "must equal production");
+  if (monitoring.projectRef !== expectedProductionProjectRef) add(blockers, "gateEvidence.monitoring.projectRef", "must equal the independently supplied production project ref");
   if (monitoring.commitSha !== release.commitSha) add(blockers, "gateEvidence.monitoring.commitSha", "must bind monitoring evidence to the release commit");
   if (monitoring.deploymentId !== release.deploymentId) add(blockers, "gateEvidence.monitoring.deploymentId", "must bind monitoring evidence to the production deployment");
 

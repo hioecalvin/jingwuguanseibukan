@@ -317,6 +317,16 @@ targets the production deployment; the available Hobby cadence is also insuffici
 for the required one-minute worker. Staging currently has neither `pg_cron` nor
 `pg_net`, so a Supabase database schedule is not configured.
 
+Production uses the same single-flight contract against
+`https://jingwuguanseibukan.com/api/system/email-worker`. Before release, run the
+offline scheduler gate with the independently supplied production project reference,
+release SHA and deployment ID. The protected evidence must prove 60-second cadence,
+non-overlap, bounded timeouts, protected header injection, retained non-successes,
+queue-health telemetry, delivered alerts and ordered independent verification within
+24 hours. Run the monitoring gate against the same project/release/deployment after
+live application, Auth, database, email, enabled-push, Mux, incident-escalation and
+rollback alerts are accepted. Neither offline gate contacts production.
+
 `/api/push/send` is intentionally excluded from this schedule. It requires an
 explicit recipient and notification payload, and the repository has no push outbox
 consumer. Exercise it only with a dedicated staging user/device under a separately

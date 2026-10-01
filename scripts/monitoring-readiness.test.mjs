@@ -6,9 +6,11 @@ import { evaluateMonitoringReadiness as evaluateGate } from "./monitoring-readin
 const NOW = Date.parse("2026-10-02T12:00:00+10:00");
 const RELEASE_SHA = "a".repeat(40);
 const DEPLOYMENT_ID = "dpl_12345678";
+const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
 
 function evaluateMonitoringReadiness(manifest, options = {}) {
   return evaluateGate(manifest, {
+    expectedProjectRef: STAGING_PROJECT_REF,
     expectedCommit: RELEASE_SHA,
     expectedDeployment: DEPLOYMENT_ID,
     ...options,
@@ -19,6 +21,7 @@ function validManifest(overrides = {}) {
   const manifest = {
     manifestVersion: 1,
     environment: "staging",
+    projectRef: STAGING_PROJECT_REF,
     applicationOrigin: "https://jingwuguanseibukan-staging.vercel.app",
     release: {
       branch: "release/v1-readiness-20260918",
@@ -33,6 +36,7 @@ function validManifest(overrides = {}) {
     },
     evidence: {
       configuredAt: "2026-10-01T09:00:00+10:00",
+      acceptanceTestedAt: "2026-10-02T09:00:00+10:00",
       verifiedAt: "2026-10-02T10:00:00+10:00",
       verifiedBy: "Independent verifier",
       protectedReference: "protected evidence monitoring-20261002",
@@ -165,8 +169,9 @@ test("binds staging and production to their exact origins", () => {
   }), { now: NOW }).ready, false);
   assert.equal(evaluateMonitoringReadiness(validManifest({
     environment: "production",
+    projectRef: "abcdefghijklmnopqrst",
     applicationOrigin: "https://jingwuguanseibukan.com",
-  }), { now: NOW }).ready, true);
+  }), { now: NOW, expectedProjectRef: "abcdefghijklmnopqrst" }).ready, true);
   assert.equal(evaluateMonitoringReadiness(validManifest({
     applicationOrigin: "https://jingwuguanseibukan-staging.vercel.app/path",
   }), { now: NOW }).ready, false);
@@ -176,6 +181,7 @@ test("requires fresh, ordered and independently verified evidence", () => {
   const result = evaluateMonitoringReadiness(validManifest({
     evidence: {
       configuredAt: "2026-10-02T11:00:00+10:00",
+      acceptanceTestedAt: "2026-10-02T10:30:00+10:00",
       verifiedAt: "2026-10-01T10:00:00+10:00",
       verifiedBy: "TBD",
       protectedReference: "public notes",
@@ -188,6 +194,7 @@ test("requires fresh, ordered and independently verified evidence", () => {
     evidence: {
       ...validManifest().evidence,
       configuredAt: "2026-08-01T09:00:00+10:00",
+      acceptanceTestedAt: "2026-08-02T09:00:00+10:00",
       verifiedAt: "2026-08-02T10:00:00+10:00",
     },
   }), { now: NOW }).ready, false);
@@ -289,4 +296,42 @@ test("binds monitoring evidence to the independently supplied release deployment
   manifest.release.commitSha = "b".repeat(40);
   manifest.release.deploymentId = "dpl_other123";
   assert.equal(evaluateMonitoringReadiness(manifest, { now: NOW }).ready, false);
+});
+
+test("binds monitoring evidence to the independently supplied project", () => {
+  assert.equal(evaluateMonitoringReadiness(validManifest(), {
+    now: NOW,
+    expectedProjectRef: "abcdefghijklmnopqrst",
+  }).ready, false);
+  assert.equal(evaluateMonitoringReadiness(validManifest({
+    environment: "production",
+    projectRef: "pkmllhaavadhaozmwapz",
+    applicationOrigin: "https://jingwuguanseibukan.com",
+  }), {
+    now: NOW,
+    expectedProjectRef: "pkmllhaavadhaozmwapz",
+  }).ready, false);
+});
+
+test("requires live acceptance before fresh independent verification", () => {
+  const result = evaluateMonitoringReadiness(validManifest({
+    evidence: {
+      ...validManifest().evidence,
+      acceptanceTestedAt: "2026-10-02T11:00:00+10:00",
+      verifiedAt: "2026-10-02T10:00:00+10:00",
+      verifiedBy: "Monitoring owner",
+    },
+  }), { now: NOW });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "evidence.verifiedAt"));
+  assert.ok(result.blockers.some(({ path }) => path === "evidence.verifiedBy"));
+});
+
+test("reviewer independence is case- and whitespace-insensitive", () => {
+  const manifest = validManifest();
+  manifest.owners.monitoring = "Monitoring Owner";
+  manifest.evidence.verifiedBy = "  monitoring owner ";
+  const result = evaluateMonitoringReadiness(manifest, { now: NOW });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "evidence.verifiedBy"));
 });

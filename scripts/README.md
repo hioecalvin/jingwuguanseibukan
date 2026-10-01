@@ -30,6 +30,7 @@ authorizes production.
 ```powershell
 npm.cmd run monitoring:check -- `
   --manifest=C:\protected\evidence\monitoring-readiness.json `
+  --expected-project-ref=<exact-20-character-project-ref> `
   --expected-commit=<40-character-reviewed-commit> `
   --expected-deployment=<exact-deployment-id>
 
@@ -67,18 +68,46 @@ and independently reviewed. A passing result is a staging-only, read-only accept
 record; it does not authorize production or replace the separate Playwright browser
 matrix.
 
+## Provider delivery and dedicated-inbox evidence gate
+
+`provider-delivery-readiness.mjs` validates the protected delivery evidence that
+the final release window already requires. It binds six distinct evidence artifacts
+to the exact future production project, release commit, production deployment, and
+dedicated non-role inbox policy. It covers Resend sender/domain readiness, Auth
+confirmation and password-reset delivery, Member announcement and event delivery,
+email-worker retry/backoff/exhaustion, and the release-matched staging Mux upload and
+signed-playback acceptance. The command is offline and never prints a mailbox,
+message, provider identifier, credential, or protected artifact.
+
+```powershell
+npm.cmd run provider:delivery:check -- `
+  --manifest=C:\protected\evidence\provider-delivery.json `
+  --expected-project-ref=<exact-20-character-production-ref> `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment=<exact-production-deployment-id>
+```
+
+The checked-in template intentionally fails. See
+`operations/PROVIDER_DELIVERY_READINESS.md` for evidence and safety boundaries. A
+pass does not contact a provider, mutate production, or authorize the release.
+
 ## Email scheduler readiness gate
 
 `email-scheduler-readiness.mjs` validates a sanitized scheduler evidence manifest
 without invoking the worker or exposing its secret. It requires the exact staging or
 production POST endpoint, a 60-second cadence, one non-overlapping execution, bounded
 worker/provider/scheduler timeouts, protected header injection, retained failures,
-queue-health alerts, named owners and an empty-queue acceptance run that made zero
-provider requests. The checked-in template intentionally fails.
+queue-health alerts, named owners and a fresh, ordered, independently reviewed
+empty-queue/live-alert acceptance run that made zero provider requests. The evidence
+is bound to the exact project, release commit, deployment and worker endpoint. The
+checked-in template intentionally fails.
 
 ```powershell
 npm.cmd run email-scheduler:check -- `
-  --manifest=C:\protected\evidence\email-scheduler-manifest.json
+  --manifest=C:\protected\evidence\email-scheduler-manifest.json `
+  --expected-project-ref=<exact-20-character-project-ref> `
+  --expected-commit=<40-character-reviewed-commit> `
+  --expected-deployment=<exact-deployment-id>
 ```
 
 Do not put the worker secret in the manifest. A passing record proves only the
@@ -241,6 +270,52 @@ Generate fingerprints without printing ledger SQL using:
 npm.cmd run recovery:fingerprint
 npm.cmd run recovery:fingerprint -- --ledger C:\protected\evidence\source-ledger.json
 ```
+
+## Production secrets readiness gate
+
+`production-secrets-readiness.mjs` validates protected future-production
+configuration in memory without contacting Vercel, Supabase, Resend, Mux, or the
+application. It composes the provider configuration check, binds the result to the
+exact Singapore project, release commit and Vercel production deployment, and
+requires fresh ownership, rotation, access-review and independent-review evidence.
+It reports only field names, sanitized counts, and blockers; secret values are never
+printed or accepted in the sanitized manifest.
+
+Use the checked-in fail-closed template and the full procedure in
+`operations/PRODUCTION_SECRETS_READINESS.md`. Keep both the completed manifest and
+the production environment file under protected storage.
+
+```powershell
+npm.cmd run production:secrets:check -- `
+  --manifest=C:\protected\evidence\production-secrets.json `
+  --env-file=C:\protected\jingwuguan-production.env `
+  --expected-project-ref=<production-project-ref> `
+  --expected-commit=<release-sha> `
+  --expected-deployment-id=<production-deployment-id> `
+  --expected-origin=https://jingwuguanseibukan.com
+```
+
+## Release evidence packet gate
+
+`release-evidence-packet-readiness.mjs` closes the gap between recorded SHA-256
+references and the actual protected evidence files. It first revalidates the complete
+release-window manifest, then verifies that all eleven evidence files exist outside
+the repository, are bounded regular JSON files, are distinct, and hash to the exact
+digests in that release record. Network-share paths, links, malformed JSON, duplicate
+files and digest drift fail closed.
+
+Copy `release/release-evidence-index.template.json` to protected storage and follow
+`operations/RELEASE_EVIDENCE_PACKET.md` after every individual gate passes:
+
+```powershell
+npm.cmd run release:evidence:check -- `
+  --index=C:\protected\jingwuguan-release-evidence-index.json `
+  --expected-commit=<release-sha> `
+  --expected-production-project-ref=<production-project-ref>
+```
+
+The packet verifier performs no network, database, deployment, inbox or provider
+action and does not authorize a production release.
 
 ## Dummy test accounts
 

@@ -4628,3 +4628,49 @@ prove production secrets/provider delivery/scheduler/monitoring, run physical Sa
 and signed-installer acceptance, prove production identity cleanliness, and approve
 the exact release window. Production remains blocked until all eleven evidence-bound
 gates pass.
+
+### Milestone 178 — production operations evidence closure (01/10/2026)
+
+Completed three offline production-readiness tracks in parallel, then ran three
+independent review tracks before integration. Added a production-secrets validator
+that checks the complete protected configuration in memory and binds it to the exact
+future Singapore project, release commit, deployment and Vercel Production context.
+It requires modern Supabase role separation, strong distinct internal secrets,
+matching VAPID keys, Resend/Mux configuration, ten ownership/access/rotation records,
+fresh distinct evidence and independent review while rejecting staging/test residue.
+
+Added a dedicated provider-delivery gate for Resend domain/SMTP/log evidence, Auth
+confirmation and password reset, Member/event/worker email, retry/backoff/exhaustion,
+and guarded staging Mux upload/signed playback/cleanup. Dedicated-inbox recipients use
+keyed HMAC fingerprints; raw addresses, unsalted hashes, role/sender reuse, production
+mutation, publication, test identities and residue cannot pass. Every accepted field
+is covered by the canonical independent-review attestation.
+
+Strengthened the existing scheduler and monitoring validators rather than creating
+duplicates. Production evidence now binds the exact project, commit, deployment and
+worker endpoint; enforces a one-minute non-overlapping job with bounded timeouts,
+protected headers, retained failures, queue health, live-alert acceptance, ordered
+timestamps, 24-hour freshness and normalized reviewer independence. The release-window
+monitoring summary now carries the exact production project reference.
+
+Added a final evidence-packet binder for the actual protected release-window and eleven
+child evidence files. It verifies all files exist outside the repository, are distinct
+regular JSON files, cannot use local/network aliases or double as the release manifest,
+and exactly match the recorded SHA-256 digests. This prevents valid-looking digest
+strings from representing missing or substituted evidence.
+
+Independent review found and fixed ambient process values overriding the named
+production env file, incomplete provider attestation binding, guessable mailbox
+fingerprints, evidence-file reuse, forward-slash UNC access and case/whitespace reviewer
+aliases. Combined verification passes 473/473 application tests, 67/67 focused gate
+tests and 27/27 uploader tests. ESLint, TypeScript, template parsing, whitespace checks,
+the optimized 51-route build and all three dependency audits pass with zero reported
+vulnerabilities. No live system or provider was contacted.
+
+Production readiness is approximately 9.4/10. Remaining work is execution of the
+operator-controlled gates—not new broad feature development: create and independently
+verify the Singapore production project, perform the managed restore, configure and
+capture production secrets/provider/scheduler/monitoring evidence, run physical Safari
+and signed-installer acceptance, prove the production identity inventory is clean, and
+approve the exact release window. Production remains blocked until the completed
+protected evidence packet passes.

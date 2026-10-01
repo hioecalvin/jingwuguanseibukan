@@ -72,6 +72,7 @@ function validManifest(overrides = {}) {
         manifestSha256: "34".repeat(32),
         result: "passed",
         environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
         commitSha: RELEASE_SHA,
         deploymentId: "dpl_release_candidate",
       },
@@ -278,10 +279,24 @@ test("rejects placeholders, missing owners, and untested rollback", () => {
   assert.ok(result.blockers.length >= 6);
 });
 
+test("recovery verification is independent from release ownership", () => {
+  const manifest = validManifest();
+  manifest.owners.rollback = "Rollback Owner";
+  manifest.recovery.verifiedBy = "  rollback owner  ";
+  const result = evaluateReleaseWindow(manifest, {
+    expectedCommit: RELEASE_SHA,
+    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
+    now: NOW,
+  });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "recovery.verifiedBy"));
+});
+
 test("requires distinct gate manifests bound to the exact release and production project", () => {
   const manifest = validManifest();
   manifest.gateEvidence.physicalSafari.commitSha = PREVIOUS_SHA;
   manifest.gateEvidence.monitoring.deploymentId = "dpl_other_deployment";
+  manifest.gateEvidence.monitoring.projectRef = "zyxwvutsrqponmlkjihg";
   manifest.gateEvidence.productionIdentity.projectRef = "zyxwvutsrqponmlkjihg";
   manifest.gateEvidence.monitoring.manifestSha256 = manifest.gateEvidence.physicalSafari.manifestSha256;
   const result = evaluateReleaseWindow(manifest, {
@@ -292,6 +307,7 @@ test("requires distinct gate manifests bound to the exact release and production
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.physicalSafari.commitSha"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.monitoring.deploymentId"));
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.monitoring.projectRef"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.productionIdentity.projectRef"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
 });

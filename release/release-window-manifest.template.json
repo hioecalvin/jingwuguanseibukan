@@ -58,6 +58,7 @@
       "manifestSha256": "REPLACE_WITH_64_CHARACTER_MONITORING_MANIFEST_SHA256",
       "result": "REPLACE_WITH_PASSING_RESULT",
       "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
       "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
       "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
     },

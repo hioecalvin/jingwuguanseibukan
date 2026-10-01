@@ -1,6 +1,7 @@
 {
   "manifestVersion": 1,
   "environment": "staging",
+  "projectRef": "eomubndonbetszdbhsrj",
   "applicationOrigin": "https://jingwuguanseibukan-staging.vercel.app",
   "release": {
     "branch": "release/v1-readiness-20260918",
@@ -15,6 +16,7 @@
   },
   "evidence": {
     "configuredAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "acceptanceTestedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
     "verifiedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
     "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER",
     "protectedReference": "REPLACE_WITH_PROTECTED_EVIDENCE_REFERENCE"

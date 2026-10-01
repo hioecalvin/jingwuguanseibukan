@@ -6,6 +6,9 @@ const TARGETS = Object.freeze({
   production: "https://jingwuguanseibukan.com",
 });
 const RELEASE_BRANCH = "release/v1-readiness-20260918";
+const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
+const RETIRED_PROJECT_REF = "pkmllhaavadhaozmwapz";
+const PROJECT_REF = /^[a-z0-9]{20}$/;
 const SHA = /^[a-f0-9]{40}$/;
 const ISO_WITH_ZONE =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -39,10 +42,10 @@ const REQUIRED_REDACTIONS = Object.freeze([
   "rawDatabaseErrors",
 ]);
 const SCHEMA = Object.freeze({
-  "$": ["manifestVersion", "environment", "applicationOrigin", "release", "owners", "evidence", "application", "auth", "database", "emailWorker", "push", "mux", "incident", "rollback", "releaseStopSignals", "redaction", "acceptance"],
+  "$": ["manifestVersion", "environment", "projectRef", "applicationOrigin", "release", "owners", "evidence", "application", "auth", "database", "emailWorker", "push", "mux", "incident", "rollback", "releaseStopSignals", "redaction", "acceptance"],
   release: ["branch", "commitSha", "deploymentId"],
   owners: ["monitoring", "incidentCommander", "rollback", "security"],
-  evidence: ["configuredAt", "verifiedAt", "verifiedBy", "protectedReference"],
+  evidence: ["configuredAt", "acceptanceTestedAt", "verifiedAt", "verifiedBy", "protectedReference"],
   application: ["httpStatusCaptured", "routeAndMethodCaptured", "deploymentIdCaptured", "latencyCaptured", "alertOnErrorRate", "alertOnMissingTelemetry", "maxServerErrorRatePercent", "errorRateWindowMinutes"],
   auth: ["failedLoginRateMonitored", "adminAuthorizationFailuresMonitored", "passwordResetAbuseMonitored", "alertContainsNoIdentityData", "maxFailedLoginsPerFiveMinutes"],
   database: ["availabilityMonitored", "connectionSaturationMonitored", "migrationLedgerDriftMonitored", "rlsOrGrantRegressionMonitored", "privilegedAuditEventsMonitored", "backupFailureMonitored"],
@@ -103,6 +106,14 @@ function add(blockers, path, message) {
   blockers.push({ path, message });
 }
 
+function normalizedIdentity(value) {
+  return typeof value === "string" ? value.trim().toLocaleLowerCase("en-US") : "";
+}
+
+function validProjectRef(value) {
+  return typeof value === "string" && PROJECT_REF.test(value) && !/^(.)\1{19}$/.test(value);
+}
+
 function exactKeys(blockers, value, path, keys) {
   const source = object(value);
   if (source !== value) add(blockers, path, "must be an object using the documented sanitized schema");
@@ -161,6 +172,7 @@ function scanForSecrets(value, blockers, path = "$") {
 }
 
 export function evaluateMonitoringReadiness(manifest, {
+  expectedProjectRef,
   expectedCommit,
   expectedDeployment,
   now = Date.now(),
@@ -197,6 +209,16 @@ export function evaluateMonitoringReadiness(manifest, {
   if (environment in TARGETS && manifest.applicationOrigin !== TARGETS[environment]) {
     add(blockers, "applicationOrigin", `must equal the exact ${environment} origin`);
   }
+  if (!validProjectRef(expectedProjectRef)) {
+    add(blockers, "expectedProjectRef", "must independently supply an exact 20-character project ref");
+  } else if (environment === "staging" && expectedProjectRef !== STAGING_PROJECT_REF) {
+    add(blockers, "expectedProjectRef", `must equal ${STAGING_PROJECT_REF} for staging`);
+  } else if (environment === "production" && [STAGING_PROJECT_REF, RETIRED_PROJECT_REF].includes(expectedProjectRef)) {
+    add(blockers, "expectedProjectRef", "must identify the active production project, not staging or retired");
+  }
+  if (manifest.projectRef !== expectedProjectRef) {
+    add(blockers, "projectRef", "must equal the independently supplied project ref");
+  }
   try {
     const origin = new URL(manifest.applicationOrigin);
     if (origin.origin !== manifest.applicationOrigin || origin.protocol !== "https:") {
@@ -212,7 +234,7 @@ export function evaluateMonitoringReadiness(manifest, {
   }
 
   const evidence = exactKeys(blockers, manifest.evidence, "evidence", SCHEMA.evidence);
-  for (const key of ["configuredAt", "verifiedAt"]) {
+  for (const key of ["configuredAt", "acceptanceTestedAt", "verifiedAt"]) {
     if (!timestamp(evidence[key])) {
       add(blockers, `evidence.${key}`, "must be an ISO-8601 timestamp with an explicit offset");
     }
@@ -227,11 +249,16 @@ export function evaluateMonitoringReadiness(manifest, {
   }
   if (timestamp(evidence.configuredAt) && timestamp(evidence.verifiedAt)) {
     const configuredAt = Date.parse(evidence.configuredAt);
+    const acceptanceTestedAt = Date.parse(evidence.acceptanceTestedAt);
     const verifiedAt = Date.parse(evidence.verifiedAt);
-    if (verifiedAt < configuredAt) add(blockers, "evidence.verifiedAt", "must not be earlier than configuredAt");
-    if (!Number.isFinite(now) || now < verifiedAt || now - verifiedAt > 30 * 24 * 60 * 60 * 1000) {
-      add(blockers, "evidence.verifiedAt", "must be independently verified within the previous 30 days");
+    if (acceptanceTestedAt < configuredAt) add(blockers, "evidence.acceptanceTestedAt", "must not be earlier than configuredAt");
+    if (verifiedAt < acceptanceTestedAt) add(blockers, "evidence.verifiedAt", "must not be earlier than acceptanceTestedAt");
+    if (!Number.isFinite(now) || now < verifiedAt || now - verifiedAt > 24 * 60 * 60 * 1000) {
+      add(blockers, "evidence.verifiedAt", "must be independently verified within the previous 24 hours");
     }
+  }
+  if (Object.values(owners).map(normalizedIdentity).includes(normalizedIdentity(evidence.verifiedBy))) {
+    add(blockers, "evidence.verifiedBy", "must be independent from all operational owners");
   }
 
   const application = exactKeys(blockers, manifest.application, "application", SCHEMA.application);
@@ -389,6 +416,7 @@ export function evaluateMonitoringReadiness(manifest, {
     summary: blockers.length === 0
       ? {
           environment,
+          projectRef: manifest.projectRef,
           commitSha: release.commitSha,
           deploymentId: release.deploymentId,
           applicationOrigin: manifest.applicationOrigin,
@@ -409,14 +437,15 @@ function option(argv, name) {
 
 export async function runCli(argv = process.argv.slice(2)) {
   if (argv.includes("--help")) {
-    console.log("Usage: node scripts/monitoring-readiness.mjs --manifest=<protected-sanitized-json> --expected-commit=<40-char-sha> --expected-deployment=<dpl_id>");
+    console.log("Usage: node scripts/monitoring-readiness.mjs --manifest=<protected-sanitized-json> --expected-project-ref=<ref> --expected-commit=<40-char-sha> --expected-deployment=<dpl_id>");
     return 0;
   }
   const manifestPath = option(argv, "--manifest");
+  const expectedProjectRef = option(argv, "--expected-project-ref");
   const expectedCommit = option(argv, "--expected-commit");
   const expectedDeployment = option(argv, "--expected-deployment");
-  if (!manifestPath || !expectedCommit || !expectedDeployment) {
-    console.error(JSON.stringify({ ready: false, error: "A protected manifest, expected commit and expected deployment are required." }, null, 2));
+  if (!manifestPath || !expectedProjectRef || !expectedCommit || !expectedDeployment) {
+    console.error(JSON.stringify({ ready: false, error: "A protected manifest and expected project, commit and deployment are required." }, null, 2));
     return 2;
   }
   let manifest;
@@ -426,7 +455,7 @@ export async function runCli(argv = process.argv.slice(2)) {
     console.error(JSON.stringify({ ready: false, error: "Monitoring manifest could not be read." }, null, 2));
     return 2;
   }
-  const result = evaluateMonitoringReadiness(manifest, { expectedCommit, expectedDeployment });
+  const result = evaluateMonitoringReadiness(manifest, { expectedProjectRef, expectedCommit, expectedDeployment });
   console.log(JSON.stringify(result, null, 2));
   return result.ready ? 0 : 1;
 }

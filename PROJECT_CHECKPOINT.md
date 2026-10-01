@@ -1406,3 +1406,34 @@ acceptance completed; production remains unchanged.
   parsing, the optimized 51-route production build, and all three dependency audits
   with zero reported vulnerabilities. No live host, database, deployment, account,
   inbox, scheduler, provider, production or retired project was contacted.
+
+## Production secrets, provider delivery and evidence-packet closure — 1 October 2026
+
+- Added an offline production-secrets gate that composes the existing provider check
+  and binds the complete 19-value environment to the exact Singapore project, release
+  commit, production deployment and Vercel Production environment. It enforces modern
+  role-correct Supabase credentials, strong distinct worker/push/rate-limit secrets,
+  matching VAPID keys, valid Resend/Mux configuration, ten explicit ownership/access/
+  rotation records, fresh independent review, and zero staging or test residue.
+- Added a provider-delivery evidence gate covering dedicated non-role inbox policy,
+  Resend sender/domain/SMTP evidence, Auth confirmation and reset, Member/event/worker
+  delivery, retry/backoff/exhaustion, and guarded staging Mux upload/signed-playback/
+  cleanup. Keyed HMAC fingerprints bind every recipient without storing reversible
+  mailbox hashes; canonical review binds every accepted outcome and timestamp.
+- Strengthened the production scheduler and monitoring gates with exact project,
+  release, deployment and endpoint binding; one-minute single-flight scheduling,
+  bounded timeouts, protected header handling, retained failures, complete queue
+  telemetry, live alert acceptance, 24-hour freshness and normalized independent
+  reviewer checks. Monitoring evidence is now also project-bound in the release window.
+- Added a release evidence-packet verifier. It independently loads the protected
+  release-window file and all eleven evidence files, rejects repository/network paths,
+  links, malformed or duplicate files and release/evidence reuse, and verifies exact
+  raw-byte SHA-256 agreement. It does not replace any semantic child validator.
+- Independent reviews fixed ambient-environment override of the protected production
+  env file, incomplete provider attestation coverage, guessable recipient hashes,
+  evidence-file reuse, forward-slash UNC paths and case/whitespace reviewer aliases.
+- Verification passes 473/473 application tests, 67/67 focused combined gate tests,
+  27/27 uploader tests, ESLint, TypeScript, whitespace and template checks, the
+  optimized 51-route build, and full/production/uploader audits with zero reported
+  vulnerabilities. No staging, production, retired project, database, deployment,
+  inbox, scheduler or provider was contacted.
