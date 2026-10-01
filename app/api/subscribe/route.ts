@@ -6,6 +6,9 @@ import {
   consumeDurableRateLimit,
   durableRateLimitHeaders,
 } from "@/lib/security/durable-rate-limit";
+import {
+  trustedPushEndpoint,
+} from "@/lib/push/endpoint";
 
 
 type SubscriptionBody = {
@@ -141,7 +144,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const endpoint = textValue(body.endpoint, 4096);
+  const endpoint = trustedPushEndpoint(
+    textValue(body.endpoint, 4096),
+  );
   const p256dh = textValue(body.keys?.p256dh, 512);
   const auth = textValue(body.keys?.auth, 512);
   const userAgent =
@@ -151,13 +156,6 @@ export async function POST(request: NextRequest) {
   if (!endpoint || !p256dh || !auth) {
     return NextResponse.json(
       { error: "A complete push subscription is required." },
-      { status: 400 }
-    );
-  }
-
-  if (!endpoint.startsWith("https://")) {
-    return NextResponse.json(
-      { error: "The push endpoint must use HTTPS." },
       { status: 400 }
     );
   }
@@ -252,7 +250,9 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const endpoint = textValue(body.endpoint, 4096);
+  const endpoint = trustedPushEndpoint(
+    textValue(body.endpoint, 4096),
+  );
 
   if (!endpoint) {
     return NextResponse.json(

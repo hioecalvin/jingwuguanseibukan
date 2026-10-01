@@ -2,6 +2,10 @@ import "server-only";
 
 import webpush from "web-push";
 
+import {
+  trustedPushEndpoint,
+} from "@/lib/push/endpoint";
+
 
 export type PushPayload = {
   title: string;
@@ -24,6 +28,17 @@ export async function sendWebPush(
   payload:
     PushPayload
 ) {
+  const endpoint =
+    trustedPushEndpoint(
+      subscription.endpoint,
+    );
+
+  if (!endpoint) {
+    throw new Error(
+      "Push subscription endpoint is not trusted."
+    );
+  }
+
   const publicKey =
     process.env
       .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -58,7 +73,7 @@ export async function sendWebPush(
   return webpush.sendNotification(
     {
       endpoint:
-        subscription.endpoint,
+        endpoint,
 
       keys: {
         p256dh:

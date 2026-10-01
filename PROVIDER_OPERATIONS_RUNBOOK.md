@@ -88,14 +88,19 @@ hosted-service limits can change.
 
 1. Use a staging VAPID pair; keep the private key and `PUSH_API_SECRET` server-only
    and distinct.
-2. Test subscribe/resubscribe/unsubscribe, denial, multiple devices, stale 404/410
+2. Subscription endpoints are accepted only for the reviewed browser push services:
+   `fcm.googleapis.com`, `updates.push.services.mozilla.com`, and
+   `web.push.apple.com`. A new service host requires an explicit security review and
+   code/test update before it can be enabled. Stored endpoints are revalidated before
+   every provider request.
+3. Test subscribe/resubscribe/unsubscribe, denial, multiple devices, stale 404/410
    endpoints, temporary failure, and persistence-failure monitoring.
-3. Confirm every notification click target remains on the deployed application
+4. Confirm every notification click target remains on the deployed application
    origin. Test `//host`, backslash, control-character, absolute-URL and malformed
    payloads; all must be rejected or fall back to `/notifications`.
-4. Test real Chromium/Android and Safari on iOS/iPadOS. Desktop emulation is not
+5. Test real Chromium/Android and Safari on iOS/iPadOS. Desktop emulation is not
    proof of iOS Web Push or Home Screen behavior.
-5. Keep notification targets on local application paths.
+6. Keep notification targets on local application paths.
 
 ## Mux repository video
 

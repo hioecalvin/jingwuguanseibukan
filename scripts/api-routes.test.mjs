@@ -289,6 +289,12 @@ function subscription(authenticated = true) {
         rpc: async (name, args) => { calls.push({ name, args }); return { error: null }; },
       }) },
       '@/lib/security/durable-rate-limit': allowRateLimit,
+      '@/lib/push/endpoint': {
+        trustedPushEndpoint: value =>
+          value === 'https://fcm.googleapis.com/fcm/send/unit-token'
+            ? value
+            : null,
+      },
     }), calls,
   };
 }
@@ -310,10 +316,25 @@ test('push handlers require authentication and use only own-user RPCs', async ()
     assert.equal((await denied[method](new Request('http://localhost/api/subscribe', { method, body: '{}' }))).status, 401);
     assert.deepEqual(denied.calls, []);
     const route = subscription();
-    const response = await route[method](new Request('http://localhost/api/subscribe', { method, body: JSON.stringify({ endpoint: 'https://push.example.invalid/unit', keys: { p256dh: 'unit-key', auth: 'unit-auth' } }) }));
+    const response = await route[method](new Request('http://localhost/api/subscribe', { method, body: JSON.stringify({ endpoint: 'https://fcm.googleapis.com/fcm/send/unit-token', keys: { p256dh: 'unit-key', auth: 'unit-auth' } }) }));
     assert.equal(response.status, 200);
     assert.equal(route.calls[0].name, method === 'POST' ? 'save_my_push_subscription' : 'disable_my_push_subscription');
     assert.equal(Object.hasOwn(route.calls[0].args, 'user_id'), false);
+  }
+});
+
+test('push handlers reject unreviewed endpoints before an RPC', async () => {
+  for (const method of ['POST', 'DELETE']) {
+    const route = subscription();
+    const response = await route[method](new Request('http://localhost/api/subscribe', {
+      method,
+      body: JSON.stringify({
+        endpoint: 'https://127.0.0.1/private',
+        keys: { p256dh: 'unit-key', auth: 'unit-auth' },
+      }),
+    }));
+    assert.equal(response.status, 400);
+    assert.deepEqual(route.calls, []);
   }
 });
 
