@@ -3,14 +3,19 @@ import { open, stat } from "node:fs/promises";
 type Progress = (percent: number, message: string) => void;
 const chunkSize = 8 * 1024 * 1024;
 const transient = new Set([429, 500, 502, 503, 504]);
+const muxDirectUploadHost = /^direct-uploads-[a-z0-9-]+\.mux\.com$/;
+const muxDirectUploadPath = /^\/upload\/[A-Za-z0-9_-]{10,255}$/;
 
 function trustedUploadUrl(value: string) {
   const url = new URL(value);
   if (
     url.protocol !== "https:" ||
-    url.hostname !== "storage.googleapis.com" ||
     url.username || url.password ||
-    !url.pathname.startsWith("/video-storage-")
+    url.port || url.hash ||
+    !(
+      (url.hostname === "storage.googleapis.com" && url.pathname.startsWith("/video-storage-")) ||
+      (muxDirectUploadHost.test(url.hostname) && muxDirectUploadPath.test(url.pathname))
+    )
   ) throw new Error("The Super App returned an untrusted Mux upload address.");
   return url;
 }

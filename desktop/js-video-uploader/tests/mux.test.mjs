@@ -38,12 +38,41 @@ test("Mux direct upload sends resumable ranges without provider credentials", as
   });
 });
 
+test("Mux direct upload accepts the current regional signed-upload address", async () => {
+  await withVideo(async path => {
+    const originalFetch = globalThis.fetch;
+    const calls = [];
+    globalThis.fetch = async (input, init) => {
+      calls.push({ input: String(input), init });
+      return new Response("", { status: 200 });
+    };
+    try {
+      await uploadToMux(
+        path,
+        "https://direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi?token=signed",
+        new AbortController().signal,
+        () => undefined,
+      );
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].input, "https://direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi?token=signed");
+      assert.equal(calls[0].init.headers.Authorization, undefined);
+    } finally { globalThis.fetch = originalFetch; }
+  });
+});
+
 test("Mux direct upload rejects deceptive and insecure provider addresses", async () => {
   await withVideo(async path => {
     for (const url of [
       "https://storage.googleapis.com.evil.test/video-storage-uploads/id",
       "http://storage.googleapis.com/video-storage-uploads/id",
       "https://storage.googleapis.com/unrelated-bucket/id",
+      "https://direct-uploads-oci-us-east-1.mux.com.evil.test/upload/4Gg6D2w_XyZaBcDeFgHi",
+      "http://direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi",
+      "https://direct-uploads-oci-us-east-1.mux.com:8443/upload/4Gg6D2w_XyZaBcDeFgHi",
+      "https://user:password@direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi",
+      "https://direct-uploads-oci-us-east-1.mux.com/upload/too-short",
+      "https://direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi/extra",
+      "https://direct-uploads-oci-us-east-1.mux.com/upload/4Gg6D2w_XyZaBcDeFgHi#fragment",
     ]) {
       await assert.rejects(
         uploadToMux(path, url, new AbortController().signal, () => undefined),

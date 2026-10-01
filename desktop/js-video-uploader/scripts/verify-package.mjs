@@ -7,10 +7,13 @@ const entries = listPackage(archive);
 assert.ok(entries.includes("\\dist\\public-config.json") || entries.includes("/dist/public-config.json"));
 assert.ok(!entries.some(path => /(^|[/\\])(?:\.env(?:\.|$)|tests|test-results|scripts)(?:[/\\]|$)/.test(path)));
 const config = JSON.parse(extractFile(archive, "dist/public-config.json").toString());
+const mainBundle = extractFile(archive, "dist/main.cjs").toString();
 assert.equal(config.url, "https://eomubndonbetszdbhsrj.supabase.co");
 assert.equal(config.environment, "Staging");
 assert.equal(config.siteUrl, "https://jingwuguanseibukan-staging.vercel.app");
 assert.deepEqual(Object.keys(config).sort(), ["environment", "key", "siteUrl", "url"]);
+assert.match(mainBundle, /direct-uploads-/);
+assert.match(mainBundle, /storage\.googleapis\.com/);
 assert.ok(entries.includes("\\dist\\public-config.json") || entries.includes("/dist/public-config.json"));
 for (const path of ["release/win-unpacked/resources/ffmpeg/ffmpeg.exe", "release/win-unpacked/resources/ffmpeg/LICENSE.txt", "release/win-unpacked/resources/ffmpeg/README.txt"]) {
   const file = await stat(path);

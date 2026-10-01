@@ -57,8 +57,8 @@ fixture creation or mutation is performed.
 
 Read-only class-logo origin audit:
 `npm run audit:staging-logos -- C:\protected\jingwuguan-staging.env`.
-The 27 September staging audit found current logos for Karate, Taiji and Xingyi,
-the Aikido logo still on the retired Supabase project, and no Kungfu Kids logo.
+The current staging checkpoint has current-project logos for all five uploadable
+classes: Aikido, Karate, Kungfu Kids, Taiji and Xingyi.
 
 ## Authentication, upload and boundaries
 
@@ -82,7 +82,9 @@ the Aikido logo still on the retired Supabase project, and no Kungfu Kids logo.
 - Main-process Supabase requests use the staging public key and signed-in user's token,
   a 15-second timeout and no redirects. No service key or Mux credential is packaged.
 - The processed MP4 travels directly from the desktop to the one-time, HTTPS Mux
-  upload address. The uploader accepts only Mux's exact Google Storage host/path shape.
+  upload address. The uploader accepts only Mux's exact regional
+  `direct-uploads-*.mux.com/upload/{id}` shape or its legacy Google Storage shape;
+  deceptive hosts, credentials, custom ports, fragments and unrelated paths fail closed.
 - The Super App verifies the upload owner and current class appointment before it
   exposes processing status, and the database creates every completed item as Draft.
 - Independent desktop package/lockfile; root TypeScript/ESLint/Vercel exclude it.
@@ -93,8 +95,10 @@ the Aikido logo still on the retired Supabase project, and no Kungfu Kids logo.
   `MUX_TOKEN_ID` and `MUX_TOKEN_SECRET` on the Super App server only.
 - Create a Mux URL-signing key and configure `MUX_SIGNING_KEY_ID` plus the private
   key PEM encoded as base64 in `MUX_SIGNING_PRIVATE_KEY`, also server-only.
-- Assign and apply the deferred Mux repository migration before enabling Mux uploads. It preserves legacy
-  YouTube items, while all new uploader-created videos use Mux signed playback.
+- Migration 056 must be present before enabling Mux uploads. It preserves legacy
+  YouTube items, while all new uploader-created videos use Mux signed playback. The
+  current staging project has migration 056 and guarded signed-playback acceptance;
+  production has not been configured.
 - Every successful upload is saved to JS as **Draft**, never auto-published.
 - JS passwords and Supabase sessions remain memory-only. The installer contains no
   Mux API token, signing key, service-role key, or other provider secret.
