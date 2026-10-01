@@ -119,6 +119,9 @@ function Write-Evidence {
         $kind = if ($PreflightOnly) { "installer-preflight" } else { "installer-acceptance" }
         $target = Join-Path $PSScriptRoot "..\test-results\$kind-$($startedAt.ToString('yyyyMMdd-HHmmss')).json"
     }
+    if ([IO.Path]::GetExtension($target) -ne ".json") {
+        throw "EvidencePath must identify a .json file."
+    }
     $parent = Split-Path -Parent $target
     if (-not [string]::IsNullOrWhiteSpace($parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
     $report = [ordered]@{
@@ -144,8 +147,26 @@ try {
     if (-not [Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([Runtime.InteropServices.OSPlatform]::Windows)) {
         throw "Installer acceptance must run on Windows."
     }
+    if ([Runtime.InteropServices.RuntimeInformation]::OSArchitecture -ne [Runtime.InteropServices.Architecture]::X64) {
+        throw "This installer candidate is approved only for Windows x64."
+    }
+    if (-not $PreflightOnly -and -not [Environment]::UserInteractive) {
+        throw "The full installer acceptance requires an interactive Windows desktop session."
+    }
+    if (-not $PreflightOnly -and [string]::IsNullOrWhiteSpace($ExpectedSha256)) {
+        throw "ExpectedSha256 is required for the full installer acceptance. Run the preflight first and approve its reported SHA-256."
+    }
 
     $resolvedInstaller = (Resolve-Path -LiteralPath $InstallerPath).Path
+    if (-not [string]::IsNullOrWhiteSpace($EvidencePath)) {
+        $resolvedEvidence = [IO.Path]::GetFullPath($EvidencePath)
+        if ([IO.Path]::GetExtension($resolvedEvidence) -ne ".json") {
+            throw "EvidencePath must identify a .json file."
+        }
+        if ([string]::Equals($resolvedEvidence, $resolvedInstaller, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "EvidencePath must not overwrite the installer."
+        }
+    }
     $item = Get-Item -LiteralPath $resolvedInstaller
     if ($item.Extension -ne ".exe" -or $item.Length -le 0) { throw "Installer must be a non-empty .exe file." }
     $hash = Get-Sha256 -Path $resolvedInstaller

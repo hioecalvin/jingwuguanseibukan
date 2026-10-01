@@ -31,7 +31,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\installer-acceptance
 ```
 
 The preflight fingerprints the installer and refuses to proceed when the exact
-per-user product is already installed. The full run opens the normal installer,
+per-user product is already installed. Copy its SHA-256 into a separately reviewed
+release record before supplying it to the full command; the full runner fails closed
+when `-ExpectedSha256` is missing or does not match. The full run opens the normal installer,
 discovers only the exact `JS Video Uploader` uninstall registration, launches the
 installed executable, requires a visible application window, allows a short visual
 inspection, closes only that captured process, and opens the normal uninstaller. It
@@ -43,6 +45,10 @@ restricted CI desktop. Do not sign in during this packaging check; authenticatio
 role and provider acceptance are separate guarded tests. If the script reports an
 existing installation, uninstall it manually and rerun rather than allowing the
 candidate to overwrite it. The runner never silently removes an existing install.
+It is pinned to Windows x64 and refuses non-JSON evidence targets. If any step fails
+after installation, the runner records the failure and closes only the app process it
+started; it does not silently uninstall or delete the partial installation. Inspect the
+report and remove that exact installation manually before retrying.
 
 ## Development (Windows)
 
