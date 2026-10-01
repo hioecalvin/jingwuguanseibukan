@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  KNOWN_PRODUCTION_PROJECT_REF,
+  RETIRED_PROJECT_REF,
   passwordUpdatePayload,
   projectRefFromHostedUrl,
   readRotationConfiguration,
@@ -58,8 +58,8 @@ test("rotation is hard-limited to the exact recorded staging origin", () => {
   ]) assert.throws(() => projectRefFromHostedUrl(url));
 
   const production = validEnvironment();
-  production.NEXT_PUBLIC_SUPABASE_URL = `https://${KNOWN_PRODUCTION_PROJECT_REF}.supabase.co`;
-  production.STAGING_PROJECT_REF = KNOWN_PRODUCTION_PROJECT_REF;
+  production.NEXT_PUBLIC_SUPABASE_URL = `https://${RETIRED_PROJECT_REF}.supabase.co`;
+  production.STAGING_PROJECT_REF = RETIRED_PROJECT_REF;
   assert.throws(() => readRotationConfiguration(production), /restricted to the recorded staging project/);
 });
 

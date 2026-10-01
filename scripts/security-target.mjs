@@ -1,6 +1,8 @@
-// Keep production probes deliberately read-only. This is a guardrail for the
-// test runner, not an authorization boundary for the application itself.
-export const PRODUCTION_SUPABASE_HOST = "pkmllhaavadhaozmwapz.supabase.co";
+// The historical project is retired and must never be treated as production.
+// Keep future production probes deliberately read-only and bind them to an
+// operator-supplied project ref. This is a runner guardrail, not application auth.
+export const RETIRED_PROJECT_REF = "pkmllhaavadhaozmwapz";
+export const RETIRED_SUPABASE_HOST = `${RETIRED_PROJECT_REF}.supabase.co`;
 
 export function validateSecurityTarget(environment) {
   const mode = environment.SECURITY_TEST_ENVIRONMENT;
@@ -21,8 +23,17 @@ export function validateSecurityTarget(environment) {
   if (environment.SECURITY_TEST_EXPECTED_HOST !== url.host) {
     throw new Error("SECURITY_TEST_EXPECTED_HOST must explicitly match the target URL host, including any port.");
   }
-  if (mode === "staging" && url.hostname === PRODUCTION_SUPABASE_HOST) {
-    throw new Error("The known production Supabase project cannot be used for staging tests.");
+  if (url.hostname === RETIRED_SUPABASE_HOST) {
+    throw new Error("The retired Supabase project is prohibited.");
+  }
+  if (mode === "production-read-only") {
+    const projectRef = environment.SECURITY_TEST_PRODUCTION_PROJECT_REF?.trim().toLowerCase();
+    if (!/^[a-z0-9]+$/.test(projectRef ?? "") || projectRef === RETIRED_PROJECT_REF) {
+      throw new Error("SECURITY_TEST_PRODUCTION_PROJECT_REF must name the exact active production project.");
+    }
+    if (url.hostname !== `${projectRef}.supabase.co` || url.port) {
+      throw new Error("Production read-only tests require the exact hosted project origin.");
+    }
   }
   return { url: url.origin, mode, allowMutationProbe: mode === "staging" };
 }

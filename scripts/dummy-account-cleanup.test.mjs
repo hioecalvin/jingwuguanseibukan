@@ -4,7 +4,7 @@ import test from 'node:test';
 import {
   classifyDummyUsers,
   cleanupConfirmationToken,
-  KNOWN_PRODUCTION_PROJECT_REF,
+  RETIRED_PROJECT_REF,
   projectRefFromUrl,
   validateCleanupTarget,
 } from './dummy-account-cleanup.mjs';
@@ -17,11 +17,12 @@ test('cleanup targets require an exact hosted project origin and expected ref', 
   assert.throws(() => validateCleanupTarget({ url: 'https://stage123.supabase.co', environment: 'staging', expectedProjectRef: 'other' }));
 });
 
-test('the known production project cannot be disguised as staging', () => {
-  const url = `https://${KNOWN_PRODUCTION_PROJECT_REF}.supabase.co`;
-  assert.throws(() => validateCleanupTarget({ url, environment: 'staging', expectedProjectRef: KNOWN_PRODUCTION_PROJECT_REF }));
-  assert.equal(validateCleanupTarget({ url, environment: 'production', expectedProjectRef: KNOWN_PRODUCTION_PROJECT_REF }), KNOWN_PRODUCTION_PROJECT_REF);
-  assert.throws(() => validateCleanupTarget({ url: 'https://stage123.supabase.co', environment: 'production', expectedProjectRef: 'stage123' }));
+test('the retired project is always prohibited and future production is exact', () => {
+  const url = `https://${RETIRED_PROJECT_REF}.supabase.co`;
+  assert.throws(() => validateCleanupTarget({ url, environment: 'staging', expectedProjectRef: RETIRED_PROJECT_REF }), /retired/);
+  assert.throws(() => validateCleanupTarget({ url, environment: 'production', expectedProjectRef: RETIRED_PROJECT_REF }), /retired/);
+  assert.equal(validateCleanupTarget({ url: 'https://singapore123.supabase.co', environment: 'production', expectedProjectRef: 'singapore123' }), 'singapore123');
+  assert.throws(() => validateCleanupTarget({ url: 'https://singapore123.supabase.co', environment: 'production', expectedProjectRef: 'other' }));
 });
 
 test('only accounts with both independent seed markers are deletion candidates', () => {

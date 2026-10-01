@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 export const DUMMY_EMAIL_DOMAIN = 'dummy.jingwuguan.test';
-export const KNOWN_PRODUCTION_PROJECT_REF = 'pkmllhaavadhaozmwapz';
+export const RETIRED_PROJECT_REF = 'pkmllhaavadhaozmwapz';
 
 export function projectRefFromUrl(value) {
   let url;
@@ -30,11 +30,8 @@ export function validateCleanupTarget({ url, environment, expectedProjectRef }) 
   if (projectRef !== expectedProjectRef.toLowerCase()) {
     throw new Error('Supabase URL does not match the expected project ref.');
   }
-  if (projectRef === KNOWN_PRODUCTION_PROJECT_REF && environment !== 'production') {
-    throw new Error('The known production project cannot be declared staging.');
-  }
-  if (environment === 'production' && projectRef !== KNOWN_PRODUCTION_PROJECT_REF) {
-    throw new Error('Production cleanup is limited to the recorded production project.');
+  if (projectRef === RETIRED_PROJECT_REF) {
+    throw new Error('The retired project is prohibited.');
   }
   return projectRef;
 }

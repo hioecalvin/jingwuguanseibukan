@@ -1,5 +1,5 @@
 export const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
-export const KNOWN_PRODUCTION_PROJECT_REF = "pkmllhaavadhaozmwapz";
+export const RETIRED_PROJECT_REF = "pkmllhaavadhaozmwapz";
 
 export const SECURITY_TEST_ACCOUNTS = Object.freeze([
   Object.freeze({
@@ -93,8 +93,8 @@ export function readRotationConfiguration(env) {
   if (expectedProjectRef !== STAGING_PROJECT_REF || projectRef !== STAGING_PROJECT_REF) {
     throw new Error("Rotation is restricted to the recorded staging project ref.");
   }
-  if (expectedProjectRef === KNOWN_PRODUCTION_PROJECT_REF || projectRef === KNOWN_PRODUCTION_PROJECT_REF) {
-    throw new Error("The known production project is prohibited.");
+  if (expectedProjectRef === RETIRED_PROJECT_REF || projectRef === RETIRED_PROJECT_REF) {
+    throw new Error("The retired project is prohibited.");
   }
 
   const secret = required(env, "SUPABASE_SECRET_KEY");

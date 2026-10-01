@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isAssessorAuthorizationDenied, isPermissionDenied, PRODUCTION_SUPABASE_HOST, resolveSecurityCredential, validateSecurityTarget } from "./security-target.mjs";
+import { isAssessorAuthorizationDenied, isPermissionDenied, RETIRED_PROJECT_REF, RETIRED_SUPABASE_HOST, resolveSecurityCredential, validateSecurityTarget } from "./security-target.mjs";
 
 const staging = {
   SECURITY_TEST_ENVIRONMENT: "staging",
@@ -15,10 +15,21 @@ test("security runner requires an explicit mode and exact target", () => {
   assert.equal(validateSecurityTarget(staging).allowMutationProbe, true);
 });
 
-test("known production cannot be declared staging and has no mutation probe", () => {
-  const production = { ...staging, SECURITY_TEST_EXPECTED_HOST: PRODUCTION_SUPABASE_HOST, NEXT_PUBLIC_SUPABASE_URL: `https://${PRODUCTION_SUPABASE_HOST}` };
-  assert.throws(() => validateSecurityTarget(production), /cannot be used/);
-  assert.equal(validateSecurityTarget({ ...production, SECURITY_TEST_ENVIRONMENT: "production-read-only" }).allowMutationProbe, false);
+test("retired project is always prohibited and future production is exact and read-only", () => {
+  const retired = { ...staging, SECURITY_TEST_EXPECTED_HOST: RETIRED_SUPABASE_HOST, NEXT_PUBLIC_SUPABASE_URL: `https://${RETIRED_SUPABASE_HOST}` };
+  assert.throws(() => validateSecurityTarget(retired), /retired/);
+  assert.throws(() => validateSecurityTarget({ ...retired, SECURITY_TEST_ENVIRONMENT: "production-read-only", SECURITY_TEST_PRODUCTION_PROJECT_REF: RETIRED_PROJECT_REF }), /retired/);
+
+  const production = {
+    ...staging,
+    SECURITY_TEST_ENVIRONMENT: "production-read-only",
+    SECURITY_TEST_EXPECTED_HOST: "singapore123.supabase.co",
+    SECURITY_TEST_PRODUCTION_PROJECT_REF: "singapore123",
+    NEXT_PUBLIC_SUPABASE_URL: "https://singapore123.supabase.co",
+  };
+  assert.equal(validateSecurityTarget(production).allowMutationProbe, false);
+  assert.throws(() => validateSecurityTarget({ ...production, SECURITY_TEST_PRODUCTION_PROJECT_REF: undefined }), /exact active production project/);
+  assert.throws(() => validateSecurityTarget({ ...production, SECURITY_TEST_PRODUCTION_PROJECT_REF: "other" }), /exact hosted project origin/);
 });
 
 test("target URLs reject embedded credentials, remote HTTP, and paths", () => {
