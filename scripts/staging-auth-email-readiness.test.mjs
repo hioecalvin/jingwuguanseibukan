@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import test from "node:test";
+import { after } from "node:test";
 
 import {
   REQUIRED_CLEANUP_SCOPES,
@@ -7,6 +12,19 @@ import {
   evaluateStagingAuthEmailReadiness,
   runCli,
 } from "./staging-auth-email-readiness.mjs";
+
+const evidenceDirectory = mkdtempSync(join(tmpdir(), "jwg-auth-email-evidence-"));
+const catalogFile = join(evidenceDirectory, "catalog.json");
+const cleanupFile = join(evidenceDirectory, "cleanup-plan.json");
+const catalogContents = '{"projectRef":"eomubndonbetszdbhsrj","kind":"catalog"}\n';
+const cleanupContents = '{"projectRef":"eomubndonbetszdbhsrj","kind":"cleanup-plan"}\n';
+writeFileSync(catalogFile, catalogContents, "utf8");
+writeFileSync(cleanupFile, cleanupContents, "utf8");
+const sha256 = (contents) => createHash("sha256").update(contents).digest("hex");
+
+after(() => {
+  if (existsSync(evidenceDirectory)) rmSync(evidenceDirectory, { recursive: true });
+});
 
 function validEnvironment({ includeReviewToken = true } = {}) {
   const environment = {
@@ -31,8 +49,10 @@ function validEnvironment({ includeReviewToken = true } = {}) {
     STAGING_AUTH_ACCEPTANCE_DOJO_ID: "20000000-0000-4000-8000-000000000002",
     STAGING_AUTH_ACCEPTANCE_REGISTRATION_PASSWORD: "Signup-Secret-2026!",
     STAGING_AUTH_ACCEPTANCE_REPLACEMENT_PASSWORD: "Replace-Secret-2026!",
-    STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256: "1".repeat(64),
-    STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256: "2".repeat(64),
+    STAGING_AUTH_ACCEPTANCE_CATALOG_FILE: catalogFile,
+    STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256: sha256(catalogContents),
+    STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE: cleanupFile,
+    STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256: sha256(cleanupContents),
     STAGING_AUTH_ACCEPTANCE_CLEANUP_SCOPES: REQUIRED_CLEANUP_SCOPES.join(","),
   };
   if (includeReviewToken) {
@@ -129,6 +149,51 @@ test("catalog, cleanup digest, isolated UUIDs, and minimum residue scopes are ma
     "STAGING_AUTH_ACCEPTANCE_DOJO_ID",
     "STAGING_AUTH_ACCEPTANCE_CLEANUP_SCOPES",
   ]) assert.ok(result.blockers.some(({ path }) => path === name), name);
+});
+
+test("catalog and cleanup digests must bind distinct protected evidence files", () => {
+  const mismatch = evaluateStagingAuthEmailReadiness({
+    ...validEnvironment(),
+    STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256: "a".repeat(64),
+  });
+  assert.equal(mismatch.ready, false);
+  assert.equal(mismatch.reviewToken, null);
+  assert.ok(mismatch.blockers.some(({ path, message }) =>
+    path === "STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256" && /exact file/.test(message)));
+
+  const missing = evaluateStagingAuthEmailReadiness({
+    ...validEnvironment(),
+    STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE: join(evidenceDirectory, "missing.json"),
+  });
+  assert.equal(missing.ready, false);
+  assert.equal(missing.reviewToken, null);
+  assert.ok(missing.blockers.some(({ path }) =>
+    path === "STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE"));
+
+  const inRepository = evaluateStagingAuthEmailReadiness({
+    ...validEnvironment(),
+    STAGING_AUTH_ACCEPTANCE_CATALOG_FILE: resolve("package.json"),
+  });
+  assert.equal(inRepository.ready, false);
+  assert.ok(inRepository.blockers.some(({ path, message }) =>
+    path === "STAGING_AUTH_ACCEPTANCE_CATALOG_FILE" && /outside/.test(message)));
+
+  const sameFile = evaluateStagingAuthEmailReadiness({
+    ...validEnvironment(),
+    STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE: catalogFile,
+    STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256: sha256(catalogContents),
+  });
+  assert.equal(sameFile.ready, false);
+  assert.equal(sameFile.reviewToken, null);
+  assert.ok(sameFile.blockers.some(({ path, message }) =>
+    path === "STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE" && /distinct/.test(message)));
+
+  const otherwiseInvalid = evaluateStagingAuthEmailReadiness({
+    ...validEnvironment({ includeReviewToken: false }),
+    EMAIL_WORKER_SECRET: "short",
+  });
+  assert.equal(otherwiseInvalid.ready, false);
+  assert.equal(otherwiseInvalid.reviewToken, null);
 });
 
 test("changing any reviewed non-secret scope invalidates the review token", () => {

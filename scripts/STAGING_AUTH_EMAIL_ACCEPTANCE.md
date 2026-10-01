@@ -22,15 +22,21 @@ arguments:
   `JWG-AUTH-YYYYMMDD-XXXXXXXXXXXX`;
 - the isolated staging class and dojo UUIDs;
 - distinct strong registration and replacement passwords;
-- the current read-only catalog SHA-256;
-- the independently reviewed cleanup-plan SHA-256;
+- `STAGING_AUTH_ACCEPTANCE_CATALOG_FILE` and
+  `STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256`, identifying the current read-only
+  catalog evidence;
+- `STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE` and
+  `STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256`, identifying the independently
+  reviewed cleanup plan;
 - the complete cleanup-scope list, including at least the scopes printed by the tool;
 - the review token issued by the first offline preflight.
 
 The normal exact staging URL, project ref, Supabase keys, sender address, and existing
 role-security account addresses must also be present. Results contain variable names,
 fixed target metadata, and a derived review token only. They do not print the inbox,
-passwords, or Supabase keys.
+passwords, Supabase keys, or protected evidence paths. The two evidence files must be
+non-empty regular files outside the repository, no larger than 32 MiB, distinct from
+each other, and must match their recorded digests exactly.
 
 ## Two-pass review
 

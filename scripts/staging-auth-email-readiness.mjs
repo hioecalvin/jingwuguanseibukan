@@ -1,8 +1,8 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { loadEnvFile } from "node:process";
 import { isAbsolute, resolve, sep } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const STAGING_AUTH_EMAIL_CONFIRMATION = "--confirm-offline-preflight";
 export const STAGING_AUTH_EMAIL_PROJECT_REF = "eomubndonbetszdbhsrj";
@@ -24,6 +24,7 @@ const SHA256 = /^[0-9a-f]{64}$/i;
 const RUN_ID = /^JWG-AUTH-[0-9]{8}-[A-Z0-9]{12}$/;
 const EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
 const PLACEHOLDER = /(?:change[-_ ]?me|example|dummy|fixture|invalid|local[-_ ]?only|test[-_ ]?only)/i;
+const REPOSITORY_ROOT = realpathSync(fileURLToPath(new URL("../", import.meta.url)));
 const PROTECTED_NAMES = Object.freeze([
   "NEXT_PUBLIC_SITE_URL",
   "STAGING_PROJECT_REF",
@@ -39,7 +40,9 @@ const PROTECTED_NAMES = Object.freeze([
   "STAGING_AUTH_ACCEPTANCE_REGISTRATION_PASSWORD",
   "STAGING_AUTH_ACCEPTANCE_REPLACEMENT_PASSWORD",
   "STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256",
+  "STAGING_AUTH_ACCEPTANCE_CATALOG_FILE",
   "STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256",
+  "STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE",
   "STAGING_AUTH_ACCEPTANCE_CLEANUP_SCOPES",
   "STAGING_AUTH_ACCEPTANCE_REVIEW_TOKEN",
   "EMAIL_FROM_ADDRESS",
@@ -99,6 +102,44 @@ function strongDisposablePassword(password) {
 
 function normalizeScopes(raw) {
   return [...new Set(raw.split(",").map((item) => item.trim()).filter(Boolean))].sort();
+}
+
+function verifyProtectedArtifact({
+  blockers,
+  environment,
+  pathName,
+  digestName,
+  expectedDigest,
+}) {
+  const artifactPath = requireValue(blockers, environment, pathName);
+  if (!artifactPath) return null;
+  if (!isAbsolute(artifactPath)) {
+    add(blockers, pathName, "must be an absolute protected evidence-file path");
+    return null;
+  }
+
+  try {
+    const realArtifactPath = realpathSync(artifactPath);
+    if (realArtifactPath === REPOSITORY_ROOT ||
+        realArtifactPath.startsWith(`${REPOSITORY_ROOT}${sep}`)) {
+      add(blockers, pathName, "must point outside the repository");
+      return null;
+    }
+    const stats = statSync(realArtifactPath);
+    if (!stats.isFile() || stats.size <= 0 || stats.size > 32 * 1024 * 1024) {
+      add(blockers, pathName, "must be a non-empty regular evidence file no larger than 32 MiB");
+      return null;
+    }
+    const actualDigest = createHash("sha256").update(readFileSync(realArtifactPath)).digest("hex");
+    if (SHA256.test(expectedDigest) && !constantTimeEqual(actualDigest, expectedDigest)) {
+      add(blockers, digestName, `must match the exact file named by ${pathName}`);
+      return null;
+    }
+    return realArtifactPath;
+  } catch {
+    add(blockers, pathName, "must identify a readable protected evidence file");
+    return null;
+  }
 }
 
 export function authEmailReviewToken({
@@ -240,6 +281,25 @@ export function evaluateStagingAuthEmailReadiness(environment) {
   if (cleanupSha256 && /^0{64}$/i.test(cleanupSha256)) {
     add(blockers, "STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256", "must not be an empty placeholder digest");
   }
+  const catalogFile = verifyProtectedArtifact({
+    blockers,
+    environment,
+    pathName: "STAGING_AUTH_ACCEPTANCE_CATALOG_FILE",
+    digestName: "STAGING_AUTH_ACCEPTANCE_CATALOG_SHA256",
+    expectedDigest: catalogSha256,
+  });
+  const cleanupFile = verifyProtectedArtifact({
+    blockers,
+    environment,
+    pathName: "STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE",
+    digestName: "STAGING_AUTH_ACCEPTANCE_CLEANUP_SHA256",
+    expectedDigest: cleanupSha256,
+  });
+  const artifactsDistinct = catalogFile && cleanupFile &&
+    !constantTimeEqual(catalogFile, cleanupFile);
+  if (catalogFile && cleanupFile && !artifactsDistinct) {
+    add(blockers, "STAGING_AUTH_ACCEPTANCE_CLEANUP_PLAN_FILE", "must be distinct from the catalog evidence file");
+  }
 
   const scopes = normalizeScopes(requireValue(blockers, environment, "STAGING_AUTH_ACCEPTANCE_CLEANUP_SCOPES"));
   const missingScopes = REQUIRED_CLEANUP_SCOPES.filter((scope) => !scopes.includes(scope));
@@ -248,8 +308,9 @@ export function evaluateStagingAuthEmailReadiness(environment) {
   }
 
   let reviewToken = null;
-  if (runId && inbox && classId && dojoId && SHA256.test(catalogSha256) &&
-      SHA256.test(cleanupSha256) && missingScopes.length === 0) {
+  if (blockers.length === 0 && runId && inbox && classId && dojoId && SHA256.test(catalogSha256) &&
+      SHA256.test(cleanupSha256) && catalogFile && cleanupFile && artifactsDistinct &&
+      missingScopes.length === 0) {
     reviewToken = authEmailReviewToken({
       runId,
       inbox,
@@ -312,8 +373,7 @@ export function runCli(argv = process.argv.slice(2), environment = process.env) 
     return 2;
   }
   const resolvedFile = resolve(envFile);
-  const repositoryRoot = resolve(process.cwd());
-  if (resolvedFile === repositoryRoot || resolvedFile.startsWith(`${repositoryRoot}${sep}`)) {
+  if (resolvedFile === REPOSITORY_ROOT || resolvedFile.startsWith(`${REPOSITORY_ROOT}${sep}`)) {
     console.error(JSON.stringify({ ready: false, error: "Protected environment file must be outside the repository." }, null, 2));
     return 2;
   }
