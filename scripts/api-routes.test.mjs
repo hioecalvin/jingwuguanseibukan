@@ -33,9 +33,11 @@ function worker({
   queueHealthError = null,
   memorialData = { created_count: 0 },
   memorialError = null,
+  remainingRunTimes = null,
 } = {}) {
   const calls = [];
   let claimIndex = 0;
+  let remainingIndex = 0;
   const route = loadRoute('app/api/system/email-worker/route.ts', {
     'next/server': nextServer,
     '@/lib/supabase/admin': { createAdminClient: () => ({ rpc: async (name, args) => {
@@ -48,6 +50,12 @@ function worker({
       throw new Error(`Unexpected RPC: ${name}`);
     } }) },
     '@/lib/email/render-email': { renderEmail: () => '<p>Unit</p>' },
+    '@/lib/email/worker-runtime': {
+      emailProviderAbortSignal: remaining => ({ remaining }),
+      emailWorkerDeadline: () => 1_000,
+      remainingWorkerTimeMs: () =>
+        remainingRunTimes?.[remainingIndex++] ?? 1_000,
+    },
     '@/lib/security/durable-rate-limit': allowRateLimit,
     '@/lib/security/constant-time-secret': {
       matchesSecret: (received, expected) =>
@@ -88,6 +96,7 @@ test('an empty email queue is a successful zero-work run', async () => {
     processed: 0,
     sent: 0,
     failed: 0,
+    budgetExhausted: false,
     memorialProcessor: {
       status: 'PASS',
       createdAnnouncements: 0,
@@ -192,6 +201,26 @@ test('successful worker delivery is capped at twenty claims per run', async () =
   assert.equal(body.failed, 0);
   assert.equal(body.queueHealth.status, 'PASS');
   assert.equal(route.calls.filter(call => call.name === 'claim_next_email').length, 20);
+});
+
+test('email worker stops before the next scheduler tick when its run budget is exhausted', async () => {
+  const route = worker({
+    claims: [
+      { data: [email], error: null },
+      { data: [{ ...email, email_id: 'must-not-be-claimed' }], error: null },
+    ],
+    remainingRunTimes: [1_000, 750, 0],
+  });
+  const response = await route.run();
+  const body = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.equal(body.success, false);
+  assert.equal(body.budgetExhausted, true);
+  assert.equal(body.processed, 1);
+  assert.equal(body.sent, 1);
+  assert.equal(route.calls.filter(call => call.name === 'claim_next_email').length, 1);
+  assert.equal(route.calls.find(call => call.name === 'send').options.signal.remaining, 750);
 });
 
 test('email queue delay or exhausted retries produce an observable unhealthy response', async () => {

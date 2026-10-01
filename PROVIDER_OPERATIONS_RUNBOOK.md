@@ -83,6 +83,13 @@ hosted-service limits can change.
    future backoff, then flags it if it remains ready for more than two minutes.
 8. Verify registration decisions, password reset, events, settlements, and
    subscription notices with test-only recipients.
+9. Keep each invocation below the scheduler interval. The worker defaults to a
+   45-second run budget and a 10-second provider timeout, stops claiming new rows when
+   the budget is exhausted, and reports that condition as HTTP 503. Optional
+   `EMAIL_WORKER_RUN_BUDGET_MS` (5000–50000) and
+   `EMAIL_PROVIDER_TIMEOUT_MS` (1000–30000) overrides fail back to those defaults when
+   missing, malformed, or outside their reviewed bounds. Monitor every non-200 result;
+   do not use the timeout as a substitute for scheduler overlap protection and alerts.
 
 ## Web Push and VAPID
 

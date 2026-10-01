@@ -15,6 +15,11 @@ import {
   renderEmail,
 } from "@/lib/email/render-email";
 import {
+  emailProviderAbortSignal,
+  emailWorkerDeadline,
+  remainingWorkerTimeMs,
+} from "@/lib/email/worker-runtime";
+import {
   configuredRateLimit,
   consumeDurableRateLimit,
   durableRateLimitHeaders,
@@ -300,6 +305,10 @@ export async function POST(
     createAdminClient();
 
 
+  const workerDeadline =
+    emailWorkerDeadline();
+
+
   let memorialProcessor: MemorialProcessorHealth = {
     status: "PASS",
     createdAnnouncements: 0,
@@ -365,6 +374,9 @@ export async function POST(
   let processed =
     0;
 
+  let budgetExhausted =
+    false;
+
 
   for (
     let index = 0;
@@ -374,6 +386,18 @@ export async function POST(
 
     index++
   ) {
+
+    const remainingRunTimeMs =
+      remainingWorkerTimeMs(
+        workerDeadline,
+      );
+
+
+    if (remainingRunTimeMs <= 0) {
+      budgetExhausted =
+        true;
+      break;
+    }
 
     const {
       data:
@@ -441,6 +465,24 @@ export async function POST(
         );
 
 
+      /*
+       * Resend's runtime forwards standard fetch options even though its
+       * public request-option type currently documents only headers/query.
+       * Keeping this as an inferred variable preserves that runtime option
+       * without weakening the email payload's type.
+       */
+      const resendRequestOptions = {
+        idempotencyKey:
+          `email-outbox/${email.email_id}`,
+        signal:
+          emailProviderAbortSignal(
+            remainingWorkerTimeMs(
+              workerDeadline,
+            ),
+          ),
+      };
+
+
       const {
         data,
         error,
@@ -469,10 +511,7 @@ export async function POST(
              * Resend supports idempotency keys.
              */
 
-            {
-              idempotencyKey:
-                `email-outbox/${email.email_id}`,
-            }
+            resendRequestOptions,
           );
 
 
@@ -638,11 +677,13 @@ export async function POST(
     {
       success:
         failed === 0 &&
+        !budgetExhausted &&
         queueHealthy &&
         memorialProcessor.status === "PASS",
       processed,
       sent,
       failed,
+      budgetExhausted,
       memorialProcessor,
       queueHealth,
     },
@@ -650,7 +691,8 @@ export async function POST(
       status:
         failed > 0
           ? 502
-          : queueHealthy &&
+          : !budgetExhausted &&
+              queueHealthy &&
               memorialProcessor.status === "PASS"
             ? 200
             : 503,

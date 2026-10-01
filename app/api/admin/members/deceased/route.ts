@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (profileError) {
-      console.error("Deceased-member authorization error:", profileError);
+      console.error("Deceased-member authorization failed.");
       return NextResponse.json(
         { error: "Unable to verify administrator access." },
         { status: 500 },
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (updateError) {
-      console.error("Deceased-member database update error:", updateError);
+      console.error("Deceased-member database update failed.");
       return NextResponse.json(
         { error: "Unable to save deceased-member settings." },
         { status: 500 },
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (authError) {
-      console.error("Deceased-member Auth access update error:", authError);
+      console.error("Deceased-member Auth access update failed.");
       return NextResponse.json(
         {
           success: false,
@@ -220,8 +220,8 @@ export async function POST(request: NextRequest) {
         : "The deceased record was saved and future sign-in was disabled.",
       memorialSettings: data,
     });
-  } catch (error) {
-    console.error("Deceased-member request failed:", error);
+  } catch {
+    console.error("Deceased-member request failed.");
     return NextResponse.json(
       { error: "Unable to process the deceased-member request." },
       { status: 500 },

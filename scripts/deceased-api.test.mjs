@@ -189,6 +189,10 @@ test("database failure blocks Auth mutation and Auth failure exposes retry-safe 
     false,
   );
   assert.doesNotMatch(JSON.stringify(await databaseResponse.json()), /private database/);
+  assert.doesNotMatch(JSON.stringify(databaseFailure.logs), /private database/);
+  assert.deepEqual(plain(databaseFailure.logs), [
+    ["Deceased-member database update failed."],
+  ]);
 
   const authFailure = deceasedRoute({
     authUpdateError: { message: "private Auth detail" },
@@ -202,6 +206,10 @@ test("database failure blocks Auth mutation and Auth failure exposes retry-safe 
     retryRequired: true,
     error: "The member record was saved, but the Auth access update must be retried.",
   });
+  assert.doesNotMatch(JSON.stringify(authFailure.logs), /private Auth/);
+  assert.deepEqual(plain(authFailure.logs), [
+    ["Deceased-member Auth access update failed."],
+  ]);
 });
 
 function memorialRoute({ superAdmin = true, rpcError = null } = {}) {
@@ -274,4 +282,27 @@ test("initial memorial publishing is Super-Admin-only and uses the exact RPC con
     created: true,
     announcementId: memberId,
   });
+});
+
+test("initial memorial failures keep private database details out of responses and logs", async () => {
+  const route = memorialRoute({
+    rpcError: {
+      message: "private memorial database detail",
+      hint: "member@example.invalid",
+    },
+  });
+  const response = await route.run();
+
+  assert.equal(response.status, 500);
+  assert.doesNotMatch(
+    JSON.stringify(await response.json()),
+    /private memorial|member@example\.invalid/,
+  );
+  assert.doesNotMatch(
+    JSON.stringify(route.logs),
+    /private memorial|member@example\.invalid/,
+  );
+  assert.deepEqual(plain(route.logs), [
+    ["Initial memorial publication failed."],
+  ]);
 });

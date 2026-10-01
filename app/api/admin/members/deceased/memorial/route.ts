@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (profileError) {
-      console.error("Initial memorial authorization error:", profileError);
+      console.error("Initial memorial authorization failed.");
       return NextResponse.json(
         { error: "Unable to verify administrator access." },
         { status: 500 },
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (publishError) {
-      console.error("Initial memorial publication error:", publishError);
+      console.error("Initial memorial publication failed.");
       return NextResponse.json(
         { error: "Unable to publish the Initial Memorial." },
         { status: 500 },
@@ -135,8 +135,8 @@ export async function POST(request: NextRequest) {
           ? result.announcement_id
           : null,
     });
-  } catch (error) {
-    console.error("Initial memorial request failed:", error);
+  } catch {
+    console.error("Initial memorial request failed.");
     return NextResponse.json(
       { error: "Unable to process the Initial Memorial request." },
       { status: 500 },
