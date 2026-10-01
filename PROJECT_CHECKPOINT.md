@@ -1312,3 +1312,31 @@ acceptance completed; production remains unchanged.
   ESLint, TypeScript, whitespace validation, and the optimized 51-route production
   build. No staging, production, retired project, deployment, database, inbox,
   scheduler or provider was contacted.
+
+## External-gate evidence and installer trust hardening — 1 October 2026
+
+- Staging Auth/email preflight now requires two distinct, non-empty protected evidence
+  files outside the repository and verifies their real SHA-256 values before issuing
+  the HMAC review token. Invalid credentials or any other blocker also prevents token
+  issuance. A live run still needs a dedicated deliverable inbox, reviewed staging
+  class/dojo UUIDs, current catalog evidence, an independently reviewed cleanup plan,
+  disposable passwords and the second-pass token.
+- Complete recovery can no longer be claimed from the local PostgreSQL drill. The v4
+  gate requires a disposable managed Supabase target, a SHA-256/size-bound finalized
+  sanitized evidence bundle, explicit-offset timestamps, in-window component evidence,
+  and protected proof that the disposable target was deleted or quarantined.
+- Full physical JS Video Uploader acceptance now requires the independently approved
+  installer SHA-256 before launch, an interactive Windows x64 session and JSON-only
+  evidence output. It refuses an existing exact installation and never silently
+  removes a partial installation after failure. Non-installing preflight still passes
+  for the 156,411,382-byte unsigned candidate at SHA-256
+  `1B4C760EB6FEF6A36B819DDFBA6877D66466B77C5004E8EA7F0A820578F67464`.
+- A new secret-free scheduler manifest gate requires the exact worker POST endpoint,
+  60-second cadence, single non-overlapping execution, bounded timeouts, protected
+  header injection, retained failures, queue-health monitoring, approvals and an
+  empty-queue acceptance with zero provider requests. Its template intentionally
+  fails until an external scheduler and plan are selected and verified.
+- Verification passes 378/378 application tests, 37/37 combined focused gate tests,
+  27/27 uploader tests, ESLint, TypeScript, whitespace validation and the optimized
+  51-route production build. No software was installed, launched or uninstalled and
+  no live host, database, inbox, provider, production or retired project was contacted.

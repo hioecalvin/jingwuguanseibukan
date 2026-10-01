@@ -4511,3 +4511,41 @@ Verification passes 367/367 application tests, 42/42 focused gate tests, ESLint,
 TypeScript, whitespace validation, and the optimized 51-route production build. No
 staging, production, retired project, database, deployment, inbox, scheduler or
 provider was contacted.
+
+### Milestone 175 — external-gate evidence and installer trust hardening (01/10/2026)
+
+Ran four independent offline release tracks in parallel. The staging Auth/email
+preflight now reads two distinct protected evidence files outside the repository,
+checks their actual SHA-256 digests and refuses review-token issuance when either file
+or any other acceptance input is invalid. This closes the previous gap where arbitrary
+digest strings could represent nonexistent evidence. The live acceptance still needs
+a dedicated deliverable inbox, reviewed class/dojo UUIDs, current catalog evidence,
+independently reviewed cleanup evidence, disposable passwords and a second-pass token.
+
+Strengthened recovery manifest v4 so local PostgreSQL cannot claim complete managed
+recovery. Completion requires a disposable managed Supabase target, SHA-256 and byte
+count for the finalized sanitized evidence bundle, explicit-offset and correctly
+ordered timestamps, completed non-placeholder component evidence, and protected proof
+that the disposable target was deleted or quarantined.
+
+Hardened the guided JS Video Uploader acceptance runner. Full execution requires a
+separately approved expected SHA-256 before launch, an interactive Windows x64 desktop,
+and a JSON evidence destination that cannot overwrite the installer. Partial failures
+remain visible for manual exact-target cleanup instead of triggering hidden removal.
+The non-installing preflight passes for the existing 156,411,382-byte unsigned staging
+candidate at SHA-256
+`1B4C760EB6FEF6A36B819DDFBA6877D66466B77C5004E8EA7F0A820578F67464`.
+
+Added a sanitized email-scheduler readiness manifest and offline validator. It binds
+staging or production to the exact worker POST URL, 60-second cadence, one
+non-overlapping run, bounded worker/provider/scheduler timeouts, protected secret
+injection, no automatic retry, retained failures, queue-health monitoring and an
+empty-queue scheduler-only acceptance with zero provider requests. The template fails
+closed until a provider, supported plan, owners, monitoring and acceptance evidence
+exist; no scheduler was selected or configured implicitly.
+
+Verification passes 378/378 application tests, 37/37 combined focused gate tests,
+27/27 uploader tests, ESLint, TypeScript, whitespace validation and the optimized
+51-route production build. No software was installed, launched or uninstalled and no
+staging host, database, inbox, scheduler, provider, production or retired project was
+contacted.
