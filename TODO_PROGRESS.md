@@ -4423,3 +4423,25 @@ that project in every mode. Future production read-only probes require a separat
 supplied exact active project ref, while staging rotation stays pinned to
 `eomubndonbetszdbhsrj`. The focused cleanup/target/rotation suite passes 18/18.
 Production and the retired project were not contacted.
+
+### Milestone 172 — dormant Web Push endpoint and state-boundary hardening (01/10/2026)
+
+Hardened the hidden Web Push tranche without enabling its UI or contacting a live
+service. Subscription create/delete accepts only HTTPS endpoints on the exact reviewed
+Google FCM, Mozilla Push Service, and Apple Web Push hosts, with credentials, custom
+ports, fragments, root/double-slash paths, deceptive names, control characters,
+oversized values, arbitrary domains, IP addresses, and localhost rejected before any
+database RPC. Stored endpoints are revalidated immediately before provider access.
+
+The browser workflow now compensates for cross-system failures. A failed persistence
+of a newly created subscription removes only that new browser subscription; a failed
+database delete keeps the old browser subscription and stops reset. This prevents a
+false disabled/enabled state and avoids destroying an existing subscription when a
+re-save fails.
+
+Focused endpoint, route and state-transition tests pass 29/29. The complete suite
+passes 336/336; ESLint, TypeScript, whitespace validation, and the optimized 51-route
+production build pass. Push/PWA settings remain intentionally hidden. Physical
+Safari/iOS delivery, live provider failure handling, and the product decision to ship
+push remain external gates. No staging, production, retired project, database,
+deployment, or provider was contacted.

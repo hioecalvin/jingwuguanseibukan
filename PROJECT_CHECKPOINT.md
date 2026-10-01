@@ -1233,3 +1233,25 @@ acceptance completed; production remains unchanged.
 - All ten deployed static logo assets return HTTP 200 `image/png`, have exact
   1024 × 1024 dimensions, and SHA-256-match their committed files. Production was not
   deployed or contacted; the retired project received no guarded browser request.
+
+## Dormant Web Push endpoint and subscription-state hardening — 1 October 2026
+
+- Subscription create/delete now accepts only HTTPS endpoints on the reviewed browser
+  push services: Google FCM, Mozilla Push Service, and Apple Web Push. Credentials,
+  custom ports, fragments, root/double-slash paths, deceptive hostnames, control
+  characters, oversized values, arbitrary domains, IP addresses, and localhost are
+  rejected before any database RPC.
+- Stored subscription endpoints are independently revalidated immediately before a
+  provider request, so historical or externally inserted invalid rows fail closed
+  without network access.
+- Browser enable/reset flows now preserve consistency across the browser and database:
+  a failed create removes only a newly created browser subscription, while a failed
+  delete retains the existing browser subscription. Reset does not proceed after a
+  persistence failure.
+- Focused route, endpoint and client-state coverage passes 29/29. The complete
+  application suite passes 336/336; ESLint, TypeScript, whitespace validation, and the
+  optimized 51-route production build pass.
+- Push/PWA settings remain deliberately hidden. No live database, deployment, push
+  service, staging, production, retired project, or other provider was contacted.
+  Physical Safari/iOS delivery, real provider failure behavior, and the product
+  decision to expose push remain external gates.
