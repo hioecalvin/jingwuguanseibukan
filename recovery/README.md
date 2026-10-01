@@ -19,7 +19,10 @@ do not mark managed components verified based only on the local PostgreSQL rehea
 version 4 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–056,
 the checked-in migration-file fingerprint, matching source/restored ledger and
 pre-migration schema-catalog fingerprints, the exact protected backup payload used as
-restore input, and measured RPO/RTO timestamps. It represents the not-yet-created
+restore input, a digest of the finalized sanitized rehearsal-evidence bundle, explicit
+restore-target disposition, and measured RPO/RTO timestamps. An isolated PostgreSQL
+restore remains useful scoped evidence but cannot pass this complete managed-platform
+gate. It represents the not-yet-created
 production project explicitly instead of using a fake project reference. It never
 connects to Supabase or a provider. It validates a sanitized recovery manifest and
 exits non-zero until every required recovery component and post-restore check is
@@ -37,12 +40,19 @@ explicitly verified.
    count. After decrypting the isolated restore input, calculate them again and put
    only the matching values in `backupArtifact`. This proves that the drill restored
    the captured payload rather than a compatible-looking stale or wrong backup.
+   After all checks finish, package or inventory the sanitized evidence, record its
+   SHA-256 digest and byte count in `evidenceBundle`, and keep the bundle in protected
+   storage. Component evidence references must resolve inside that reviewed evidence
+   set and cannot be placeholders.
 3. Restore into a disposable Supabase project. Disable email, push, webhooks,
    schedulers and other outbound delivery before any copied data becomes executable.
 4. Prove database, Auth and Storage recovery; compare object-byte manifests; verify
    roles/RLS, migration history and configuration; then run database lint and the
    Member/Admin/Super Admin security smoke.
-5. Quarantine or destroy the disposable target and record retention/deletion.
+5. Quarantine or destroy the disposable target. Record its `deleted` or `quarantined`
+   disposition, completion time and protected evidence reference. The disposition and
+   evidence-bundle finalization times must fall after the rehearsal completes and no
+   later than the manifest recording time.
 6. Run the gate:
 
 ```powershell

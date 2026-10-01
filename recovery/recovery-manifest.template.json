@@ -7,7 +7,12 @@
   },
   "restoreTarget": {
     "kind": "disposable-supabase",
-    "projectRef": "REPLACE_WITH_DISPOSABLE_PROJECT_REF"
+    "projectRef": "REPLACE_WITH_DISPOSABLE_PROJECT_REF",
+    "disposition": {
+      "status": "PENDING",
+      "completedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+      "evidence": ""
+    }
   },
   "production": {
     "exists": false,
@@ -22,6 +27,12 @@
     "restoreInputPayloadSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
     "sourcePayloadBytes": -1,
     "restoreInputPayloadBytes": -1,
+    "evidence": ""
+  },
+  "evidenceBundle": {
+    "sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "bytes": -1,
+    "finalizedAt": "REPLACE_WITH_ISO_TIMESTAMP",
     "evidence": ""
   },
   "objectives": {

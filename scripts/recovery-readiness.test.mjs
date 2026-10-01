@@ -16,7 +16,15 @@ function validManifest() {
     manifestVersion: 4,
     recordedAt: verifiedAt,
     source: { environment: "staging", projectRef: STAGING_PROJECT_REF },
-    restoreTarget: { kind: "disposable-supabase", projectRef: "disposable-ref" },
+    restoreTarget: {
+      kind: "disposable-supabase",
+      projectRef: "disposable-ref",
+      disposition: {
+        status: "quarantined",
+        completedAt: verifiedAt,
+        evidence: "evidence/restore-target-disposition.json",
+      },
+    },
     production: { exists: false, projectRef: null, mutations: 0 },
     backupArtifact: {
       format: "protected-export-bundle",
@@ -27,6 +35,12 @@ function validManifest() {
       sourcePayloadBytes: 1048576,
       restoreInputPayloadBytes: 1048576,
       evidence: "evidence/backup-payload-fingerprint.json",
+    },
+    evidenceBundle: {
+      sha256: "d".repeat(64),
+      bytes: 2048,
+      finalizedAt: verifiedAt,
+      evidence: "evidence/rehearsal-evidence-bundle.json",
     },
     objectives: { declaredRpoHours: 24, declaredRtoHours: 4, observedRestoreMinutes: 60 },
     timing: {
@@ -128,6 +142,58 @@ test("backup provenance evidence cannot remain a placeholder", () => {
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path, message }) =>
     path === "backupArtifact.evidence" && /placeholder/.test(message)));
+});
+
+test("component and evidence-bundle references cannot remain placeholders", () => {
+  const manifest = validManifest();
+  manifest.components.authConfiguration.evidence = "PENDING";
+  manifest.evidenceBundle.evidence = "TODO: attach later";
+  manifest.evidenceBundle.sha256 = "not-a-digest";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "components.authConfiguration.evidence"));
+  assert.ok(result.blockers.some(({ path }) => path === "evidenceBundle.evidence"));
+  assert.ok(result.blockers.some(({ path }) => path === "evidenceBundle.sha256"));
+});
+
+test("a local PostgreSQL drill cannot claim complete managed-platform recovery", () => {
+  const manifest = validManifest();
+  manifest.restoreTarget.kind = "isolated-postgresql";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "restoreTarget.kind" && /managed-platform/.test(message)));
+});
+
+test("restore-target disposition and evidence finalization are time-bound", () => {
+  const manifest = validManifest();
+  manifest.restoreTarget.disposition.status = "active";
+  manifest.restoreTarget.disposition.completedAt = "2026-09-16T00:30:00.000Z";
+  manifest.evidenceBundle.finalizedAt = "2026-09-16T00:30:00.000Z";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "restoreTarget.disposition.status"));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "restoreTarget.disposition.completedAt" && /between/.test(message)));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "evidenceBundle.finalizedAt" && /between/.test(message)));
+});
+
+test("timestamps require an explicit timezone and component verification stays in-window", () => {
+  const manifest = validManifest();
+  manifest.recordedAt = "2026-09-16T02:00:00";
+  manifest.components.storageMetadata.verifiedAt = "2026-09-16T03:00:00.000Z";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "recordedAt"));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "components.storageMetadata.verifiedAt" && /rehearsal window/.test(message)));
 });
 
 test("production-source evidence requires an explicit acknowledgement", () => {

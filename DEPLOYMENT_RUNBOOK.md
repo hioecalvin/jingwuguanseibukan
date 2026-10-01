@@ -179,17 +179,23 @@ blocked until managed Auth, Storage metadata and object bytes, database roles/gr
 Vault/encryption handling, Auth configuration, secrets inventory, schedules and
 external provider resources have all been restored or recovered and verified.
 
-Manifest v2 must name exact staging project `eomubndonbetszdbhsrj`, represent the
+Manifest v4 must name exact staging project `eomubndonbetszdbhsrj`, represent the
 absence of a production project with `production.exists=false` and a null reference,
-match the immutable repository migration fingerprint, and contain equal sanitized
-source/restored ledger fingerprints for versions 006–056. Its recovery-point,
-rehearsal-start and completion timestamps must satisfy the declared RPO/RTO. Produce
-the repository and protected ledger fingerprints with `npm.cmd run
+match the immutable repository migration fingerprint, contain equal sanitized
+source/restored ledger fingerprints for versions 006–056, bind the exact protected
+backup payload used as restore input, and bind the finalized sanitized rehearsal
+evidence bundle by SHA-256 and byte count. Its recovery-point, rehearsal-start,
+component-verification, completion, evidence-finalization and disposable-target
+disposition timestamps must be ordered and satisfy the declared RPO/RTO. A local
+PostgreSQL rehearsal cannot pass the complete managed-platform gate. Produce the
+repository and protected ledger fingerprints with `npm.cmd run
 recovery:fingerprint`; never retain SQL statements in repository evidence.
 
 Do not place dumps, object bytes, personal information, passwords, tokens, private
 keys or secret values in the manifest or repository. Record only sanitized counts,
-hashes, timestamps and protected evidence references. A staging-source pass proves
+hashes, timestamps and protected evidence references. Every component reference must
+identify completed evidence rather than a placeholder, and the disposable target must
+have protected proof that it was deleted or quarantined. A staging-source pass proves
 the procedure, not the freshness of a production backup. Production-source evidence
 requires the validator's explicit `--allow-production-source` acknowledgement; that
 flag does not authorize or perform production access.

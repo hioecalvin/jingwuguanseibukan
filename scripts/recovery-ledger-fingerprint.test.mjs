@@ -24,6 +24,8 @@ test("the recovery manifest template matches the immutable migration contract", 
     template.migrationLedger;
   assert.equal(template.manifestVersion, 4);
   assert.equal(template.preMigrationBaseline.catalogFormatVersion, 1);
+  assert.equal(template.restoreTarget.disposition.status, "PENDING");
+  assert.equal(template.evidenceBundle.bytes, -1);
   assert.deepEqual(
     { firstVersion, lastVersion, migrationCount, repositoryFilesSha256 },
     RELEASE_MIGRATION_CONTRACT,

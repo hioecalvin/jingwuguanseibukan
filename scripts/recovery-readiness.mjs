@@ -53,7 +53,9 @@ function isObject(value) {
 }
 
 function isIsoDate(value) {
-  return typeof value === "string" && value.length > 0 && Number.isFinite(Date.parse(value));
+  return typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+    Number.isFinite(Date.parse(value));
 }
 
 function isSha256(value) {
@@ -67,6 +69,17 @@ function add(blockers, path, message) {
 function requireNonEmptyString(blockers, value, path) {
   if (typeof value !== "string" || value.trim() === "") {
     add(blockers, path, "must be a non-empty string");
+    return false;
+  }
+  return true;
+}
+
+function requireEvidenceReference(blockers, value, path) {
+  if (!requireNonEmptyString(blockers, value, path)) {
+    return false;
+  }
+  if (/replace|placeholder|tbd|todo|pending/i.test(value)) {
+    add(blockers, path, "must identify completed protected evidence, not a placeholder");
     return false;
   }
   return true;
@@ -95,6 +108,7 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
   const restoreTarget = isObject(manifest.restoreTarget) ? manifest.restoreTarget : {};
   const production = isObject(manifest.production) ? manifest.production : {};
   const backupArtifact = isObject(manifest.backupArtifact) ? manifest.backupArtifact : {};
+  const evidenceBundle = isObject(manifest.evidenceBundle) ? manifest.evidenceBundle : {};
 
   if (!["staging", "production"].includes(source.environment)) {
     add(blockers, "source.environment", "must be staging or production");
@@ -115,6 +129,13 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
       blockers,
       "restoreTarget.kind",
       "must be disposable-supabase or isolated-postgresql",
+    );
+  }
+  if (restoreTarget.kind === "isolated-postgresql") {
+    add(
+      blockers,
+      "restoreTarget.kind",
+      "isolated PostgreSQL proves only scoped database recovery, not complete managed-platform recovery",
     );
   }
   if (restoreTarget.projectRef && restoreTarget.projectRef === source.projectRef) {
@@ -193,17 +214,35 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
       "must match the protected source payload byte count",
     );
   }
-  requireNonEmptyString(blockers, backupArtifact.evidence, "backupArtifact.evidence");
-  if (
-    typeof backupArtifact.evidence === "string" &&
-    /replace|placeholder|tbd|todo/i.test(backupArtifact.evidence)
-  ) {
+  requireEvidenceReference(blockers, backupArtifact.evidence, "backupArtifact.evidence");
+
+  if (!isSha256(evidenceBundle.sha256)) {
+    add(blockers, "evidenceBundle.sha256", "must be a SHA-256 digest");
+  }
+  if (!Number.isSafeInteger(evidenceBundle.bytes) || evidenceBundle.bytes <= 0) {
+    add(blockers, "evidenceBundle.bytes", "must be a positive integer");
+  }
+  if (!isIsoDate(evidenceBundle.finalizedAt)) {
+    add(blockers, "evidenceBundle.finalizedAt", "must be an ISO-8601 timestamp with an explicit offset");
+  }
+  requireEvidenceReference(blockers, evidenceBundle.evidence, "evidenceBundle.evidence");
+
+  const disposition = isObject(restoreTarget.disposition) ? restoreTarget.disposition : {};
+  if (!["deleted", "quarantined"].includes(disposition.status)) {
+    add(blockers, "restoreTarget.disposition.status", "must be deleted or quarantined");
+  }
+  if (!isIsoDate(disposition.completedAt)) {
     add(
       blockers,
-      "backupArtifact.evidence",
-      "must identify completed protected evidence, not a placeholder",
+      "restoreTarget.disposition.completedAt",
+      "must be an ISO-8601 timestamp with an explicit offset",
     );
   }
+  requireEvidenceReference(
+    blockers,
+    disposition.evidence,
+    "restoreTarget.disposition.evidence",
+  );
 
   const controls = isObject(manifest.controls) ? manifest.controls : {};
   for (const key of REQUIRED_TRUE_CONTROLS) {
@@ -263,6 +302,26 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     }
     if (Number.isFinite(recordedAt) && completedAt > recordedAt) {
       add(blockers, "timing.rehearsalCompletedAt", "must not be later than recordedAt");
+    }
+    if (isIsoDate(evidenceBundle.finalizedAt)) {
+      const finalizedAt = Date.parse(evidenceBundle.finalizedAt);
+      if (finalizedAt < completedAt || (Number.isFinite(recordedAt) && finalizedAt > recordedAt)) {
+        add(
+          blockers,
+          "evidenceBundle.finalizedAt",
+          "must be between rehearsalCompletedAt and recordedAt",
+        );
+      }
+    }
+    if (isIsoDate(disposition.completedAt)) {
+      const disposedAt = Date.parse(disposition.completedAt);
+      if (disposedAt < completedAt || (Number.isFinite(recordedAt) && disposedAt > recordedAt)) {
+        add(
+          blockers,
+          "restoreTarget.disposition.completedAt",
+          "must be between rehearsalCompletedAt and recordedAt",
+        );
+      }
     }
     if (Number.isFinite(objectives.declaredRpoHours) &&
         startedAt - recoveryPointAt > objectives.declaredRpoHours * 60 * 60 * 1000) {
@@ -336,9 +395,24 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
       add(blockers, `components.${name}.status`, "must equal VERIFIED");
     }
     if (!isIsoDate(component.verifiedAt)) {
-      add(blockers, `components.${name}.verifiedAt`, "must be an ISO-8601 timestamp");
+      add(
+        blockers,
+        `components.${name}.verifiedAt`,
+        "must be an ISO-8601 timestamp with an explicit offset",
+      );
+    } else if (isIsoDate(timing.rehearsalStartedAt) &&
+        isIsoDate(timing.rehearsalCompletedAt)) {
+      const verifiedAt = Date.parse(component.verifiedAt);
+      if (verifiedAt < Date.parse(timing.rehearsalStartedAt) ||
+          verifiedAt > Date.parse(timing.rehearsalCompletedAt)) {
+        add(
+          blockers,
+          `components.${name}.verifiedAt`,
+          "must be within the recorded rehearsal window",
+        );
+      }
     }
-    requireNonEmptyString(blockers, component.evidence, `components.${name}.evidence`);
+    requireEvidenceReference(blockers, component.evidence, `components.${name}.evidence`);
   }
 
   const checks = isObject(manifest.checks) ? manifest.checks : {};
