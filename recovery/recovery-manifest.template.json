@@ -1,5 +1,5 @@
 {
-  "manifestVersion": 3,
+  "manifestVersion": 4,
   "recordedAt": "REPLACE_WITH_ISO_TIMESTAMP",
   "source": {
     "environment": "staging",
@@ -13,6 +13,16 @@
     "exists": false,
     "projectRef": null,
     "mutations": 0
+  },
+  "backupArtifact": {
+    "format": "protected-export-bundle",
+    "sourceProjectRef": "eomubndonbetszdbhsrj",
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "sourcePayloadSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoreInputPayloadSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "sourcePayloadBytes": -1,
+    "restoreInputPayloadBytes": -1,
+    "evidence": ""
   },
   "objectives": {
     "declaredRpoHours": 24,

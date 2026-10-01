@@ -84,8 +84,8 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     };
   }
 
-  if (manifest.manifestVersion !== 3) {
-    add(blockers, "manifestVersion", "must equal 3");
+  if (manifest.manifestVersion !== 4) {
+    add(blockers, "manifestVersion", "must equal 4");
   }
   if (!isIsoDate(manifest.recordedAt)) {
     add(blockers, "recordedAt", "must be an ISO-8601 timestamp");
@@ -94,6 +94,7 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
   const source = isObject(manifest.source) ? manifest.source : {};
   const restoreTarget = isObject(manifest.restoreTarget) ? manifest.restoreTarget : {};
   const production = isObject(manifest.production) ? manifest.production : {};
+  const backupArtifact = isObject(manifest.backupArtifact) ? manifest.backupArtifact : {};
 
   if (!["staging", "production"].includes(source.environment)) {
     add(blockers, "source.environment", "must be staging or production");
@@ -149,6 +150,61 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     add(blockers, "production.mutations", "must be exactly 0 during a recovery rehearsal");
   }
 
+  if (!["protected-export-bundle", "managed-backup-export"].includes(backupArtifact.format)) {
+    add(
+      blockers,
+      "backupArtifact.format",
+      "must be protected-export-bundle or managed-backup-export",
+    );
+  }
+  requireNonEmptyString(blockers, backupArtifact.sourceProjectRef, "backupArtifact.sourceProjectRef");
+  if (backupArtifact.sourceProjectRef && backupArtifact.sourceProjectRef !== source.projectRef) {
+    add(blockers, "backupArtifact.sourceProjectRef", "must match source.projectRef");
+  }
+  if (!isIsoDate(backupArtifact.capturedAt)) {
+    add(blockers, "backupArtifact.capturedAt", "must be an ISO-8601 timestamp");
+  }
+  for (const key of ["sourcePayloadSha256", "restoreInputPayloadSha256"]) {
+    if (!isSha256(backupArtifact[key])) {
+      add(blockers, `backupArtifact.${key}`, "must be a SHA-256 digest");
+    }
+  }
+  if (isSha256(backupArtifact.sourcePayloadSha256) &&
+      isSha256(backupArtifact.restoreInputPayloadSha256) &&
+      backupArtifact.sourcePayloadSha256.toLowerCase() !==
+        backupArtifact.restoreInputPayloadSha256.toLowerCase()) {
+    add(
+      blockers,
+      "backupArtifact.restoreInputPayloadSha256",
+      "must match the protected source payload digest",
+    );
+  }
+  for (const key of ["sourcePayloadBytes", "restoreInputPayloadBytes"]) {
+    if (!Number.isSafeInteger(backupArtifact[key]) || backupArtifact[key] <= 0) {
+      add(blockers, `backupArtifact.${key}`, "must be a positive integer");
+    }
+  }
+  if (Number.isSafeInteger(backupArtifact.sourcePayloadBytes) &&
+      Number.isSafeInteger(backupArtifact.restoreInputPayloadBytes) &&
+      backupArtifact.sourcePayloadBytes !== backupArtifact.restoreInputPayloadBytes) {
+    add(
+      blockers,
+      "backupArtifact.restoreInputPayloadBytes",
+      "must match the protected source payload byte count",
+    );
+  }
+  requireNonEmptyString(blockers, backupArtifact.evidence, "backupArtifact.evidence");
+  if (
+    typeof backupArtifact.evidence === "string" &&
+    /replace|placeholder|tbd|todo/i.test(backupArtifact.evidence)
+  ) {
+    add(
+      blockers,
+      "backupArtifact.evidence",
+      "must identify completed protected evidence, not a placeholder",
+    );
+  }
+
   const controls = isObject(manifest.controls) ? manifest.controls : {};
   for (const key of REQUIRED_TRUE_CONTROLS) {
     if (controls[key] !== true) {
@@ -192,6 +248,15 @@ export function evaluateRecoveryManifest(manifest, options = {}) {
     const recordedAt = Date.parse(manifest.recordedAt);
     if (recoveryPointAt > startedAt) {
       add(blockers, "timing.recoveryPointAt", "must not be later than rehearsalStartedAt");
+    }
+    if (isIsoDate(backupArtifact.capturedAt)) {
+      const capturedAt = Date.parse(backupArtifact.capturedAt);
+      if (capturedAt < recoveryPointAt) {
+        add(blockers, "backupArtifact.capturedAt", "must not be earlier than recoveryPointAt");
+      }
+      if (capturedAt > startedAt) {
+        add(blockers, "backupArtifact.capturedAt", "must not be later than rehearsalStartedAt");
+      }
     }
     if (completedAt < startedAt) {
       add(blockers, "timing.rehearsalCompletedAt", "must not be earlier than rehearsalStartedAt");

@@ -16,9 +16,10 @@ The offline gate therefore remains intentionally blocked until those checks are 
 do not mark managed components verified based only on the local PostgreSQL rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
-version 3 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–056,
+version 4 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–056,
 the checked-in migration-file fingerprint, matching source/restored ledger and
-pre-migration schema-catalog fingerprints, and measured RPO/RTO timestamps. It represents the not-yet-created
+pre-migration schema-catalog fingerprints, the exact protected backup payload used as
+restore input, and measured RPO/RTO timestamps. It represents the not-yet-created
 production project explicitly instead of using a fake project reference. It never
 connects to Supabase or a provider. It validates a sanitized recovery manifest and
 exits non-zero until every required recovery component and post-restore check is
@@ -32,6 +33,10 @@ explicitly verified.
 2. Record only timestamps, status, counts, hashes and references to access-controlled
    evidence. Keep encrypted backups and secret recovery material in the approved
    backup system.
+   Before encrypting the protected export bundle, record its SHA-256 digest and byte
+   count. After decrypting the isolated restore input, calculate them again and put
+   only the matching values in `backupArtifact`. This proves that the drill restored
+   the captured payload rather than a compatible-looking stale or wrong backup.
 3. Restore into a disposable Supabase project. Disable email, push, webhooks,
    schedulers and other outbound delivery before any copied data becomes executable.
 4. Prove database, Auth and Storage recovery; compare object-byte manifests; verify

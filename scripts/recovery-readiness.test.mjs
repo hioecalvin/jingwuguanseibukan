@@ -13,11 +13,21 @@ const verifiedAt = "2026-09-16T02:00:00.000Z";
 
 function validManifest() {
   return {
-    manifestVersion: 3,
+    manifestVersion: 4,
     recordedAt: verifiedAt,
     source: { environment: "staging", projectRef: STAGING_PROJECT_REF },
     restoreTarget: { kind: "disposable-supabase", projectRef: "disposable-ref" },
     production: { exists: false, projectRef: null, mutations: 0 },
+    backupArtifact: {
+      format: "protected-export-bundle",
+      sourceProjectRef: STAGING_PROJECT_REF,
+      capturedAt: "2026-09-16T00:30:00.000Z",
+      sourcePayloadSha256: "c".repeat(64),
+      restoreInputPayloadSha256: "c".repeat(64),
+      sourcePayloadBytes: 1048576,
+      restoreInputPayloadBytes: 1048576,
+      evidence: "evidence/backup-payload-fingerprint.json",
+    },
     objectives: { declaredRpoHours: 24, declaredRtoHours: 4, observedRestoreMinutes: 60 },
     timing: {
       recoveryPointAt: "2026-09-16T00:00:00.000Z",
@@ -85,11 +95,47 @@ test("a production restore target and production mutation can never pass", () =>
   assert.ok(result.blockers.some(({ path }) => path === "production.mutations"));
 });
 
+test("the restored input must be the exact protected source backup payload", () => {
+  const manifest = validManifest();
+  manifest.backupArtifact.restoreInputPayloadSha256 = "d".repeat(64);
+  manifest.backupArtifact.restoreInputPayloadBytes -= 1;
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "backupArtifact.restoreInputPayloadSha256"));
+  assert.ok(result.blockers.some(({ path }) =>
+    path === "backupArtifact.restoreInputPayloadBytes"));
+});
+
+test("backup provenance must name the source and precede the restore", () => {
+  const manifest = validManifest();
+  manifest.backupArtifact.sourceProjectRef = "wrong-source";
+  manifest.backupArtifact.capturedAt = "2026-09-16T01:30:00.000Z";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "backupArtifact.sourceProjectRef"));
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "backupArtifact.capturedAt" && /rehearsalStartedAt/.test(message)));
+});
+
+test("backup provenance evidence cannot remain a placeholder", () => {
+  const manifest = validManifest();
+  manifest.backupArtifact.evidence = "REPLACE_WITH_EVIDENCE";
+
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "backupArtifact.evidence" && /placeholder/.test(message)));
+});
+
 test("production-source evidence requires an explicit acknowledgement", () => {
   const manifest = validManifest();
   manifest.production.exists = true;
   manifest.production.projectRef = "production-ref";
   manifest.source = { environment: "production", projectRef: manifest.production.projectRef };
+  manifest.backupArtifact.sourceProjectRef = manifest.production.projectRef;
 
   assert.equal(evaluateRecoveryManifest(manifest).ready, false);
   assert.equal(evaluateRecoveryManifest(manifest, { allowProductionSource: true }).ready, true);
