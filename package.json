@@ -18,7 +18,8 @@
     "provider:check": "node scripts/provider-config-readiness.mjs",
     "auth-email:staging:preflight": "node scripts/staging-auth-email-readiness.mjs --confirm-offline-preflight",
     "production:target:check": "node scripts/production-target-readiness.mjs",
-    "release:window:check": "node scripts/release-window-readiness.mjs"
+    "release:window:check": "node scripts/release-window-readiness.mjs",
+    "email-scheduler:check": "node scripts/email-scheduler-readiness.mjs"
   },
   "dependencies": {
     "@mux/mux-player-react": "^3.13.4",

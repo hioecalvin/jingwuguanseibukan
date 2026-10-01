@@ -1,5 +1,22 @@
 # Project scripts
 
+## Email scheduler readiness gate
+
+`email-scheduler-readiness.mjs` validates a sanitized scheduler evidence manifest
+without invoking the worker or exposing its secret. It requires the exact staging or
+production POST endpoint, a 60-second cadence, one non-overlapping execution, bounded
+worker/provider/scheduler timeouts, protected header injection, retained failures,
+queue-health alerts, named owners and an empty-queue acceptance run that made zero
+provider requests. The checked-in template intentionally fails.
+
+```powershell
+npm.cmd run email-scheduler:check -- `
+  --manifest=C:\protected\evidence\email-scheduler-manifest.json
+```
+
+Do not put the worker secret in the manifest. A passing record proves only the
+configured evidence; it does not invoke the worker or authorize production.
+
 ## Release-window readiness gate
 
 `release-window-readiness.mjs` validates a protected release-window manifest without
