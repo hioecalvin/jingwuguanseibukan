@@ -19,6 +19,31 @@ The installer is per-user, unsigned, uses the default Electron icon and does not
 run automatically after installation. Windows ARM64/32-bit are not verified. The
 packaged FFmpeg executable and its GPL license/readme are placed outside `app.asar`.
 
+### Reproducible Windows acceptance
+
+Run the guided acceptance script from a normal Windows desktop session before
+distributing a newly built installer:
+
+```powershell
+npm run test:installer-preflight
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\installer-acceptance.ps1 `
+  -ExpectedSha256 "<approved 64-character installer SHA-256>"
+```
+
+The preflight fingerprints the installer and refuses to proceed when the exact
+per-user product is already installed. The full run opens the normal installer,
+discovers only the exact `JS Video Uploader` uninstall registration, launches the
+installed executable, requires a visible application window, allows a short visual
+inspection, closes only that captured process, and opens the normal uninstaller. It
+passes only when the product registration and captured installation directory are
+gone. A timestamped JSON report is written under `test-results/` even on failure.
+
+Run this from the interactive Windows account being accepted, not a service or
+restricted CI desktop. Do not sign in during this packaging check; authentication,
+role and provider acceptance are separate guarded tests. If the script reports an
+existing installation, uninstall it manually and rerun rather than allowing the
+candidate to overwrite it. The runner never silently removes an existing install.
+
 ## Development (Windows)
 
 From this directory:

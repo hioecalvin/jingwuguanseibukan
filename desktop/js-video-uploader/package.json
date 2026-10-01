@@ -12,6 +12,7 @@
     "start": "npm run build && electron .",
     "test": "npm run build && node --test tests/*.test.mjs",
     "test:smoke": "npm run build && node scripts/smoke.mjs",
+    "test:installer-preflight": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/installer-acceptance.ps1 -PreflightOnly",
     "audit:staging-logos": "node scripts/staging-logo-audit.mjs",
     "pack:win": "npm run build && electron-builder --win --x64 --dir --publish never",
     "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never"
