@@ -1,5 +1,24 @@
 # Project scripts
 
+## Production bootstrap/import readiness gate
+
+The production bootstrap gate prevents treating migrations 006–056 as a standalone
+initializer for an empty Supabase project. It validates a protected, sanitized plan
+that binds the exact new Singapore production project, fresh empty-target inventory,
+the protected pre-006 baseline/catalog, the exact migration contract, a managed import
+package and independent review. It requires zero production mutations and makes no
+network request. See `operations/PRODUCTION_BOOTSTRAP_READINESS.md`.
+
+```powershell
+npm.cmd run production:bootstrap:check -- `
+  --manifest=C:\protected\evidence\production-bootstrap.json `
+  --expected-project-ref=<exact-new-production-project-ref> `
+  --expected-commit=<exact-40-character-release-sha>
+```
+
+The checked-in template intentionally fails. Passing this offline gate does not
+authorize an import, migration, deployment or provider contact.
+
 ## Monitoring and production-identity evidence gates
 
 The offline monitoring gate validates the sanitized operational record described in
@@ -72,9 +91,13 @@ contacting any service. It binds the approved release to an independently suppli
 commit and known-good rollback revision, requires a fresh protected recovery point,
 named owners, tested rollback, bounded Sydney release window, stop conditions, and
 completion of every external production gate. The checked-in template is deliberately
-incomplete and must fail. The three Safari, monitoring and production-identity gate
-manifests are bound by distinct SHA-256 digests; bare approval booleans cannot replace
-their results.
+incomplete and must fail. The Safari, monitoring, production-identity, managed-restore,
+production-target, production-secret, provider-delivery/dedicated-inbox,
+email-scheduler and signed installer-acceptance manifests are all required with
+passing results. Their SHA-256 digests must also be distinct from one another and from
+the rollback and recovery-point manifests. Exact commit, deployment and
+production-project metadata is cross-checked, so bare approval booleans cannot replace
+any gate result.
 
 ```powershell
 npm.cmd run release:window:check -- `

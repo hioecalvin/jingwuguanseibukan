@@ -19,6 +19,13 @@ The installer is per-user, unsigned, uses the default Electron icon and does not
 run automatically after installation. Windows ARM64/32-bit are not verified. The
 packaged FFmpeg executable and its GPL license/readme are placed outside `app.asar`.
 
+This unsigned build is a staging candidate, not a distributable release. Final
+distribution also requires the repository-level signed-installer evidence gate in
+`operations/INSTALLER_RELEASE_READINESS.md`. The interactive harness below alone
+does not establish Authenticode identity, trusted timestamping, current malware
+scanning, packaged-secret inspection, staging upload-boundary evidence, or
+independent review.
+
 ### Reproducible Windows acceptance
 
 Run the guided acceptance script from a normal Windows desktop session before

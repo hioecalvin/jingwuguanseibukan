@@ -34,12 +34,18 @@ function validManifest(overrides = {}) {
     },
     recovery: {
       pointId: "protected-recovery-20261002",
-      manifestSha256: "c".repeat(64),
+      manifestSha256: "ab".repeat(32),
       capturedAt: "2026-10-02T07:00:00+10:00",
       verifiedAt: "2026-10-02T08:00:00+10:00",
       verifiedBy: "Recovery verifier",
     },
     rollback: {
+      manifestSha256: "35".repeat(32),
+      result: "passed",
+      commitSha: RELEASE_SHA,
+      previousCommitSha: PREVIOUS_SHA,
+      deploymentId: "dpl_release_candidate",
+      previousDeploymentId: "dpl_known_good",
       applicationTested: true,
       databaseRecoveryTested: true,
       decisionDeadlineMinutes: 20,
@@ -58,19 +64,81 @@ function validManifest(overrides = {}) {
     gateEvidence: {
       physicalSafari: {
         manifestSha256: "12".repeat(32),
+        result: "passed",
         commitSha: RELEASE_SHA,
         stagingDeploymentId: "dpl_staging_candidate",
       },
       monitoring: {
         manifestSha256: "34".repeat(32),
+        result: "passed",
         environment: "production",
         commitSha: RELEASE_SHA,
         deploymentId: "dpl_release_candidate",
       },
       productionIdentity: {
         manifestSha256: "56".repeat(32),
+        result: "passed",
+        environment: "production",
         projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
         policy: "jingwuguan-production-identity-v1",
+      },
+      managedRestore: {
+        manifestSha256: "78".repeat(32),
+        result: "passed",
+        environment: "staging",
+        sourceProjectRef: "eomubndonbetszdbhsrj",
+        commitSha: RELEASE_SHA,
+        targetKind: "disposable-managed",
+        zeroResidueVerified: true,
+      },
+      productionTarget: {
+        manifestSha256: "9a".repeat(32),
+        result: "passed",
+        environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
+        region: "ap-southeast-1",
+        supabaseOrigin: `https://${PRODUCTION_PROJECT_REF}.supabase.co`,
+        policy: "jingwuguan-production-bootstrap-v1",
+      },
+      productionSecrets: {
+        manifestSha256: "bc".repeat(32),
+        result: "passed",
+        environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
+        deploymentId: "dpl_release_candidate",
+      },
+      providerDelivery: {
+        manifestSha256: "de".repeat(32),
+        result: "passed",
+        environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
+        deploymentId: "dpl_release_candidate",
+        dedicatedInboxPolicy: "dedicated-non-role-inbox",
+      },
+      emailScheduler: {
+        manifestSha256: "f0".repeat(32),
+        result: "passed",
+        environment: "production",
+        projectRef: PRODUCTION_PROJECT_REF,
+        commitSha: RELEASE_SHA,
+        deploymentId: "dpl_release_candidate",
+        endpoint: "https://jingwuguanseibukan.com/api/system/email-worker",
+      },
+      installerAcceptance: {
+        manifestSha256: "13".repeat(32),
+        result: "passed",
+        environment: "staging",
+        projectRef: "eomubndonbetszdbhsrj",
+        commitSha: RELEASE_SHA,
+        origin: "https://jingwuguanseibukan-staging.vercel.app",
+        installerSha256: "24".repeat(32),
+        platform: "win32-x64",
+        acceptancePolicy: "interactive-install-launch-uninstall",
+        authenticodeStatus: "Valid",
       },
     },
     stopConditions: {
@@ -197,6 +265,7 @@ test("rejects placeholders, missing owners, and untested rollback", () => {
         pointId: "REPLACE_WITH_RECOVERY_POINT",
       },
       rollback: {
+        ...validManifest().rollback,
         applicationTested: false,
         databaseRecoveryTested: false,
         decisionDeadlineMinutes: 0,
@@ -224,5 +293,68 @@ test("requires distinct gate manifests bound to the exact release and production
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.physicalSafari.commitSha"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.monitoring.deploymentId"));
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.productionIdentity.projectRef"));
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
+});
+
+test("bare approval booleans cannot replace managed restore, target, secrets, provider, scheduler, or installer evidence", () => {
+  const manifest = validManifest();
+  manifest.gateEvidence = {
+    physicalSafari: manifest.gateEvidence.physicalSafari,
+    monitoring: manifest.gateEvidence.monitoring,
+    productionIdentity: manifest.gateEvidence.productionIdentity,
+  };
+  const result = evaluateReleaseWindow(manifest, {
+    expectedCommit: RELEASE_SHA,
+    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
+    now: NOW,
+  });
+  assert.equal(result.ready, false);
+  for (const gate of [
+    "managedRestore",
+    "productionTarget",
+    "productionSecrets",
+    "providerDelivery",
+    "emailScheduler",
+    "installerAcceptance",
+  ]) {
+    assert.ok(result.blockers.some(({ path }) => path === `gateEvidence.${gate}.manifestSha256`));
+  }
+});
+
+test("every referenced gate must have a passing result and exact production/release binding", () => {
+  const manifest = validManifest();
+  manifest.gateEvidence.managedRestore.result = "failed";
+  manifest.gateEvidence.productionTarget.region = "us-east-1";
+  manifest.gateEvidence.productionSecrets.projectRef = "zyxwvutsrqponmlkjihg";
+  manifest.gateEvidence.providerDelivery.dedicatedInboxPolicy = "shared-role-inbox";
+  manifest.gateEvidence.emailScheduler.endpoint = "https://example.invalid/worker";
+  manifest.gateEvidence.installerAcceptance.authenticodeStatus = "NotSigned";
+  const result = evaluateReleaseWindow(manifest, {
+    expectedCommit: RELEASE_SHA,
+    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
+    now: NOW,
+  });
+  assert.equal(result.ready, false);
+  for (const path of [
+    "gateEvidence.managedRestore.result",
+    "gateEvidence.productionTarget.region",
+    "gateEvidence.productionSecrets.projectRef",
+    "gateEvidence.providerDelivery.dedicatedInboxPolicy",
+    "gateEvidence.emailScheduler.endpoint",
+    "gateEvidence.installerAcceptance.authenticodeStatus",
+  ]) {
+    assert.ok(result.blockers.some(blocker => blocker.path === path));
+  }
+});
+
+test("all recovery and gate manifest digests must be distinct", () => {
+  const manifest = validManifest();
+  manifest.gateEvidence.emailScheduler.manifestSha256 = manifest.gateEvidence.productionSecrets.manifestSha256;
+  const result = evaluateReleaseWindow(manifest, {
+    expectedCommit: RELEASE_SHA,
+    expectedProductionProjectRef: PRODUCTION_PROJECT_REF,
+    now: NOW,
+  });
+  assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
 });

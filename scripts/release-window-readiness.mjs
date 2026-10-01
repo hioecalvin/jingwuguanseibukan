@@ -6,6 +6,12 @@ export const RELEASE_BRANCH =
 const STAGING_PROJECT_REF = "eomubndonbetszdbhsrj";
 const RETIRED_PROJECT_REF = "pkmllhaavadhaozmwapz";
 const PRODUCTION_IDENTITY_POLICY = "jingwuguan-production-identity-v1";
+const PRODUCTION_BOOTSTRAP_POLICY = "jingwuguan-production-bootstrap-v1";
+const PRODUCTION_REGION = "ap-southeast-1";
+const PRODUCTION_ORIGIN = "https://jingwuguanseibukan.com";
+const PRODUCTION_EMAIL_WORKER = `${PRODUCTION_ORIGIN}/api/system/email-worker`;
+const DEDICATED_INBOX_POLICY = "dedicated-non-role-inbox";
+const INSTALLER_ACCEPTANCE_POLICY = "interactive-install-launch-uninstall";
 const PROJECT_REF = /^[a-z0-9]{20}$/;
 
 const SHA = /^[a-f0-9]{40}$/;
@@ -69,6 +75,37 @@ function requireDigest(blockers, value, path) {
     return false;
   }
   return true;
+}
+
+function requirePassingEvidence(blockers, evidence, path) {
+  requireDigest(blockers, evidence.manifestSha256, `${path}.manifestSha256`);
+  if (evidence.result !== "passed") {
+    add(blockers, `${path}.result`, "must equal passed for the referenced evidence manifest");
+  }
+}
+
+function bindReleaseEvidence(blockers, evidence, path, release) {
+  if (evidence.commitSha !== release.commitSha) {
+    add(blockers, `${path}.commitSha`, "must bind the evidence to the release commit");
+  }
+}
+
+function bindProductionEvidence(
+  blockers,
+  evidence,
+  path,
+  { expectedProductionProjectRef, release, requireDeployment = true },
+) {
+  bindReleaseEvidence(blockers, evidence, path, release);
+  if (evidence.environment !== "production") {
+    add(blockers, `${path}.environment`, "must equal production");
+  }
+  if (evidence.projectRef !== expectedProductionProjectRef) {
+    add(blockers, `${path}.projectRef`, "must equal the independently supplied production project ref");
+  }
+  if (requireDeployment && evidence.deploymentId !== release.deploymentId) {
+    add(blockers, `${path}.deploymentId`, "must bind the evidence to the production deployment");
+  }
 }
 
 export function evaluateReleaseWindow(
@@ -165,9 +202,7 @@ export function evaluateReleaseWindow(
 
   const recovery = object(manifest.recovery);
   requireText(blockers, recovery.pointId, "recovery.pointId");
-  if (!SHA256.test(recovery.manifestSha256 ?? "")) {
-    add(blockers, "recovery.manifestSha256", "must be a 64-character SHA-256 digest");
-  }
+  requireDigest(blockers, recovery.manifestSha256, "recovery.manifestSha256");
   for (const key of ["capturedAt", "verifiedAt"]) {
     if (!timestamp(recovery[key])) {
       add(blockers, `recovery.${key}`, "must be an ISO-8601 timestamp with an explicit offset");
@@ -189,6 +224,7 @@ export function evaluateReleaseWindow(
   }
 
   const rollback = object(manifest.rollback);
+  requirePassingEvidence(blockers, rollback, "rollback");
   if (rollback.applicationTested !== true) {
     add(blockers, "rollback.applicationTested", "must be true");
   }
@@ -202,6 +238,13 @@ export function evaluateReleaseWindow(
   ) {
     add(blockers, "rollback.decisionDeadlineMinutes", "must be an integer from 5 to 60");
   }
+  if (rollback.commitSha !== release.commitSha || rollback.deploymentId !== release.deploymentId) {
+    add(blockers, "rollback", "must bind rollback evidence to the release commit and deployment");
+  }
+  if (rollback.previousCommitSha !== release.previousCommitSha ||
+      rollback.previousDeploymentId !== release.previousDeploymentId) {
+    add(blockers, "rollback", "must bind rollback evidence to the exact known-good commit and deployment");
+  }
 
   const approvals = object(manifest.approvals);
   for (const key of REQUIRED_APPROVALS) {
@@ -212,26 +255,126 @@ export function evaluateReleaseWindow(
 
   const gateEvidence = object(manifest.gateEvidence);
   const safari = object(gateEvidence.physicalSafari);
-  requireDigest(blockers, safari.manifestSha256, "gateEvidence.physicalSafari.manifestSha256");
+  requirePassingEvidence(blockers, safari, "gateEvidence.physicalSafari");
   if (safari.commitSha !== release.commitSha) add(blockers, "gateEvidence.physicalSafari.commitSha", "must bind the Safari evidence to the release commit");
   requireText(blockers, safari.stagingDeploymentId, "gateEvidence.physicalSafari.stagingDeploymentId");
   if (safari.stagingDeploymentId === release.deploymentId) add(blockers, "gateEvidence.physicalSafari.stagingDeploymentId", "must identify the separately tested staging deployment");
 
   const monitoring = object(gateEvidence.monitoring);
-  requireDigest(blockers, monitoring.manifestSha256, "gateEvidence.monitoring.manifestSha256");
+  requirePassingEvidence(blockers, monitoring, "gateEvidence.monitoring");
   if (monitoring.environment !== "production") add(blockers, "gateEvidence.monitoring.environment", "must equal production");
   if (monitoring.commitSha !== release.commitSha) add(blockers, "gateEvidence.monitoring.commitSha", "must bind monitoring evidence to the release commit");
   if (monitoring.deploymentId !== release.deploymentId) add(blockers, "gateEvidence.monitoring.deploymentId", "must bind monitoring evidence to the production deployment");
 
   const identity = object(gateEvidence.productionIdentity);
-  requireDigest(blockers, identity.manifestSha256, "gateEvidence.productionIdentity.manifestSha256");
+  requirePassingEvidence(blockers, identity, "gateEvidence.productionIdentity");
   if (!PROJECT_REF.test(expectedProductionProjectRef ?? "") || [STAGING_PROJECT_REF, RETIRED_PROJECT_REF].includes(expectedProductionProjectRef)) {
     add(blockers, "expectedProductionProjectRef", "must independently supply the exact active production project ref");
   }
   if (identity.projectRef !== expectedProductionProjectRef) add(blockers, "gateEvidence.productionIdentity.projectRef", "must equal the independently supplied production project ref");
+  if (identity.environment !== "production") add(blockers, "gateEvidence.productionIdentity.environment", "must equal production");
+  bindReleaseEvidence(blockers, identity, "gateEvidence.productionIdentity", release);
   if (identity.policy !== PRODUCTION_IDENTITY_POLICY) add(blockers, "gateEvidence.productionIdentity.policy", `must equal ${PRODUCTION_IDENTITY_POLICY}`);
-  const gateDigests = [safari.manifestSha256, monitoring.manifestSha256, identity.manifestSha256].filter(value => SHA256.test(value ?? ""));
-  if (new Set(gateDigests).size !== 3) add(blockers, "gateEvidence", "must bind three distinct gate manifests");
+
+  const managedRestore = object(gateEvidence.managedRestore);
+  requirePassingEvidence(blockers, managedRestore, "gateEvidence.managedRestore");
+  bindReleaseEvidence(blockers, managedRestore, "gateEvidence.managedRestore", release);
+  if (managedRestore.environment !== "staging") {
+    add(blockers, "gateEvidence.managedRestore.environment", "must equal staging for the non-production restore rehearsal");
+  }
+  if (managedRestore.sourceProjectRef !== STAGING_PROJECT_REF) {
+    add(blockers, "gateEvidence.managedRestore.sourceProjectRef", `must equal ${STAGING_PROJECT_REF}`);
+  }
+  if (managedRestore.targetKind !== "disposable-managed") {
+    add(blockers, "gateEvidence.managedRestore.targetKind", "must equal disposable-managed");
+  }
+  if (managedRestore.zeroResidueVerified !== true) {
+    add(blockers, "gateEvidence.managedRestore.zeroResidueVerified", "must be true");
+  }
+
+  const productionTarget = object(gateEvidence.productionTarget);
+  requirePassingEvidence(blockers, productionTarget, "gateEvidence.productionTarget");
+  bindProductionEvidence(blockers, productionTarget, "gateEvidence.productionTarget", {
+    expectedProductionProjectRef,
+    release,
+    requireDeployment: false,
+  });
+  if (productionTarget.region !== PRODUCTION_REGION) {
+    add(blockers, "gateEvidence.productionTarget.region", `must equal ${PRODUCTION_REGION}`);
+  }
+  if (productionTarget.supabaseOrigin !== `https://${expectedProductionProjectRef}.supabase.co`) {
+    add(blockers, "gateEvidence.productionTarget.supabaseOrigin", "must equal the exact production Supabase origin");
+  }
+  if (productionTarget.policy !== PRODUCTION_BOOTSTRAP_POLICY) {
+    add(blockers, "gateEvidence.productionTarget.policy", `must equal ${PRODUCTION_BOOTSTRAP_POLICY}`);
+  }
+
+  const productionSecrets = object(gateEvidence.productionSecrets);
+  requirePassingEvidence(blockers, productionSecrets, "gateEvidence.productionSecrets");
+  bindProductionEvidence(blockers, productionSecrets, "gateEvidence.productionSecrets", {
+    expectedProductionProjectRef,
+    release,
+  });
+
+  const providerDelivery = object(gateEvidence.providerDelivery);
+  requirePassingEvidence(blockers, providerDelivery, "gateEvidence.providerDelivery");
+  bindProductionEvidence(blockers, providerDelivery, "gateEvidence.providerDelivery", {
+    expectedProductionProjectRef,
+    release,
+  });
+  if (providerDelivery.dedicatedInboxPolicy !== DEDICATED_INBOX_POLICY) {
+    add(blockers, "gateEvidence.providerDelivery.dedicatedInboxPolicy", `must equal ${DEDICATED_INBOX_POLICY}`);
+  }
+
+  const emailScheduler = object(gateEvidence.emailScheduler);
+  requirePassingEvidence(blockers, emailScheduler, "gateEvidence.emailScheduler");
+  bindProductionEvidence(blockers, emailScheduler, "gateEvidence.emailScheduler", {
+    expectedProductionProjectRef,
+    release,
+  });
+  if (emailScheduler.endpoint !== PRODUCTION_EMAIL_WORKER) {
+    add(blockers, "gateEvidence.emailScheduler.endpoint", `must equal ${PRODUCTION_EMAIL_WORKER}`);
+  }
+
+  const installer = object(gateEvidence.installerAcceptance);
+  requirePassingEvidence(blockers, installer, "gateEvidence.installerAcceptance");
+  bindReleaseEvidence(blockers, installer, "gateEvidence.installerAcceptance", release);
+  if (installer.environment !== "staging") {
+    add(blockers, "gateEvidence.installerAcceptance.environment", "must equal staging for guarded installer acceptance");
+  }
+  if (installer.projectRef !== STAGING_PROJECT_REF) {
+    add(blockers, "gateEvidence.installerAcceptance.projectRef", `must equal ${STAGING_PROJECT_REF}`);
+  }
+  if (installer.origin !== "https://jingwuguanseibukan-staging.vercel.app") {
+    add(blockers, "gateEvidence.installerAcceptance.origin", "must equal the exact staging origin");
+  }
+  requireDigest(blockers, installer.installerSha256, "gateEvidence.installerAcceptance.installerSha256");
+  if (installer.platform !== "win32-x64") {
+    add(blockers, "gateEvidence.installerAcceptance.platform", "must equal win32-x64");
+  }
+  if (installer.acceptancePolicy !== INSTALLER_ACCEPTANCE_POLICY) {
+    add(blockers, "gateEvidence.installerAcceptance.acceptancePolicy", `must equal ${INSTALLER_ACCEPTANCE_POLICY}`);
+  }
+  if (installer.authenticodeStatus !== "Valid") {
+    add(blockers, "gateEvidence.installerAcceptance.authenticodeStatus", "must equal Valid for the release installer");
+  }
+
+  const gateDigests = [
+    recovery.manifestSha256,
+    rollback.manifestSha256,
+    safari.manifestSha256,
+    monitoring.manifestSha256,
+    identity.manifestSha256,
+    managedRestore.manifestSha256,
+    productionTarget.manifestSha256,
+    productionSecrets.manifestSha256,
+    providerDelivery.manifestSha256,
+    emailScheduler.manifestSha256,
+    installer.manifestSha256,
+  ].filter(value => SHA256.test(value ?? ""));
+  if (gateDigests.length !== 11 || new Set(gateDigests).size !== 11) {
+    add(blockers, "gateEvidence", "must bind eleven distinct rollback, recovery and release-gate manifests");
+  }
 
   const stopConditions = object(manifest.stopConditions);
   for (const key of REQUIRED_STOP_CONDITIONS) {

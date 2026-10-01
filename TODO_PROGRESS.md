@@ -4588,3 +4588,43 @@ project, prove managed restore, complete dedicated-inbox Auth/email delivery, se
 and verify the scheduler plus live alerts, run physical Safari and interactive signed
 installer acceptance, prove production identity cleanup, then obtain an exact release
 window approval. Production remains blocked until every gate passes.
+
+### Milestone 177 — final bootstrap, installer-signing and CI gates (01/10/2026)
+
+Completed three offline release-readiness tracks in parallel and integrated their
+evidence into the final release gate. The production bootstrap validator now requires
+an exact empty Singapore target, read-only inventory, the protected pre-006 baseline,
+the immutable 006–056 contract, source-ledger agreement, import/recovery proof and an
+independent canonical review. It refuses production mutation and refuses to treat the
+incremental migration set as an empty-database bootstrap.
+
+Added a signed-installer evidence validator for the JS Video Uploader. Release evidence
+must bind the exact artifact hash, byte count and commit to valid Authenticode signer
+and trusted-timestamp records, a current clean malware scan, packaged-secret scanning,
+and a physical Windows x64 install/launch/staging-sign-in/local-processing/uninstall
+run. The physical test deliberately stops before any upload request, Repository Draft,
+Mux asset or provider/production contact. Placeholder hashes and signer fingerprints,
+unknown fields and secret-bearing values fail closed.
+
+The release-window gate now requires eleven distinct evidence digests covering
+rollback, recovery, physical Safari, monitoring, production identities, managed
+restore, production bootstrap/target, production secrets, provider delivery and the
+dedicated inbox, scheduler, and signed installer. Every referenced result must pass
+and bind the exact release, deployment and project; approval booleans alone do not
+pass. GitHub CI now also enforces full and production dependency audits, the production
+build, and the complete uploader build/test/audit suite without carrying secrets or
+deploying.
+
+Local verification passes 432/432 application tests, 30/30 focused gate tests and
+27/27 uploader tests. ESLint, TypeScript, whitespace checks, all JSON templates, the
+optimized 51-route Next.js 16.3.8 build, and full/production/uploader audits pass with
+zero reported vulnerabilities. No staging, production, retired project, database,
+deployment, inbox, scheduler or provider was contacted.
+
+Production readiness remains approximately 9.3/10 because the remaining work is
+operator-controlled evidence rather than unfinished application code: create and
+verify the Singapore production project, complete a managed restore, configure and
+prove production secrets/provider delivery/scheduler/monitoring, run physical Safari
+and signed-installer acceptance, prove production identity cleanliness, and approve
+the exact release window. Production remains blocked until all eleven evidence-bound
+gates pass.

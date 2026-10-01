@@ -1377,3 +1377,32 @@ acceptance completed; production remains unchanged.
   dedicated-inbox Auth/email delivery, external scheduler and live monitoring,
   physical Safari devices, interactive signed-installer acceptance, removal of any
   production test identities, and a separately approved release window.
+
+## Final production bootstrap, signed-installer and CI evidence gates — 1 October 2026
+
+- Added a fail-closed production bootstrap validator and deliberately incomplete
+  manifest. It requires an exact new empty Singapore Supabase target, read-only
+  inventory evidence, the protected pre-006 baseline, the immutable 006–056 migration
+  contract, matching source ledger, import/recovery evidence and independent review.
+  It explicitly rejects using migrations 006–056 as an empty-database bootstrap and
+  performs no production mutation.
+- Added a signed Windows uploader release validator and evidence template. It binds the
+  exact installer SHA-256 and size to the release commit, requires a valid Authenticode
+  signature and trusted timestamp, a current clean malware scan, secret-free packaged
+  configuration, and physical Windows x64 install/launch/staging-sign-in/local-video/
+  uninstall evidence. The acceptance boundary prohibits Mux upload, Repository Draft
+  creation and provider or production contact.
+- Expanded the final release-window validator from three to eleven distinct evidence
+  digests. Rollback, recovery, physical Safari, monitoring, production identity,
+  managed restore, production target/bootstrap, production secrets, provider delivery,
+  scheduler and signed installer evidence must all pass and agree on the exact release,
+  deployment and production project. Bare approvals cannot substitute for evidence.
+- Strengthened GitHub CI so its common release job now runs full and production-only
+  dependency audits, lint, all tests, the optimized production build, and the complete
+  JS Video Uploader build/test/audit suite. Regression tests keep the workflow
+  secret-free and prevent it from authorizing deployment.
+- Local verification passes 432/432 application tests, 30/30 focused gate tests,
+  27/27 uploader tests, ESLint, TypeScript, whitespace validation, JSON-template
+  parsing, the optimized 51-route production build, and all three dependency audits
+  with zero reported vulnerabilities. No live host, database, deployment, account,
+  inbox, scheduler, provider, production or retired project was contacted.

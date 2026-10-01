@@ -18,11 +18,13 @@
     "provider:check": "node scripts/provider-config-readiness.mjs",
     "auth-email:staging:preflight": "node scripts/staging-auth-email-readiness.mjs --confirm-offline-preflight",
     "production:target:check": "node scripts/production-target-readiness.mjs",
+    "production:bootstrap:check": "node scripts/production-bootstrap-readiness.mjs",
     "release:window:check": "node scripts/release-window-readiness.mjs",
     "email-scheduler:check": "node scripts/email-scheduler-readiness.mjs",
     "safari:physical:check": "node scripts/physical-safari-readiness.mjs",
     "production:identity:check": "node scripts/production-identity-readiness.mjs",
-    "monitoring:check": "node scripts/monitoring-readiness.mjs"
+    "monitoring:check": "node scripts/monitoring-readiness.mjs",
+    "installer:release:check": "node scripts/installer-release-readiness.mjs"
   },
   "dependencies": {
     "@mux/mux-player-react": "^3.13.4",

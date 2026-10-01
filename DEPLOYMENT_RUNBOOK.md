@@ -386,9 +386,12 @@ deployment/rollback/monitoring owners, tested application and database recovery,
 bounded stop thresholds, and explicit completion of every external gate. It records
 approval but cannot grant it and never connects to production.
 The release-window record must include distinct SHA-256 digests of passing physical
-Safari, production monitoring and production identity manifests. Their commit,
-deployment, project and policy bindings must match the release record; bare approval
-booleans are insufficient.
+Safari, production monitoring, production identity, managed restore, production
+target, production secrets, provider delivery/dedicated inbox, email scheduler and
+signed interactive installer manifests. These digests must also differ from the
+rollback and recovery-point manifest digests. Their exact commit, deployment, project,
+Singapore region, endpoint, policy and installer-artifact bindings must match the release
+record; bare approval booleans are insufficient.
 
 1. Freeze schema changes. Capture and prove fresh recovery points for every source
    that will be imported and for the new target before release mutations. Confirm

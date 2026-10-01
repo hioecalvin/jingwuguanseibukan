@@ -26,6 +26,12 @@
     "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER"
   },
   "rollback": {
+    "manifestSha256": "REPLACE_WITH_64_CHARACTER_ROLLBACK_EVIDENCE_SHA256",
+    "result": "REPLACE_WITH_PASSING_RESULT",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "previousCommitSha": "REPLACE_WITH_40_CHARACTER_ROLLBACK_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "previousDeploymentId": "REPLACE_WITH_KNOWN_GOOD_DEPLOYMENT_ID",
     "applicationTested": false,
     "databaseRecoveryTested": false,
     "decisionDeadlineMinutes": 0
@@ -44,19 +50,81 @@
   "gateEvidence": {
     "physicalSafari": {
       "manifestSha256": "REPLACE_WITH_64_CHARACTER_SAFARI_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
       "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
       "stagingDeploymentId": "REPLACE_WITH_TESTED_STAGING_DEPLOYMENT_ID"
     },
     "monitoring": {
       "manifestSha256": "REPLACE_WITH_64_CHARACTER_MONITORING_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
       "environment": "production",
       "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
       "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
     },
     "productionIdentity": {
       "manifestSha256": "REPLACE_WITH_64_CHARACTER_IDENTITY_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
       "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
       "policy": "jingwuguan-production-identity-v1"
+    },
+    "managedRestore": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_MANAGED_RESTORE_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "staging",
+      "sourceProjectRef": "eomubndonbetszdbhsrj",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "targetKind": "disposable-managed",
+      "zeroResidueVerified": false
+    },
+    "productionTarget": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_TARGET_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "region": "ap-southeast-1",
+      "supabaseOrigin": "REPLACE_WITH_EXACT_PRODUCTION_SUPABASE_ORIGIN",
+      "policy": "jingwuguan-production-bootstrap-v1"
+    },
+    "productionSecrets": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_SECRETS_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
+    },
+    "providerDelivery": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PROVIDER_DELIVERY_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+      "dedicatedInboxPolicy": "dedicated-non-role-inbox"
+    },
+    "emailScheduler": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_EMAIL_SCHEDULER_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+      "endpoint": "https://jingwuguanseibukan.com/api/system/email-worker"
+    },
+    "installerAcceptance": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_ACCEPTANCE_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "staging",
+      "projectRef": "eomubndonbetszdbhsrj",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "origin": "https://jingwuguanseibukan-staging.vercel.app",
+      "installerSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_INSTALLER_SHA256",
+      "platform": "win32-x64",
+      "acceptancePolicy": "interactive-install-launch-uninstall",
+      "authenticodeStatus": "REPLACE_WITH_VALID_SIGNATURE_STATUS"
     }
   },
   "stopConditions": {

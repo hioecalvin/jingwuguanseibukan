@@ -20,8 +20,23 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Audit complete dependency tree
+        run: npm audit --audit-level=high
+      - name: Audit production dependency tree
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
       - run: npm test
+      - name: Build production application
+        run: npm run build
+      - name: Install desktop uploader dependencies
+        working-directory: desktop/js-video-uploader
+        run: npm ci
+      - name: Test desktop uploader
+        working-directory: desktop/js-video-uploader
+        run: npm test
+      - name: Audit desktop uploader dependencies
+        working-directory: desktop/js-video-uploader
+        run: npm audit --audit-level=high
 
   browser-smoke:
     name: ${{ matrix.label }}
