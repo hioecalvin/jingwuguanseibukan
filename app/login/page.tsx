@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -35,13 +33,17 @@ export default function LoginPage() {
     setMessageType("error");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ identifier: email.trim(), password }),
       });
-
-      if (error) {
-        setMessage(error.message);
+      const result = await response.json();
+      if (!response.ok || result?.success !== true) {
+        setMessage(response.status === 429
+          ? "Too many login attempts. Please wait and try again."
+          : "Unable to log in. Check your email or JS Member ID and password.");
         return;
       }
 
@@ -78,18 +80,24 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} aria-busy={loading} className="mt-8 space-y-5">
           <div>
             <label htmlFor="login-email" className="block text-sm font-medium mb-1">
-              Email
+              Email or JS Member ID
             </label>
 
             <input
               id="login-email"
-              type="email"
+              type="text"
               required
-              autoComplete="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              aria-describedby="login-identifier-help"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-500 focus:border-sky-500 focus:outline-none"              placeholder="member@email.com"
+className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-500 focus:border-sky-500 focus:outline-none"              placeholder="member@email.com or JS Member ID"
             />
+            <p id="login-identifier-help" className="mt-2 text-sm text-neutral-400">
+              Awaiting approval? Use your email. Your JS Member ID is assigned after approval.
+            </p>
           </div>
 
           <div>

@@ -1489,3 +1489,27 @@ acceptance completed; production remains unchanged.
   verify the Singapore project, managed restore, production secrets and delivery,
   scheduler/monitoring, physical Safari, signed installer, identity cleanup, approved
   cutover, then the final protected release-window and twelve-file evidence packet.
+
+## Milestone 181 — email or JS Member ID login — 2 October 2026
+
+- Implemented locally after explicit approval. The web login accepts email or exact
+  `profiles.registration_number` plus password, preserving leading zeros. Aikikai
+  numbers and usernames are not aliases. Pending applicants continue using email;
+  existing post-login approval/role routing and desktop uploader email login remain.
+- The server resolves the ID privately through the profile UUID and authoritative
+  Auth email. Ambiguous IDs, unconfirmed users, identity mismatch, disabled/deceased
+  profiles, missing profiles and backend failures cannot issue browser cookies.
+  Failed post-auth validation revokes the newly issued session best-effort. Successful
+  replacement clears only the current project's stale session cookie chunks.
+- Exact configured-origin checks, an 8 KiB streamed body limit, durable global/client/
+  identifier limits, generic errors, no credential logging and a one-second rejection
+  floor are included. The floor reduces simple timing probes, but network timing can
+  still vary. Live validation must confirm the existing rate-limit secret and grants.
+- Local checks: `npm test` passes 529/529 including TypeScript; ESLint passes; the
+  optimized production build passes (52 generated pages) with synthetic configuration.
+  Focused login, frontend, public-form and staging-guard tests pass 49/49. The local
+  Chromium-desktop and WebKit-desktop browser suite passes 78/78. Its initial run
+  passed 77/78; the new WebKit JS-ID test was corrected to wait for hydration and
+  verify the entered value before submission, then both projects passed on rerun.
+  No migration was needed. No staging/production database or provider was contacted,
+  and this milestone is not committed, pushed, deployed or live-verified yet.

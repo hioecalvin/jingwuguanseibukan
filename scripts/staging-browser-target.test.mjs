@@ -75,6 +75,10 @@ test("child environment keeps only runtime necessities and protected browser cre
 test("request guard allows reads and ephemeral auth but rejects writes and unknown origins", () => {
   const cases = [
     ["GET", `${STAGING_APP_ORIGIN}/register`, true],
+    ["POST", `${STAGING_APP_ORIGIN}/api/auth/login`, true],
+    ["PUT", `${STAGING_APP_ORIGIN}/api/auth/login`, false],
+    ["POST", `${STAGING_APP_ORIGIN}/api/auth/login?other=1`, false],
+    ["POST", `${STAGING_APP_ORIGIN}/api/auth/login/other`, false],
     ["GET", `${STAGING_SUPABASE_ORIGIN}/rest/v1/profiles?select=id`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/auth/v1/token?grant_type=password`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/auth/v1/token?grant_type=refresh_token`, true],

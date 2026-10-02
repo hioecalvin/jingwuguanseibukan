@@ -22,7 +22,7 @@ async function beginMemberLogin(
   violations: string[],
 ) {
   await page.goto('/login', { waitUntil: 'networkidle' });
-  const email = page.getByLabel('Email', { exact: true });
+  const email = page.getByLabel('Email or JS Member ID', { exact: true });
   const password = page.getByLabel('Password', { exact: true });
   await email.fill(process.env.SECURITY_TEST_MEMBER_EMAIL!);
   await password.fill(process.env.SECURITY_TEST_MEMBER_PASSWORD!);
@@ -30,7 +30,7 @@ async function beginMemberLogin(
   await expect(password).toHaveValue(process.env.SECURITY_TEST_MEMBER_PASSWORD!);
   const tokenResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
-    return url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password';
+    return url.origin === STAGING_APP_ORIGIN && url.pathname === '/api/auth/login' && response.request().method() === 'POST';
   }, { timeout: 12_000 }).catch(() => null);
   await page.getByRole('button', { name: 'Log In', exact: true }).click();
   const response = await tokenResponse;
@@ -40,10 +40,10 @@ async function beginMemberLogin(
   }
   expect(
     response,
-    `Password-grant response missing. Requests: ${requestAudit.join('; ') || 'none'} | ` +
+    `Application login response missing. Requests: ${requestAudit.join('; ') || 'none'} | ` +
       `Violations: ${violations.join('; ') || 'none'}`,
   ).not.toBeNull();
-  expect(response!.status(), 'Supabase password grant must succeed').toBe(200);
+  expect(response!.status(), 'Application login must succeed').toBe(200);
 }
 
 test('Member CAS no-op leaves contact/profile data unchanged', async ({ context, page }) => {

@@ -506,7 +506,8 @@ npm.cmd run test:security
    default-ACL disposition, reviewed-existing-account read-only role acceptance, exact domain/Auth
    configuration, all 11 host probes, rollback reachability and zero application/
    domain acceptance writes. Expected Auth session/refresh/audit writes from login
-   and logout must be retained and reviewed separately. Generate its canonical
+   and logout, plus login-only `api_rate_limit_buckets` counters, must be retained
+   and reviewed separately as operational evidence. Generate its canonical
    review digest, then require this offline check:
 
 ```powershell

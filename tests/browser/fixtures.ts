@@ -11,6 +11,7 @@ export type Backend = {
   dojoWait: Map<string, Promise<void>>;
   calls: { path: string; method: string }[];
   authCalls: number;
+  loginPayload?: { identifier: string; password: string };
   signupPayload?: { email: string; data: Record<string, string | null> };
   confirmSignup: boolean;
 };
@@ -32,6 +33,12 @@ export const test = base.extend<{ backend: Backend }>({
       const request = route.request();
       const url = new URL(request.url());
       const mockHost = new URL(MOCK_BACKEND_ORIGIN);
+      if (url.origin === APP_ORIGIN && url.pathname === '/api/auth/login' && request.method() === 'POST' && !url.search) {
+        // Browser interaction fixture only: never forward credentials to a real server.
+        backend.authCalls++;
+        backend.loginPayload = request.postDataJSON();
+        return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Invalid fixture credentials' }) });
+      }
       if (url.hostname === mockHost.hostname && url.port === mockHost.port && ['http:', 'https:'].includes(url.protocol)) {
         // Fulfill locally, never route.fetch()/continue() to this address.
         backend.calls.push({ path: url.pathname, method: request.method() });

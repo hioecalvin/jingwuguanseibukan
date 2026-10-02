@@ -22,7 +22,7 @@ test('login keyboard order, visible focus, responsive layout and automated acces
   await page.goto('/login');
   await expect(page).toHaveTitle('Member login | Jingwuguan Seibukan');
   await page.keyboard.press('Tab');
-  await expect(page.getByLabel('Email', { exact: true })).toBeFocused();
+  await expect(page.getByLabel('Email or JS Member ID', { exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByLabel('Password', { exact: true })).toBeFocused();
   const outline = await page.getByLabel('Password', { exact: true }).evaluate(el => getComputedStyle(el).outlineStyle);
@@ -39,13 +39,27 @@ test('login keyboard order, visible focus, responsive layout and automated acces
 
 test('failed login displays an error and releases submission', async ({ page, backend }) => {
   await page.goto('/login');
-  await typeText(page, 'Email', 'fixture@example.invalid');
+  await typeText(page, 'Email or JS Member ID', 'fixture@example.invalid');
   await typeText(page, 'Password', 'FixturePassword123');
   await page.getByRole('button', { name: 'Log In', exact: true }).click();
-  await expect(page.getByText('Invalid fixture credentials', { exact: true })).toBeVisible();
+  await expect(page.getByText('Unable to log in. Check your email or JS Member ID and password.', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Log In', exact: true })).toBeEnabled();
   expect(backend.authCalls).toBe(1);
   await expect(page).toHaveURL(/\/login$/);
+});
+
+test('JS Member ID can be submitted without browser email validation', async ({ page, backend }) => {
+  await page.goto('/login', { waitUntil: 'networkidle' });
+  const identifier = page.getByLabel('Email or JS Member ID', { exact: true });
+  await expect(identifier).toHaveAttribute('autocomplete', 'username');
+  await typeText(page, 'Email or JS Member ID', '0101');
+  await typeText(page, 'Password', 'FixturePassword123');
+  await expect(identifier).toHaveValue('0101');
+  await page.getByRole('button', { name: 'Log In', exact: true }).click();
+  await expect(page.getByText('Unable to log in. Check your email or JS Member ID and password.', { exact: true })).toBeVisible();
+  expect(backend.authCalls).toBe(1);
+  await expect(page.getByText('Awaiting approval? Use your email. Your JS Member ID is assigned after approval.', { exact: true })).toBeVisible();
+  expect(backend.loginPayload).toEqual({ identifier: '0101', password: 'FixturePassword123' });
 });
 
 test('verified and disabled login redirects show safe, accessible feedback', async ({ page }) => {

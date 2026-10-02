@@ -140,6 +140,10 @@ export function classifyStagingBrowserRequest(method, rawUrl) {
     return allow("read request");
   }
   if (url.origin === STAGING_APP_ORIGIN) {
+    // Auth sessions and hashed security rate-limit counters are expected writes.
+    if (normalizedMethod === "POST" && url.pathname === "/api/auth/login" && !url.search) {
+      return allow("authentication and security rate-limit counters");
+    }
     return deny("application mutation request");
   }
   if (normalizedMethod !== "POST") {

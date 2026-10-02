@@ -59,6 +59,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
     module: componentModule, exports: componentModule.exports, Error,
     window: { location: { origin: 'http://127.0.0.1:3100', search: extras.__locationSearch ?? '' }, matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }) },
     URLSearchParams,
+    fetch: extras.__fetch ?? (() => { throw new Error('Unmocked fetch'); }),
     require(name) {
       if (!(name in dependencies)) throw new Error(`Unmocked dependency: ${name}`);
       return dependencies[name];
@@ -137,7 +138,7 @@ function fillRegistration(ui, { aikikaiNumber = ' AIKIKAI   123 ' } = {}) {
 }
 
 test('login recovers from unexpected failures without disclosing their details', async () => {
-  const ui = componentHarness('app/login/page.tsx', { auth: { signInWithPassword: async () => { throw new Error('private host detail'); } } });
+  const ui = componentHarness('app/login/page.tsx', {}, { __fetch: async () => { throw new Error('private host detail'); } });
   ui.render();
   await ui.submit();
   await ui.flush();
@@ -150,15 +151,50 @@ test('login recovers from unexpected failures without disclosing their details',
 test('login blocks a second submission while a request is pending', async () => {
   const result = deferred();
   let calls = 0;
-  const ui = componentHarness('app/login/page.tsx', { auth: { signInWithPassword() { calls++; return result.promise; } } });
+  const ui = componentHarness('app/login/page.tsx', {}, { __fetch() { calls++; return result.promise; } });
   ui.render();
   const first = ui.submit();
   await ui.flush();
   await ui.submit();
   assert.equal(calls, 1);
-  result.resolve({ error: null });
+  result.resolve({ ok: true, json: async () => ({ success: true }) });
   await first;
   assert.deepEqual(ui.redirects, ['/']);
+});
+
+test('login sends either identifier to the same-origin endpoint and hides server error details', async () => {
+  for (const identifier of [' MEMBER@EXAMPLE.INVALID ', '0101']) {
+    const calls = [];
+    const ui = componentHarness('app/login/page.tsx', {}, { __fetch: async (...args) => {
+      calls.push(args);
+      return { ok: false, status: 401, json: async () => ({ error: 'private-account@example.invalid' }) };
+    } });
+    ui.render();
+    ui.change('login-email', identifier);
+    ui.change('login-password', ' password unchanged ');
+    await ui.submit();
+    await ui.flush();
+    assert.equal(calls[0][0], '/api/auth/login');
+    assert.equal(calls[0][1].credentials, 'same-origin');
+    assert.deepEqual(JSON.parse(calls[0][1].body), { identifier: identifier.trim(), password: ' password unchanged ' });
+    assert.match(ui.text(), /Check your email or JS Member ID and password/);
+    assert.doesNotMatch(ui.text(), /private-account/);
+    assert.deepEqual(ui.redirects, []);
+  }
+});
+
+test('login requires explicit success and explains rate limiting', async () => {
+  for (const status of [200, 429]) {
+    const ui = componentHarness('app/login/page.tsx', {}, { __fetch: async () => ({
+      ok: status === 200, status, json: async () => ({}),
+    }) });
+    ui.render();
+    await ui.submit();
+    await ui.flush();
+    assert.deepEqual(ui.redirects, []);
+    assert.equal(ui.find(node => node.type === 'button').props.disabled, false);
+    if (status === 429) assert.match(ui.text(), /Too many login attempts/);
+  }
 });
 
 test('login explains verified and disabled account redirects without reflecting input', async () => {

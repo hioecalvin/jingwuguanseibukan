@@ -18,14 +18,14 @@ const fixture = repositoryDraftFixture(marker);
 
 async function loginAsSuper(page: Page) {
   await page.goto('/login', { waitUntil: 'networkidle' });
-  await page.getByLabel('Email', { exact: true }).fill(process.env.SECURITY_TEST_SUPER_EMAIL!);
+  await page.getByLabel('Email or JS Member ID', { exact: true }).fill(process.env.SECURITY_TEST_SUPER_EMAIL!);
   await page.getByLabel('Password', { exact: true }).fill(process.env.SECURITY_TEST_SUPER_PASSWORD!);
   const tokenResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
-    return url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password';
+    return url.origin === STAGING_APP_ORIGIN && url.pathname === '/api/auth/login' && response.request().method() === 'POST';
   });
   await page.getByRole('button', { name: 'Log In', exact: true }).click();
-  expect((await tokenResponse).status(), 'Supabase password grant must succeed').toBe(200);
+  expect((await tokenResponse).status(), 'Application login must succeed').toBe(200);
 }
 
 test('Super Admin creates, updates and deletes one zero-residue Repository Draft', async ({ context, page }) => {

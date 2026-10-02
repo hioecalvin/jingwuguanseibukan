@@ -4,6 +4,18 @@ The authenticated Member repository and administration system for Jingwuguan
 Seibukan. The application is built with Next.js 16, React 19, Supabase, Resend,
 web push, React PDF, and SheetJS.
 
+## Member login
+
+The web login accepts an email address or the exact JS Member ID, plus a password.
+Keep leading zeros (for example, `0101`); Aikikai numbers are not login identifiers.
+Applicants awaiting approval use their verified email until a JS Member ID is assigned.
+The desktop JS Video Uploader continues to use email and password.
+
+The server resolves JS IDs privately and checks account status before issuing session
+cookies. It requires the existing server Supabase credentials, exact
+`NEXT_PUBLIC_SITE_URL`, and `DURABLE_RATE_LIMIT_SECRET`. Login fails closed if rate
+limiting is unavailable. Existing approval and role routing still apply after login.
+
 ## Local development
 
 Use Node.js 20 or later.

@@ -76,13 +76,15 @@ For browser acceptance, use only existing production Member, scoped Admin and Su
 Admin accounts selected from a separately protected account/role roster that
 underpins the sanitized aggregate identity evidence. For each role, record login,
 authorized landing/navigation, one representative authorized read, one representative
-out-of-scope denial, and logout. Do not submit a form, invoke a mutating RPC, create an
+out-of-scope denial, and logout. Apart from the login form, do not submit a form, invoke a mutating RPC, create an
 account, publish content, upload media, send a provider message or alter a member.
 Capture application/domain audit and write counters immediately before and after and
 require no change attributable to acceptance. Login, token refresh and logout may
 create expected Supabase Auth session, refresh-token, last-sign-in or Auth-audit
-records; retain and review those separately and do not count them as application
-writes. No profile, membership, finance, content, notification or other public-schema
+records. Login also updates HMAC-keyed counters in `public.api_rate_limit_buckets`;
+retain and review the login-only limiter counters separately as operational evidence.
+These expected Auth and login limiter writes are excluded from business/application
+acceptance-write counts. No profile, membership, finance, content, notification or other public-schema
 business row may change. Hash the exact protected HTTP, browser and
 before/after database records; those hashes populate `probes.evidenceSha256` and
 `roleSecurity.evidenceSha256`. Booleans without those retained records are not

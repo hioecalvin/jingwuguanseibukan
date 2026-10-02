@@ -156,7 +156,8 @@ security results, default-ACL resolution or a narrow time-bounded exception,
 read-only Member/Admin/Super Admin checks, the production domain and exact Auth
 redirect, all 11 host probes, rollback reachability and zero application/domain
 acceptance writes. Expected Supabase Auth session, refresh, audit and last-sign-in
-writes are retained and reviewed separately. Evidence must be fresh, ordered,
+writes and login-only `api_rate_limit_buckets` counters are retained and reviewed
+separately as operational evidence. Evidence must be fresh, ordered,
 independently reviewed and represented only by distinct SHA-256 digests.
 
 ```powershell

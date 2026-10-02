@@ -4739,3 +4739,21 @@ execution evidence and separate authorization: create/verify the Singapore produ
 project, managed restore, production secrets/provider/scheduler/monitoring, physical
 Safari, signed installer acceptance, clean production identities, approved cutover,
 and the final protected release-window plus twelve-file evidence packet.
+
+### Milestone 181 — email or JS Member ID login (02/10/2026)
+
+Explicitly approved local implementation adds a same-origin server login endpoint
+and one email-or-JS-ID field. Exact JS IDs retain leading zeros; pending applicants
+use email. Server-only ID resolution uses the Auth email associated with the matched
+profile UUID. Generic failures, durable request limits, bounded input, confirmation/
+account checks, delayed failure responses and buffered session cookies protect the
+flow. Stale same-project cookie chunks are cleared only on successful replacement.
+No new schema/RPC or migration is introduced; uploader email login is unchanged.
+
+529/529 tests, TypeScript, ESLint and a synthetic-environment optimized production
+build pass. Focused login/frontend/form/staging-guard checks pass 49/49 and local
+Chromium/WebKit desktop browser checks pass 78/78 after correcting a hydration race
+in the new WebKit JS-ID test. Login creates expected Auth operational records and HMAC-keyed limiter
+counters; acceptance docs now distinguish those from forbidden business-row writes.
+Deployment, live staging email/JS-ID role acceptance and remote CI remain pending.
+No production, retired project, provider or live database was contacted.

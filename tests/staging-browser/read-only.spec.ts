@@ -21,7 +21,7 @@ async function login(
   // fill/click race where hydration replaces the controlled input values and
   // native form validation silently suppresses submission.
   await page.goto('/login', { waitUntil: 'networkidle' });
-  const email = page.getByLabel('Email', { exact: true });
+  const email = page.getByLabel('Email or JS Member ID', { exact: true });
   const password = page.getByLabel('Password', { exact: true });
   await email.fill(account.email);
   await password.fill(account.password);
@@ -29,7 +29,7 @@ async function login(
   await expect(password).toHaveValue(account.password);
   const tokenResponse = page.waitForResponse((response) => {
     const url = new URL(response.url());
-    return url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password';
+    return url.origin === STAGING_APP_ORIGIN && url.pathname === '/api/auth/login' && response.request().method() === 'POST';
   }, { timeout: 12_000 }).catch(() => null);
   await page.getByRole('button', { name: 'Log In', exact: true }).click();
   const response = await tokenResponse;
@@ -44,8 +44,8 @@ async function login(
     `Page errors: ${diagnostics.pageErrors.join('; ') || 'none'}`,
     `Failed requests: ${diagnostics.failedRequests.join('; ') || 'none'}`,
   ].join(' | ');
-  expect(response, `Password-grant response missing. ${diagnosticSummary}`).not.toBeNull();
-  expect(response!.status(), 'Supabase password grant must succeed').toBe(200);
+  expect(response, `Application login response missing. ${diagnosticSummary}`).not.toBeNull();
+  expect(response!.status(), 'Application login must succeed').toBe(200);
   await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
 }
 
@@ -152,3 +152,20 @@ test('a random certificate UUID is not found', async ({ page }) => {
   await page.goto(`/certificate/verify/${randomUUID()}`);
   await expect(page.getByRole('heading', { name: 'Certificate not found' })).toBeVisible();
 });
+
+for (const [role, memberId, allowedPath, heading, deniedPath] of [
+  ['MEMBER', '0101', '/profile', 'My Profile', '/admin'],
+  ['ADMIN', '0002', '/admin/members', 'Member Management', '/admin/applications'],
+  ['SUPER', '0001', '/admin/applications', 'Pending Applications', null],
+] as const) {
+  test(`${role} can sign in with exact JS Member ID and retains role boundaries`, async ({ page, requestAudit, browserDiagnostics }) => {
+    const account = credentials(role);
+    await login(page, { ...account, email: memberId }, requestAudit, browserDiagnostics);
+    await page.goto(allowedPath);
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
+    if (deniedPath) {
+      await page.goto(deniedPath);
+      await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
+    }
+  });
+}
