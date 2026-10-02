@@ -1513,3 +1513,31 @@ acceptance completed; production remains unchanged.
   verify the entered value before submission, then both projects passed on rerun.
   No migration was needed. No staging/production database or provider was contacted,
   and this milestone is not committed, pushed, deployed or live-verified yet.
+
+### Approved staging release follow-up — 2 October 2026
+
+- Committed the 19 intended login, test and documentation files as `ed15327` and
+  pushed to `release/v1-readiness-20260918`. Existing `supabase/.temp` changes were
+  excluded and preserved. Added exact JS-ID role checks for Member 0101, Admin 0002
+  and Super Admin 0001 on all three guarded WebKit device projects (27 total cases).
+- TypeScript and 24 focused login/target-guard tests passed again before the commit.
+  GitHub Actions run `36971234524` passed all five jobs: common checks, Chromium/Linux,
+  Firefox/Linux, WebKit/Linux and WebKit/macOS.
+- After the user restored Vercel sign-in, exact commit `ed15327` was built as Ready
+  Preview `dpl_5tjVrPaXs7yuyywmwUkefoNfEtVx` (53-second build). Existing CLI access
+  assigned only `jingwuguanseibukan-staging.vercel.app` to
+  `jingwuguanseibukan-e1vrid5dg-js1-ccd7.vercel.app`; no production promotion occurred.
+- All 11 staging host probes and required security headers passed. The new login
+  label is deployed. The login bundle no longer includes the Supabase client, so
+  backend binding was verified from registration bundles: only
+  `eomubndonbetszdbhsrj.supabase.co` was present.
+- `npm run test:browser:staging:read-only` passed 27/27 in 4.0 minutes: desktop,
+  tablet and mobile WebKit each verified registration catalog, invalid confirmation,
+  email login for all three roles, Member/Admin denied routes, Super Admin readers,
+  unknown-certificate handling, and exact JS-ID login for 0101, 0002 and 0001.
+  The request guard reported no application mutation, unapproved RPC or off-origin
+  browser request. This is not a separate database-wide zero-residue audit or a
+  substitute for physical Safari/iOS testing.
+- No production, retired project or outbound delivery/video provider was contacted.
+  No database migration or business-record mutation was performed. Authentication
+  sessions and HMAC-keyed login rate-limit counters are expected operational writes.

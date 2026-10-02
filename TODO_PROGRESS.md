@@ -4757,3 +4757,17 @@ in the new WebKit JS-ID test. Login creates expected Auth operational records an
 counters; acceptance docs now distinguish those from forbidden business-row writes.
 Deployment, live staging email/JS-ID role acceptance and remote CI remain pending.
 No production, retired project, provider or live database was contacted.
+
+Approved release follow-up (02/10/2026): login commit `ed15327` is pushed to the
+existing release branch; unrelated Supabase cache changes were preserved. The live
+suite now contains 27 guarded WebKit cases, including exact JS-ID login for all three
+approved roles. TypeScript and 24 focused tests passed again. GitHub Actions run
+`36971234524` subsequently passed all five CI jobs. After Vercel sign-in, Ready
+Preview `dpl_5tjVrPaXs7yuyywmwUkefoNfEtVx` was built from `ed15327` and assigned
+only the existing staging hostname. All 11 host/security-header probes passed;
+registration bundles confirmed only the staging Supabase host. Guarded live WebKit
+acceptance passed 27/27 in 4.0 minutes, covering email and exact JS-ID login plus
+role boundaries on desktop, tablet and mobile. No guard violations occurred.
+Only expected Auth/session and login rate-limit operational writes were permitted;
+no migration, business-record mutation, production or retired-project contact.
+Physical Safari/iOS and the separately authorized production release gates remain open.
