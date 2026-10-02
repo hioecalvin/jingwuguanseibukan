@@ -12,7 +12,6 @@
     "productionSecrets": "C:\\protected\\REPLACE_WITH_PRODUCTION_SECRETS_EVIDENCE.json",
     "productionCutover": "C:\\protected\\REPLACE_WITH_PRODUCTION_CUTOVER_EVIDENCE.json",
     "providerDelivery": "C:\\protected\\REPLACE_WITH_PROVIDER_DELIVERY_EVIDENCE.json",
-    "emailScheduler": "C:\\protected\\REPLACE_WITH_EMAIL_SCHEDULER_EVIDENCE.json",
-    "installerAcceptance": "C:\\protected\\REPLACE_WITH_INSTALLER_ACCEPTANCE_EVIDENCE.json"
+    "emailScheduler": "C:\\protected\\REPLACE_WITH_EMAIL_SCHEDULER_EVIDENCE.json"
   }
 }

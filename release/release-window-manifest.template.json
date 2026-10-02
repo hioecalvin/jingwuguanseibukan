@@ -1,6 +1,7 @@
 {
   "manifestVersion": 1,
   "release": {
+    "scope": "web-only",
     "branch": "release/v1-readiness-20260918",
     "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
     "previousCommitSha": "REPLACE_WITH_40_CHARACTER_ROLLBACK_SHA",
@@ -37,6 +38,7 @@
     "decisionDeadlineMinutes": 0
   },
   "approvals": {
+    "windowsUploaderWithheld": false,
     "explicitReleaseApproval": false,
     "productionTargetVerified": false,
     "productionSecretsVerified": false,
@@ -126,18 +128,6 @@
       "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
       "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
       "endpoint": "https://jingwuguanseibukan.com/api/system/email-worker"
-    },
-    "installerAcceptance": {
-      "manifestSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_ACCEPTANCE_MANIFEST_SHA256",
-      "result": "REPLACE_WITH_PASSING_RESULT",
-      "environment": "staging",
-      "projectRef": "eomubndonbetszdbhsrj",
-      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
-      "origin": "https://jingwuguanseibukan-staging.vercel.app",
-      "installerSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_INSTALLER_SHA256",
-      "platform": "win32-x64",
-      "acceptancePolicy": "interactive-install-launch-uninstall",
-      "authenticodeStatus": "REPLACE_WITH_VALID_SIGNATURE_STATUS"
     }
   },
   "stopConditions": {

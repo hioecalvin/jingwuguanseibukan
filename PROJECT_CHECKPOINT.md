@@ -1541,3 +1541,37 @@ acceptance completed; production remains unchanged.
 - No production, retired project or outbound delivery/video provider was contacted.
   No database migration or business-record mutation was performed. Authentication
   sessions and HMAC-keyed login rate-limit counters are expected operational writes.
+
+## Approved web-first release scope — 2 October 2026
+
+- The user approved updating V1 to a web-first launch after confirming that no
+  Windows code-signing certificate is available. The Windows uploader is deferred
+  and withheld from production distribution, not marked tested or released.
+- Release-window and evidence-packet validators now require explicit `release.scope`:
+  `web-only` or `web-and-windows-uploader`. Web-only requires confirmation of
+  `approvals.windowsUploaderWithheld`, excludes installer evidence rather than
+  treating it as passed, and requires eleven distinct final evidence files (ten
+  pre-cutover). Combined releases retain twelve final files and the existing signed
+  installer requirements. Missing/unknown scopes fail closed.
+- Updated both release templates, deployment runbook, evidence-packet instructions,
+  installer deferral notice and current TODO scope. Existing protected manifests
+  must be deliberately updated with scope; no protected evidence was changed or
+  fabricated. All web recovery, security, identity, provider/Mux delivery, scheduler,
+  monitoring, physical Safari, production target/secrets and cutover gates remain.
+- Verified locally: `npm test` passes TypeScript and 537/537 tests; the focused
+  release-window/packet suite passes 34/34; `npm run lint`, `git diff --check` and
+  parsing of both updated JSON templates pass. Eight new regression tests cover
+  scope validation, distribution withholding, evidence counts, retained web gates,
+  and missing/unsigned/misbound installer rejection for combined releases.
+- No application UI, database migration, credential, uploader binary or standalone
+  installer validator was changed. No build/browser/live provider tests were rerun
+  for this offline release-policy change. No live systems were contacted. Changes
+  were prepared on top of `34e43c4`; pre-existing Supabase temporary
+  metadata changes were preserved. Production creation, import and deployment still
+  require separate explicit authorization.
+- Follow-up local commit review reran all 34 focused release-window/packet tests and
+  whitespace validation successfully. Only the eleven intended scope-change files
+  are included in the local commit; Supabase temporary metadata is excluded. No
+  push, deployment or remote CI run is part of this follow-up. The next publication
+  step requires approval to push the commit and run GitHub CI; managed recovery,
+  physical Safari and the separately approved production setup remain open.

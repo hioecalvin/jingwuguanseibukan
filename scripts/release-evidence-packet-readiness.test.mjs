@@ -74,7 +74,7 @@ async function fixture() {
   }
 
   const releaseManifest = {
-    release: { commitSha: COMMIT, deploymentId: DEPLOYMENT, previousCommitSha: PREVIOUS_COMMIT, previousDeploymentId: PREVIOUS_DEPLOYMENT },
+    release: { scope: "web-and-windows-uploader", commitSha: COMMIT, deploymentId: DEPLOYMENT, previousCommitSha: PREVIOUS_COMMIT, previousDeploymentId: PREVIOUS_DEPLOYMENT },
     window: { startsAt: windowStartsAt, endsAt: windowEndsAt },
     recovery: { manifestSha256: digests.recovery },
     rollback: { manifestSha256: digests.rollback, decisionDeadlineMinutes: 15 },
@@ -278,4 +278,50 @@ test("checked-in template is incomplete and CLI refuses missing independent iden
   const result = await verifyEvidenceFiles(template, {});
   assert.equal(result.ready, false);
   assert.equal(await runCli([]), 2);
+});
+
+async function webOnlyFixture() {
+  const data = await fixture();
+  data.releaseManifest.release.scope = "web-only";
+  data.releaseManifest.approvals = { windowsUploaderWithheld: true };
+  delete data.releaseManifest.gateEvidence.installerAcceptance;
+  delete data.index.evidenceFiles.installerAcceptance;
+  await writeFile(data.index.releaseWindowManifest, JSON.stringify(data.releaseManifest));
+  return data;
+}
+
+test("web-only packet verifies eleven distinct files without accessing installer evidence", async t => {
+  const data = await webOnlyFixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+  const result = await verifyEvidenceFiles(data.index, data.releaseManifest, { expectedDeploymentId: DEPLOYMENT, expectedProductionProjectRef: PROJECT });
+  assert.equal(result.ready, true, JSON.stringify(result.blockers));
+  assert.deepEqual(result.summary, { verifiedEvidenceFiles: 11, semanticallyVerifiedEvidenceFiles: 2 });
+});
+
+test("web-only packet rejects missing web evidence and extra installer entries", async t => {
+  const data = await webOnlyFixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+  for (const key of Object.keys(data.index.evidenceFiles)) {
+    const index = structuredClone(data.index);
+    delete index.evidenceFiles[key];
+    assert.equal((await verifyEvidenceFiles(index, data.releaseManifest, { expectedDeploymentId: DEPLOYMENT, expectedProductionProjectRef: PROJECT })).ready, false, key);
+  }
+  data.index.evidenceFiles.installerAcceptance = join(data.directory, "not-to-be-read.json");
+  const result = await verifyEvidenceFiles(data.index, data.releaseManifest, { expectedDeploymentId: DEPLOYMENT, expectedProductionProjectRef: PROJECT });
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(item => item.path === "evidenceFiles"));
+});
+
+test("packet scope cannot be omitted, invented or used without distribution withholding", async t => {
+  const data = await webOnlyFixture();
+  t.after(() => rm(data.directory, { recursive: true, force: true }));
+  for (const scope of [undefined, "unknown", "web-and-windows-uploader"]) {
+    const manifest = structuredClone(data.releaseManifest);
+    manifest.release.scope = scope;
+    await writeFile(data.index.releaseWindowManifest, JSON.stringify(manifest));
+    assert.equal((await verifyEvidenceFiles(data.index, manifest, { expectedDeploymentId: DEPLOYMENT, expectedProductionProjectRef: PROJECT })).ready, false);
+  }
+  delete data.releaseManifest.approvals.windowsUploaderWithheld;
+  await writeFile(data.index.releaseWindowManifest, JSON.stringify(data.releaseManifest));
+  assert.equal((await verifyEvidenceFiles(data.index, data.releaseManifest, { expectedDeploymentId: DEPLOYMENT, expectedProductionProjectRef: PROJECT })).ready, false);
 });

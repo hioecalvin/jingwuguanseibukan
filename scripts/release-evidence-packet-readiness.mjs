@@ -3,7 +3,7 @@ import { lstat, readFile, realpath } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { evaluateReleaseWindow } from "./release-window-readiness.mjs";
+import { evaluateReleaseWindow, releaseScopeBlockers } from "./release-window-readiness.mjs";
 import { evaluateRollbackReadiness } from "./rollback-readiness.mjs";
 import { evaluateProductionCutoverReadiness } from "./production-cutover-readiness.mjs";
 
@@ -104,7 +104,10 @@ export async function verifyEvidenceFiles(
     expectedProductionProjectRef,
   } = {},
 ) {
-  const blockers = [];
+  const blockers = releaseScopeBlockers(releaseManifest);
+  const evidenceKeys = object(releaseManifest?.release).scope === "web-only"
+    ? EVIDENCE_KEYS.filter(key => key !== "installerAcceptance")
+    : EVIDENCE_KEYS;
   if (!exactKeys(index, ["manifestVersion", "releaseWindowManifest", "evidenceFiles"])) {
     blockers.push(blocker("$", "evidence index must use only the documented fields"));
   }
@@ -124,13 +127,13 @@ export async function verifyEvidenceFiles(
   }
 
   const evidenceFiles = object(index?.evidenceFiles);
-  if (!exactKeys(evidenceFiles, EVIDENCE_KEYS)) {
-    blockers.push(blocker("evidenceFiles", "must contain exactly the twelve documented evidence entries"));
+  if (!exactKeys(evidenceFiles, evidenceKeys)) {
+    blockers.push(blocker("evidenceFiles", `must contain exactly the ${evidenceKeys.length} evidence entries required by the release scope`));
   }
 
   const resolvedFiles = [];
   let semanticallyVerifiedFiles = 0;
-  for (const key of EVIDENCE_KEYS) {
+  for (const key of evidenceKeys) {
     const expected = expectedDigest(object(releaseManifest), key);
     if (!/^[a-f0-9]{64}$/.test(expected ?? "") || /^(.)\1{63}$/.test(expected)) {
       blockers.push(blocker(`evidenceFiles.${key}`, "release manifest does not contain a valid evidence digest"));
@@ -199,8 +202,8 @@ export async function verifyEvidenceFiles(
     }
   }
 
-  if (resolvedFiles.length !== EVIDENCE_KEYS.length || new Set(resolvedFiles).size !== EVIDENCE_KEYS.length) {
-    blockers.push(blocker("evidenceFiles", "all twelve evidence files must be present and distinct"));
+  if (resolvedFiles.length !== evidenceKeys.length || new Set(resolvedFiles).size !== evidenceKeys.length) {
+    blockers.push(blocker("evidenceFiles", `all ${evidenceKeys.length} required evidence files must be present and distinct`));
   }
 
   return {
@@ -210,7 +213,7 @@ export async function verifyEvidenceFiles(
       "This offline check binds protected evidence files only; it does not authorize or execute a release.",
     ],
     summary: blockers.length === 0 ? {
-      verifiedEvidenceFiles: EVIDENCE_KEYS.length,
+      verifiedEvidenceFiles: evidenceKeys.length,
       semanticallyVerifiedEvidenceFiles: semanticallyVerifiedFiles,
     } : null,
   };

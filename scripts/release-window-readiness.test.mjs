@@ -20,6 +20,7 @@ function validManifest(overrides = {}) {
   const manifest = {
     manifestVersion: 1,
     release: {
+      scope: "web-and-windows-uploader",
       branch: RELEASE_BRANCH,
       commitSha: RELEASE_SHA,
       previousCommitSha: PREVIOUS_SHA,
@@ -411,4 +412,83 @@ test("all recovery and gate manifest digests must be distinct", () => {
   const result = evaluateReleaseWindow(manifest, options());
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "gateEvidence"));
+});
+
+function webOnlyManifest() {
+  const manifest = validManifest();
+  manifest.release.scope = "web-only";
+  manifest.approvals.windowsUploaderWithheld = true;
+  delete manifest.gateEvidence.installerAcceptance;
+  return manifest;
+}
+
+test("explicit web-only scope defers only the installer in both release phases", () => {
+  for (const phase of ["pre-cutover", "final"]) {
+    const manifest = webOnlyManifest();
+    if (phase === "pre-cutover") {
+      delete manifest.gateEvidence.productionCutover;
+      manifest.approvals.productionCutoverVerified = false;
+    }
+    const result = evaluateReleaseWindow(manifest, options({ phase }));
+    assert.equal(result.ready, true, JSON.stringify(result.blockers));
+    assert.equal(result.summary.scope, "web-only");
+  }
+});
+
+test("missing or unknown scope never implicitly waives installer evidence", () => {
+  for (const scope of [undefined, null, "", "web", "WEB-ONLY"]) {
+    const manifest = webOnlyManifest();
+    manifest.release.scope = scope;
+    const result = evaluateReleaseWindow(manifest, options());
+    assert.equal(result.ready, false);
+    assert.ok(result.blockers.some(({ path }) => path === "release.scope"));
+  }
+});
+
+test("web-only must confirm withholding distribution and cannot claim installer acceptance", () => {
+  for (const value of [undefined, false, "true"]) {
+    const manifest = webOnlyManifest();
+    manifest.approvals.windowsUploaderWithheld = value;
+    assert.equal(evaluateReleaseWindow(manifest, options()).ready, false);
+  }
+  for (const evidence of [null, {}, validManifest().gateEvidence.installerAcceptance]) {
+    const manifest = webOnlyManifest();
+    manifest.gateEvidence.installerAcceptance = evidence;
+    assert.equal(evaluateReleaseWindow(manifest, options()).ready, false);
+  }
+});
+
+test("web-only still requires every web gate, approval, distinct digest and stop condition", () => {
+  for (const key of Object.keys(webOnlyManifest().gateEvidence)) {
+    const manifest = webOnlyManifest();
+    delete manifest.gateEvidence[key];
+    assert.equal(evaluateReleaseWindow(manifest, options()).ready, false, key);
+  }
+  for (const section of ["recovery", "rollback"]) {
+    const manifest = webOnlyManifest();
+    delete manifest[section];
+    assert.equal(evaluateReleaseWindow(manifest, options()).ready, false, section);
+  }
+  for (const section of ["approvals", "stopConditions"]) {
+    for (const key of Object.keys(webOnlyManifest()[section])) {
+      const manifest = webOnlyManifest();
+      delete manifest[section][key];
+      assert.equal(evaluateReleaseWindow(manifest, options()).ready, false, `${section}.${key}`);
+    }
+  }
+  const manifest = webOnlyManifest();
+  manifest.gateEvidence.emailScheduler.manifestSha256 = manifest.gateEvidence.monitoring.manifestSha256;
+  assert.equal(evaluateReleaseWindow(manifest, options()).ready, false);
+});
+
+test("combined release still rejects missing, unsigned or misbound installer evidence", () => {
+  for (const change of [
+    manifest => { delete manifest.gateEvidence.installerAcceptance; },
+    manifest => { manifest.gateEvidence.installerAcceptance.authenticodeStatus = "NotSigned"; },
+    manifest => { manifest.gateEvidence.installerAcceptance.commitSha = PREVIOUS_SHA; },
+  ]) {
+    const manifest = validManifest();
+    change(manifest);
+    assert.equal(evaluateReleaseWindow(manifest, options()).ready, false);
+  }
 });

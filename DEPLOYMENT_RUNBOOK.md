@@ -416,10 +416,18 @@ npm.cmd run release:window:check -- `
   --phase=pre-cutover
 if ($LASTEXITCODE -ne 0) { throw 'Pre-cutover release prerequisites are incomplete' }
 ```
+The approved V1 launch scope is `web-only`, with the Windows uploader withheld from
+distribution and released separately later. Set `release.scope` to `web-only` and
+confirm `approvals.windowsUploaderWithheld` only after verifying that exclusion.
+Omit installer evidence rather than claiming that an unsigned installer passed.
+This scope approval is not permission to deploy or contact production.
+
 The release-window record must include distinct SHA-256 digests of passing physical
 Safari, production monitoring, production identity, managed restore, production
 target, production secrets, production cutover, provider delivery/dedicated inbox,
-email scheduler and signed interactive installer manifests. These digests must also differ from the
+email scheduler manifests. A separately approved `web-and-windows-uploader` scope
+additionally requires the signed interactive installer manifest; its standalone
+release requirements are unchanged. These digests must also differ from the
 rollback and recovery-point manifest digests. Their exact commit, deployment, project,
 Singapore region, endpoint, policy and installer-artifact bindings must match the release
 record; bare approval booleans are insufficient.
@@ -522,7 +530,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Production cutover evidence is incomplete' }
 ```
 
 8. Insert that exact file digest and sanitized passing summary into the protected
-   release-window record, rerun `release:window:check`, and assemble the twelve-file
+   release-window record, rerun `release:window:check`, and assemble the eleven-file
+   web-only (or twelve-file combined-release)
    protected index. The final packet semantically rechecks both rollback and
    production-cutover evidence. Finish steps 7 and 8 before `window.endsAt`; they do
    not authorize the release or replace the

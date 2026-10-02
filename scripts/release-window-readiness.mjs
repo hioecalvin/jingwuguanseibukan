@@ -59,6 +59,24 @@ function add(blockers, path, message) {
   blockers.push({ path, message });
 }
 
+// Explicit scope prevents an incomplete combined release silently becoming web-only.
+export function releaseScopeBlockers(manifest) {
+  const blockers = [];
+  const scope = object(manifest?.release).scope;
+  if (!["web-only", "web-and-windows-uploader"].includes(scope)) {
+    add(blockers, "release.scope", "must explicitly equal web-only or web-and-windows-uploader");
+  }
+  if (scope === "web-only") {
+    if (object(manifest.approvals).windowsUploaderWithheld !== true) {
+      add(blockers, "approvals.windowsUploaderWithheld", "must confirm the Windows uploader is withheld from distribution for this web-only release");
+    }
+    if (Object.hasOwn(object(manifest.gateEvidence), "installerAcceptance")) {
+      add(blockers, "gateEvidence.installerAcceptance", "must be absent for web-only scope; deferred does not mean passed");
+    }
+  }
+  return blockers;
+}
+
 function normalizedIdentity(value) {
   return typeof value === "string" ? value.trim().toLocaleLowerCase("en-US") : "";
 }
@@ -155,6 +173,8 @@ export function evaluateReleaseWindow(
   if (!["pre-cutover", "final"].includes(phase)) add(blockers, "phase", "must equal pre-cutover or final");
 
   const release = object(manifest.release);
+  blockers.push(...releaseScopeBlockers(manifest));
+  const includesInstaller = release.scope !== "web-only";
   if (release.branch !== RELEASE_BRANCH) {
     add(blockers, "release.branch", `must equal ${RELEASE_BRANCH}`);
   }
@@ -369,26 +389,28 @@ export function evaluateReleaseWindow(
   }
 
   const installer = object(gateEvidence.installerAcceptance);
-  requirePassingEvidence(blockers, installer, "gateEvidence.installerAcceptance");
-  bindReleaseEvidence(blockers, installer, "gateEvidence.installerAcceptance", release);
-  if (installer.environment !== "staging") {
-    add(blockers, "gateEvidence.installerAcceptance.environment", "must equal staging for guarded installer acceptance");
-  }
-  if (installer.projectRef !== STAGING_PROJECT_REF) {
-    add(blockers, "gateEvidence.installerAcceptance.projectRef", `must equal ${STAGING_PROJECT_REF}`);
-  }
-  if (installer.origin !== "https://jingwuguanseibukan-staging.vercel.app") {
-    add(blockers, "gateEvidence.installerAcceptance.origin", "must equal the exact staging origin");
-  }
-  requireDigest(blockers, installer.installerSha256, "gateEvidence.installerAcceptance.installerSha256");
-  if (installer.platform !== "win32-x64") {
-    add(blockers, "gateEvidence.installerAcceptance.platform", "must equal win32-x64");
-  }
-  if (installer.acceptancePolicy !== INSTALLER_ACCEPTANCE_POLICY) {
-    add(blockers, "gateEvidence.installerAcceptance.acceptancePolicy", `must equal ${INSTALLER_ACCEPTANCE_POLICY}`);
-  }
-  if (installer.authenticodeStatus !== "Valid") {
-    add(blockers, "gateEvidence.installerAcceptance.authenticodeStatus", "must equal Valid for the release installer");
+  if (includesInstaller) {
+    requirePassingEvidence(blockers, installer, "gateEvidence.installerAcceptance");
+    bindReleaseEvidence(blockers, installer, "gateEvidence.installerAcceptance", release);
+    if (installer.environment !== "staging") {
+      add(blockers, "gateEvidence.installerAcceptance.environment", "must equal staging for guarded installer acceptance");
+    }
+    if (installer.projectRef !== STAGING_PROJECT_REF) {
+      add(blockers, "gateEvidence.installerAcceptance.projectRef", `must equal ${STAGING_PROJECT_REF}`);
+    }
+    if (installer.origin !== "https://jingwuguanseibukan-staging.vercel.app") {
+      add(blockers, "gateEvidence.installerAcceptance.origin", "must equal the exact staging origin");
+    }
+    requireDigest(blockers, installer.installerSha256, "gateEvidence.installerAcceptance.installerSha256");
+    if (installer.platform !== "win32-x64") {
+      add(blockers, "gateEvidence.installerAcceptance.platform", "must equal win32-x64");
+    }
+    if (installer.acceptancePolicy !== INSTALLER_ACCEPTANCE_POLICY) {
+      add(blockers, "gateEvidence.installerAcceptance.acceptancePolicy", `must equal ${INSTALLER_ACCEPTANCE_POLICY}`);
+    }
+    if (installer.authenticodeStatus !== "Valid") {
+      add(blockers, "gateEvidence.installerAcceptance.authenticodeStatus", "must equal Valid for the release installer");
+    }
   }
 
   const gateDigests = [
@@ -403,9 +425,9 @@ export function evaluateReleaseWindow(
     ...(phase === "final" ? [productionCutover.manifestSha256] : []),
     providerDelivery.manifestSha256,
     emailScheduler.manifestSha256,
-    installer.manifestSha256,
+    ...(includesInstaller ? [installer.manifestSha256] : []),
   ].filter(value => SHA256.test(value ?? ""));
-  const expectedGateCount = phase === "final" ? 12 : 11;
+  const expectedGateCount = (phase === "final" ? 11 : 10) + Number(includesInstaller);
   if (gateDigests.length !== expectedGateCount || new Set(gateDigests).size !== expectedGateCount) {
     add(blockers, "gateEvidence", `must bind ${expectedGateCount} distinct rollback, recovery and release-gate manifests`);
   }
@@ -449,6 +471,7 @@ export function evaluateReleaseWindow(
           endsAt: window.endsAt,
           timeZone: window.timeZone,
           phase,
+          scope: release.scope,
         }
       : null,
   };

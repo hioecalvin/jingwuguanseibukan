@@ -1,5 +1,11 @@
 # JS Video Uploader signed-installer release gate
 
+The approved 2 October 2026 V1 launch is web-only. This installer gate is deferred,
+not passed or weakened, and the unsigned Windows candidate must not be distributed
+as a production release. Complete this gate under separate approval before the later
+Windows release. Web security, Mux playback/provider checks and operational gates
+remain required for the web launch.
+
 This gate records the evidence needed before the Windows x64 installer can be offered to users. The checker is deliberately offline: it does not build or sign the executable, run antivirus, open the installer, contact staging, contact Mux, or authorize production.
 
 ## Required evidence

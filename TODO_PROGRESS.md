@@ -1,6 +1,25 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 01/10/2026
+Last updated: 02/10/2026
+
+## Current scope update — 2 October 2026
+
+The user approved a web-first V1 launch. The Windows uploader is deferred and
+withheld from production distribution; its signing and interactive acceptance gate
+remains unchanged for a later separately approved release. Web-only release records
+now explicitly select that scope and require eleven protected evidence files instead
+of twelve. All web security, recovery, Mux/provider delivery, email, scheduling,
+monitoring, physical Safari, identity and cutover requirements remain in force.
+
+The scope-change base commit is `34e43c4`; previously verified staging application
+commit is `ed15327` (11 host probes and 27 guarded WebKit cases, recorded in
+PROJECT_CHECKPOINT.md). The older status and milestones below are historical, not a
+fresh remote verification. The scope update is local and does not authorize a push,
+deployment, live migration or production contact.
+
+Scope-change verification passes TypeScript, 537/537 application/tooling tests,
+34/34 focused release-window/packet tests, ESLint, whitespace validation and both
+updated JSON templates. No web gate has been marked complete solely by this change.
 
 ## Release status
 
