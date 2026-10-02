@@ -1,0 +1,143 @@
+{
+  "manifestVersion": 1,
+  "release": {
+    "scope": "web-only",
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "previousCommitSha": "REPLACE_WITH_40_CHARACTER_ROLLBACK_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "previousDeploymentId": "REPLACE_WITH_KNOWN_GOOD_DEPLOYMENT_ID"
+  },
+  "owners": {
+    "deployment": "REPLACE_WITH_OWNER",
+    "rollback": "REPLACE_WITH_OWNER",
+    "monitoring": "REPLACE_WITH_OWNER"
+  },
+  "window": {
+    "approvedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "startsAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "endsAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "timeZone": "Australia/Sydney"
+  },
+  "recovery": {
+    "pointId": "REPLACE_WITH_PROTECTED_RECOVERY_POINT_ID",
+    "manifestSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER"
+  },
+  "rollback": {
+    "manifestSha256": "REPLACE_WITH_64_CHARACTER_ROLLBACK_EVIDENCE_SHA256",
+    "result": "REPLACE_WITH_PASSING_RESULT",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "previousCommitSha": "REPLACE_WITH_40_CHARACTER_ROLLBACK_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "previousDeploymentId": "REPLACE_WITH_KNOWN_GOOD_DEPLOYMENT_ID",
+    "applicationTested": false,
+    "databaseRecoveryTested": false,
+    "decisionDeadlineMinutes": 0
+  },
+  "approvals": {
+    "windowsUploaderWithheld": false,
+    "explicitReleaseApproval": false,
+    "productionTargetVerified": false,
+    "productionSecretsVerified": false,
+    "managedRestoreVerified": false,
+    "providerDeliveryVerified": false,
+    "physicalSafariVerified": false,
+    "monitoringReady": false,
+    "weakTestAccountsRemoved": false,
+    "pushHiddenOrVerified": false,
+    "productionCutoverVerified": false
+  },
+  "gateEvidence": {
+    "physicalSafari": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_SAFARI_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "stagingDeploymentId": "REPLACE_WITH_TESTED_STAGING_DEPLOYMENT_ID"
+    },
+    "monitoring": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_MONITORING_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
+    },
+    "productionIdentity": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_IDENTITY_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "policy": "jingwuguan-production-identity-v1"
+    },
+    "managedRestore": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_MANAGED_RESTORE_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "staging",
+      "sourceProjectRef": "eomubndonbetszdbhsrj",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "targetKind": "disposable-managed",
+      "zeroResidueVerified": false
+    },
+    "productionTarget": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_TARGET_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "region": "ap-southeast-1",
+      "supabaseOrigin": "REPLACE_WITH_EXACT_PRODUCTION_SUPABASE_ORIGIN",
+      "policy": "jingwuguan-production-bootstrap-v1"
+    },
+    "productionSecrets": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_SECRETS_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
+    },
+    "productionCutover": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PRODUCTION_CUTOVER_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+      "origin": "https://jingwuguanseibukan.com",
+      "migrationLedger": "006-056",
+      "policy": "jingwuguan-production-cutover-v1"
+    },
+    "providerDelivery": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_PROVIDER_DELIVERY_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+      "dedicatedInboxPolicy": "dedicated-non-role-inbox"
+    },
+    "emailScheduler": {
+      "manifestSha256": "REPLACE_WITH_64_CHARACTER_EMAIL_SCHEDULER_MANIFEST_SHA256",
+      "result": "REPLACE_WITH_PASSING_RESULT",
+      "environment": "production",
+      "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+      "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+      "endpoint": "https://jingwuguanseibukan.com/api/system/email-worker"
+    }
+  },
+  "stopConditions": {
+    "authenticationFailure": false,
+    "authorizationFailure": false,
+    "databaseSecurityFailure": false,
+    "migrationOrRestoreMismatch": false,
+    "emailWorkerFailure": false,
+    "rollbackAccessFailure": false,
+    "maxServerErrorRatePercent": 0,
+    "maxOldestReadyEmailSeconds": 0
+  }
+}

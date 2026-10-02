@@ -275,3 +275,47 @@ export function formatLongDate(
     }
   );
 }
+
+
+/*
+ * =====================================================
+ * LAST TRAINING SESSION
+ *
+ * `daysAgo` is calculated by PostgreSQL using the Jakarta
+ * business date. The browser only chooses the agreed display.
+ * =====================================================
+ */
+
+export function formatTrainingSessionRecency(
+  trainingDate:
+    | string
+    | null
+    | undefined,
+  daysAgo:
+    | number
+    | null
+    | undefined
+) {
+  if (!trainingDate) {
+    return "Not recorded";
+  }
+
+  if (
+    typeof daysAgo !== "number" ||
+    !Number.isInteger(daysAgo) ||
+    daysAgo < 0 ||
+    daysAgo >= 30
+  ) {
+    return formatDate(trainingDate);
+  }
+
+  if (daysAgo === 0) {
+    return "Today";
+  }
+
+  if (daysAgo === 1) {
+    return "1 day ago";
+  }
+
+  return `${daysAgo} days ago`;
+}

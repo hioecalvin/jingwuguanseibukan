@@ -15,9 +15,6 @@ import {
   createClient,
 } from "@/lib/supabase/client";
 
-import PushNotificationButton from "@/components/PushNotificationButton";
-
-
 type NotificationRow = {
   notification_id: string;
 
@@ -651,8 +648,83 @@ export default function NotificationsPage() {
     notification:
       NotificationRow
   ) {
+
     /*
-     * Dojo settlement.
+     * ==========================================================
+     * CLASS ENROLLMENT REQUEST — ADMIN
+     * ==========================================================
+     *
+     * A new request is sent to the relevant Admin(s)
+     * and Super Admin(s).
+     */
+
+    if (
+      notification.notification_type ===
+        "class_enrollment_requested"
+    ) {
+      router.push(
+        "/admin/enrollment-requests"
+      );
+
+      return;
+    }
+
+
+    /*
+     * ==========================================================
+     * CLASS ENROLLMENT RESULT — MEMBER
+     * ==========================================================
+     *
+     * Approved / rejected enrollment notifications
+     * return the Member to their Profile.
+     */
+
+    if (
+      notification.notification_type ===
+        "class_enrollment_approved" ||
+      notification.notification_type ===
+        "class_enrollment_rejected"
+    ) {
+      router.push(
+        "/profile"
+      );
+
+      return;
+    }
+
+
+    /*
+     * Generic enrollment reference fallback.
+     *
+     * This protects us if we add another enrollment
+     * notification type later.
+     */
+
+    if (
+      notification.reference_type ===
+        "class_enrollment_request"
+    ) {
+      if (
+        notification.notification_type ===
+        "class_enrollment_requested"
+      ) {
+        router.push(
+          "/admin/enrollment-requests"
+        );
+      } else {
+        router.push(
+          "/profile"
+        );
+      }
+
+      return;
+    }
+
+
+    /*
+     * ==========================================================
+     * DOJO SETTLEMENT
+     * ==========================================================
      */
 
     if (
@@ -668,7 +740,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Admin payment confirmation.
+     * ==========================================================
+     * ADMIN PAYMENT CONFIRMATION
+     * ==========================================================
      */
 
     if (
@@ -686,7 +760,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Member subscription.
+     * ==========================================================
+     * MEMBER SUBSCRIPTION
+     * ==========================================================
      */
 
     if (
@@ -710,7 +786,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Announcement.
+     * ==========================================================
+     * ANNOUNCEMENT
+     * ==========================================================
      */
 
     if (
@@ -728,7 +806,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Event / calendar.
+     * ==========================================================
+     * EVENT / CALENDAR
+     * ==========================================================
      */
 
     if (
@@ -748,7 +828,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Grade / grading.
+     * ==========================================================
+     * GRADE / GRADING
+     * ==========================================================
      */
 
     if (
@@ -768,7 +850,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Title appointment.
+     * ==========================================================
+     * TITLE APPOINTMENT
+     * ==========================================================
      */
 
     if (
@@ -788,7 +872,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Dojo transfer.
+     * ==========================================================
+     * DOJO TRANSFER
+     * ==========================================================
      */
 
     if (
@@ -808,10 +894,9 @@ export default function NotificationsPage() {
 
 
     /*
-     * Unknown notification:
-     * keep the Member in the notification centre
-     * rather than incorrectly sending everyone
-     * to /admin.
+     * ==========================================================
+     * UNKNOWN
+     * ==========================================================
      */
 
     router.push(
@@ -960,9 +1045,9 @@ export default function NotificationsPage() {
               "
             >
               Subscription,
-              payment, announcement,
-              calendar, grading,
-              title and account
+              payment, enrollment,
+              announcement, calendar,
+              grading, title and account
               activity.
             </p>
           </div>
@@ -1031,82 +1116,6 @@ export default function NotificationsPage() {
       {/*
        * PUSH NOTIFICATIONS
        */}
-
-      <section
-        className="
-          mt-6
-          rounded-2xl
-          border
-          border-sky-900
-          bg-sky-950/10
-          p-5
-        "
-      >
-        <div
-          className="
-            flex
-            flex-col
-            gap-5
-            sm:flex-row
-            sm:items-center
-            sm:justify-between
-          "
-        >
-          <div>
-            <p
-              className="
-                text-xs
-                font-semibold
-                uppercase
-                tracking-wider
-                text-sky-400
-              "
-            >
-              This Device
-            </p>
-
-
-            <h2
-              className="
-                mt-1
-                text-lg
-                font-bold
-              "
-            >
-              Push Notifications
-            </h2>
-
-
-            <p
-              className="
-                mt-2
-                max-w-2xl
-                text-sm
-                leading-6
-                text-neutral-400
-              "
-            >
-              Receive browser
-              notifications for
-              subscription reminders,
-              payments, announcements,
-              calendar events and
-              important account
-              activity.
-            </p>
-          </div>
-
-
-          <div
-            className="
-              shrink-0
-            "
-          >
-            <PushNotificationButton />
-          </div>
-        </div>
-      </section>
-
 
       {/*
        * TOOLBAR
@@ -1579,7 +1588,7 @@ export default function NotificationsPage() {
             >
               {unreadOnly
                 ? "You have no unread notifications."
-                : "Subscription, payment, announcement, event, grading, title and account updates will appear here."}
+                : "Subscription, payment, enrollment, announcement, event, grading, title and account updates will appear here."}
             </p>
           </div>
         )}

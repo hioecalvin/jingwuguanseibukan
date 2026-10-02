@@ -14,6 +14,7 @@ type Application = {
   email: string | null;
   phone: string | null;
   date_of_birth: string | null;
+  aikikai_registration_number: string | null;
   class_name: string | null;
   dojo_name: string | null;
   status: string;
@@ -98,72 +99,21 @@ export default function ApplicationsPage() {
       selectedLevels[application.request_id] ?? "mudansha";
 
     /*
-     * Approve membership request.
+     * Approve the request and assign its membership level atomically.
      */
 
     const { error: approveError } = await supabase.rpc(
-      "review_class_request",
+      "review_class_request_with_level",
       {
-        request_id: application.request_id,
+        target_request_id: application.request_id,
         decision: "approved",
         reason: null,
+        selected_level: level,
       }
     );
 
     if (approveError) {
       setMessage(approveError.message);
-      setMessageType("error");
-      setProcessingId(null);
-
-      return;
-    }
-
-    /*
-     * Locate newly-created membership.
-     */
-
-    const { data: membership, error: membershipError } = await supabase
-      .from("class_memberships")
-      .select("id")
-      .eq("user_id", application.user_id)
-      .eq("class_id", application.class_id)
-      .single();
-
-    if (membershipError || !membership) {
-      console.error(
-        "Membership lookup after approval failed:",
-        membershipError
-      );
-
-      setMessage(
-        "The application was approved, but its membership level could not be updated. Please check the Member record."
-      );
-
-      setMessageType("error");
-      setProcessingId(null);
-
-      return;
-    }
-
-    /*
-     * Assign Mudansha / Yudansha.
-     */
-
-    const { error: levelError } = await supabase.rpc(
-      "set_membership_level",
-      {
-        membership_id: membership.id,
-        new_level: level,
-      }
-    );
-
-    if (levelError) {
-      console.error("Membership level update failed:", levelError);
-
-      setMessage(
-        "The application was approved, but its membership level could not be updated. Please check the Member record."
-      );
-
       setMessageType("error");
       setProcessingId(null);
 
@@ -191,7 +141,7 @@ export default function ApplicationsPage() {
     setMessage(
       `${application.full_name ?? "Member"} was approved as ${
         level === "yudansha" ? "Yudansha" : "Mudansha"
-      }.`
+      }. Their permanent JS Member ID was assigned automatically.`
     );
 
     setMessageType("success");
@@ -223,10 +173,11 @@ export default function ApplicationsPage() {
     setMessage("");
     setMessageType("");
 
-    const { error } = await supabase.rpc("review_class_request", {
-      request_id: application.request_id,
+    const { error } = await supabase.rpc("review_class_request_with_level", {
+      target_request_id: application.request_id,
       decision: "rejected",
       reason: reason.trim() || null,
+      selected_level: selectedLevels[application.request_id] ?? "mudansha",
     });
 
     if (error) {
@@ -293,6 +244,11 @@ export default function ApplicationsPage() {
           header: "Phone",
           key: "phone",
           value: (row) => row.phone ?? "",
+        },
+        {
+          header: "Aikikai Registration Number",
+          key: "aikikai_registration_number",
+          value: (row) => row.aikikai_registration_number ?? "",
         },
         {
           header: "Date of Birth",
@@ -399,8 +355,8 @@ export default function ApplicationsPage() {
             </h1>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400">
-              Review new membership requests and assign the
-              Member&apos;s initial membership level.
+              Review new membership requests. Approval assigns the Member&apos;s
+              initial membership level and permanent JS Member ID atomically.
             </p>
           </div>
 
@@ -622,6 +578,11 @@ export default function ApplicationsPage() {
                           />
 
                           <Detail
+                            label="Aikikai Registration Number"
+                            value={application.aikikai_registration_number}
+                          />
+
+                          <Detail
                             label="Date of Birth"
                             value={formatDate(
                               application.date_of_birth
@@ -800,8 +761,9 @@ export default function ApplicationsPage() {
           <p className="text-sm leading-6 text-neutral-500">
             Approval creates or activates the Member&apos;s class
             membership. Select Mudansha or Yudansha before approval.
-            Rank, tier, grading history and other Member records can be
-            managed afterwards from Admin → Members.
+            The JS Member ID is assigned automatically. Rank, tier, grading
+            history and other Member records can be managed afterwards from
+            Admin → Members.
           </p>
         </section>
       )}

@@ -269,8 +269,6 @@ type MonthlyPaymentSummary = {
 
   pending_confirmation_members: number;
 
-  partially_paid_members: number;
-
   unpaid_members: number;
 
   special_rate_members: number;
@@ -300,7 +298,6 @@ type PaymentStatusFilter =
   | "all"
   | "paid"
   | "pending"
-  | "partial"
   | "unpaid"
   | "special";
 
@@ -329,15 +326,6 @@ export default function SubscriptionPage() {
     useState<
       Profile | null
     >(null);
-
-
-  const [
-    assignments,
-    setAssignments,
-  ] =
-    useState<
-      AdminAssignment[]
-    >([]);
 
 
   const [
@@ -606,13 +594,6 @@ export default function SubscriptionPage() {
 
 
   const [
-    paymentAmount,
-    setPaymentAmount,
-  ] =
-    useState("");
-
-
-  const [
     paymentMethod,
     setPaymentMethod,
   ] =
@@ -849,14 +830,78 @@ export default function SubscriptionPage() {
     membershipId:
       string
   ) {
-    return overrides.find(
-      (
-        override
-      ) =>
-        override.membership_id ===
-          membershipId &&
-        override.active
-    );
+    const today =
+      todayString();
+
+
+    return overrides
+      .filter(
+        (
+          override
+        ) =>
+          override.membership_id ===
+            membershipId &&
+          override.active &&
+          (
+            (
+              override.effective_from <=
+                today &&
+              (
+                override.effective_until ===
+                  null ||
+                override.effective_until >=
+                  today
+              )
+            ) ||
+            override.effective_from >
+              today
+          )
+      )
+      .sort(
+        (
+          left,
+          right
+        ) => {
+          const leftIsCurrent =
+            left.effective_from <=
+              today;
+
+          const rightIsCurrent =
+            right.effective_from <=
+              today;
+
+
+          if (
+            leftIsCurrent !==
+            rightIsCurrent
+          ) {
+            return leftIsCurrent
+              ? -1
+              : 1;
+          }
+
+
+          const dateOrder =
+            left.effective_from.localeCompare(
+              right.effective_from
+            );
+
+
+          if (
+            dateOrder !==
+            0
+          ) {
+            return leftIsCurrent
+              ? -dateOrder
+              : dateOrder;
+          }
+
+
+          return left.id.localeCompare(
+            right.id
+          );
+        }
+      )[0];
   }
 
 
@@ -1041,11 +1086,6 @@ export default function SubscriptionPage() {
           AdminAssignment[];
 
 
-      setAssignments(
-        loadedAssignments
-      );
-
-
       if (
         loadedAssignments.length ===
         0
@@ -1099,6 +1139,9 @@ export default function SubscriptionPage() {
 
 
     loadPage();
+    // The loader declarations close over the stable client and state setters;
+    // including their per-render identities would turn this into a load loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     router,
     supabase,
@@ -1291,6 +1334,9 @@ export default function SubscriptionPage() {
 
 
     loadSelectedDojo();
+    // Each loader intentionally reads this render's selected dojo/month data.
+    // Their declaration identities are not triggers for refreshing the panel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedDojoId,
     billingMonth,
@@ -1762,12 +1808,6 @@ export default function SubscriptionPage() {
       pending_confirmation_members:
         Number(
           row.pending_confirmation_members ??
-            0
-        ),
-
-      partially_paid_members:
-        Number(
-          row.partially_paid_members ??
             0
         ),
 
@@ -2329,7 +2369,7 @@ export default function SubscriptionPage() {
   ) {
     const confirmed =
       window.confirm(
-        `Remove the special rate for ${member.full_name}?\n\nThe member will return to the dojo default rate.`
+        `End or cancel the special rate for ${member.full_name}?\n\nA rate already in effect remains valid through today. Scheduled future rates will be cancelled, and the dojo default rate applies from tomorrow.`
       );
 
 
@@ -2381,7 +2421,7 @@ export default function SubscriptionPage() {
 
 
     showSuccess(
-      `${member.full_name}'s special rate was removed.`
+      `${member.full_name}'s current special rate now ends today, and scheduled future rates were cancelled.`
     );
 
 
@@ -2647,31 +2687,8 @@ export default function SubscriptionPage() {
     charge:
       SubscriptionCharge
   ) {
-    const paid =
-      totalPaidForCharge(
-        charge.id
-      );
-
-
-    const remaining =
-      Math.max(
-        Number(
-          charge.amount
-        ) -
-          paid,
-        0
-      );
-
-
     setPayingChargeId(
       charge.id
-    );
-
-
-    setPaymentAmount(
-      String(
-        remaining
-      )
     );
 
 
@@ -2701,7 +2718,6 @@ export default function SubscriptionPage() {
       null
     );
 
-    setPaymentAmount("");
     setPaymentReference("");
     setPaymentNotes("");
   }
@@ -2711,10 +2727,10 @@ export default function SubscriptionPage() {
     charge:
       SubscriptionCharge
   ) {
-    const amount =
-      Number(
-        paymentAmount
-      );
+    const amount = Math.max(
+      Number(charge.amount) - totalPaidForCharge(charge.id),
+      0
+    );
 
 
     if (
@@ -2725,7 +2741,7 @@ export default function SubscriptionPage() {
         0
     ) {
       showError(
-        "Enter a valid payment amount."
+        "This charge has no outstanding balance."
       );
 
       return;
@@ -3023,6 +3039,8 @@ export default function SubscriptionPage() {
         confirmationFilter
       );
     }
+    // loadConfirmations is intentionally driven by these filter inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -3039,6 +3057,8 @@ export default function SubscriptionPage() {
     ) {
       loadReport();
     }
+    // loadReport is intentionally driven by these report inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -3205,20 +3225,6 @@ export default function SubscriptionPage() {
 
         if (
           paymentStatusFilter ===
-          "partial"
-        ) {
-          return (
-            paid >
-              0 &&
-            outstanding >
-              0 &&
-            !pending
-          );
-        }
-
-
-        if (
-          paymentStatusFilter ===
           "unpaid"
         ) {
           return (
@@ -3329,7 +3335,7 @@ export default function SubscriptionPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -3597,26 +3603,6 @@ export default function SubscriptionPage() {
                   onClick={() =>
                     setPaymentStatusFilter(
                       "pending"
-                    )
-                  }
-                />
-
-
-                <DashboardStat
-                  label="Partially Paid"
-                  value={
-                    String(
-                      monthlySummary.partially_paid_members
-                    )
-                  }
-                  tone="amber"
-                  active={
-                    paymentStatusFilter ===
-                    "partial"
-                  }
-                  onClick={() =>
-                    setPaymentStatusFilter(
-                      "partial"
                     )
                   }
                 />
@@ -4066,7 +4052,7 @@ export default function SubscriptionPage() {
                                   }
                                   className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-300 hover:bg-red-950/30 disabled:opacity-50"
                                 >
-                                  Remove
+                                  End / Cancel
                                 </button>
 
                               )}
@@ -4433,7 +4419,9 @@ export default function SubscriptionPage() {
 
 
               <p className="mt-2 text-sm text-neutral-400">
-                Record full or partial payments against each monthly charge.
+                Mark the full outstanding charge paid without waiting for a Member
+                confirmation request. Your Admin account is retained in the payment
+                audit record.
               </p>
 
 
@@ -4457,8 +4445,6 @@ export default function SubscriptionPage() {
                   <span className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs font-semibold uppercase text-neutral-300">
                     {paymentStatusFilter === "all"
                       ? "ALL"
-                      : paymentStatusFilter === "partial"
-                      ? "PARTIALLY PAID"
                       : paymentStatusFilter === "special"
                       ? "SPECIAL RATE"
                       : paymentStatusFilter.toUpperCase()}
@@ -4554,13 +4540,7 @@ export default function SubscriptionPage() {
 
                               <StatusBadge
                                 status={
-                                  outstanding <=
-                                  0
-                                    ? "paid"
-                                    : paid >
-                                      0
-                                    ? "partial"
-                                    : "unpaid"
+                                  outstanding <= 0 ? "paid" : "unpaid"
                                 }
                               />
 
@@ -4616,7 +4596,7 @@ export default function SubscriptionPage() {
                             }
                             className="rounded-lg border border-green-800 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-950/30 disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            Record Payment
+                            Mark Full Payment
                           </button>
 
                         </div>
@@ -4626,23 +4606,10 @@ export default function SubscriptionPage() {
 
                           <div className="mt-5 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2">
 
-                            <Field
-                              label="Amount"
-                            >
-                              <input
-                                type="number"
-                                min="0"
-                                value={
-                                  paymentAmount
-                                }
-                                onChange={(e) =>
-                                  setPaymentAmount(
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-3"
-                              />
-                            </Field>
+                            <MoneyBlock
+                              label="Full Payment Amount"
+                              value={formatCurrency(outstanding, charge.currency)}
+                            />
 
 
                             <Field
@@ -4738,7 +4705,7 @@ export default function SubscriptionPage() {
                                 {processing ===
                                 key
                                   ? "Saving..."
-                                  : "Save Payment"}
+                                  : "Confirm Direct Payment"}
                               </button>
 
 
@@ -5295,16 +5262,8 @@ export default function SubscriptionPage() {
                           <td className="px-4 py-4">
                             <StatusBadge
                               status={
-                                Number(
-                                  row.outstanding_amount
-                                ) <=
-                                0
+                                Number(row.outstanding_amount) <= 0
                                   ? "paid"
-                                  : Number(
-                                      row.paid_amount
-                                    ) >
-                                    0
-                                  ? "partial"
                                   : "unpaid"
                               }
                             />
@@ -5600,16 +5559,12 @@ function StatusBadge({
 }: {
   status:
     | "paid"
-    | "partial"
     | "unpaid";
 }) {
   const style =
     status ===
     "paid"
       ? "border-green-800 bg-green-950/30 text-green-300"
-      : status ===
-        "partial"
-      ? "border-amber-800 bg-amber-950/30 text-amber-300"
       : "border-red-800 bg-red-950/30 text-red-300";
 
 
@@ -5617,9 +5572,6 @@ function StatusBadge({
     status ===
     "paid"
       ? "PAID"
-      : status ===
-        "partial"
-      ? "PARTIAL"
       : "UNPAID";
 
 

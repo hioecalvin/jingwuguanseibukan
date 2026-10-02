@@ -1,0 +1,63 @@
+{
+  "manifestVersion": 1,
+  "policy": "jingwuguan-production-rollback-v1",
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "previousCommitSha": "REPLACE_WITH_40_CHARACTER_KNOWN_GOOD_SHA",
+    "previousDeploymentId": "REPLACE_WITH_KNOWN_GOOD_DEPLOYMENT_ID"
+  },
+  "rehearsal": {
+    "environment": "staging",
+    "origin": "https://jingwuguanseibukan-staging.vercel.app",
+    "supabaseProjectRef": "eomubndonbetszdbhsrj",
+    "startedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "completedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "candidateDeploymentVerified": false,
+    "knownGoodDeploymentActivated": false,
+    "authenticationPassed": false,
+    "authorizationPassed": false,
+    "hostProbesPassed": false,
+    "candidateRestoredAfterTest": false,
+    "evidenceBundleSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+  },
+  "databaseRecovery": {
+    "strategy": "replacement-target-restore",
+    "sourceProjectRef": "eomubndonbetszdbhsrj",
+    "targetKind": "disposable-managed",
+    "backupSha256": "REPLACE_WITH_64_CHARACTER_BACKUP_SHA256",
+    "evidenceBundleSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_EVIDENCE_SHA256",
+    "migrationLedger": "006-056",
+    "exactLedgerPassed": false,
+    "catalogPassed": false,
+    "databaseLintPassed": false,
+    "grantsAndRlsPassed": false,
+    "roleSecurityPassed": false,
+    "restoreCompleted": false,
+    "zeroResidueVerified": false
+  },
+  "timings": {
+    "decisionDeadlineMinutes": 0,
+    "applicationRollbackMinutes": 0,
+    "databaseRecoveryMinutes": 0,
+    "rtoMinutes": 0,
+    "completedWithinRto": false
+  },
+  "safety": {
+    "productionContacted": false,
+    "productionMutated": false,
+    "destructiveDownMigrationUsed": false,
+    "historicalDataRewritten": false,
+    "outboundProvidersContacted": false,
+    "temporaryTargetDeletedOrQuarantined": false
+  },
+  "attestation": {
+    "recordedByRole": "release-operator",
+    "reviewedByRole": "independent-reviewer",
+    "reviewedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "evidenceReviewed": false,
+    "allFindingsResolved": false,
+    "reviewDigest": "REPLACE_WITH_CANONICAL_64_CHARACTER_SHA256"
+  }
+}

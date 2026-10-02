@@ -16,6 +16,15 @@ import {
   createClient,
 } from "@/lib/supabase/client";
 
+import VideoLogoWatermarks from "@/components/video-logo-watermarks";
+import MuxRepositoryPlayer from "@/components/mux-repository-player";
+import { getYouTubeEmbedUrl } from "@/lib/video/youtube";
+
+type ClassBrand = {
+  id: string;
+  logo_url: string | null;
+};
+
 type Rank = {
   id: string;
   class_id: string;
@@ -134,6 +143,14 @@ export default function RepositoryTierPage() {
     setMessage,
   ] =
     useState("");
+
+  const [
+    classBrand,
+    setClassBrand,
+  ] =
+    useState<ClassBrand | null>(
+      null
+    );
 
   /*
    * =====================================================
@@ -277,6 +294,50 @@ export default function RepositoryTierPage() {
         ) {
           setMessage(
             "Your membership does not currently have repository access."
+          );
+
+          setLoading(
+            false
+          );
+        }
+
+        return;
+      }
+
+      /*
+       * LOAD CLASS BRANDING
+       */
+
+      const {
+        data:
+          classData,
+        error:
+          classError,
+      } =
+        await supabase
+          .from(
+            "classes"
+          )
+          .select(`
+            id,
+            logo_url
+          `)
+          .eq(
+            "id",
+            classId
+          )
+          .maybeSingle();
+
+      if (
+        classError ||
+        !classData
+      ) {
+        if (
+          active
+        ) {
+          setMessage(
+            classError?.message ??
+              "Class not found."
           );
 
           setLoading(
@@ -501,6 +562,10 @@ export default function RepositoryTierPage() {
         rankData as Rank
       );
 
+      setClassBrand(
+        classData as ClassBrand
+      );
+
       setTier(
         tierData as Tier
       );
@@ -648,27 +713,9 @@ export default function RepositoryTierPage() {
         ?.trim()
         .toLowerCase();
 
-    if (
-      normalized ===
-        "youtube" ||
-      normalized ===
-        "yt"
-    ) {
-      return `https://www.youtube.com/embed/${encodeURIComponent(
-        videoId
-      )}`;
-    }
-
-    if (
-      normalized ===
-      "vimeo"
-    ) {
-      return `https://player.vimeo.com/video/${encodeURIComponent(
-        videoId
-      )}`;
-    }
-
-    return null;
+    return normalized === "youtube"
+      ? getYouTubeEmbedUrl(videoId)
+      : null;
   }
 
   /*
@@ -1231,15 +1278,17 @@ export default function RepositoryTierPage() {
              */}
 
             {(() => {
+              const normalizedProvider =
+                selectedContent.video_provider
+                  ?.trim()
+                  .toLowerCase();
               const embedUrl =
                 getEmbedUrl(
                   selectedContent.video_provider,
                   selectedContent.video_id
                 );
 
-              if (
-                !embedUrl
-              ) {
+              if (!embedUrl && normalizedProvider !== "mux") {
                 return (
                   <div
                     className="
@@ -1257,9 +1306,7 @@ export default function RepositoryTierPage() {
                         text-neutral-500
                       "
                     >
-                      No supported video
-                      is attached to this
-                      reference.
+                      No supported video is attached to this reference.
                     </p>
                   </div>
                 );
@@ -1279,30 +1326,34 @@ export default function RepositoryTierPage() {
                 >
                   <div
                     className="
+                      relative
                       aspect-video
                     "
                   >
-                    <iframe
-                      src={
-                        embedUrl
+                    {normalizedProvider === "mux" ? (
+                      <MuxRepositoryPlayer
+                        contentId={selectedContent.id}
+                        title={selectedContent.title}
+                      />
+                    ) : (
+                      <iframe
+                        src={embedUrl ?? undefined}
+                        title={selectedContent.title}
+                        className="h-full w-full"
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    )}
+
+                    <VideoLogoWatermarks
+                      classLogoUrl={
+                        classBrand?.logo_url ??
+                        null
                       }
-
-                      title={
-                        selectedContent.title
-                      }
-
-                      className="
-                        h-full
-                        w-full
-                      "
-
-                      loading="lazy"
-
-                      referrerPolicy="strict-origin-when-cross-origin"
-
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-
-                      allowFullScreen
+                      includeOrganizationLogo
                     />
                   </div>
                 </div>

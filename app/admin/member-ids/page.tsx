@@ -169,7 +169,7 @@ export default function MemberIdManagementPage() {
         <header className="flex flex-col gap-5 border-b border-neutral-800 pb-7 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -186,7 +186,7 @@ export default function MemberIdManagementPage() {
               </h1>
 
               <p className="mt-1 text-sm text-neutral-400">
-                Assign and manage member identification numbers.
+                Assign and manage Member identification numbers.
               </p>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function MemberIdManagementPage() {
           />
 
           <p className="mt-3 text-sm text-neutral-500">
-            Showing {filteredProfiles.length} of {profiles.length} users
+            Showing {filteredProfiles.length} of {profiles.length} Members
           </p>
         </section>
 

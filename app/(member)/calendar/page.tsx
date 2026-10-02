@@ -54,6 +54,14 @@ export default function CalendarPage() {
 
 
   const [
+    pageLoadedAt,
+  ] =
+    useState(
+      () => Date.now()
+    );
+
+
+  const [
     events,
     setEvents,
   ] =
@@ -304,7 +312,7 @@ export default function CalendarPage() {
 
     return (
       comparisonDate.getTime() <
-      Date.now()
+      pageLoadedAt
     );
   }
 

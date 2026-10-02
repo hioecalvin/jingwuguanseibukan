@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "policy": "jingwuguan-production-bootstrap-v1",
+  "environment": "production",
+  "target": {
+    "projectRef": "REPLACE_WITH_NEW_SINGAPORE_PRODUCTION_REF",
+    "region": "ap-southeast-1",
+    "supabaseOrigin": "REPLACE_WITH_EXACT_PRODUCTION_SUPABASE_ORIGIN"
+  },
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA"
+  },
+  "targetInventory": {
+    "projectRef": "REPLACE_WITH_NEW_SINGAPORE_PRODUCTION_REF",
+    "capturedAt": "1970-01-01T00:00:00.000Z",
+    "collectorRole": "REPLACE_WITH_READ_ONLY_COLLECTOR_ROLE",
+    "transactionReadOnly": false,
+    "inventoryComplete": false,
+    "applicationObjectCount": -1,
+    "applicationMigrationCount": -1,
+    "authAccountCount": -1,
+    "storageObjectCount": -1,
+    "snapshotSha256": "REPLACE_WITH_PROTECTED_TARGET_SNAPSHOT_SHA256",
+    "evidenceSha256": "REPLACE_WITH_PROTECTED_TARGET_EVIDENCE_SHA256"
+  },
+  "baselineArtifact": {
+    "sourceProjectRef": "eomubndonbetszdbhsrj",
+    "capturedAt": "1970-01-01T00:00:00.000Z",
+    "payloadSha256": "REPLACE_WITH_PROTECTED_BASELINE_PAYLOAD_SHA256",
+    "payloadBytes": 0,
+    "catalogFormatVersion": 1,
+    "catalogSha256": "REPLACE_WITH_PRE_006_CATALOG_SHA256",
+    "catalogObjectCount": 0,
+    "evidenceSha256": "REPLACE_WITH_PROTECTED_BASELINE_EVIDENCE_SHA256"
+  },
+  "migrationLedger": {
+    "firstVersion": "006",
+    "lastVersion": "056",
+    "migrationCount": 51,
+    "repositoryFilesSha256": "e5f55e45dbed1beb759fd1ac88cb3e68da6af1d9caaf2408402390b70775ec6e",
+    "sourceLedgerSha256": "REPLACE_WITH_PROTECTED_SOURCE_LEDGER_SHA256",
+    "evidenceSha256": "REPLACE_WITH_PROTECTED_LEDGER_EVIDENCE_SHA256"
+  },
+  "importPlan": {
+    "mode": "managed-full-import",
+    "preparedAt": "1970-01-01T00:00:00.000Z",
+    "packageSha256": "REPLACE_WITH_PROTECTED_IMPORT_PACKAGE_SHA256",
+    "packageBytes": 0,
+    "baselinePayloadSha256": "REPLACE_WITH_MATCHING_BASELINE_PAYLOAD_SHA256",
+    "baselineCatalogSha256": "REPLACE_WITH_MATCHING_BASELINE_CATALOG_SHA256",
+    "migrationLedgerSha256": "REPLACE_WITH_MATCHING_SOURCE_LEDGER_SHA256",
+    "recoveryManifestSha256": "REPLACE_WITH_PASSED_RECOVERY_MANIFEST_SHA256",
+    "planEvidenceSha256": "REPLACE_WITH_PROTECTED_IMPORT_PLAN_EVIDENCE_SHA256"
+  },
+  "controls": {
+    "offlineValidationOnly": true,
+    "offlineGateNetworkContacted": false,
+    "productionMutationAuthorized": false,
+    "productionMutationsPerformed": 0,
+    "importExecuted": false,
+    "deploymentExecuted": false,
+    "applyMigrationsToEmptyTarget": false,
+    "restoreBaselineBeforeMigrationVerification": false,
+    "outboundDeliveryDisabledBeforeImport": false,
+    "postImportCatalogMatchRequired": false,
+    "postImportLedgerMatchRequired": false,
+    "rollbackPlanPrepared": false,
+    "rawSecretsInManifest": false,
+    "rawPersonalDataInManifest": false
+  },
+  "independentReview": {
+    "preparerFingerprint": "REPLACE_WITH_PREPARER_FINGERPRINT",
+    "reviewerFingerprint": "REPLACE_WITH_INDEPENDENT_REVIEWER_FINGERPRINT",
+    "reviewedAt": "1970-01-01T00:00:00.000Z",
+    "result": "pending",
+    "targetInventorySha256": "REPLACE_WITH_MATCHING_TARGET_EVIDENCE_SHA256",
+    "baselineEvidenceSha256": "REPLACE_WITH_MATCHING_BASELINE_EVIDENCE_SHA256",
+    "ledgerEvidenceSha256": "REPLACE_WITH_MATCHING_LEDGER_EVIDENCE_SHA256",
+    "importPlanEvidenceSha256": "REPLACE_WITH_MATCHING_IMPORT_PLAN_EVIDENCE_SHA256",
+    "attestationSha256": "REPLACE_WITH_CANONICAL_REVIEW_ATTESTATION_SHA256"
+  }
+}

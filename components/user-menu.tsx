@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -24,11 +24,24 @@ export default function UserMenu({
   memberId,
   role,
 }: UserMenuProps) {
+  const menuId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const signOutRef = useRef<HTMLButtonElement>(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const router =
     useRouter();
 
   const [open, setOpen] =
     useState(false);
+
+  useEffect(() => {
+    if (open) signOutRef.current?.focus();
+  }, [open]);
+
+  function closeMenu() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
 
   const [
     signingOut,
@@ -36,6 +49,8 @@ export default function UserMenu({
   ] = useState(false);
 
   async function handleLogout() {
+    if (signingOut) return;
+    setErrorMessage("");
     try {
       setSigningOut(true);
 
@@ -43,20 +58,18 @@ export default function UserMenu({
         createClient();
 
       const { error } =
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: "local" });
 
       if (error) {
-        console.error(
-          "Sign out error:",
-          error
-        );
-
+        setErrorMessage("Unable to sign out. Please try again.");
         return;
       }
 
       router.replace("/login");
 
       router.refresh();
+    } catch {
+      setErrorMessage("Unable to sign out. Please try again.");
     } finally {
       setSigningOut(false);
     }
@@ -71,8 +84,21 @@ export default function UserMenu({
     ).toUpperCase();
 
   return (
-    <div className="relative">
+    <div className="relative" onKeyDown={(event) => {
+      if (open && event.key === "Escape") {
+        event.preventDefault();
+        closeMenu();
+      }
+    }} onBlur={(event) => {
+      // Disabling the focused sign-out button can blur it with no new focus
+      // target. Keep its pending/error state visible; close on actual exit.
+      if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
       <button
+        ref={triggerRef}
+        aria-label="Account menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
         type="button"
         onClick={() =>
           setOpen(
@@ -132,7 +158,7 @@ export default function UserMenu({
               mt-0.5
               text-xs
               capitalize
-              text-neutral-500
+              text-neutral-400
             "
           >
             {role.replaceAll(
@@ -147,10 +173,9 @@ export default function UserMenu({
         <>
           <button
             type="button"
+            tabIndex={-1}
             aria-label="Close user menu"
-            onClick={() =>
-              setOpen(false)
-            }
+            onClick={closeMenu}
             className="
               fixed
               inset-0
@@ -160,6 +185,9 @@ export default function UserMenu({
           />
 
           <div
+            id={menuId}
+            role="region"
+            aria-label="Account menu"
             className="
               absolute
               right-0
@@ -200,7 +228,7 @@ export default function UserMenu({
                   className="
                     mt-1
                     text-xs
-                    text-neutral-500
+                    text-neutral-400
                   "
                 >
                   Member ID:{" "}
@@ -213,7 +241,7 @@ export default function UserMenu({
                   mt-1
                   text-xs
                   capitalize
-                  text-neutral-500
+                  text-neutral-400
                 "
               >
                 {role.replaceAll(
@@ -224,7 +252,9 @@ export default function UserMenu({
             </div>
 
             <div className="p-2">
+              {errorMessage && <p role="alert" className="px-3 py-2 text-sm text-red-300">{errorMessage}</p>}
               <button
+                ref={signOutRef}
                 type="button"
                 disabled={
                   signingOut
@@ -241,10 +271,11 @@ export default function UserMenu({
                   text-sm
                   font-medium
                   text-red-300
-                  transition
+                  transition-colors
                   hover:bg-red-950/40
                   disabled:cursor-not-allowed
-                  disabled:opacity-50
+                  disabled:bg-neutral-900
+                  disabled:text-red-200
                 "
               >
                 {signingOut

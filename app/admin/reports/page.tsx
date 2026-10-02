@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -105,6 +106,35 @@ export default function OfficialReportHistoryPage() {
   ] =
     useState("all");
 
+  const loadReports = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_member_report_history"
+      );
+
+
+    if (error) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+
+    setReports(
+      (data ??
+        []) as ReportRow[]
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -134,37 +164,7 @@ export default function OfficialReportHistoryPage() {
 
 
     loadPage();
-  }, []);
-
-
-  async function loadReports() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_member_report_history"
-      );
-
-
-    if (error) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      return;
-    }
-
-
-    setReports(
-      (data ??
-        []) as ReportRow[]
-    );
-  }
+  }, [loadReports, router, supabase]);
 
 
   const classes =
@@ -402,7 +402,7 @@ export default function OfficialReportHistoryPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
