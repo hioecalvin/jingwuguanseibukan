@@ -51,6 +51,17 @@ function componentHarness(relativePath, supabase, extras = {}) {
     '@/lib/supabase/client': { createClient: () => supabase },
     ...extras,
   };
+  const signOutModule = { exports: {} };
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync('components/use-sign-out.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText, {
+    module: signOutModule, exports: signOutModule.exports,
+    require(name) {
+      if (!(name in dependencies)) throw new Error(`Unmocked dependency: ${name}`);
+      return dependencies[name];
+    },
+  }, { timeout: 1000 });
+  dependencies['@/components/use-sign-out'] = signOutModule.exports;
   const componentModule = { exports: {} };
   vm.runInNewContext(ts.transpileModule(fs.readFileSync(relativePath, 'utf8'), {
     fileName: relativePath,
@@ -389,8 +400,32 @@ test('skip link explicitly participates in normal sequential keyboard navigation
 });
 
 test('sign out revokes only the current browser session', () => {
-  const userMenu = fs.readFileSync('components/user-menu.tsx', 'utf8');
-  assert.match(userMenu, /signOut\(\{\s*scope:\s*"local"\s*\}\)/);
+  const signOut = fs.readFileSync('components/use-sign-out.ts', 'utf8');
+  assert.match(signOut, /signOut\(\{\s*scope:\s*"local"\s*\}\)/);
+  assert.match(signOut, /router\.replace\("\/login"\)/);
+  assert.match(signOut, /router\.refresh\(\)/);
+  for (const file of ['components/user-menu.tsx', 'components/mobile-nav.tsx']) {
+    const menu = fs.readFileSync(file, 'utf8');
+    assert.match(menu, /useSignOut\(\)/);
+    assert.match(menu, /onClick=\{\s*handleLogout\s*\}/);
+  }
+});
+
+test('mobile sign out prevents duplicate requests and redirects only on success', async () => {
+  const result = deferred();
+  let calls = 0;
+  const ui = componentHarness('components/mobile-nav.tsx', {
+    auth: { signOut: options => { assert.equal(options.scope, 'local'); calls++; return result.promise; } },
+  }, { '@/lib/navigation': { getNavigationForRole: () => [] } });
+  ui.render({ role: 'member' });
+  const logout = ui.find(node => node.type === 'button' && node.props.children === 'Sign out').props.onClick;
+  const pending = logout();
+  await logout();
+  assert.equal(calls, 1);
+  assert.deepEqual(ui.redirects, []);
+  result.resolve({ error: null });
+  await pending;
+  assert.deepEqual(ui.redirects, ['/login']);
 });
 
 test('admins have an explicit audited direct-payment path without a member request', () => {

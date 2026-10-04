@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-
-import {
-  createClient,
-} from "@/lib/supabase/client";
+import { useSignOut } from "@/components/use-sign-out";
 
 import type {
   AppRole,
@@ -27,9 +23,7 @@ export default function UserMenu({
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const signOutRef = useRef<HTMLButtonElement>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const router =
-    useRouter();
+  const { errorMessage, signingOut, handleLogout } = useSignOut();
 
   const [open, setOpen] =
     useState(false);
@@ -41,38 +35,6 @@ export default function UserMenu({
   function closeMenu() {
     setOpen(false);
     triggerRef.current?.focus();
-  }
-
-  const [
-    signingOut,
-    setSigningOut,
-  ] = useState(false);
-
-  async function handleLogout() {
-    if (signingOut) return;
-    setErrorMessage("");
-    try {
-      setSigningOut(true);
-
-      const supabase =
-        createClient();
-
-      const { error } =
-        await supabase.auth.signOut({ scope: "local" });
-
-      if (error) {
-        setErrorMessage("Unable to sign out. Please try again.");
-        return;
-      }
-
-      router.replace("/login");
-
-      router.refresh();
-    } catch {
-      setErrorMessage("Unable to sign out. Please try again.");
-    } finally {
-      setSigningOut(false);
-    }
   }
 
   const initial =

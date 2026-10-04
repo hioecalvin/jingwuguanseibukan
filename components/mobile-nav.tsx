@@ -10,6 +10,7 @@ import {
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSignOut } from "@/components/use-sign-out";
 
 import {
   getNavigationForRole,
@@ -34,6 +35,7 @@ export default function MobileNav({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogId = useId();
   const titleId = useId();
+  const { errorMessage, signingOut, handleLogout } = useSignOut();
 
   function closeNavigation() {
     dialogRef.current?.close();
@@ -278,6 +280,7 @@ export default function MobileNav({
             <nav
               aria-label="Mobile primary"
               className="
+                min-h-0
                 flex-1
                 overflow-y-auto
                 p-3
@@ -351,10 +354,12 @@ export default function MobileNav({
 
             <div
               className="
+                shrink-0
                 border-t
                 border-neutral-800
                 px-5
-                py-5
+                pt-5
+                pb-[max(1.25rem,env(safe-area-inset-bottom))]
               "
             >
               <div
@@ -368,6 +373,17 @@ export default function MobileNav({
                 {memberName ??
                   "Member"}
               </div>
+              {errorMessage && (
+                <p role="alert" className="mt-2 text-sm text-red-300">{errorMessage}</p>
+              )}
+              <button
+                type="button"
+                disabled={signingOut}
+                onClick={handleLogout}
+                className="mt-3 min-h-11 w-full rounded-lg border border-neutral-700 px-3 py-2.5 text-left text-sm font-medium text-red-300 hover:bg-red-950/40 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-red-200"
+              >
+                {signingOut ? "Signing out..." : "Sign out"}
+              </button>
             </div>
           </div>
         </dialog>

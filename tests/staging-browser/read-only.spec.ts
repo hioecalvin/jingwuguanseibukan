@@ -158,7 +158,7 @@ for (const [role, memberId, allowedPath, heading, deniedPath] of [
   ['ADMIN', '0002', '/admin/members', 'Member Management', '/admin/applications'],
   ['SUPER', '0001', '/admin/applications', 'Pending Applications', null],
 ] as const) {
-  test(`${role} can sign in with exact JS Member ID and retains role boundaries`, async ({ page, requestAudit, browserDiagnostics }) => {
+  test(`${role} can sign in with exact JS Member ID, retains role boundaries and signs out`, async ({ page, requestAudit, browserDiagnostics }) => {
     const account = credentials(role);
     await login(page, { ...account, email: memberId }, requestAudit, browserDiagnostics);
     await page.goto(allowedPath);
@@ -166,6 +166,25 @@ for (const [role, memberId, allowedPath, heading, deniedPath] of [
     if (deniedPath) {
       await page.goto(deniedPath);
       await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/`);
+    }
+    if (page.viewportSize()!.width < 1024) {
+      await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    } else {
+      await page.getByRole('button', { name: 'Account menu', exact: true }).click();
+    }
+    const signOut = page.getByRole('button', { name: 'Sign out', exact: true });
+    await expect(signOut).toBeInViewport({ ratio: 1 });
+    const logoutResponse = page.waitForResponse(response => {
+      const url = new URL(response.url());
+      return url.pathname === '/auth/v1/logout' && url.searchParams.get('scope') === 'local';
+    });
+    await signOut.click();
+    expect((await logoutResponse).ok()).toBe(true);
+    await expect(page).toHaveURL(`${STAGING_APP_ORIGIN}/login`);
+    for (const protectedPath of ['/profile', allowedPath, '/admin']) {
+      await page.goto(protectedPath);
+      await expect(page).toHaveURL(/\/login(?:\?|$)/);
+      await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
     }
   });
 }

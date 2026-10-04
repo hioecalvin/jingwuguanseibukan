@@ -31,10 +31,10 @@ test('mobile modal contains focus, closes with Escape and restores focus', async
   await expect(menu).toHaveAttribute('aria-expanded', 'true');
   await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
-  await expect(dialog.getByRole('link', { name: 'Subscription', exact: true })).toBeFocused();
+  await expect(dialog.getByRole('button', { name: 'Sign out', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
-  for (let index = 0; index < 9; index++) {
+  for (let index = 0; index < 10; index++) {
     await page.keyboard.press('Tab');
     expect(await dialog.evaluate(el => el.contains(document.activeElement))).toBe(true);
   }
@@ -43,6 +43,26 @@ test('mobile modal contains focus, closes with Escape and restores focus', async
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(menu).toBeFocused();
 });
+
+for (const role of ['member', 'admin', 'super_admin']) {
+  test(`${role} mobile sign out stays visible on a short screen and reports failures`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 568 });
+    await page.goto(`${NAV_ORIGIN}/profile?role=${role}`);
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    const signOut = dialog.getByRole('button', { name: 'Sign out', exact: true });
+    await expect(signOut).toBeInViewport({ ratio: 1 });
+    expect((await signOut.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await signOut.click();
+    await expect(dialog.getByRole('button', { name: 'Signing out...', exact: true })).toBeDisabled();
+    await expect(dialog.getByRole('alert')).toHaveText('Unable to sign out. Please try again.');
+    await expect(signOut).toBeEnabled();
+    await expect(signOut).toBeInViewport({ ratio: 1 });
+    await expect(page).toHaveURL(`${NAV_ORIGIN}/profile?role=${role}`);
+    const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(scan.violations).toEqual([]);
+  });
+}
 
 test('desktop resize closes a mobile modal and releases background interaction', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
