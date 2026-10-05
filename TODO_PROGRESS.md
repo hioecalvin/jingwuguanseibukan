@@ -2,6 +2,10 @@
 
 ## Approved CI advisory exception — 5 October 2026
 
+- [x] Initial CI passed web gates; identified separate uploader audit failure.
+- [x] Update uploader http-cache-semantics 4.2.0 to 4.3.0 only; strict full audit
+  clean and uploader type-check/build/27 tests passed. No exception expansion.
+
 - [x] Explicit owner approval; exact development-only advisory exception.
 - [x] Automatic expiry 2026-10-19 11:09:49 UTC; no blanket high/critical bypass.
 - [x] Thirteen policy safety tests; live audit policy and strict production audit passed.

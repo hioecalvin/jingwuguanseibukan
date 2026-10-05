@@ -1,5 +1,17 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## CI follow-up: uploader dependency corrected — 5 October 2026
+
+Run 37301577626 passed the approved full audit policy, strict production audit,
+lint, all 561 application tests, production build and uploader build/27 tests.
+It then stopped on the separate uploader development dependency
+http-cache-semantics@4.2.0 (GHSA-ch52-4w7c-c8xp); browser jobs were skipped.
+Updated only that lockfile entry to compatible 4.3.0 (including registry URL and
+integrity); no overrides, exception expansion or installation scripts. Uploader
+strict full audit now reports zero vulnerabilities, and type-check/build/all
+27 tests passed locally. No installed EXE was rebuilt or released. New remote CI
+is required; prior failed run is preserved. No production/database/provider contact.
+
 ## Owner-approved temporary CI exception — 5 October 2026
 
 User explicitly approved a 14-day development-only exception for
