@@ -1,5 +1,16 @@
 # Jingwuguan Seibukan production progress
 
+## Fresh staging backup — 6 October 2026
+
+- [x] Explicit approval; new private encrypted source package, previous backups preserved.
+- [x] Exact 006–058 (53 migrations), 4,159 catalog objects, Auth/Storage metadata,
+  two buckets and six stored files; staging source read-only.
+- [x] Authenticated AES-256-GCM decryption and byte/hash checks, dump/archive listing,
+  independent local streaming verification and current-user-only ACLs passed.
+- [x] Remove only new verified temporary plaintext; retain archive/key/metadata/evidence.
+- [ ] Separately approve and perform isolated restore acceptance for this package.
+  No project resume, import, account change or original-password verification performed.
+
 ## Approved CI advisory exception — 5 October 2026
 
 - [x] Initial CI passed web gates; identified separate uploader audit failure.

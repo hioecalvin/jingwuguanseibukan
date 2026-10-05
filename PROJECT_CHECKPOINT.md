@@ -1,5 +1,39 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Approved encrypted staging backup verified — 6 October 2026 (Sydney)
+
+Created a new current-user-only protected package at
+`C:\protected\jingwuguan-recovery-source-20261006-99bcd14c` from staging
+eomubndonbetszdbhsrj only. Capture 2026-10-05T18:30:03.482Z; verification
+2026-10-05T18:30:42.787Z (6 October locally). Exact 006–058 ledger: 53 versions;
+repository migration fingerprint matches. Captured 4,159 schema-catalog objects,
+57 Auth users/identities, 2 Storage buckets and 6 objects (3,412,943 bytes).
+The database uses one shared read-only snapshot; role globals (no role passwords)
+and Storage bytes are separate captures. Source ledger and Storage metadata were
+unchanged at the end of capture. No source member/account records were modified.
+
+AES-256-GCM encrypted archive is 7,635,456 bytes. Authenticated decryption,
+payload SHA-256/size comparison and archive/dump listing passed. A separate local
+streaming verification independently rechecked ciphertext and plaintext hashes,
+GCM authentication and absence of plaintext, without writing decrypted material.
+ACL checks passed on the directory and all four final files. Key is a separate
+file in the same protected directory; this is access restriction, not off-device
+key separation. Preserve the archive, key and encryption metadata together.
+
+Ciphertext SHA-256:
+`80fe758ac52908e209a80c2b96e9545f205f1d20ee905ed36c0f74ab51eec285`.
+Payload SHA-256:
+`0427de398e136c93931510795018875b74311fb1fcff9a75f4cf107064879a77`.
+Detailed sanitized evidence is backup-verification.json in the protected directory.
+Only this run's tracked plaintext was removed after successful verification;
+previous backups and failed-attempt evidence were not changed or deleted.
+
+No restore/import, project resume, account reset, outbound messages, scheduler
+invocation, production/retired/disposable or delivery-provider contact. This is
+source-backup integrity evidence, NOT restore acceptance. Hosted Auth configuration
+and provider secrets were not captured; original-password recovery and managed
+restore/Storage/Auth acceptance for this new package remain separate open gates.
+
 ## Full remote CI passed — verified 6 October 2026 (Sydney)
 
 GitHub run 37301928136 completed SUCCESS for release commit
