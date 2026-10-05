@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -1473,7 +1475,10 @@ export default function MemberSubscriptionsPage() {
 
 
               return (
-                <article
+                <CompactRecord summary={<>{formatMonth(
+                          subscription.billing_month
+                        )}</>}
+                  detail={<>{subscription.class_name} · {isPaid ? "Paid" : pending ? "Pending confirmation" : rejected ? "Rejected" : "Unpaid"} · {formatCurrency(subscription.outstanding_amount, subscription.currency)} outstanding</>}
                   key={
                     subscription.charge_id
                   }
@@ -2116,7 +2121,7 @@ export default function MemberSubscriptionsPage() {
                       </div>
                     </div>
                   )}
-                </article>
+                </CompactRecord>
               );
             }
           )}

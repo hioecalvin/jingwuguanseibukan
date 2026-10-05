@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -1210,7 +1212,11 @@ export default function DocumentArchivePage() {
                 document
               ) => (
 
-                <article
+                <CompactRecord summary={<>{document.member_name ??
+                          document.document_subject ??
+                          labelFromValue(
+                            document.document_type
+                          )}</>}
                   key={
                     `${document.document_type}:${document.archive_id}`
                   }
@@ -1414,7 +1420,7 @@ export default function DocumentArchivePage() {
 
                   )}
 
-                </article>
+                </CompactRecord>
 
               )
             )

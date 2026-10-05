@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -845,7 +847,10 @@ export default function DojoMigrationHistoryPage() {
                 migration
               ) => (
 
-                <article
+                <CompactRecord summary={<>{
+                            migration
+                              .member_name
+                          }</>}
                   key={
                     migration
                       .migration_id
@@ -1035,7 +1040,7 @@ export default function DojoMigrationHistoryPage() {
 
                   </div>
 
-                </article>
+                </CompactRecord>
 
               )
             )

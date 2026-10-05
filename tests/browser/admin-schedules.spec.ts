@@ -1,4 +1,5 @@
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
+import { expandCompactRecords } from './compact-record-helpers';
 import { test, expect } from './fixtures';
 
 test('scoped Admin creates, edits and deactivates one regular schedule atomically', async ({ page }) => {
@@ -21,6 +22,7 @@ test('scoped Admin creates, edits and deactivates one regular schedule atomicall
   await page.getByRole('button', { name: 'Add schedule' }).click();
 
   await expect(page.getByRole('status')).toHaveText('Schedule created.');
+  await expandCompactRecords(page);
   const card = page.getByRole('article');
   await expect(card.getByRole('heading', { name: 'Fixture Dojo — Fixture Aikido' })).toBeVisible();
   await expect(card).toContainText('Friday');

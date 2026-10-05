@@ -30,7 +30,7 @@ export default function AppShell({
   hasRepositoryUpload = false,
 }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="app-compact min-h-screen bg-neutral-950 text-neutral-100">
       <a href="#main-content" tabIndex={0} className="skip-link">Skip to content</a>
       <MobileNav
         role={role}

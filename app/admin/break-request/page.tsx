@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   FormEvent,
   useCallback,
@@ -721,7 +723,7 @@ export default function BreakRequestsPage() {
                 request.request_id;
 
               return (
-                <article
+                <CompactRecord summary={<>{request.member_name}</>}
                   key={
                     request.request_id
                   }
@@ -954,7 +956,7 @@ export default function BreakRequestsPage() {
                       </div>
                     </>
                   )}
-                </article>
+                </CompactRecord>
               );
             }
           )}

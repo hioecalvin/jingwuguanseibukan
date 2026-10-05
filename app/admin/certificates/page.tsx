@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -1134,7 +1136,10 @@ export default function CertificateHistoryPage() {
 
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{
+                              certificate
+                                .member_name
+                            }</>}
                     key={
                       certificate
                         .certificate_id
@@ -1534,7 +1539,7 @@ export default function CertificateHistoryPage() {
 
                     )}
 
-                  </article>
+                  </CompactRecord>
                 );
               }
             )

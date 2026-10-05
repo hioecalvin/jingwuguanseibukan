@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -622,7 +624,9 @@ export default function OfficialReportHistoryPage() {
                 report
               ) => (
 
-                <article
+                <CompactRecord summary={<>{
+                            report.member_name
+                          }</>}
                   key={
                     report.audit_id
                   }
@@ -766,7 +770,7 @@ export default function OfficialReportHistoryPage() {
 
                   </div>
 
-                </article>
+                </CompactRecord>
 
               )
             )

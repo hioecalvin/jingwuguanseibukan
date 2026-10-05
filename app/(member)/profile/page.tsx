@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   ChangeEvent,
   FormEvent,
@@ -2021,7 +2023,10 @@ export default function ProfilePage() {
                   membership.id;
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{membership
+                            .ranks
+                            ?.name ??
+                            "Rank not assigned"}</>} detail={<>{membership.classes?.name} · {membership.dojos?.name}</>}
                     key={
                       membership.id
                     }
@@ -2588,7 +2593,7 @@ export default function ProfilePage() {
                           </button>
                         </div>
                       )}
-                  </article>
+                  </CompactRecord>
                 );
               }
             )}

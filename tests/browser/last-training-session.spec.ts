@@ -18,9 +18,11 @@ test('Admin marks today and then corrects the last training session date', async
   await page.goto(`${NAV_ORIGIN}/admin-last-training`);
   await expect(page).toHaveTitle('Last training workflow fixture');
   await expect(page.getByRole('heading', { name: 'Member Management' })).toBeVisible();
+  await page.getByRole('button', { name: 'Member ID 0101: Fixture Member', exact: true }).click();
+  await page.getByRole('button', { name: 'Update Training Session', exact: true }).click();
 
   const member = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Fixture Member' }) });
-  await expect(member.getByText('Last Training Session', { exact: true })).toBeVisible();
+  await expect(member.locator('.member-overview').getByText('Last Training Session', { exact: true })).toBeVisible();
   await expect(member).toContainText('01/08/2026');
 
   await member.getByRole('button', { name: 'Mark Fixture Member as trained today for Aikido' }).click();
@@ -57,6 +59,8 @@ test('Admin marks today and then corrects the last training session date', async
 
 test('Admin can retry a rejected training update without losing the correction date', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-last-training`);
+  await page.getByRole('button', { name: 'Member ID 0101: Fixture Member', exact: true }).click();
+  await page.getByRole('button', { name: 'Update Training Session', exact: true }).click();
   await page.evaluate(() => {
     (window as Window & { __lastTrainingFixture: LastTrainingFixtureState }).__lastTrainingFixture.failNextTraining = true;
   });

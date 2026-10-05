@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -664,7 +666,7 @@ This will email all eligible members enrolled in ${
                   event.id;
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{event.title}</>}
                     key={event.id}
                     className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
                   >
@@ -772,7 +774,7 @@ This will email all eligible members enrolled in ${
                         </button>
                       </div>
                     </div>
-                  </article>
+                  </CompactRecord>
                 );
               })}
             </div>

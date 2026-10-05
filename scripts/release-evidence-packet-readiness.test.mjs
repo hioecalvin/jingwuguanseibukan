@@ -25,7 +25,7 @@ function rollbackEvidence() {
     policy: "jingwuguan-production-rollback-v1",
     release: { branch: "release/v1-readiness-20260918", commitSha: COMMIT, deploymentId: DEPLOYMENT, previousCommitSha: PREVIOUS_COMMIT, previousDeploymentId: PREVIOUS_DEPLOYMENT },
     rehearsal: { environment: "staging", origin: "https://jingwuguanseibukan-staging.vercel.app", supabaseProjectRef: "eomubndonbetszdbhsrj", startedAt: new Date(Date.now() - 1_380_000).toISOString(), completedAt: new Date(Date.now() - 900_000).toISOString(), candidateDeploymentVerified: true, knownGoodDeploymentActivated: true, authenticationPassed: true, authorizationPassed: true, hostProbesPassed: true, candidateRestoredAfterTest: true, evidenceBundleSha256: "12".repeat(32) },
-    databaseRecovery: { strategy: "replacement-target-restore", sourceProjectRef: "eomubndonbetszdbhsrj", targetKind: "disposable-managed", backupSha256: "34".repeat(32), evidenceBundleSha256: "56".repeat(32), migrationLedger: "006-056", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, grantsAndRlsPassed: true, roleSecurityPassed: true, restoreCompleted: true, zeroResidueVerified: true },
+    databaseRecovery: { strategy: "replacement-target-restore", sourceProjectRef: "eomubndonbetszdbhsrj", targetKind: "disposable-managed", backupSha256: "34".repeat(32), evidenceBundleSha256: "56".repeat(32), migrationLedger: "006-058", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, grantsAndRlsPassed: true, roleSecurityPassed: true, restoreCompleted: true, zeroResidueVerified: true },
     timings: { decisionDeadlineMinutes: 15, applicationRollbackMinutes: 8, databaseRecoveryMinutes: 75, rtoMinutes: 90, completedWithinRto: true },
     safety: { productionContacted: false, productionMutated: false, destructiveDownMigrationUsed: false, historicalDataRewritten: false, outboundProvidersContacted: false, temporaryTargetDeletedOrQuarantined: true },
     attestation: { recordedByRole: "release-operator", reviewedByRole: "independent-reviewer", reviewedAt: new Date(Date.now() - 900_000).toISOString(), evidenceReviewed: true, allFindingsResolved: true, reviewDigest: "" },
@@ -42,7 +42,7 @@ function productionCutoverEvidence(windowStartsAt, windowEndsAt) {
     policy: "jingwuguan-production-cutover-v1",
     release: { branch: "release/v1-readiness-20260918", commitSha: COMMIT, deploymentId: DEPLOYMENT, origin: "https://jingwuguanseibukan.com", windowStartsAt, windowEndsAt },
     target: { environment: "production", projectRef: PROJECT, region: "ap-southeast-1", supabaseOrigin: `https://${PROJECT}.supabase.co`, dashboardOwnershipVerified: true, dashboardRegionVerified: true },
-    database: { capturedAt, migrationLedger: "006-056", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, securityVerifierPassed: true, grantsAndRlsPassed: true, evidenceSha256: "12".repeat(32) },
+    database: { capturedAt, migrationLedger: "006-058", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, securityVerifierPassed: true, grantsAndRlsPassed: true, evidenceSha256: "12".repeat(32) },
     defaultAcl: { capturedAt, status: "resolved", scope: "supabase-admin-future-object-default-acl-only", evidenceSha256: "23".repeat(32), exceptionReference: "not-applicable", exceptionExpiresAt: null, reviewedByRole: "independent-security-reviewer" },
     roleSecurity: { capturedAt, readOnly: true, memberPassed: true, scopedAdminPassed: true, superAdminPassed: true, reviewedExistingAccounts: true, authSessionWritesExpected: true, applicationMutationsAttempted: false, evidenceSha256: "34".repeat(32) },
     domain: { capturedAt, customDomain: "jingwuguanseibukan.com", dnsResolved: true, tlsValid: true, certificateHostname: "jingwuguanseibukan.com", supabaseSiteUrl: "https://jingwuguanseibukan.com", authConfirmRedirect: "https://jingwuguanseibukan.com/auth/confirm", publicConfigProjectRef: PROJECT, stagingResidueFound: false, retiredResidueFound: false, evidenceSha256: "45".repeat(32) },
@@ -90,7 +90,7 @@ async function fixture() {
     commitSha: COMMIT,
     deploymentId: DEPLOYMENT,
     origin: "https://jingwuguanseibukan.com",
-    migrationLedger: "006-056",
+    migrationLedger: "006-058",
     policy: "jingwuguan-production-cutover-v1",
   };
   const index = {

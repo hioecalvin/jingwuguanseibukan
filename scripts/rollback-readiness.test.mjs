@@ -48,7 +48,7 @@ export function validRollbackManifest() {
       targetKind: "disposable-managed",
       backupSha256: "34".repeat(32),
       evidenceBundleSha256: "56".repeat(32),
-      migrationLedger: "006-056",
+      migrationLedger: "006-058",
       exactLedgerPassed: true,
       catalogPassed: true,
       databaseLintPassed: true,

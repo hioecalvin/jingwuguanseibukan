@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useEffect,
   useMemo,
@@ -557,7 +559,9 @@ export default function CalendarPage() {
             (
               event
             ) => (
-              <article
+              <CompactRecord summary={<>{
+                        event.title
+                      }</>}
                 key={
                   event.id
                 }
@@ -705,7 +709,7 @@ export default function CalendarPage() {
                     UPCOMING
                   </span>
                 </div>
-              </article>
+              </CompactRecord>
             )
           )}
 
@@ -783,7 +787,9 @@ export default function CalendarPage() {
               (
                 event
               ) => (
-                <article
+                <CompactRecord summary={<>{
+                          event.title
+                        }</>}
                   key={
                     event.id
                   }
@@ -875,7 +881,7 @@ export default function CalendarPage() {
                       PAST
                     </span>
                   </div>
-                </article>
+                </CompactRecord>
               )
             )}
           </div>

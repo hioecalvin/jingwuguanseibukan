@@ -112,7 +112,7 @@ test("accepts a reviewed offline plan bound to the exact empty Singapore product
   assert.equal(result.summary.projectRef, PROJECT_REF);
   assert.equal(result.summary.productionMutationsPerformed, 0);
   assert.deepEqual(result.summary.migrationContract, {
-    firstVersion: "006", lastVersion: "056", migrationCount: 51,
+    firstVersion: "006", lastVersion: "058", migrationCount: 53,
   });
 });
 
@@ -161,7 +161,7 @@ test("requires the protected pre-006 baseline instead of treating migrations as 
   assert.ok(result.blockers.some(({ path }) => path === "controls.applyMigrationsToEmptyTarget"));
 });
 
-test("requires the immutable 006-056 repository contract and matching source ledger", () => {
+test("requires the immutable 006-058 repository contract and matching source ledger", () => {
   const manifest = validManifest();
   manifest.migrationLedger.firstVersion = "007";
   manifest.migrationLedger.repositoryFilesSha256 = "cd".repeat(32);

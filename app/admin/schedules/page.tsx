@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -367,7 +369,7 @@ export default function ScheduleManagementPage() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {schedules.map((row) => (
-              <article key={row.schedule_id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
+              <CompactRecord summary={<>{row.dojo_name} — {row.class_name}</>} key={row.schedule_id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="font-semibold text-white">{row.dojo_name} — {row.class_name}</h3>
@@ -389,7 +391,7 @@ export default function ScheduleManagementPage() {
                 >
                   Edit schedule
                 </button>
-              </article>
+              </CompactRecord>
             ))}
           </div>
         )}

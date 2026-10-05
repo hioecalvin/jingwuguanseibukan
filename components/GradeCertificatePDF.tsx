@@ -407,32 +407,6 @@ const styles =
     },
 
 
-    /*
-     * ========================================================
-     * AUDIT FOOTER
-     * ========================================================
-     */
-
-    footer: {
-      position:
-        "absolute",
-
-      bottom: 31,
-      left: 42,
-      right: 105,
-
-      flexDirection:
-        "row",
-
-      justifyContent:
-        "space-between",
-
-      fontSize: 6.5,
-
-      color:
-        "#777777",
-    },
-
     verificationBarcode: {
       position: "absolute",
       right: 44,
@@ -443,9 +417,9 @@ const styles =
 
     verificationBarcodeLabel: {
       position: "absolute",
-      right: 38,
+      right: 23,
       bottom: 38,
-      width: 60,
+      width: 90,
       fontSize: 5.5,
       color: "#666666",
       textAlign: "center",
@@ -480,33 +454,6 @@ function formatDate(
 }
 
 
-function formatDateTime(
-  value: string
-) {
-  return new Date(
-    value
-  ).toLocaleString(
-    "en-AU",
-    {
-      day:
-        "2-digit",
-
-      month:
-        "2-digit",
-
-      year:
-        "numeric",
-
-      hour:
-        "2-digit",
-
-      minute:
-        "2-digit",
-    }
-  );
-}
-
-
 /*
  * ============================================================
  * CERTIFICATE
@@ -520,64 +467,6 @@ export function GradeCertificatePage({
   categoryLogoUrl,
   verificationBarcodeUrl,
 }: GradeCertificateProps) {
-
-  /*
-   * ==========================================================
-   * MEMBER IDENTIFICATION
-   *
-   * Aikido Members with an Aikikai registration number use:
-   *
-   * Member ID / Aikikai Registration Number
-   *
-   * Everyone else uses the normal Member ID.
-   * ==========================================================
-   */
-
-  const hasAikikaiNumber =
-    record.class_name
-      .trim()
-      .toLowerCase() ===
-      "aikido" &&
-    Boolean(
-      record.aikikai_registration_number
-        ?.trim()
-    );
-
-
-  const identificationLabel =
-    hasAikikaiNumber
-      ? "Member ID / Aikikai Registration Number"
-      : "Member ID";
-
-
-  const identificationValue =
-    hasAikikaiNumber
-      ? `${
-          record.member_id ??
-          "-"
-        } / ${
-          record.aikikai_registration_number
-        }`
-      : record.member_id ??
-        "-";
-
-
-  /*
-   * ==========================================================
-   * ASSESSOR
-   *
-   * assessor_name is a historical snapshot.
-   *
-   * Do not resolve the current profile name here because the
-   * historical grading record must remain unchanged.
-   * ==========================================================
-   */
-
-  const assessorName =
-    record.assessor_name
-      ?.trim() ||
-    "Not recorded";
-
 
   return (
       <Page
@@ -762,218 +651,19 @@ export function GradeCertificatePage({
            * ==================================================
            */}
 
-          <View
-            style={
-              styles.details
-            }
-          >
-
-            {/*
-             * DISCIPLINE
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Discipline
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {record.class_name}
-              </Text>
+          <View style={styles.details}>
+            <View style={styles.row}>
+              <Text style={styles.label}>Member ID</Text>
+              <Text style={styles.value}>{record.member_id ?? "-"}</Text>
             </View>
-
-
-            {/*
-             * MEMBER ID
-             *
-             * Aikikai number is combined with Member ID when
-             * available.
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                {identificationLabel}
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {identificationValue}
-              </Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Promotion Date</Text>
+              <Text style={styles.value}>{formatDate(record.effective_date)}</Text>
             </View>
-
-
-            {/*
-             * PROMOTION DATE
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Promotion Date
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {formatDate(
-                  record.effective_date
-                )}
-              </Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Certificate No.</Text>
+              <Text style={styles.value}>{audit.certificate_number}</Text>
             </View>
-
-
-            {/*
-             * DOJO
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Dojo
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {record.dojo_name ??
-                  "-"}
-              </Text>
-            </View>
-
-
-            {/*
-             * GRADING ASSESSOR
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Grading Assessor
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {assessorName}
-              </Text>
-            </View>
-
-
-            {/*
-             * CERTIFICATE NUMBER
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Certificate No.
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {
-                  audit.certificate_number
-                }
-              </Text>
-            </View>
-
-
-            {/*
-             * PRINT TYPE
-             */}
-
-            <View
-              style={
-                styles.row
-              }
-            >
-              <Text
-                style={
-                  styles.label
-                }
-              >
-                Print Type
-              </Text>
-
-
-              <Text
-                style={
-                  styles.value
-                }
-              >
-                {audit.print_type ===
-                "reprint"
-                  ? "Official Reprint"
-                  : "Original"}
-              </Text>
-            </View>
-
           </View>
 
 
@@ -1028,6 +718,7 @@ export function GradeCertificatePage({
               >
                 Authorized Signatory
               </Text>
+              <Text style={styles.signatureText}>Jingwuguan Seibukan Head</Text>
             </View>
 
           </View>
@@ -1035,46 +726,9 @@ export function GradeCertificatePage({
         </View>
 
 
-        {/*
-         * ====================================================
-         * AUDIT FOOTER
-         *
-         * This identifies who generated/printed the system
-         * certificate. It is intentionally separate from the
-         * grading assessor.
-         * ====================================================
-         */}
-
-        <View
-          style={
-            styles.footer
-          }
-        >
-          <Text>
-            {
-              audit.certificate_number
-            }
-          </Text>
+        {/* Generator identity, timestamp and print audit remain in system records only. */}
 
 
-          <Text>
-            Generated by{" "}
-            {
-              audit.generated_by_name
-            }
-            {" - "}
-            {
-              audit.generated_by_role
-            }
-          </Text>
-
-
-          <Text>
-            {formatDateTime(
-              audit.generated_at
-            )}
-          </Text>
-        </View>
 
       </Page>
   );

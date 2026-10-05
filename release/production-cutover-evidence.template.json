@@ -19,7 +19,7 @@
   },
   "database": {
     "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
-    "migrationLedger": "006-056",
+    "migrationLedger": "006-058",
     "exactLedgerPassed": false,
     "catalogPassed": false,
     "databaseLintPassed": false,

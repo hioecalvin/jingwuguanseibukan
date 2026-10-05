@@ -24,7 +24,7 @@ export function validCutoverManifest() {
     policy: "jingwuguan-production-cutover-v1",
     release: { branch: "release/v1-readiness-20260918", commitSha: COMMIT, deploymentId: DEPLOYMENT, origin: "https://jingwuguanseibukan.com", windowStartsAt: WINDOW_START, windowEndsAt: WINDOW_END },
     target: { environment: "production", projectRef: PROJECT, region: "ap-southeast-1", supabaseOrigin: `https://${PROJECT}.supabase.co`, dashboardOwnershipVerified: true, dashboardRegionVerified: true },
-    database: { capturedAt: "2026-10-02T09:00:00+10:00", migrationLedger: "006-056", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, securityVerifierPassed: true, grantsAndRlsPassed: true, evidenceSha256: "12".repeat(32) },
+    database: { capturedAt: "2026-10-02T09:00:00+10:00", migrationLedger: "006-058", exactLedgerPassed: true, catalogPassed: true, databaseLintPassed: true, securityVerifierPassed: true, grantsAndRlsPassed: true, evidenceSha256: "12".repeat(32) },
     defaultAcl: { capturedAt: "2026-10-02T09:15:00+10:00", status: "resolved", scope: "supabase-admin-future-object-default-acl-only", evidenceSha256: "23".repeat(32), exceptionReference: "not-applicable", exceptionExpiresAt: null, reviewedByRole: "independent-security-reviewer" },
     roleSecurity: { capturedAt: "2026-10-02T09:30:00+10:00", readOnly: true, memberPassed: true, scopedAdminPassed: true, superAdminPassed: true, reviewedExistingAccounts: true, authSessionWritesExpected: true, applicationMutationsAttempted: false, evidenceSha256: "34".repeat(32) },
     domain: { capturedAt: "2026-10-02T10:00:00+10:00", customDomain: "jingwuguanseibukan.com", dnsResolved: true, tlsValid: true, certificateHostname: "jingwuguanseibukan.com", supabaseSiteUrl: "https://jingwuguanseibukan.com", authConfirmRedirect: "https://jingwuguanseibukan.com/auth/confirm", publicConfigProjectRef: PROJECT, stagingResidueFound: false, retiredResidueFound: false, evidenceSha256: "45".repeat(32) },
@@ -41,7 +41,7 @@ function options(overrides = {}) { return { expectedCommit: COMMIT, expectedDepl
 test("complete fresh read-only production cutover evidence passes", () => {
   const result = evaluateProductionCutoverReadiness(validCutoverManifest(), options());
   assert.equal(result.ready, true, JSON.stringify(result.blockers));
-  assert.equal(result.summary.migrationLedger, "006-056");
+  assert.equal(result.summary.migrationLedger, "006-058");
   assert.equal(result.summary.defaultAclStatus, "resolved");
 });
 

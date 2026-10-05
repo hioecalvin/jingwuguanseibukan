@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -950,7 +952,8 @@ export default function EnrollmentRequestsPage() {
 
 
               return (
-                <article
+                <CompactRecord summary={<>{request.member_name ??
+                            "Member"}</>}
                   key={
                     request.request_id
                   }
@@ -1570,7 +1573,7 @@ export default function EnrollmentRequestsPage() {
                       </div>
                     )}
                   </div>
-                </article>
+                </CompactRecord>
               );
             }
           )}

@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -2511,7 +2513,10 @@ export default function DojoTransferPage() {
 
 
                   return (
-                    <article
+                    <CompactRecord summary={<>{transfer
+                              .profiles
+                              ?.full_name ??
+                              "Unknown Member"}</>}
                       key={
                         transfer.id
                       }
@@ -2622,7 +2627,7 @@ export default function DojoTransferPage() {
 
                       </div>
 
-                    </article>
+                    </CompactRecord>
                   );
                 }
               )
@@ -2952,7 +2957,7 @@ export default function DojoTransferPage() {
 
 
                   return (
-                    <article
+                    <CompactRecord summary={<>Bulk Transfer</>}
                       key={
                         batchId
                       }
@@ -3522,7 +3527,7 @@ export default function DojoTransferPage() {
 
                       )}
 
-                    </article>
+                    </CompactRecord>
                   );
                 }
               )}
@@ -3715,7 +3720,9 @@ function TransferCard({
     ) => string;
 }) {
   return (
-    <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+    <CompactRecord summary={<>{
+                row.member_name
+              }</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
 
       {/* HEADER */}
@@ -4105,7 +4112,7 @@ function TransferCard({
 
       )}
 
-    </article>
+    </CompactRecord>
   );
 }
 

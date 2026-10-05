@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { useState } from 'react';
 import AppShell from '../../../components/app-shell';
+import CompactRecord from '../../../components/compact-record';
 import type { AppRole } from '../../../lib/navigation';
 
 const requestedRole = new URLSearchParams(window.location.search).get('role');
@@ -16,6 +17,21 @@ function NavigationFixture() {
     <button type="button" onClick={() => setActivated(true)} className="mt-4 rounded-lg border border-neutral-600 px-4 py-3">Content action</button>
     {activated && <p role="status">Content action activated</p>}
     </div>
+    {new URLSearchParams(window.location.search).has('compact') && (
+      <form onSubmit={event => { event.preventDefault(); setActivated(true); }} className="mt-8 space-y-4">
+        <CompactRecord summary="Fixture Member with a long display name" detail="Aikido · 1st Kyu · Central Dojo" className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          <h2>Member details</h2>
+          <label className="block" htmlFor="compact-notes">Notes</label>
+          <input id="compact-notes" required className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2" />
+          <p className="mt-4 text-sm text-neutral-400">Details remain mounted when this record is closed.</p>
+        </CompactRecord>
+        <CompactRecord summary="September payment" detail="Rp 100.000 · Unpaid" className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          <h2>Payment details</h2>
+          <p>Full-payment workflow; no financial action in this fixture.</p>
+        </CompactRecord>
+        <button type="submit" className="rounded-lg border border-neutral-700 px-3 py-2">Validate fixture</button>
+      </form>
+    )}
   </AppShell>
   );
 }

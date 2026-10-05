@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -2567,7 +2569,9 @@ export default function DojoManagementPage() {
 
 
               return (
-                <article
+                <CompactRecord summary={<>{
+                            dojo.name
+                          }</>}
                   key={
                     dojo.id
                   }
@@ -2731,7 +2735,7 @@ export default function DojoManagementPage() {
 
                   )}
 
-                </article>
+                </CompactRecord>
               );
             }
           )}

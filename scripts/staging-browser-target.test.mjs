@@ -90,6 +90,7 @@ test("request guard allows reads and ephemeral auth but rejects writes and unkno
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_manageable_schedule_scopes`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_schedule_instructor_options`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_my_member_directory`, true],
+    ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_my_member_directory_v2`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_dojo_payment_confirmations`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_dojo_settlement_configs`, true],
     ["POST", `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/get_dojo_admin_settlements`, true],

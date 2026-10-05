@@ -28,7 +28,7 @@
     "targetKind": "disposable-managed",
     "backupSha256": "REPLACE_WITH_64_CHARACTER_BACKUP_SHA256",
     "evidenceBundleSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_EVIDENCE_SHA256",
-    "migrationLedger": "006-056",
+    "migrationLedger": "006-058",
     "exactLedgerPassed": false,
     "catalogPassed": false,
     "databaseLintPassed": false,

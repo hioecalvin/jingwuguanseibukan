@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -1302,7 +1304,10 @@ export default function NotificationsPage() {
 
 
             return (
-              <article
+              <CompactRecord summary={<>{
+                              notification.title
+                            }</>}
+                detail={notification.is_read ? "Read notification" : "Unread notification"}
                 key={
                   notification.notification_id
                 }
@@ -1526,7 +1531,7 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                 </div>
-              </article>
+              </CompactRecord>
             );
           }
         )}

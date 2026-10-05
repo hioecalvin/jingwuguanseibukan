@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import { expandCompactRecords } from './compact-record-helpers';
 
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
 import { test, expect } from './fixtures';
@@ -24,6 +25,7 @@ test('Admin records a complete payment without a Member confirmation request', a
   await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments`);
   await expect(page).toHaveTitle('Direct payment workflow fixture');
   await expect(page.getByRole('heading', { name: 'Subscription & Payments' })).toBeVisible();
+  await expandCompactRecords(page, 'Member Payments');
   await expect(page.getByText(/without waiting for a Member confirmation request/)).toBeVisible();
 
   const payments = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Member Payments' }) });
@@ -55,6 +57,7 @@ test('Admin records a complete payment without a Member confirmation request', a
 
 test('Full-payment rejection remains retryable with the entered audit details', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments`);
+  await expandCompactRecords(page, 'Member Payments');
   await page.evaluate(() => {
     (window as Window & { __directPaymentFixture: DirectPaymentState }).__directPaymentFixture.failNextPayment = true;
   });
@@ -80,6 +83,7 @@ test('Admin reviews late and current payment confirmations with guarded retry', 
   await page.goto(`${NAV_ORIGIN}/admin-payment-review`);
   await expect(page).toHaveTitle('Payment review workflow fixture');
   await expect(page.getByRole('heading', { name: 'Payment Confirmations' })).toBeVisible();
+  await expandCompactRecords(page);
 
   const approval = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Approve Member' }) });
   await expect(approval).toContainText('August 2026');
@@ -89,7 +93,7 @@ test('Admin reviews late and current payment confirmations with guarded retry', 
   await expect(page.getByRole('row').filter({ hasText: 'Approve Member' })).toContainText('APPROVED');
 
   const rejection = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Reject Member' }) });
-  await rejection.getByRole('button', { name: 'Reject' }).click();
+  await rejection.getByRole('button', { name: 'Reject', exact: true }).click();
   await rejection.getByRole('button', { name: 'Confirm Rejection' }).click();
   await expect(page.getByText('A rejection reason is required.')).toBeVisible();
   await rejection.getByPlaceholder('Explain why this payment confirmation is being rejected...').fill('Amount does not match the receipt.');
@@ -120,6 +124,7 @@ test('Super Admin reviews settlement details, late payments, exports, and retry-
   await page.goto(`${NAV_ORIGIN}/admin-settlements`);
   await expect(page).toHaveTitle('Settlement workflow fixture');
   await expect(page.getByRole('heading', { name: 'Dojo Settlements' })).toBeVisible();
+  await expandCompactRecords(page);
   await expect(page.getByLabel('Settlement status')).toHaveValue('all');
   await expect(page.getByLabel('Settlement dojo')).toHaveValue('all');
   await expect(page.getByLabel('Settlement month')).toHaveValue('');
@@ -158,7 +163,9 @@ test('Super Admin reviews settlement details, late payments, exports, and retry-
   await expect(approval.getByRole('button', { name: 'Approve' })).toBeEnabled();
   await approval.getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByText('Settlement approved.')).toBeVisible();
-  await expect(approval.getByText('approved', { exact: true })).toBeVisible();
+  // The successful review reloads the list; reopen its newly mounted records.
+  await expandCompactRecords(page);
+  await expect(approval.locator('.compact-record-body').getByText('approved', { exact: true })).toBeVisible();
 
   const rejection = page.locator('section').filter({
     has: page.getByRole('heading', { name: 'September 2026 · Fixture Annex' }),
@@ -175,7 +182,8 @@ test('Super Admin reviews settlement details, late payments, exports, and retry-
   await expect(rejection.getByPlaceholder('Rejection reason')).toHaveValue('Transfer reference needs correction.');
   await rejection.getByRole('button', { name: 'Confirm Rejection' }).click();
   await expect(page.getByText('Settlement rejected. The Admin can correct it and resubmit.')).toBeVisible();
-  await expect(rejection.getByText('rejected', { exact: true })).toBeVisible();
+  await expandCompactRecords(page);
+  await expect(rejection.locator('.compact-record-body').getByText('rejected', { exact: true })).toBeVisible();
   await expect(rejection).toContainText('Transfer reference needs correction.');
 
   const state = await page.evaluate(() =>

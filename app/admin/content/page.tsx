@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -1137,7 +1139,7 @@ export default function AdminContentPage() {
               {filteredContent.map(
                 (item) => (
 
-                  <article
+                  <CompactRecord summary={<>{item.title}</>}
                     key={
                       item.id
                     }
@@ -1256,7 +1258,7 @@ export default function AdminContentPage() {
 
                     </div>
 
-                  </article>
+                  </CompactRecord>
 
                 )
               )}

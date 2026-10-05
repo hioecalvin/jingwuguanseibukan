@@ -1,5 +1,8 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+import MemberSubscriptionHistory from "@/components/member-subscription-history";
+
 import {
   useEffect,
   useMemo,
@@ -269,6 +272,8 @@ export default function MemberManagementPage() {
   ] =
     useState<Member[]>([]);
 
+
+  const [memberViews, setMemberViews] = useState<Record<string, "details" | "promote" | undefined>>({});
 
   const [
     nextPromotions,
@@ -2681,6 +2686,11 @@ export default function MemberManagementPage() {
       return;
     }
 
+    if (next.is_rank_promotion || next.next_rank_id !== member.rank_id) {
+      showError("Rank promotion requires a Super Admin assessment.");
+      return;
+    }
+
 
     if (
       !date
@@ -5029,17 +5039,251 @@ export default function MemberManagementPage() {
 
 
                 return (
-                  <article
-                    key={
-                      member.membership_id
-                    }
-                    className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
-                  >
+                  <article key={member.membership_id} className="member-list-item rounded-xl border border-neutral-800 bg-neutral-900">
+                    <div className="member-list-row">
+                      <div className="member-list-photo">
+                        {member.avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={member.avatar_url} alt="" className="h-full w-full object-cover" />
+                        ) : <span aria-hidden="true">{member.full_name.charAt(0).toUpperCase()}</span>}
+                      </div>
+                      <div className="member-list-id"><span className="member-list-label">Member ID</span>
+                        <button type="button" aria-label={`Member ID ${member.registration_number ?? "not assigned"}: ${member.full_name}`} aria-expanded={memberViews[member.membership_id] === "details"} aria-controls={`member-details-${member.membership_id}`}
+                          onClick={() => {
+                            const opening = memberViews[member.membership_id] !== "details";
+                            setMemberViews(current => ({ ...current, [member.membership_id]: opening ? "details" : undefined }));
+                            if (opening) { setOpenHistory(current => ({ ...current, [member.membership_id]: true })); void loadGradeHistory(member.membership_id); }
+                          }} className="member-id-button">{member.registration_number ?? "Not assigned"}</button>
+                      </div>
+                      <div className="member-list-name"><span className="member-list-label">Name</span><h2 className="font-semibold">{member.full_name}</h2><span className="text-xs text-neutral-400">{member.class_name}</span></div>
+                      <div><span className="member-list-label">Rank</span><span>{member.rank_name ?? "Unranked"}</span>{member.sub_rank_name && <span className="block text-xs text-neutral-400">{member.sub_rank_name}</span>}</div>
+                      <div><span className="member-list-label">Dojo</span><span>{member.dojo_name ?? "Not recorded"}</span></div>
+                      <div><span className="member-list-label">Last Training Session</span><span>{formatTrainingSessionRecency(member.last_training_session_date, member.last_training_days_ago)}</span></div>
+                      <div className="member-list-actions">
+                        <button type="button" disabled={!next || next.is_rank_promotion || next.next_rank_id !== member.rank_id || processing || Boolean(member.date_of_passing) || member.membership_status !== "active"}
+                          aria-expanded={memberViews[member.membership_id] === "promote"} aria-controls={`member-promote-${member.membership_id}`}
+                          onClick={() => setMemberViews(current => ({ ...current, [member.membership_id]: current[member.membership_id] === "promote" ? undefined : "promote" }))}
+                          className="rounded-lg border border-sky-700 px-3 py-2 text-sm text-sky-300 disabled:opacity-40">Promote Tier</button>
+                        {next?.is_rank_promotion && <span className="text-xs text-amber-300">Assessment required for next rank</span>}
+                        <label className="text-xs text-neutral-400">Status
+                          <select aria-label={`Status for ${member.full_name}`} value={member.membership_status} disabled={processing || Boolean(member.date_of_passing)}
+                            onChange={event => {
+                              const action = event.target.value;
+                              if (action === member.membership_status) return;
+                              if (action === "break_1" && member.membership_status === "active") void setBreak(member);
+                              if (action === "inactive") void setInactive(member);
+                              if (action === "active") void setActive(member);
+                            }} className="mt-1 block w-full rounded-lg border border-neutral-600 bg-neutral-900 px-2 py-2 text-sm text-white">
+                            <option value={member.membership_status}>{statusLabel(member.membership_status, member.date_of_passing)}</option>
+                            {!member.date_of_passing && member.membership_status === "active" && <option value="break_1">Set Break 1</option>}
+                            {!member.date_of_passing && ["break_1", "break_2", "inactive"].includes(member.membership_status) && <option value="active">Set Active</option>}
+                            {!member.date_of_passing && member.membership_status !== "inactive" && <option value="inactive">Set Inactive</option>}
+                          </select>
+                        </label>
+                      </div>
+                    </div>
+                    <section id={`member-promote-${member.membership_id}`} hidden={memberViews[member.membership_id] !== "promote" || !next || next.is_rank_promotion || next.next_rank_id !== member.rank_id || Boolean(member.date_of_passing) || member.membership_status !== "active"} aria-label={`Promote ${member.full_name}`} className="member-expanded-panel">
+                      {next && (<>
+
+                        <p className="font-semibold">
+                          Promote Tier
+                        </p>
 
 
-                    {/* MEMBER HEADER */}
+                        <p className="mt-1 text-sm text-neutral-400">
+                          Advance to the next tier within the same rank. Rank changes require a Super Admin assessment. The assessor is retained in the audit history.
+                        </p>
 
-                    <div className="flex flex-col justify-between gap-5 lg:flex-row">
+
+                        <div className="mt-4 grid gap-4 lg:grid-cols-3 lg:items-end">
+
+                          <div>
+
+                            <label className="mb-2 block text-sm font-medium">
+                              Promotion Effective Date
+                            </label>
+
+
+                            <input
+                              type="date"
+                              value={
+                                promotionDates[
+                                  member.membership_id
+                                ] ??
+                                ""
+                              }
+                              onChange={(e) =>
+                                setPromotionDates(
+                                  (
+                                    current
+                                  ) => ({
+                                    ...current,
+
+                                    [member.membership_id]:
+                                      e.target.value,
+                                  })
+                                )
+                              }
+                              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
+                            />
+
+                          </div>
+
+
+                          {next.next_level ===
+                          "yudansha" ? (
+
+                            <div>
+
+                              <label className="mb-2 block text-sm font-medium">
+                                External Assessor
+                              </label>
+
+
+                              <input
+                                type="text"
+                                value={
+                                  externalAssessorNames[
+                                    member.membership_id
+                                  ] ??
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  setExternalAssessorNames(
+                                    (
+                                      current
+                                    ) => ({
+                                      ...current,
+
+                                      [member.membership_id]:
+                                        e.target.value,
+                                    })
+                                  )
+                                }
+                                placeholder="Enter assessor's full name"
+                                className="w-full rounded-lg border border-purple-800 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-600"
+                              />
+
+
+                              <p className="mt-2 text-xs text-purple-300/70">
+                                Yudansha grading uses an external assessor name.
+                              </p>
+
+                            </div>
+
+                          ) : (
+
+                            <div>
+
+                              <label className="mb-2 block text-sm font-medium">
+                                Grading Assessor
+                              </label>
+
+
+                              <select
+                                value={
+                                  selectedAssessors[
+                                    member.membership_id
+                                  ] ??
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  setSelectedAssessors(
+                                    (
+                                      current
+                                    ) => ({
+                                      ...current,
+
+                                      [member.membership_id]:
+                                        e.target.value,
+                                    })
+                                  )
+                                }
+                                className="w-full rounded-lg border border-green-800 bg-neutral-800 px-3 py-2 text-white"
+                              >
+
+                                <option value="">
+                                  Select active assessor
+                                </option>
+
+
+                                {gradingAssessors.map(
+                                  (
+                                    assessor
+                                  ) => (
+
+                                    <option
+                                      key={
+                                        assessor.member_id
+                                      }
+                                      value={
+                                        assessor.member_id
+                                      }
+                                    >
+                                      {
+                                        assessor.full_name
+                                      }
+                                    </option>
+
+                                  )
+                                )}
+
+                              </select>
+
+
+                              {gradingAssessors.length ===
+                              0 && (
+
+                                <p className="mt-2 text-xs text-amber-400">
+                                  No active grading assessors are configured. Super Admin must enable at least one Member as a Grading Assessor.
+                                </p>
+
+                              )}
+
+                            </div>
+
+                          )}
+
+
+                          <button
+                            type="button"
+                            disabled={
+                              processing ||
+                              (
+                                next.next_level ===
+                                  "mudansha" &&
+                                gradingAssessors.length ===
+                                  0
+                              )
+                            }
+                            onClick={() =>
+                              promoteMember(
+                                member
+                              )
+                            }
+                            className="rounded-lg bg-sky-500 px-5 py-2 font-semibold hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {processing
+                              ? "Processing..."
+                              : `Promote to ${next.next_rank_name} · ${next.next_sub_rank_name}`}
+                          </button>
+
+                        </div>
+
+                      </>)}
+                    </section>
+
+
+
+
+                    <div id={`member-details-${member.membership_id}`} hidden={memberViews[member.membership_id] !== "details"} className="member-expanded-panel">
+                      <dl className="member-overview mt-4" aria-label="Member overview">
+                      <div><dt>Date Joined</dt><dd>{member.joined_date ? formatDate(member.joined_date) : "Not recorded"}</dd></div>
+                      <div><dt>Rank Now</dt><dd>{member.rank_name ?? "Unranked"}{member.sub_rank_name && <span className="block text-xs font-normal text-neutral-300">{member.sub_rank_name}</span>}</dd></div>
+                      <div><dt>Last Training Session</dt><dd>{formatTrainingSessionRecency(member.last_training_session_date, member.last_training_days_ago)}</dd></div>
+                    </dl>
+                      <div className="member-detail-sections mt-4">
+<CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Contact Details" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                       <div className="flex items-start gap-4">
 
@@ -5082,11 +5326,11 @@ export default function MemberManagementPage() {
 
                           <div className="flex flex-wrap items-center gap-3">
 
-                            <h2 className="text-xl font-bold">
+                            <p className="text-xl font-bold">
                               {
                                 member.full_name
                               }
-                            </h2>
+                            </p>
 
 
                             {member.rank_id && (
@@ -5265,14 +5509,247 @@ export default function MemberManagementPage() {
                         )}
                       </span>
 
-                    </div>
+                    </CompactRecord>
+<CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Rank History" detail="" className="mt-3 rounded-xl border border-neutral-800">
+
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+
+                        <div>
+                          <p className="text-sm font-semibold uppercase tracking-wider text-sky-400">
+                            Official Promotion Record
+                          </p>
+
+                          <p className="mt-1 text-sm text-neutral-400">
+                            Valid and revoked promotions are retained permanently.
+                          </p>
+                        </div>
 
 
-                    {/* MEMBERSHIP TIMELINE */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleHistory(
+                              member.membership_id
+                            )
+                          }
+                          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm"
+                        >
+                          {historyOpen
+                            ? "Hide History"
+                            : "View History"}
+                        </button>
 
-                    <div className="mt-6 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2 xl:grid-cols-3">
+                      </div>
 
-                      <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
+
+                      {historyOpen && (
+
+                        <div className="mt-4 space-y-3">
+
+                          {!history ? (
+
+                            <p className="text-sm text-neutral-400">
+                              Loading history...
+                            </p>
+
+                          ) : history.length ===
+                            0 ? (
+
+                            <p className="text-sm text-neutral-400">
+                              No promotions recorded yet.
+                            </p>
+
+                          ) : (
+
+                            history.map(
+                              (
+                                item
+                              ) => (
+
+                                <div
+                                  key={
+                                    item.id
+                                  }
+                                  className={`rounded-xl border p-4 ${
+                                    item.revoked_at
+                                      ? "border-red-900 bg-red-950/10"
+                                      : "border-neutral-800 bg-neutral-950/50"
+                                  }`}
+                                >
+
+                                  <div className="flex flex-wrap items-center gap-2">
+
+                                    <p className="font-semibold">
+                                      {item.rank_name ??
+                                        "Unranked"}
+
+                                      {item.sub_rank_name
+                                        ? ` · ${item.sub_rank_name}`
+                                        : ""}
+                                    </p>
+
+
+                                    <span
+                                      className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${
+                                        item.revoked_at
+                                          ? "border-red-800 text-red-300"
+                                          : "border-green-800 text-green-300"
+                                      }`}
+                                    >
+                                      {item.revoked_at
+                                        ? "REVOKED"
+                                        : "VALID"}
+                                    </span>
+
+                                  </div>
+
+
+                                  <p className="mt-2 text-sm text-neutral-400">
+                                    Effective:{" "}
+                                    {formatDate(
+                                      item.effective_date
+                                    )}
+                                  </p>
+
+
+                                  <div className="mt-3 rounded-lg border border-neutral-800 bg-neutral-900/70 p-3">
+
+                                    <div className="flex flex-wrap items-center gap-2">
+
+                                      <p className="text-sm">
+                                        <span className="text-neutral-400">
+                                          Assessor:
+                                        </span>{" "}
+
+                                        <span className="font-semibold text-neutral-200">
+                                          {item.assessor_name_snapshot ??
+                                            "Not recorded"}
+                                        </span>
+                                      </p>
+
+
+                                      {item.assessor_type && (
+
+                                        <span
+                                          className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${
+                                            item.assessor_type ===
+                                            "external"
+                                              ? "border-purple-800 bg-purple-950/30 text-purple-300"
+                                              : "border-green-800 bg-green-950/30 text-green-300"
+                                          }`}
+                                        >
+                                          {item.assessor_type ===
+                                          "external"
+                                            ? "EXTERNAL ASSESSOR"
+                                            : "MEMBER ASSESSOR"}
+                                        </span>
+
+                                      )}
+
+                                    </div>
+
+                                  </div>
+
+
+                                  <p className="mt-2 text-xs text-neutral-400">
+                                    Recorded:{" "}
+                                    {formatDateTime(
+                                      item.created_at
+                                    )}
+                                  </p>
+
+
+                                  {item.revoked_at && (
+
+                                    <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/20 p-3">
+
+                                      <p className="text-sm text-red-300">
+                                        Reason:{" "}
+                                        {item.revoke_reason ??
+                                          "No reason recorded"}
+                                      </p>
+
+
+                                      <p className="mt-1 text-xs text-red-400/70">
+                                        Revoked:{" "}
+                                        {formatDateTime(
+                                          item.revoked_at
+                                        )}
+                                      </p>
+
+                                    </div>
+
+                                  )}
+
+                                </div>
+
+                              )
+                            )
+
+                          )}
+
+                        </div>
+
+                      )}
+
+                    </CompactRecord>
+<CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Subscription History" detail="" className="mt-3 rounded-xl border border-neutral-800">
+                        <MemberSubscriptionHistory membershipId={member.membership_id} active={memberViews[member.membership_id] === "details"} />
+                      </CompactRecord>
+<CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Official Records" detail="" className="mt-3 rounded-xl border border-neutral-800">
+
+                      <p className="text-sm font-semibold uppercase tracking-wider text-amber-400">
+                        Official Records
+                      </p>
+
+
+                      <div className="mt-4 flex flex-wrap gap-3">
+
+                        <button
+                          type="button"
+                          disabled={
+                            processing
+                          }
+                          onClick={() =>
+                            exportOfficialPDF(
+                              member
+                            )
+                          }
+                          className="rounded-lg border border-amber-700 bg-amber-950/20 px-5 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-950/40 disabled:opacity-50"
+                        >
+                          {processing
+                            ? "Preparing..."
+                            : "Export Official Member PDF"}
+                        </button>
+
+
+                        {member.rank_id && (
+
+                          <button
+                            type="button"
+                            disabled={
+                              processing
+                            }
+                            onClick={() =>
+                              printCurrentRankCertificate(
+                                member
+                              )
+                            }
+                            className="rounded-lg border border-purple-700 bg-purple-950/20 px-5 py-2 text-sm font-semibold text-purple-200 hover:bg-purple-950/40 disabled:opacity-50"
+                          >
+                            {processing
+                              ? "Preparing..."
+                              : `Print ${member.rank_name ?? "Grade"} Certificate`}
+                          </button>
+
+                        )}
+
+                      </div>
+
+                    </CompactRecord>
+{/* MEMBER HEADER */}{/* MEMBERSHIP TIMELINE */}<>
+
+                      <CompactRecord as="section" alwaysCollapsible summary="Edit Date Joined" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                           Date Joined
@@ -5375,10 +5852,10 @@ export default function MemberManagementPage() {
 
                         )}
 
-                      </div>
+                      </CompactRecord>
 
 
-                      <div className="rounded-xl border border-sky-900 bg-sky-950/10 p-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Last Grading" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                           Last Grading
@@ -5398,10 +5875,10 @@ export default function MemberManagementPage() {
                           Latest valid promotion date.
                         </p>
 
-                      </div>
+                      </CompactRecord>
 
 
-                      <div className="rounded-xl border border-emerald-900 bg-emerald-950/10 p-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Update Training Session" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
                           Last Training Session
@@ -5536,18 +6013,13 @@ export default function MemberManagementPage() {
                           The server counts sessions from the last 30 days; older sessions show their date.
                         </p>
 
-                      </div>
+                      </CompactRecord>
 
-                    </div>
-
-
-                    {/* TITLE APPOINTMENT */}
-
-                    {isSuperAdmin &&
+                    </>{/* TITLE APPOINTMENT */}{isSuperAdmin &&
                       member.title_system &&
                       member.title_system !== "none" && (
 
-                      <div className="mt-6 rounded-xl border border-amber-900 bg-amber-950/10 p-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Title Appointment" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
@@ -5851,18 +6323,13 @@ export default function MemberManagementPage() {
 
                         )}
 
-                      </div>
+                      </CompactRecord>
 
-                    )}
-
-
-                    {/* AIKIKAI REGISTRATION NUMBER */}
-
-                    {isSuperAdmin &&
+                    )}{/* AIKIKAI REGISTRATION NUMBER */}{isSuperAdmin &&
                       member.level ===
                         "yudansha" && (
 
-                      <div className="mt-6 rounded-xl border border-purple-900 bg-purple-950/10 p-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Aikikai Registration" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
@@ -5985,97 +6452,10 @@ export default function MemberManagementPage() {
 
                         </div>
 
-                      </div>
+                      </CompactRecord>
 
-                    )}
-
-
-                    {/* OFFICIAL RECORDS */}
-
-                    <div className="mt-6 border-t border-neutral-800 pt-5">
-
-                      <p className="text-sm font-semibold uppercase tracking-wider text-amber-400">
-                        Official Records
-                      </p>
-
-
-                      <div className="mt-4 flex flex-wrap gap-3">
-
-                        <button
-                          type="button"
-                          disabled={
-                            processing
-                          }
-                          onClick={() =>
-                            exportOfficialPDF(
-                              member
-                            )
-                          }
-                          className="rounded-lg border border-amber-700 bg-amber-950/20 px-5 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-950/40 disabled:opacity-50"
-                        >
-                          {processing
-                            ? "Preparing..."
-                            : "Export Official Member PDF"}
-                        </button>
-
-
-                        {member.rank_id && (
-
-                          <button
-                            type="button"
-                            disabled={
-                              processing
-                            }
-                            onClick={() =>
-                              printCurrentRankCertificate(
-                                member
-                              )
-                            }
-                            className="rounded-lg border border-purple-700 bg-purple-950/20 px-5 py-2 text-sm font-semibold text-purple-200 hover:bg-purple-950/40 disabled:opacity-50"
-                          >
-                            {processing
-                              ? "Preparing..."
-                              : `Print ${member.rank_name ?? "Grade"} Certificate`}
-                          </button>
-
-                        )}
-
-                      </div>
-
-                    </div>
-
-
-                    {/* CURRENT / NEXT */}
-
-                    <div className="mt-6 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2">
-
-                      <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
-
-                        <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                          Current Grade
-                        </p>
-
-
-                        <p className="mt-2 text-xl font-bold">
-                          {member.rank_name ??
-                            "Unranked"}
-                        </p>
-
-
-                        {member.sub_rank_name && (
-
-                          <p className="mt-1 text-neutral-400">
-                            {
-                              member.sub_rank_name
-                            }
-                          </p>
-
-                        )}
-
-                      </div>
-
-
-                      <div className="rounded-xl border border-sky-900 bg-sky-950/20 p-5">
+                    )}{/* OFFICIAL RECORDS */}{/* CURRENT / NEXT */}<>
+                      <CompactRecord as="section" alwaysCollapsible summary="Next Promotion" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                           Next Promotion
@@ -6117,210 +6497,9 @@ export default function MemberManagementPage() {
 
                         )}
 
-                      </div>
+                      </CompactRecord>
 
-                    </div>
-
-
-                    {/* PROMOTION */}
-
-                    {next && (
-
-                      <div className="mt-5 rounded-xl border border-neutral-800 bg-neutral-950/40 p-5">
-
-                        <p className="font-semibold">
-                          Promote Member
-                        </p>
-
-
-                        <p className="mt-1 text-sm text-neutral-400">
-                          The next grade is calculated automatically. Every grading must have an assessor.
-                        </p>
-
-
-                        <div className="mt-4 grid gap-4 lg:grid-cols-3 lg:items-end">
-
-                          <div>
-
-                            <label className="mb-2 block text-sm font-medium">
-                              Promotion Effective Date
-                            </label>
-
-
-                            <input
-                              type="date"
-                              value={
-                                promotionDates[
-                                  member.membership_id
-                                ] ??
-                                ""
-                              }
-                              onChange={(e) =>
-                                setPromotionDates(
-                                  (
-                                    current
-                                  ) => ({
-                                    ...current,
-
-                                    [member.membership_id]:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-                            />
-
-                          </div>
-
-
-                          {next.next_level ===
-                          "yudansha" ? (
-
-                            <div>
-
-                              <label className="mb-2 block text-sm font-medium">
-                                External Assessor
-                              </label>
-
-
-                              <input
-                                type="text"
-                                value={
-                                  externalAssessorNames[
-                                    member.membership_id
-                                  ] ??
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  setExternalAssessorNames(
-                                    (
-                                      current
-                                    ) => ({
-                                      ...current,
-
-                                      [member.membership_id]:
-                                        e.target.value,
-                                    })
-                                  )
-                                }
-                                placeholder="Enter assessor's full name"
-                                className="w-full rounded-lg border border-purple-800 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-600"
-                              />
-
-
-                              <p className="mt-2 text-xs text-purple-300/70">
-                                Yudansha grading uses an external assessor name.
-                              </p>
-
-                            </div>
-
-                          ) : (
-
-                            <div>
-
-                              <label className="mb-2 block text-sm font-medium">
-                                Grading Assessor
-                              </label>
-
-
-                              <select
-                                value={
-                                  selectedAssessors[
-                                    member.membership_id
-                                  ] ??
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  setSelectedAssessors(
-                                    (
-                                      current
-                                    ) => ({
-                                      ...current,
-
-                                      [member.membership_id]:
-                                        e.target.value,
-                                    })
-                                  )
-                                }
-                                className="w-full rounded-lg border border-green-800 bg-neutral-800 px-3 py-2 text-white"
-                              >
-
-                                <option value="">
-                                  Select active assessor
-                                </option>
-
-
-                                {gradingAssessors.map(
-                                  (
-                                    assessor
-                                  ) => (
-
-                                    <option
-                                      key={
-                                        assessor.member_id
-                                      }
-                                      value={
-                                        assessor.member_id
-                                      }
-                                    >
-                                      {
-                                        assessor.full_name
-                                      }
-                                    </option>
-
-                                  )
-                                )}
-
-                              </select>
-
-
-                              {gradingAssessors.length ===
-                              0 && (
-
-                                <p className="mt-2 text-xs text-amber-400">
-                                  No active grading assessors are configured. Super Admin must enable at least one Member as a Grading Assessor.
-                                </p>
-
-                              )}
-
-                            </div>
-
-                          )}
-
-
-                          <button
-                            type="button"
-                            disabled={
-                              processing ||
-                              (
-                                next.next_level ===
-                                  "mudansha" &&
-                                gradingAssessors.length ===
-                                  0
-                              )
-                            }
-                            onClick={() =>
-                              promoteMember(
-                                member
-                              )
-                            }
-                            className="rounded-lg bg-sky-500 px-5 py-2 font-semibold hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {processing
-                              ? "Processing..."
-                              : `Promote to ${next.next_rank_name} · ${next.next_sub_rank_name}`}
-                          </button>
-
-                        </div>
-
-                      </div>
-
-                    )}
-
-
-                    {/* UNDO */}
-
-                    <div className="mt-5">
+                    </>{/* PROMOTION */}{/* UNDO */}<CompactRecord as="section" alwaysCollapsible summary="Correct Last Promotion" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                       {!showUndo ? (
 
@@ -6426,201 +6605,9 @@ export default function MemberManagementPage() {
 
                       )}
 
-                    </div>
+                    </CompactRecord>{/* HISTORY */}{/* GRADING ASSESSOR */}{isSuperAdmin && (
 
-
-                    {/* HISTORY */}
-
-                    <div className="mt-6 border-t border-neutral-800 pt-5">
-
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-wider text-sky-400">
-                            Official Promotion Record
-                          </p>
-
-                          <p className="mt-1 text-sm text-neutral-400">
-                            Valid and revoked promotions are retained permanently.
-                          </p>
-                        </div>
-
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            toggleHistory(
-                              member.membership_id
-                            )
-                          }
-                          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm"
-                        >
-                          {historyOpen
-                            ? "Hide History"
-                            : "View History"}
-                        </button>
-
-                      </div>
-
-
-                      {historyOpen && (
-
-                        <div className="mt-4 space-y-3">
-
-                          {!history ? (
-
-                            <p className="text-sm text-neutral-400">
-                              Loading history...
-                            </p>
-
-                          ) : history.length ===
-                            0 ? (
-
-                            <p className="text-sm text-neutral-400">
-                              No promotions recorded yet.
-                            </p>
-
-                          ) : (
-
-                            history.map(
-                              (
-                                item
-                              ) => (
-
-                                <div
-                                  key={
-                                    item.id
-                                  }
-                                  className={`rounded-xl border p-4 ${
-                                    item.revoked_at
-                                      ? "border-red-900 bg-red-950/10"
-                                      : "border-neutral-800 bg-neutral-950/50"
-                                  }`}
-                                >
-
-                                  <div className="flex flex-wrap items-center gap-2">
-
-                                    <p className="font-semibold">
-                                      {item.rank_name ??
-                                        "Unranked"}
-
-                                      {item.sub_rank_name
-                                        ? ` · ${item.sub_rank_name}`
-                                        : ""}
-                                    </p>
-
-
-                                    <span
-                                      className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${
-                                        item.revoked_at
-                                          ? "border-red-800 text-red-300"
-                                          : "border-green-800 text-green-300"
-                                      }`}
-                                    >
-                                      {item.revoked_at
-                                        ? "REVOKED"
-                                        : "VALID"}
-                                    </span>
-
-                                  </div>
-
-
-                                  <p className="mt-2 text-sm text-neutral-400">
-                                    Effective:{" "}
-                                    {formatDate(
-                                      item.effective_date
-                                    )}
-                                  </p>
-
-
-                                  <div className="mt-3 rounded-lg border border-neutral-800 bg-neutral-900/70 p-3">
-
-                                    <div className="flex flex-wrap items-center gap-2">
-
-                                      <p className="text-sm">
-                                        <span className="text-neutral-400">
-                                          Assessor:
-                                        </span>{" "}
-
-                                        <span className="font-semibold text-neutral-200">
-                                          {item.assessor_name_snapshot ??
-                                            "Not recorded"}
-                                        </span>
-                                      </p>
-
-
-                                      {item.assessor_type && (
-
-                                        <span
-                                          className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${
-                                            item.assessor_type ===
-                                            "external"
-                                              ? "border-purple-800 bg-purple-950/30 text-purple-300"
-                                              : "border-green-800 bg-green-950/30 text-green-300"
-                                          }`}
-                                        >
-                                          {item.assessor_type ===
-                                          "external"
-                                            ? "EXTERNAL ASSESSOR"
-                                            : "MEMBER ASSESSOR"}
-                                        </span>
-
-                                      )}
-
-                                    </div>
-
-                                  </div>
-
-
-                                  <p className="mt-2 text-xs text-neutral-600">
-                                    Recorded:{" "}
-                                    {formatDateTime(
-                                      item.created_at
-                                    )}
-                                  </p>
-
-
-                                  {item.revoked_at && (
-
-                                    <div className="mt-3 rounded-lg border border-red-900/60 bg-red-950/20 p-3">
-
-                                      <p className="text-sm text-red-300">
-                                        Reason:{" "}
-                                        {item.revoke_reason ??
-                                          "No reason recorded"}
-                                      </p>
-
-
-                                      <p className="mt-1 text-xs text-red-400/70">
-                                        Revoked:{" "}
-                                        {formatDateTime(
-                                          item.revoked_at
-                                        )}
-                                      </p>
-
-                                    </div>
-
-                                  )}
-
-                                </div>
-
-                              )
-                            )
-
-                          )}
-
-                        </div>
-
-                      )}
-
-                    </div>
-
-
-                    {/* GRADING ASSESSOR */}
-
-                    {isSuperAdmin && (
-
-                      <div className="mt-6 border-t border-neutral-800 pt-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Grading Assessor" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-5">
 
@@ -6696,16 +6683,11 @@ export default function MemberManagementPage() {
 
                         </div>
 
-                      </div>
+                      </CompactRecord>
 
-                    )}
+                    )}{/* ADMIN ACCESS */}{isSuperAdmin && (
 
-
-                    {/* ADMIN ACCESS */}
-
-                    {isSuperAdmin && (
-
-                      <div className="mt-6 border-t border-neutral-800 pt-5">
+                      <CompactRecord as="section" alwaysCollapsible summary="Administrative Access" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <div className="flex flex-wrap items-center justify-between gap-3">
 
@@ -6902,14 +6884,9 @@ export default function MemberManagementPage() {
 
                         )}
 
-                      </div>
+                      </CompactRecord>
 
-                    )}
-
-
-                    {/* SUBSCRIPTION FEE */}
-
-                    <div className="mt-6 border-t border-neutral-800 pt-5">
+                    )}{/* SUBSCRIPTION FEE */}<CompactRecord as="section" alwaysCollapsible summary="Subscription & Payment" detail="" className="mt-3 rounded-xl border border-neutral-800">
                       <div className="rounded-xl border border-emerald-900 bg-emerald-950/10 p-5">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div>
@@ -7113,11 +7090,8 @@ export default function MemberManagementPage() {
                           </div>
                         )}
                       </div>
-                    </div>
-
-
-                    {isSuperAdmin && (
-                      <DeceasedMemorialPanel
+                    </CompactRecord>{isSuperAdmin && (
+                      <CompactRecord as="section" alwaysCollapsible summary="Memorial Settings" detail="" className="mt-3 rounded-xl border border-neutral-800"><DeceasedMemorialPanel
                         fullName={member.full_name}
                         classes={classes.map(([id, name]) => ({ id, name }))}
                         draft={memorialDraft}
@@ -7133,13 +7107,8 @@ export default function MemberManagementPage() {
                         onPublishInitialMemorial={() =>
                           publishInitialMemorial(member)
                         }
-                      />
-                    )}
-
-
-                    {/* STATUS */}
-
-                    <div className="mt-6 border-t border-neutral-800 pt-5">
+                      /></CompactRecord>
+                    )}{/* STATUS */}<CompactRecord as="section" alwaysCollapsible summary="Member Status" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                       <p className="text-sm font-semibold uppercase tracking-wider text-neutral-400">
                         Membership Status
@@ -7233,8 +7202,7 @@ export default function MemberManagementPage() {
 
                       </div>
 
-                    </div>
-
+                    </CompactRecord></div></div>
                   </article>
                 );
               }

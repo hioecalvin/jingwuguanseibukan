@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { expandCompactRecords } from './compact-record-helpers';
 import * as XLSX from 'xlsx';
 
 import { test, expect } from './fixtures';
@@ -16,6 +17,7 @@ function workbookRows(downloadPath: string, sheetName: string) {
 test('Certificates exports the visible audit history as a real Excel download', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-certificates`);
   await expect(page.getByRole('heading', { name: 'Certificate History' })).toBeVisible();
+  await expandCompactRecords(page);
   await expect(page.getByText('JS-AIK-2026-0001', { exact: true })).toBeVisible();
 
   const downloadPromise = page.waitForEvent('download');
@@ -42,6 +44,7 @@ test('Certificates exports the visible audit history as a real Excel download', 
 test('Reports exports the visible official report history as a real Excel download', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-reports`);
   await expect(page.getByRole('heading', { name: 'Official Report History' })).toBeVisible();
+  await expandCompactRecords(page);
   await expect(page.getByText('JS-REPORT-2026-0001', { exact: true })).toBeVisible();
 
   const downloadPromise = page.waitForEvent('download');
@@ -68,6 +71,7 @@ test('Reports exports the visible official report history as a real Excel downlo
 test('Archive remains view-only and exposes its complete record without a download action', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-archive`);
   await expect(page.getByRole('heading', { name: 'Archive', exact: true })).toBeVisible();
+  await expandCompactRecords(page);
   await expect(page.getByText('JS-AIK-2026-0001', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /export|download/i })).toHaveCount(0);
 

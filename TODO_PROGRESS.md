@@ -1,6 +1,378 @@
 # Jingwuguan Seibukan production progress
 
-Last updated: 02/10/2026
+## 057–058 staging milestone — 5 October 2026 (supersedes pending gates below)
+
+- [x] Apply approved directory and dojo-scoped tier/assessment migrations to staging only.
+- [x] Exact 006–058 ledger; old directory unchanged; 13-table independent zero residue.
+- [x] Persisted rollback-contained privacy, tier, assessment, undo and role acceptance.
+- [x] Strict database verifier and all 12 protected-account security checks.
+- [x] Staging database lint: no schema errors.
+- [x] Type-check, 548 automated tests, lint, isolated production build, 232 browser tests.
+- [x] Refresh release/recovery chain contracts without relabelling historical evidence.
+- [ ] Deploy verified compact UI to staging and run host/guarded WebKit acceptance.
+- [ ] Refresh restore evidence for the changed migration chain before production.
+
+## Approved 057 staging gate — 5 October 2026
+
+- [x] Read-only strict security verifier; exact 006–056 ledger, v2 absent.
+- [x] Check real Admin 0002 scope: list access scoped, class-management helper
+  permits three other dojos; promotion read/write definitions use class-only guard.
+- [ ] Separate dojo-only promotion authorization correction and guarded tests;
+  additional live migration approval required. No member mutation attempted.
+- [ ] Apply approved 057 only after safety gates; UI deployment remains held.
+  No migration or deployment executed in this preflight.
+
+## Organisation-wide Member Directory — 5 October 2026, local only
+
+- [x] Compact Photo / Name / enrolled Class–Dojo–Rank / Instagram rows.
+- [x] One person per row, multiple enrolments together; preserve namesakes.
+- [x] Class/Dojo filters and Class–Dojo, Dojo–Class, Name sorting.
+- [x] Safe Instagram profile links and directory error/retry/empty states.
+- [x] Type-check, 544 automated tests, lint, isolated production-mode build,
+  228 local browser tests, diff-check and phone/desktop screenshot review.
+- [x] Prepare additive privacy-limited v2 RPC in supabase/pending/057 only;
+  leave the applied 006–056 chain and historic recovery evidence unchanged.
+- [ ] Approve/promote/apply 057 to staging; execute rollback-contained privacy,
+  role, catalog, exact-ledger, database-lint and independent zero-residue checks.
+- [ ] Deploy UI only after database acceptance; guarded staging/browser review.
+- [ ] Separately harden dojo-only Admin management (existing class-only scopes
+  can be broader); this public directory adds no management permissions.
+
+## Compact Member Lists — 5 October 2026, local only
+
+- [x] Small photo / JS Member ID / name / rank / dojo / last training row,
+  Promote button and current-status dropdown; responsive phone wrapping.
+- [x] Click Member ID to open contact details, rank history, subscription history
+  and official-record controls, preserving other management sections and drafts.
+- [x] Add lazy, membership-scoped read-only subscription/payment history with
+  pagination and retry; preserve existing mutation handlers and deceased guards.
+- [x] Type-check, 539 automated tests, lint, production-mode build and 208 local
+  browser tests passed. Desktop/mobile screenshots reviewed.
+- [ ] Staging release approval, guarded live query/role checks and phone review.
+
+## Promotion certificate layout — 5 October 2026, local only
+
+- [x] Detail order: Member ID, Promotion Date, Certificate No.; remove extra
+  printed detail rows and visible generator/timestamp footer.
+- [x] Authorized Signatory: Jingwuguan Seibukan Head. Keep class heading, logos,
+  QR and reprint notice; retain stored audit history and access boundaries.
+- [x] Actual-template sample PDF rendered, text checked and visually reviewed.
+- [x] Type-check, 539 tests, lint, production-mode build and 100 desktop/mobile
+  WebKit cases passed. No live acceptance or deployment claimed.
+- [ ] User design review and staging release approval.
+
+## Member detail refinement — 5 October 2026, local only
+
+- [x] Always-visible Date Joined / Rank Now / Last Training Session in one row.
+- [x] Last Grading, Next Promotion, Promote Member and records hidden until their
+  individual dropdown is opened, on mobile and desktop.
+- [x] Other member controls grouped into compact two-column dropdowns; preserve
+  permissions, server-derived recency and unsaved edits.
+- [x] Type-check, 538 tests, lint, production-mode build and 200 local browser
+  cases passed; mobile screenshot reviewed.
+- [ ] Staging release approval, guarded live tests and fresh physical iPhone review.
+
+## Latest milestone — compact all-role UI, local only, 5 October 2026
+
+- [x] Shared smaller mobile/tablet spacing and typography for authenticated roles.
+- [x] 46 expandable record/tool groups across 29 pages, concise summaries and
+  compact navigation buttons; desktop and print remain expanded.
+- [x] Keep draft inputs mounted, reveal invalid fields, preserve touch targets
+  and keep bulk-assessment candidates expanded initially.
+- [x] Add all-role dashboard/disclosure fixtures and update workflow tests to use
+  the same dropdown controls a person taps.
+- [x] Final type-check, 538 automated tests, lint, isolated production-mode build
+  and 196 local browser cases passed; representative mobile screenshots reviewed.
+- [ ] Commit/push/deploy the compact UI to staging after approval.
+- [ ] Run guarded live staging acceptance against that exact release.
+- [ ] Fresh physical iPhone compact-layout review; remaining device checks.
+
+No migration, provider configuration, production contact or delivery. This local
+UI work does not change the separate production-readiness blockers.
+
+## Latest milestone — mobile Sign out restored on staging, 5 October 2026
+
+- [x] Confirmed screenshot defect: desktop-only account menu left mobile without
+  Sign out. Added a mobile footer button and shared safe local-session logout.
+- [x] Release fix `fc5463a` pushed; exact Preview READY and staging alias verified.
+- [x] Type-check, 538 tests, lint, production-mode isolated build, 84 local WebKit
+  cases, 11 staging host probes and public staging-backend binding passed.
+- [x] Final d9f253c Ready Preview/alias verified. Guarded live desktop/tablet/mobile
+  role and sign-out acceptance: 27/27 passed, zero retries; 11 host probes passed.
+  First run exposed desktop menu click obstruction; corrected before final pass.
+- [x] User confirmed Menu > Sign out / signed-out /profile retest with "correct,
+  next" on 5 October (reported iPhone 17 / iOS 26.6). Narrow user-reported result,
+  not independently captured evidence or full physical Safari acceptance.
+- [ ] Physical iPhone Admin/Super Admin read-only role and logout checks.
+- [ ] Remaining physical Mac/iPad and wider production gates stay open.
+
+No production contact, deliveries, scheduler activation or account changes.
+
+Last updated: 04/10/2026
+
+## Latest milestone — corrected staging scheduler deployed, still disabled
+
+Cloudflare scheduler version `d1587e88-a448-4c82-8cac-b293797f0c23` deployed and
+read-back verified on 4 October at 11:12 UTC. Fixed a workerd redirect-mode defect
+found by real local runtime tests. 27/27 core/runtime/config checks pass; local
+SQLite overlap and restart persistence verified using fake responses only.
+ENABLED=false, no cron triggers/public URLs; both approved secrets retained.
+Healthchecks last verified paused; no worker call, email, alert or production contact.
+Supersedes older scaffold/not-deployed entries below. Workspace evidence is in
+`staging-readiness/email-scheduler`; application release HEAD remains `7471c44`.
+
+Still open: guarded live delivery/monitoring/scheduler evidence; recovery login
+using backup-era credentials; physical Safari testing (deferred, not passed);
+production target/secrets/bootstrap, final release/rollback review and authorized
+cutover. No numerical completion claim is derived from the passing local tests.
+
+## Latest preparation — scheduler implemented locally, still disabled
+
+Cloudflare Workers Free + Healthchecks.io Free selected. Local scheduler scaffold
+prepared under workspace `staging-readiness/email-scheduler`; 20 offline tests pass.
+Persistent overlap/duplicate guard; uncertain/unhealthy responses stop future runs
+pending reconciliation. No cron triggers, no enabled worker, no provider resources
+or secret uploads, no emails/alerts or live acceptance. Wrangler/local platform
+validation and separately approved provisioning/activation remain outstanding.
+The existing operational readiness gates are unchanged; this is not live evidence.
+
+## Latest audit — staging email database healthy; external operations unverified
+
+Approved read-only staging audit complete. Version inventory 006–056; no database
+scheduler (pg_cron/pg_net/http absent). Queue has one historical sent row and no
+pending/due/overdue/stuck/exhausted messages; RLS and worker browser-role restrictions
+verified. Local configuration shapes pass, but deployed/provider validity unknown.
+25 focused local tests pass. External scheduler, live monitoring and delivery remain
+unverified; identify the service/owner before separately approved configuration or
+delivery tests. Evidence `staging-email-audit-1791106030328`; sanitized workspace
+report `staging-readiness/STAGING_EMAIL_AUDIT_2026-10-04.md`. No workers, sends,
+settings changes, disposable resume, production or provider contact occurred.
+
+## Latest milestone — 537 local tests passed; Safari skipped for now
+
+User requested skipping physical Safari for now. Marked deferred, not passed;
+existing production gate remains enforced. Original-password recovery stays open.
+Fresh `npm test` passed TypeScript and 537/537 local tests, zero failures/skips.
+No live environment/provider contact, resume, password change, build/browser run,
+commit, push or deployment. Remaining release work needs live operational/recovery
+evidence and separately authorized production setup/cutover, not mock-test claims.
+
+## Latest offline milestone — local release checks passed
+
+At local HEAD `7471c44`, TypeScript, ESLint, 34 release-window/evidence-packet tests,
+8 physical-Safari evidence-validator tests and whitespace checks passed. No full
+build/application suite/browser/live CI rerun; no remote environment or credential
+contact. Preserved all existing dirty files. Password recovery remains unresolved,
+not waived or formally deferred; disposable was not resumed.
+Prepared `staging-readiness/PHYSICAL_SAFARI_HANDOFF.md` in the working workspace.
+Next hands-on gate needs staging access approval, exact deployment identification,
+and physical Mac/iPhone/iPad access. Preparation/tests do not certify device runs.
+
+## Latest result — corrected verifier reached password-validation blocker
+
+Disposable-only corrected retry passed stability/full DB preflight and captured
+103 tables, 21 catalog sections, 57 users/identities, zero sessions/refresh tokens.
+The corrected identity SQL passed the prior role-column issue, then the supported-
+bcrypt/password-match guard failed. Account-specific failure detail was not saved;
+do not claim which account failed or that all three were checked. Backup-era vs
+current saved credentials may differ, but that explanation remains unverified.
+No live login tests ran, no passwords changed, Auth never enabled. Disabled Auth
+and INACTIVE verified at 2026-10-04T02:06:19.107Z and pause independently reconfirmed.
+Evidence: `auth-acceptance-1791079240657/result.json` in protected recovery storage.
+Need backup-era credentials supplied securely or a decision to defer this gate.
+Any disposable reset needs new approval and cannot prove original-password recovery.
+No other project or delivery provider contacted; original evidence remains intact.
+
+## Latest result — database preflight passed; Auth verifier corrected
+
+Approved single retry on disposable `wtnonpldqvzipqmwgbru`: stability, pinned full
+database verification, no-job checks and baseline capture passed (103 tables,
+21 catalog sections, 57 users/identities, zero sessions/refresh tokens).
+The account query failed before Auth enablement/login. A runner-only bug referenced
+nonexistent profiles.role; corrected offline to use the existing Super Admin flag,
+dojo assignments and admin memberships. Added schema validation before secret
+loading and SQLSTATE-only diagnostics. Captured-schema validation and all 29 local
+tests pass; corrected hosted query has NOT been run. Protected test values were
+loaded in memory during the failed attempt, never logged or changed.
+Target Auth disabled and INACTIVE confirmed at 2026-10-04T01:52:55.059Z; evidence
+`auth-acceptance-1791078451683`. No account tests passed; no other project/provider
+contacted. Next requires approval for one corrected disposable-only retry, followed
+by Auth disablement and pause. Original backup and failed-attempt evidence retained.
+
+## Latest result — credential ACL fixed; database connection interrupted
+
+Exact staging env file is now owner-only, with unchanged contents independently
+verified. Only disposable `wtnonpldqvzipqmwgbru` was resumed. Its isolation passed,
+but SQL preflight was interrupted by an administrator-command connection termination
+and SSL closure; underlying cause remains unverified, not a proven data mismatch.
+No SECURITY_TEST values read by the runner, no Auth enablement or login tests.
+Auth disabled and INACTIVE verified at 2026-10-04T01:40:01.658Z. Evidence:
+`auth-acceptance-1791077907900/result.json` and
+`staging-env-acl-restriction-1791077635775.json` in the protected recovery directory.
+All source/failed-attempt evidence preserved; no passwords changed or other projects
+contacted. Added locally tested three-probe stability gate; all 27 helper tests pass.
+Hosted Auth acceptance remains OPEN. Future retry needs disposable-only resume,
+stability/preflight checks, three-account tests, Auth disablement and pause again.
+
+## Earlier result — Auth preflight blocked; disposable INACTIVE
+
+The approved password/refresh/logout run stopped before its Node runner started:
+the staging env file failed the owner-only ACL check (sandbox ownership and broad
+Windows group access). No test passwords read, no Auth enablement or login attempt,
+no password resets or data changes. Separate target-only quarantine confirmed Auth
+disabled and disposable `wtnonpldqvzipqmwgbru` INACTIVE at 2026-10-04T00:47:33Z.
+Protected evidence: `auth-acl-stop-quarantine-1791074853766.json` in the existing
+recovery evidence directory. All 25 local helper tests pass; live Auth acceptance
+remains OPEN. Database/Storage recovery success is not invalidated.
+Next requires approval to fix only the exact staging env file's ownership/ACL
+without changing values, resume only this disposable, test, disable Auth and pause
+again. No other project or delivery provider contacted; do not bypass the guard.
+
+## Latest preparation — hosted Auth recovery, 4 October 2026
+
+Prepared the disposable-only password-login/refresh/local-logout test plan and
+pure safety guards for restored test accounts 0101, 0002 and 0001. All 25 local
+recovery helper tests passed, including four new Auth guard tests. No live runner
+completed or live Auth acceptance executed; no remote project contact, credential
+read or configuration change occurred during this preparation. Existing staging
+magic-link runner remains unchanged and must not be used for this target.
+Live tests require explicit approval for temporary disposable password-provider
+enablement and protected test-credential reads. Keep signup/hooks/delivery off,
+restore disabled Auth, report expected Auth-only deltas, and pause the disposable
+afterward. No account reset or direct SQL cleanup. Plan is in workspace
+`staging-readiness/AUTH_RECOVERY_ACCEPTANCE_PLAN.md`. Database/Storage recovery
+success below remains valid; hosted Auth recovery is still OPEN.
+
+## Latest milestone — hosted Storage recovery PASSED, 4 October 2026
+
+Approved continuation succeeded on disposable `wtnonpldqvzipqmwgbru` only:
+two buckets and all six logos (3,412,943 bytes) restored without overwrites.
+Private and public download hashes match; anonymous private reads and insert
+were denied; listings empty/denied; bucket privacy, metadata, ownership and RLS
+checks passed. Video bucket remains empty/private with the approved disposable-
+only 50 MiB limit instead of the source 2 GiB. Backup and source plan unchanged.
+Independent database postflight and final platform isolation passed. Target is
+active/healthy with Auth providers disabled and no delivery workers. Evidence:
+`storage-restore-1791070301947`; original failure journal retained, separate
+continuation journal created. All 21 local helper tests pass. No other project or
+delivery provider contacted. Hosted Auth login/refresh/logout acceptance remains
+OPEN and needs a separately scoped outbound-safe test plan. Historical failure
+notes below do not describe the current successful Storage result.
+
+## Earlier Storage preparation and stopped attempt — 4 October 2026
+
+Live Storage attempt subsequently STOPPED and disposable target is confirmed
+INACTIVE. Database/data/catalog/security preflight passed. Private class-logos
+bucket creation was acknowledged; video bucket creation failed before any uploads.
+Source video-bucket limit (2 GiB) exceeds verified target global limit (50 MiB).
+Exact failed HTTP body was not retained; partial state needs read-only reconciliation
+after an approved resume. No files uploaded/overwritten; no automatic retry.
+Protected evidence: `storage-restore-1791069349580`. Local size-limit preflight and
+protected HTTP diagnostics added; five Storage tests pass. A documented disposable-
+only limit adjustment or deferral needs approval; full hosted Storage/Auth recovery
+remains OPEN. Production, staging, retired database and providers were untouched.
+
+All six backed-up files (3,412,943 bytes) passed authenticated extraction and
+individual SHA-256 verification. Exact dump/manifest metadata mappings match.
+The public class-logos bucket contains the six files; the private video-originals
+bucket is empty. No source Storage policies or ownership values were present.
+Four Storage helper tests pass. Protected plan: `storage-preparation-1791068719153`.
+No upload, remote configuration change or database mutation occurred this step.
+Next is scoped disposable-target Storage upload/download acceptance; hosted Auth
+acceptance remains separate because providers are deliberately disabled.
+
+## Latest milestone — managed recovery preflight, 3 October 2026
+
+Corrected persistent database restore PASSED on disposable
+`wtnonpldqvzipqmwgbru` only. Exactly one approved attempt committed successfully;
+fresh-connection verification passed for 383 rows/70 tables, 15 application
+catalog comparisons, exact 006–056 ledger, six sequence values, Auth triggers,
+privileges and database-security assertions. All 18 managed catalog datasets,
+Auth constraints/indexes and unrelated role settings remain preserved. Final
+platform isolation passed (Auth providers/hooks disabled, zero Edge Functions
+and secrets); target remains active and isolated. Evidence:
+`persistent-restore-1791024441642`. Original encrypted backup and failed-attempt
+evidence were preserved; a separate exclusive attempt-02 journal prevents replay.
+All 14 local helper tests pass. No staging/retired/production database or delivery
+provider was contacted. Storage bytes and hosted Auth/Storage API acceptance
+remain OPEN. Earlier pending-import and failure notes below are historical.
+
+Approved resume/read-only reconciliation PASSED. Only disposable
+`wtnonpldqvzipqmwgbru` was resumed and is now ACTIVE_HEALTHY with isolation
+verified before/after. All 18 catalog datasets and saved Auth/session/Storage,
+ledger-schema, trigger and role-setting baselines match exactly; fingerprint
+`566c81dda74befb0ed2f37728dc1f2c87e728af3a966207ea5fa6912ae263e94`.
+Auth constraints/indexes also match. Independent zero residue is now verified.
+Protected evidence: `read-only-reconciliation-1791021907586`. The import was NOT
+retried, its journal remains unchanged, and production/staging/retired databases
+were not contacted. Earlier quarantine/failure notes below are historical;
+persistent restore and hosted recovery acceptance remain open and require a new
+import decision. Local empty-array inventory-count handling was corrected without
+changing any remote isolation settings.
+
+Latest outcome: persistent restore attempt STOPPED before commit acknowledgement
+with a locally generated SQL syntax error. Independent verification failed too;
+neither persistent success nor a fresh full zero-residue check is claimed.
+Disposable `wtnonpldqvzipqmwgbru` was quarantined and independently confirmed
+INACTIVE through management inventory. The String.replace dollar-token defect
+is fixed locally; all 12 helper tests and runner syntax checking pass. The
+protected attempt journal, diagnostics and source backup are preserved. No
+automatic retry, staging/retired database contact, provider operation or
+production change occurred. Next: approve resuming only the disposable project
+for read-only baseline reconciliation before any new import decision. See the
+latest PROJECT_CHECKPOINT.md section. Earlier rehearsal milestones below remain
+historical; they do not establish persistent restore success.
+
+Expanded rollback rehearsal PASSED: all 383 copied rows across exactly 70 tables
+match semantically, including duplicate-row checks. The 15 catalog comparisons,
+exact ledger, six sequence counters and database-security assertions pass; the
+independent before/after baseline again proves zero residue. Eight local helper
+tests pass. Evidence is in protected `rollback-rehearsal-1791018511840`. Nothing
+is committed to the disposable database. Next is a separately guarded persistent
+restore with post-commit reconciliation, then Storage bytes and hosted Auth/Storage
+API acceptance. Staging, production and the retired database remain untouched.
+
+Rollback-only managed restore now PASSES on disposable `wtnonpldqvzipqmwgbru`:
+15 application catalog comparisons, exact 006–056 ledger, six sequence values,
+57 Auth users/identities, custom Auth triggers, defaults and database-security
+assertions. Independent before/after catalog/Auth/Storage/role baselines match
+exactly, proving zero residue. No restore is committed. Sequence-owner grants and
+the source JSON's bigint rounding limitation were explicitly reconciled against
+captured evidence; see PROJECT_CHECKPOINT.md. Full data equality is now verified
+by the expanded run above; persistent restore and managed Auth/Storage API
+acceptance are still outstanding.
+
+Follow-up verified exact Auth column/type/generated-flag compatibility (35 user
+columns and nine identity columns), generated 1,240 protected schema-only review
+entries and connected to the API-verified disposable endpoint in read-only mode
+with client TLS/hostname verification. The pooler's upstream SSL observation is
+recorded separately as false; no end-to-end TLS claim is made. Target remains empty.
+Required extension functions and insertion/schema privileges are present. Six Auth
+constraints and 19 indexes await comparison. Migration 047's authenticator account-
+access setting requires explicit restoration outside the public schema. No import
+or Auth/Storage recovery acceptance has run; source-origin avatar URLs also require
+target-only test guards. Four classifier tests pass. See PROJECT_CHECKPOINT.md.
+
+- [x] Verify disposable Singapore target is empty, PostgreSQL 17.11 and healthy.
+- [x] Disable/read back signup and email/phone/anonymous Auth providers; verify
+  no enabled other providers/hooks, Edge Functions/secrets or existing delivery jobs.
+  No custom SMTP sink exists; invite/reset/admin-email operations remain prohibited.
+- [x] Authenticate/decrypt the protected staging backup and inspect safe selected
+  archive entries, custom dump TOC and schema-only SQL without importing data.
+- [x] Classify all 1,866 TOC entries; four parser tests pass, including DEFAULT
+  regression. Identify three application Auth triggers and exact ledger objects.
+- [x] Capture target managed-column/trigger and extension compatibility metadata;
+  Supabase Vault 0.3.1 is available. Parallel review produced a guarded checklist.
+- [ ] Review selected SQL/dependencies, managed-column compatibility and exact
+  owner/ACL mapping; generate a reviewed staged restore allowlist.
+- [ ] Execute disposable-target import and Storage-byte recovery, then ledger,
+  catalog, Auth/Storage API, database-lint, role/security and isolation acceptance.
+- [ ] Quarantine the target after acceptance and remove only tracked scratch
+  plaintext while retaining encrypted source evidence.
+
+No restore, recovery acceptance, production deployment or cutover is claimed.
+Protected inspection scratch is retained with restricted ACLs. Staging and the
+paused old project were not changed. See PROJECT_CHECKPOINT.md for exact evidence.
 
 ## Current scope update — 2 October 2026
 
@@ -20,6 +392,28 @@ deployment, live migration or production contact.
 Scope-change verification passes TypeScript, 537/537 application/tooling tests,
 34/34 focused release-window/packet tests, ESLint, whitespace validation and both
 updated JSON templates. No web gate has been marked complete solely by this change.
+
+Remote follow-up: scope commit `7471c44` is pushed. GitHub Actions run
+`37002672716` completed successfully on its exact SHA with all five jobs passing
+(common, Chromium/Linux, Firefox/Linux, WebKit/Linux, WebKit/macOS). No alias
+assignment or production action occurred; Preview readiness was not verified.
+This result does not close the physical Safari or operational release gates.
+
+Approved recovery-source refresh completed on 2 October: the protected encrypted
+package now captures the exact 006–056 ledger, database/Auth/Storage metadata,
+roles, 4,151 catalog objects and six Storage objects. Authenticated decryption and
+byte-for-byte archive verification passed; temporary plaintext was removed and the
+September archives remain unchanged. See PROJECT_CHECKPOINT.md for hashes and the
+protected folder. This supersedes the old 006–055 source-backup limitation, not the
+still-open managed Supabase restore or hosted configuration/provider recovery gates.
+
+Recovery capacity blocker cleared with explicit user approval: old `js-repository`
+(`pkmllhaavadhaozmwapz`) is now paused (`INACTIVE`), not deleted. New disposable
+Singapore target `js-recovery-rehearsal-20261002` (`wtnonpldqvzipqmwgbru`) is
+`ACTIVE_HEALTHY`; staging remains healthy and the organization remains Free.
+This is not production and has not received a restore. Verify outbound isolation
+and the empty-target baseline before the managed recovery rehearsal. Older capacity
+blockers below are historical; no production/domain cutover has been authorized.
 
 ## Release status
 

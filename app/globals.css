@@ -55,6 +55,95 @@ body:has(dialog[data-mobile-navigation][open]) {
   overflow: hidden;
 }
 
+/* A single responsive density system for every authenticated role. Keep public
+   authentication screens, PDF layouts and video aspect ratios unchanged. */
+.compact-record-toggle { display: none; }
+.compact-record-body { display: contents; }
+.app-compact :where(.text-neutral-500, .text-zinc-500) { color: #a3a3a3; }
+
+@media (max-width: 63.999rem) {
+  .app-compact #main-content { padding: 1rem; }
+  .app-compact h1 { font-size: 1.5rem; line-height: 1.3; }
+  .app-compact h2 { font-size: 1.125rem; line-height: 1.4; }
+  .app-compact h3 { font-size: 1rem; line-height: 1.4; }
+  .app-compact :where(.p-5, .p-6, .p-8, .p-10) { padding: 0.875rem; }
+  .app-compact :where(.mt-6, .mt-8, .mt-10, .mt-12) { margin-top: 1rem; }
+  .app-compact :where(.pb-7, .pb-8) { padding-bottom: 1rem; }
+  .app-compact :where(.gap-4, .gap-5, .gap-6, .gap-8) { gap: 0.75rem; }
+  .app-compact :where(.rounded-2xl, .rounded-3xl) { border-radius: 0.75rem; }
+  .app-compact :where(button, select, summary) { min-height: 44px; }
+  /* 16px form text avoids automatic input zoom on iPhone. */
+  .app-compact :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])),
+  .app-compact :where(select, textarea) { font-size: 1rem; min-height: 44px; }
+  .app-compact :where(th, td) { padding: 0.625rem; }
+  .app-compact :where(h1, h2, h3) { overflow-wrap: anywhere; }
+  .app-compact :where(.tracking-\[0\.2em\]) { letter-spacing: 0.08em; }
+
+  .compact-record { padding: 0; overflow: visible; }
+  .app-compact section.compact-record {
+    border: 1px solid #262626; border-radius: 0.75rem; background: #171717;
+  }
+  .compact-record-toggle {
+    display: flex; align-items: center; gap: 0.75rem; width: 100%;
+    min-height: 56px; padding: 0.75rem; border-radius: 0.75rem;
+    text-align: left; font-size: 0.875rem; cursor: pointer;
+  }
+  .compact-record-toggle:hover { background: rgb(255 255 255 / 0.04); }
+  .compact-record-body { display: none; }
+  .compact-record[data-expanded="true"] > .compact-record-body {
+    display: block; padding: 0.875rem; border-top: 1px solid #404040;
+  }
+  .app-compact .compact-action {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center; gap: 0.25rem 0.75rem; padding: 0.75rem;
+  }
+  .app-compact .compact-action > h3 { margin: 0; }
+  .app-compact .compact-action > p { margin: 0; line-height: 1.4; }
+  .app-compact .compact-action > p:first-child { font-size: 0.625rem; }
+  .app-compact .compact-action > p { grid-column: 1; }
+  .app-compact .compact-action > div { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
+  .app-compact .compact-action > div > span:first-child { display: none; }
+}
+
+.compact-record-always { padding: 0; }
+.compact-record-always > .compact-record-toggle {
+  display: flex; align-items: center; gap: 0.75rem; width: 100%;
+  min-height: 44px; padding: 0.75rem; border-radius: 0.75rem;
+  text-align: left; font-size: 0.875rem; cursor: pointer;
+}
+.compact-record-always > .compact-record-body { display: none; }
+.compact-record-always[data-expanded="true"] > .compact-record-body {
+  display: block; padding: 0.875rem; border-top: 1px solid #404040;
+}
+.member-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.member-overview > div { min-width: 0; overflow-wrap: anywhere; }
+.member-overview dt { color: #a3a3a3; font-size: 0.75rem; min-height: 2.5em; }
+.member-overview dd { margin-top: 0.25rem; font-size: 0.875rem; font-weight: 600; }
+.member-detail-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.member-detail-sections > .compact-record { margin-top: 0; min-width: 0; }
+.member-detail-sections > .compact-record[data-expanded="true"] { grid-column: 1 / -1; }
+.member-list-item { padding: 0; }
+.member-list-row { display: grid; grid-template-columns: 36px minmax(5rem, .7fr) minmax(8rem, 1.3fr) minmax(5rem, .7fr) minmax(6rem, 1fr) minmax(6rem, 1fr) minmax(9rem, 1fr); gap: 0.75rem; align-items: center; padding: 0.75rem; font-size: 0.875rem; }
+.member-list-row > div { min-width: 0; overflow-wrap: anywhere; }
+.member-list-row h2 { font-size: 0.875rem; }
+.member-list-photo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; background: #262626; }
+.member-list-label { display: block; font-size: 0.75rem; color: #a3a3a3; margin-bottom: 0.25rem; }
+.member-id-button { min-height: 44px; color: #7dd3fc; text-decoration: underline; font-weight: 600; text-align: left; }
+.member-list-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+.member-expanded-panel { padding: 1rem; border-top: 1px solid #404040; }
+.member-expanded-panel[hidden] { display: none; }
+@media (max-width: 63.999rem) {
+  .member-list-row { grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1.5fr); gap: 0.625rem; }
+  .member-list-row > div:nth-child(4) { grid-column: 1 / 3; }
+  .member-list-row > div:nth-child(6) { grid-column: 1 / 3; }
+  .member-list-actions { grid-column: 3; grid-row: 3 / span 2; }
+}
+
+@media print {
+  .compact-record-toggle { display: none !important; }
+  .compact-record-body { display: contents !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;

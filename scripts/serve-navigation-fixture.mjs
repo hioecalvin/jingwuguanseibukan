@@ -25,6 +25,8 @@ async function bundleFixture(entry, supabaseFixture) {
   });
 }
 const navigationBundle = await bundleFixture('navigation.tsx', 'supabase.ts');
+const dashboardBundle = await bundleFixture('dashboard.tsx', 'dashboard-supabase.ts');
+const directoryBundle = await bundleFixture('member-directory.tsx', 'member-directory-supabase.ts');
 const enrollmentBundle = await bundleFixture('enrollment.tsx', 'enrollment-supabase.ts');
 const adminExportsBundle = await bundleFixture('admin-exports.tsx', 'admin-exports-supabase.ts');
 const adminSchedulesBundle = await bundleFixture('admin-schedules.tsx', 'admin-schedules-supabase.ts');
@@ -36,6 +38,8 @@ const adminPaymentReviewBundle = await bundleFixture('admin-payment-review.tsx',
 const adminSettlementsBundle = await bundleFixture('admin-settlements.tsx', 'admin-settlements-supabase.ts');
 const profileContactBundle = await bundleFixture('profile-contact.tsx', 'profile-contact-supabase.ts');
 const assets = new Map([
+  ['/directory-fixture.js', { type: 'text/javascript', data: directoryBundle.outputFiles[0].contents }],
+  ['/dashboard-fixture.js', { type: 'text/javascript', data: dashboardBundle.outputFiles[0].contents }],
   ['/fixture.js', { type: 'text/javascript', data: navigationBundle.outputFiles[0].contents }],
   ['/enrollment-fixture.js', { type: 'text/javascript', data: enrollmentBundle.outputFiles[0].contents }],
   ['/admin-exports-fixture.js', { type: 'text/javascript', data: adminExportsBundle.outputFiles[0].contents }],
@@ -58,6 +62,8 @@ function collectCss(directory) {
 collectCss(path.join(root, BROWSER_SMOKE_DIST_DIR, 'static'));
 const cssLinks = [...assets.keys()].filter(name => name.endsWith('.css')).map(name => `<link rel="stylesheet" href="${name}">`).join('');
 function fixtureHtml(pathname) {
+  if (pathname === '/directory-fixture') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Directory fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/directory-fixture.js"></script></body></html>`;
+  if (pathname === '/dashboard-fixture') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/dashboard-fixture.js"></script></body></html>`;
   const enrollment = pathname === '/enrollment';
   const adminSchedules = pathname === '/admin-schedules';
   const adminAssessments = pathname === '/admin-assessments';

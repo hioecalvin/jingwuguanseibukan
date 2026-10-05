@@ -105,6 +105,8 @@ test('Admin 0002 corrects Member 0101 then marks the same membership trained tod
 
     const member = page.getByRole('article').filter({ hasText: `Member ID: ${fixture.memberNumber}` });
     await expect(member).toHaveCount(1);
+    await member.getByRole('button', { name: /^Member ID / }).click();
+    await member.getByRole('button', { name: 'Update Training Session', exact: true }).click();
     const correction = member.getByLabel('Correct or backdate the session');
     await correction.fill(fixture.correctionDate);
     await member.getByRole('button', { name: 'Save Date Correction', exact: true }).click();

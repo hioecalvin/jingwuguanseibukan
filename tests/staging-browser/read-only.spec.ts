@@ -89,6 +89,15 @@ test('Member can load their profile and is denied Admin access', async ({ page, 
   await page.goto('/directory');
   await expect(page.getByRole('heading', { name: 'Member Directory' })).toBeVisible();
   await expect(page.getByText('Loading directory...', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.locator('.directory-member').first()).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Class', exact: true })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Dojo', exact: true })).toBeVisible();
+  await page.getByRole('combobox', { name: 'Sort by', exact: true }).selectOption('name');
+  for (const row of await page.locator('.directory-member').all()) {
+    await expect(row).not.toContainText(/Member ID|Date of Birth|Last Training|Subscription History/i);
+    await expect(row.getByRole('button')).toHaveCount(0);
+  }
 
   await expect(page.getByRole('link', { name: 'Repository Upload', exact: true })).toHaveCount(0);
   await page.goto('/admin');
@@ -105,6 +114,9 @@ test('scoped Admin sees only Aikido members and is denied Super Admin pages', as
   const cardCount = await cards.count();
   expect(cardCount).toBeGreaterThan(0);
   for (let index = 0; index < cardCount; index++) {
+    const toggle = cards.nth(index).getByRole('button', { name: /^Member ID / });
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await toggle.click();
     const classDetail = cards.nth(index).locator('p').filter({ hasText: /^\s*Class:\s*/ });
     await expect(classDetail).toHaveText(/^\s*Class:\s*Aikido\s*$/);
   }
@@ -135,6 +147,10 @@ test('Super Admin can load applications and assessments without mutating them', 
 
   await page.goto('/admin/settlements');
   await expect(page.getByRole('heading', { name: 'Dojo Settlements' })).toBeVisible();
+  if (page.viewportSize()!.width < 1024) {
+    const settlementToggle = page.locator('section.compact-record > .compact-record-toggle').first();
+    if (await settlementToggle.count()) await settlementToggle.click();
+  }
   const firstSettlementDetails = page.getByRole('button', { name: 'View Payments', exact: true }).first();
   if (await firstSettlementDetails.count()) {
     await firstSettlementDetails.click();

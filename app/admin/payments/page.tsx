@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -759,7 +761,8 @@ export default function AdminPaymentsPage() {
                 const rejecting = rejectingId === item.confirmation_id;
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{item.member_name}</>}
+                    detail={<>{formatMoney(item.transferred_amount, item.currency)} · {statusLabel(item.status)} · {item.class_name}</>}
                     key={item.confirmation_id}
                     className="rounded-2xl border border-amber-900/70 bg-neutral-900 p-6"
                   >
@@ -886,7 +889,7 @@ export default function AdminPaymentsPage() {
                         </div>
                       </div>
                     )}
-                  </article>
+                  </CompactRecord>
                 );
               })}
             </div>

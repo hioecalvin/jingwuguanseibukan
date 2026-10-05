@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useEffect,
   useMemo,
@@ -843,7 +845,7 @@ export default function AdminDashboardPage() {
        * MANAGEMENT
        */}
 
-      <section
+      <CompactRecord summary={<>Management</>} detail={`${managementCards.length} tools · members, schedules & payments`} as="section"
         className="
           mt-10
         "
@@ -923,14 +925,14 @@ export default function AdminDashboardPage() {
             )
           )}
         </div>
-      </section>
+      </CompactRecord>
 
       {/*
        * SUPER ADMIN
        */}
 
       {isSuperAdmin && (
-        <section
+        <CompactRecord summary={<>Organisation Management</>} detail={`${superAdminCards.length} Super Admin tools`} as="section"
           className="
             mt-12
           "
@@ -1004,7 +1006,7 @@ export default function AdminDashboardPage() {
               )
             )}
           </div>
-        </section>
+        </CompactRecord>
       )}
 
       {/*
@@ -1075,6 +1077,7 @@ function AdminCardButton({
 
       className={`
         group
+        compact-action
         rounded-2xl
         border
         p-6

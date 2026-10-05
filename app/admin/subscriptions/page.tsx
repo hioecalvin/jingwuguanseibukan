@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useEffect,
   useMemo,
@@ -3763,7 +3765,10 @@ export default function SubscriptionPage() {
 
           <section className="mt-6 space-y-6">
 
-            <article className="rounded-2xl border border-purple-900 bg-purple-950/10 p-6">
+            <CompactRecord summary={<>{selectedDojo
+                  ?.name ??
+                  "Dojo"}{" "}
+                Subscription Fee</>} className="rounded-2xl border border-purple-900 bg-purple-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                 Regular Rate
@@ -3875,10 +3880,10 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Member Special Rates</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -4200,7 +4205,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -4216,7 +4221,7 @@ export default function SubscriptionPage() {
 
           <section className="mt-6 space-y-5">
 
-            <article className="rounded-2xl border border-sky-900 bg-sky-950/10 p-6">
+            <CompactRecord summary={<>Member Transfer Destination</>} className="rounded-2xl border border-sky-900 bg-sky-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                 Receiving Account
@@ -4341,10 +4346,12 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-green-900 bg-green-950/10 p-6">
+            <CompactRecord summary={<>{formatMonth(
+                  billingMonth
+                )} Charges</>} className="rounded-2xl border border-green-900 bg-green-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-green-400">
                 Monthly Billing
@@ -4408,10 +4415,10 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Member Payments</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <h2 className="text-2xl font-bold">
                 Member Payments
@@ -4751,7 +4758,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -4767,7 +4774,7 @@ export default function SubscriptionPage() {
 
           <section className="mt-6">
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Payment Confirmations</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -5027,7 +5034,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -5079,7 +5086,9 @@ export default function SubscriptionPage() {
             </div>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>{selectedDojo
+                      ?.name ??
+                      "Dojo"}</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
@@ -5290,7 +5299,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 

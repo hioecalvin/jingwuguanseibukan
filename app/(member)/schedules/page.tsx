@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useEffect, useMemo, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -163,7 +165,7 @@ export default function SchedulesPage() {
 
               <div className="divide-y divide-neutral-800">
                 {group.rows.map((row) => (
-                  <article key={row.schedule_id} className="space-y-3 px-5 py-4">
+                  <CompactRecord summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)}</>} detail={<>{row.class_name} · {row.dojo_name}</>} key={row.schedule_id} className="space-y-3 px-5 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="font-semibold text-white">
@@ -192,7 +194,7 @@ export default function SchedulesPage() {
                     </dl>
 
                     {row.notes && <p className="text-sm leading-6 text-neutral-400">{row.notes}</p>}
-                  </article>
+                  </CompactRecord>
                 ))}
               </div>
             </section>

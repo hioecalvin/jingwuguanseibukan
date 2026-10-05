@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
@@ -789,7 +791,7 @@ export default function BulkAssessmentsPage() {
           if (!decision) return null;
           const controlPrefix = `candidate-${candidate.membership_id}`;
           return (
-            <article key={candidate.membership_id} className={`rounded-2xl border p-4 sm:p-5 ${decision.included ? "border-amber-700 bg-amber-950/10" : "border-neutral-800 bg-neutral-900/50"}`}>
+            <CompactRecord summary={<>{candidate.full_name}</>} defaultExpanded detail={<>{candidate.dojo_name ?? "No dojo"} · {decision.included ? decision.outcome : "Not included"}</>} key={candidate.membership_id} className={`rounded-2xl border p-4 sm:p-5 ${decision.included ? "border-amber-700 bg-amber-950/10" : "border-neutral-800 bg-neutral-900/50"}`}>
               <div className="grid gap-5 xl:grid-cols-[minmax(15rem,1.2fr)_minmax(12rem,1fr)_minmax(14rem,1.2fr)]">
                 <div className="flex items-start gap-3">
                   {candidate.avatar_url ? (
@@ -867,7 +869,7 @@ export default function BulkAssessmentsPage() {
                   </label>
                 </div>
               </div>
-            </article>
+            </CompactRecord>
           );
         })}
       </section>

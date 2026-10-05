@@ -27,6 +27,7 @@ const READ_ONLY_RPCS = new Set([
   "get_membership_grade_history_with_assessor",
   "get_membership_title_history",
   "get_my_member_directory",
+  "get_my_member_directory_v2",
   "get_my_repository_upload_scopes",
   "get_my_last_training_sessions",
   "get_my_available_class_enrollments",

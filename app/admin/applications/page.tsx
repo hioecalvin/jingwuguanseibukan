@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { exportToExcel } from "@/lib/exportExcel";
@@ -527,7 +529,7 @@ export default function ApplicationsPage() {
                 processingId !== null && !isProcessing;
 
               return (
-                <article
+                <CompactRecord summary={<>{application.full_name ?? "Unknown Member"}</>}
                   key={application.request_id}
                   className="
                     overflow-hidden
@@ -745,7 +747,7 @@ export default function ApplicationsPage() {
                       </div>
                     </div>
                   </div>
-                </article>
+                </CompactRecord>
               );
             })}
           </div>

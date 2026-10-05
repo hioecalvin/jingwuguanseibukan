@@ -1,6 +1,8 @@
 // app/admin/settlements/page.tsx
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -890,7 +892,7 @@ export default function AdminSettlementsPage() {
                 s.transfer_amount != null;
 
               return (
-                <section
+                <CompactRecord as="section" summary={<>{monthLabel(s.settlement_month)} · {s.dojo_name}</>} detail={s.status}
                   key={s.settlement_id}
                   className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60"
                 >
@@ -1342,7 +1344,7 @@ export default function AdminSettlementsPage() {
                       </div>
                     )}
                   </div>
-                </section>
+                </CompactRecord>
               );
             })
           )}

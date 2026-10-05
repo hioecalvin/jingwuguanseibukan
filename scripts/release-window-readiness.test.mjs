@@ -126,7 +126,7 @@ function validManifest(overrides = {}) {
         commitSha: RELEASE_SHA,
         deploymentId: "dpl_release_candidate",
         origin: "https://jingwuguanseibukan.com",
-        migrationLedger: "006-056",
+        migrationLedger: "006-058",
         policy: "jingwuguan-production-cutover-v1",
       },
       providerDelivery: {

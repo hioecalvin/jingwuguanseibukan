@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   ChangeEvent,
   useCallback,
@@ -1188,7 +1190,9 @@ export default function ClassManagementPage() {
                 classRecord.id;
 
               return (
-                <article
+                <CompactRecord summary={<>{
+                            classRecord.name
+                          }</>}
                   key={
                     classRecord.id
                   }
@@ -1566,7 +1570,7 @@ export default function ClassManagementPage() {
 
                   </div>
 
-                </article>
+                </CompactRecord>
               );
             }
           )}

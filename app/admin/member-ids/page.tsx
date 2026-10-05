@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -234,7 +236,7 @@ export default function MemberIdManagementPage() {
             const processing = processingId === profile.id;
 
             return (
-              <article
+              <CompactRecord summary={<>{profile.full_name}</>}
                 key={profile.id}
                 className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
               >
@@ -292,7 +294,7 @@ export default function MemberIdManagementPage() {
                       : "Assign Member ID"}
                   </button>
                 </div>
-              </article>
+              </CompactRecord>
             );
           })}
         </section>

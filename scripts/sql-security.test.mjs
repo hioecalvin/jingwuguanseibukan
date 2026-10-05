@@ -236,6 +236,8 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_bulk_assessment_candidates",
     "get_manageable_schedule_scopes",
     "get_my_member_directory",
+    // Prepared in supabase/pending/057; do not deploy the UI before acceptance.
+    "get_my_member_directory_v2",
     "get_my_repository_upload_scopes",
     "get_member_memorial_settings",
     "get_repository_uploader_candidates",

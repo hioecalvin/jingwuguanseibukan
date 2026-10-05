@@ -56,16 +56,16 @@ test("directory is RPC-only and available to every signed-in application role", 
   assert.match(migration, /security definer[\s\S]*set search_path to public, pg_temp/i);
   assert.match(migration, /revoke all[\s\S]*get_my_member_directory\(\)[\s\S]*from public, anon, authenticated, service_role/i);
   assert.match(migration, /grant execute[\s\S]*get_my_member_directory\(\)[\s\S]*to authenticated, service_role/i);
-  assert.match(page, /\.rpc\(\s*"get_my_member_directory"/);
+  assert.match(page, /\.rpc\(\s*"get_my_member_directory_v2"/);
   assert.match(navigation, /label: "Directory"[\s\S]*href: "\/directory"[\s\S]*"member"[\s\S]*"admin"[\s\S]*"super_admin"/);
 });
 
 test("directory UI displays only class, photo, name, rank, dojo and optional Instagram", () => {
   assert.match(page, /member\.avatar_url/);
   assert.match(page, /member\.full_name/);
-  assert.match(page, /member\.current_rank/);
-  assert.match(page, /member\.home_dojo/);
+  assert.match(page, /entry\.current_rank/);
+  assert.match(page, /entry\.home_dojo/);
   assert.match(page, /member\.instagram_username/);
-  assert.match(page, /member\.class_name/);
+  assert.match(page, /entry\.class_name/);
   assert.doesNotMatch(page, /member\.(?:email|phone|date_of_birth|registration_number|membership_status|payment|attendance)/);
 });

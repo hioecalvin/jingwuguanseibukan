@@ -364,7 +364,7 @@ export function evaluateReleaseWindow(
       release,
     });
     if (productionCutover.origin !== PRODUCTION_ORIGIN) add(blockers, "gateEvidence.productionCutover.origin", `must equal ${PRODUCTION_ORIGIN}`);
-    if (productionCutover.migrationLedger !== "006-056") add(blockers, "gateEvidence.productionCutover.migrationLedger", "must equal 006-056");
+    if (productionCutover.migrationLedger !== "006-058") add(blockers, "gateEvidence.productionCutover.migrationLedger", "must equal 006-058");
     if (productionCutover.policy !== PRODUCTION_CUTOVER_POLICY) add(blockers, "gateEvidence.productionCutover.policy", `must equal ${PRODUCTION_CUTOVER_POLICY}`);
   }
 
