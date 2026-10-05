@@ -48,6 +48,8 @@ export default function AppShell({
         <div className="min-w-0 flex-1">
           <header
             className="
+              relative
+              z-30
               hidden
               h-16
               items-center

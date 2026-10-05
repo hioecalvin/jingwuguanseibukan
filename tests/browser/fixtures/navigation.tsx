@@ -9,10 +9,13 @@ function NavigationFixture() {
   const [activated, setActivated] = useState(false);
   return (
   <AppShell role={role} memberName="Fixture Member" memberId="FIXTURE-001">
+    {/* Exercise account-menu hit testing above positioned page content. */}
+    <div className="relative z-10 min-h-64">
     <h1 className="text-2xl font-semibold">Navigation component fixture</h1>
     <p className="mt-4 text-neutral-300">Fictional presentation only. No authentication or database access.</p>
     <button type="button" onClick={() => setActivated(true)} className="mt-4 rounded-lg border border-neutral-600 px-4 py-3">Content action</button>
     {activated && <p role="status">Content action activated</p>}
+    </div>
   </AppShell>
   );
 }
