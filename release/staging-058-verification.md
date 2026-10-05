@@ -57,6 +57,30 @@ Npm reports five high findings along this dependency chain. Its forced fix would
 downgrade eslint-config-next to 14.2.35; that breaking downgrade was not performed.
 No audit exceptions, gate suppression, or CI success claims were made.
 
+### Published-fix review — 5 October 2026
+
+Rechecked the npm registry and installed dependency graph after browser acceptance:
+
+- Latest `braces` is still 3.0.3; no patched release is listed in the advisory.
+- Latest `eslint-config-next` and `@next/eslint-plugin-next` are 16.3.8, already
+  installed. The plugin still pins `fast-glob` to 3.3.1.
+- Latest `fast-glob` 3.3.3 still depends on `micromatch ^4.0.8`, so overriding
+  fast-glob alone would not remove the affected dependency.
+- `npm ls braces --all` shows only the development ESLint dependency chain.
+- The installed Next plugin calls fast-glob from `getRootDirs` only for an
+  explicitly configured `settings.next.rootDir` string/array. This repository
+  does not configure that setting. This lowers exposure through the reviewed
+  path; it is not proof that the dependency is patched or universally unreachable.
+- Repeated production-only audit: zero findings. Repeated complete audit: five
+  high findings along the same chain, and the same breaking downgrade suggestion.
+
+No dependencies, lint rules, CI workflow, deployment or database changed in this
+review. No production/provider contact. A temporary advisory-specific development
+exception would change the release security policy and requires explicit owner
+approval, an expiry, and continued failure on every other high/critical advisory.
+Until then the full audit remains blocking. Do not use `npm audit fix --force`,
+silently omit the full audit, or relabel this as a successful CI run.
+
 ## Boundaries and follow-up
 
 Production, retired and disposable projects were not contacted. No schedulers,

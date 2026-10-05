@@ -1,5 +1,17 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Owner-approved temporary CI exception — 5 October 2026
+
+User explicitly approved a 14-day development-only exception for
+GHSA-vfj7-8cjw-p6xm. Implemented a fail-closed audit policy with exact advisory,
+dependency chain, version, dev-only lockfile node and severity checks. It expires
+2026-10-19 at 11:09:49 UTC. Other high/critical findings, audit errors, production
+and desktop uploader audits remain blocking. No dependency downgrade or app/DB
+change. Thirteen policy tests and the live policy/strict production audits passed.
+Full local validation passed: ESLint, type-check, and 561 automated tests.
+Remote CI completion is still pending; historical
+failed CI below is not reclassified as success. See release/development-audit-exception.md.
+
 ## Directory and tier/assessment boundary — 5 October 2026 (staging deployed and accepted)
 
 Supersedes the historical 057 stop gate below. User approved running the clarified

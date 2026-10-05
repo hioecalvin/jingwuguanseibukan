@@ -21,7 +21,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Audit complete dependency tree
-        run: npm audit --audit-level=high
+        # Owner-approved dev-only advisory exception expires 2026-10-19 11:09:49 UTC.
+        # All other high/critical findings and audit errors remain blocking.
+        run: npm run audit:dependencies
       - name: Audit production dependency tree
         run: npm audit --omit=dev --audit-level=high
       - run: npm run lint

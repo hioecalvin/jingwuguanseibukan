@@ -1,5 +1,14 @@
 # Jingwuguan Seibukan production progress
 
+## Approved CI advisory exception — 5 October 2026
+
+- [x] Explicit owner approval; exact development-only advisory exception.
+- [x] Automatic expiry 2026-10-19 11:09:49 UTC; no blanket high/critical bypass.
+- [x] Thirteen policy safety tests; live audit policy and strict production audit passed.
+- [x] ESLint, type-check and all 561 automated tests passed locally.
+- [ ] Fresh GitHub CI completion for this policy commit.
+- [ ] Remove exception after compatible remediation; no automatic extension.
+
 ## 057–058 staging milestone — 5 October 2026 (supersedes pending gates below)
 
 - [x] Apply approved directory and dojo-scoped tier/assessment migrations to staging only.
@@ -12,6 +21,9 @@
 - [x] Deploy 8143a20 to staging Preview; verify staging-only alias and backend.
 - [x] All 11 host probes; 27 WebKit cases accepted (24 initial + 3 corrected-selector reruns).
 - [ ] Resolve development-only braces advisory blocking GitHub CI; no audit bypass.
+- [x] Check published fixes: latest Next ESLint still affected; newer fast-glob
+  retains the vulnerable chain. Production-only audit remains clean. Temporary
+  advisory-specific CI exception requires owner decision; no policy changed.
 - [ ] Refresh restore evidence for the changed migration chain before production.
 
 ## Approved 057 staging gate — 5 October 2026
