@@ -9,7 +9,9 @@
 - [x] Staging database lint: no schema errors.
 - [x] Type-check, 548 automated tests, lint, isolated production build, 232 browser tests.
 - [x] Refresh release/recovery chain contracts without relabelling historical evidence.
-- [ ] Deploy verified compact UI to staging and run host/guarded WebKit acceptance.
+- [x] Deploy 8143a20 to staging Preview; verify staging-only alias and backend.
+- [x] All 11 host probes; 27 WebKit cases accepted (24 initial + 3 corrected-selector reruns).
+- [ ] Resolve development-only braces advisory blocking GitHub CI; no audit bypass.
 - [ ] Refresh restore evidence for the changed migration chain before production.
 
 ## Approved 057 staging gate — 5 October 2026

@@ -1,6 +1,6 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
-## Directory and tier/assessment boundary — 5 October 2026 (staging database verified)
+## Directory and tier/assessment boundary — 5 October 2026 (staging deployed and accepted)
 
 Supersedes the historical 057 stop gate below. User approved running the clarified
 dojo-scoped tier-only change and updating staging. Migrations 057 and 058 were
@@ -16,8 +16,22 @@ tables matched before and after; no test rows or test promotions persisted.
 Strict read-only database verifier and all 12 protected-account role-security
 checks passed. Staging database lint completed with no schema errors. Local
 type-check, 548 automated tests, ESLint, isolated production
-build and 232 WebKit/Chromium browser checks passed. Hosted UI deployment and
-post-deployment acceptance are the remaining steps for this milestone.
+build and 232 WebKit/Chromium browser checks passed. Release commit 8143a20 is
+deployed as READY Preview dpl_9SmayAxT3GgDyHLP68EGtssLSzcP; only
+jingwuguanseibukan-staging.vercel.app was reassigned. All 11 host probes passed
+and the public bundle binds only to the expected staging backend.
+
+All 27 guarded live WebKit cases now have passing evidence: 24 passed initially;
+three Member cases initially failed because the test counted Next.js's empty
+route-announcer alert outside main as an error. After scoping the assertion to
+directory errors inside main, all three passed on desktop/tablet/mobile (46.6s).
+No application or role guard was weakened; the follow-up commit changes tests
+and documentation only and does not require an application redeployment.
+
+CI is NOT green: GitHub run 37299562571 stopped at the development dependency
+audit (braces@3.0.3, GHSA-vfj7-8cjw-p6xm; no patched version listed).
+Production dependency audit reports zero vulnerabilities. No audit bypass or
+forced ESLint downgrade was performed. See release/staging-058-verification.md.
 
 Release/recovery templates now require 006–058 and fingerprint
 `a412432bedf7c95578e7ebfb83317987c1d4350d19121fe533007a1967b26ffd`.

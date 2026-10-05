@@ -89,7 +89,9 @@ test('Member can load their profile and is denied Admin access', async ({ page, 
   await page.goto('/directory');
   await expect(page.getByRole('heading', { name: 'Member Directory' })).toBeVisible();
   await expect(page.getByText('Loading directory...', { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  // Next.js also mounts an empty route-announcer alert outside main. Check
+  // directory errors, not that framework accessibility live region.
+  await expect(page.locator('main [role="alert"]')).toHaveCount(0);
   await expect(page.locator('.directory-member').first()).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'Class', exact: true })).toBeVisible();
   await expect(page.getByRole('combobox', { name: 'Dojo', exact: true })).toBeVisible();
