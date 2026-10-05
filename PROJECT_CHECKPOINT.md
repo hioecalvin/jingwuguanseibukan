@@ -1,5 +1,28 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Full remote CI passed — verified 6 October 2026 (Sydney)
+
+GitHub run 37301928136 completed SUCCESS for release commit
+`bc481bf34e9d3160a3796c0c4b25d96402a29a49`. Independently read back all five jobs:
+checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS, all success.
+This supersedes the pending-CI statements below, not the historical failed runs.
+The checks job includes the approved expiring development audit policy, unchanged
+strict production and uploader audits, lint, application tests/build and uploader
+tests/build. The development exception is still active and is not a vulnerability
+fix; its 19 October 2026 11:09:49 UTC expiry remains unchanged.
+
+No deployment, account or database mutation was performed to verify CI. Staging
+application remains the verified 8143a20 Preview; later commits are tests, policy,
+documentation and the uploader build dependency. No new installer was released.
+Automated macOS WebKit is not a physical Safari acceptance result.
+
+Next recommended recovery step is an explicitly approved new encrypted read-only
+source backup from staging eomubndonbetszdbhsrj for exact 006–058, preserving all
+prior backups. No restore, disposable resume or password reset is authorized by
+this checkpoint. Original-password restore acceptance, fresh managed recovery,
+physical Safari, live delivery/scheduler/monitoring and production provisioning/
+cutover evidence remain separate open gates. Production was not contacted.
+
 ## CI follow-up: uploader dependency corrected — 5 October 2026
 
 Run 37301577626 passed the approved full audit policy, strict production audit,

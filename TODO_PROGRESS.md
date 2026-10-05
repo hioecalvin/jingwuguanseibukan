@@ -10,7 +10,8 @@
 - [x] Automatic expiry 2026-10-19 11:09:49 UTC; no blanket high/critical bypass.
 - [x] Thirteen policy safety tests; live audit policy and strict production audit passed.
 - [x] ESLint, type-check and all 561 automated tests passed locally.
-- [ ] Fresh GitHub CI completion for this policy commit.
+- [x] Full GitHub CI passed on successor bc481bf, run 37301928136: checks,
+  Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS (verified 6 October).
 - [ ] Remove exception after compatible remediation; no automatic extension.
 
 ## 057–058 staging milestone — 5 October 2026 (supersedes pending gates below)
@@ -29,6 +30,8 @@
   retains the vulnerable chain. Production-only audit remains clean. Temporary
   advisory-specific CI exception requires owner decision; no policy changed.
 - [ ] Refresh restore evidence for the changed migration chain before production.
+- [ ] Obtain explicit approval for fresh encrypted read-only 006–058 staging
+  source backup; no restore, disposable resume or account changes included.
 
 ## Approved 057 staging gate — 5 October 2026
 
