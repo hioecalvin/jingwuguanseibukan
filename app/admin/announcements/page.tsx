@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -138,7 +140,7 @@ export default function AnnouncementsPage() {
             <div className="flex items-center gap-4">
 
               <Image
-                src="/js-logo.jpeg"
+                src="/logos/organization/logo-js.png"
                 alt="Jingwuguan Seibukan"
                 width={65}
                 height={65}
@@ -219,7 +221,9 @@ export default function AnnouncementsPage() {
           {announcements.map(
             (announcement) => (
 
-              <article
+              <CompactRecord summary={<>{
+                        announcement.title
+                      }</>}
                 key={
                   announcement.id
                 }
@@ -269,7 +273,7 @@ export default function AnnouncementsPage() {
 
                 </div>
 
-              </article>
+              </CompactRecord>
 
             )
           )}

@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useCallback,
   useEffect,
@@ -171,13 +173,6 @@ export default function MemberSubscriptionsPage() {
     useState<
       string | null
     >(null);
-
-
-  const [
-    transferAmount,
-    setTransferAmount,
-  ] =
-    useState("");
 
 
   const [
@@ -770,12 +765,6 @@ export default function MemberSubscriptionsPage() {
                 paymentStatus =
                   "paid";
 
-              } else if (
-                paidAmount >
-                0
-              ) {
-                paymentStatus =
-                  "partial";
               }
 
 
@@ -1074,13 +1063,6 @@ export default function MemberSubscriptionsPage() {
     );
 
 
-    setTransferAmount(
-      String(
-        subscription.outstanding_amount
-      )
-    );
-
-
     setTransferDate(
       todayString()
     );
@@ -1100,10 +1082,6 @@ export default function MemberSubscriptionsPage() {
   function closePaymentForm() {
     setExpandedChargeId(
       null
-    );
-
-    setTransferAmount(
-      ""
     );
 
     setTransferDate(
@@ -1126,10 +1104,7 @@ export default function MemberSubscriptionsPage() {
     subscription:
       SubscriptionRow
   ) {
-    const amount =
-      Number(
-        transferAmount
-      );
+    const amount = Number(subscription.outstanding_amount);
 
 
     if (
@@ -1140,19 +1115,7 @@ export default function MemberSubscriptionsPage() {
         0
     ) {
       showError(
-        "Enter the amount you transferred."
-      );
-
-      return;
-    }
-
-
-    if (
-      amount >
-      subscription.outstanding_amount
-    ) {
-      showError(
-        "The transferred amount cannot be greater than the outstanding subscription amount."
+        "This charge has no outstanding balance."
       );
 
       return;
@@ -1512,7 +1475,10 @@ export default function MemberSubscriptionsPage() {
 
 
               return (
-                <article
+                <CompactRecord summary={<>{formatMonth(
+                          subscription.billing_month
+                        )}</>}
+                  detail={<>{subscription.class_name} · {isPaid ? "Paid" : pending ? "Pending confirmation" : rejected ? "Rejected" : "Unpaid"} · {formatCurrency(subscription.outstanding_amount, subscription.currency)} outstanding</>}
                   key={
                     subscription.charge_id
                   }
@@ -1583,11 +1549,6 @@ export default function MemberSubscriptionsPage() {
                         !isPaid
                       }
 
-                      partial={
-                        !isPaid &&
-                        subscription.paid_amount >
-                          0
-                      }
                     />
                   </div>
 
@@ -1943,43 +1904,13 @@ export default function MemberSubscriptionsPage() {
                           sm:grid-cols-2
                         "
                       >
-                        <Field
-                          label="Amount Transferred"
-                        >
-                          <input
-                            type="number"
-
-                            min="1"
-
-                            max={
-                              subscription.outstanding_amount
-                            }
-
-                            value={
-                              transferAmount
-                            }
-
-                            onChange={(
-                              event
-                            ) =>
-                              setTransferAmount(
-                                event.target.value
-                              )
-                            }
-
-                            className="
-                              w-full
-                              rounded-lg
-                              border
-                              border-neutral-700
-                              bg-neutral-900
-                              px-3
-                              py-3
-                              outline-none
-                              focus:border-emerald-600
-                            "
-                          />
-                        </Field>
+                        <MoneySummary
+                          label="Full Payment Amount"
+                          value={formatCurrency(
+                            subscription.outstanding_amount,
+                            subscription.currency
+                          )}
+                        />
 
 
                         <Field
@@ -2190,7 +2121,7 @@ export default function MemberSubscriptionsPage() {
                       </div>
                     </div>
                   )}
-                </article>
+                </CompactRecord>
               );
             }
           )}
@@ -2428,12 +2359,10 @@ function PaymentStatusBadge({
   paid,
   pending,
   rejected,
-  partial,
 }: {
   paid: boolean;
   pending: boolean;
   rejected: boolean;
-  partial: boolean;
 }) {
   if (
     paid
@@ -2499,29 +2428,6 @@ function PaymentStatusBadge({
         "
       >
         DECLINED
-      </span>
-    );
-  }
-
-
-  if (
-    partial
-  ) {
-    return (
-      <span
-        className="
-          rounded-full
-          border
-          border-orange-800
-          bg-orange-950/30
-          px-3
-          py-1
-          text-xs
-          font-bold
-          text-orange-300
-        "
-      >
-        PARTIAL
       </span>
     );
   }

@@ -1,34 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const supabase = createClient();
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"error" | "success">("error");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const search = new URLSearchParams(window.location.search);
+
+    if (search.get("verified") === "true") {
+      setMessage("Email verified. Log in to check your membership approval status.");
+      setMessageType("success");
+    } else if (search.get("error") === "disabled") {
+      setMessage("This account is disabled. Contact an administrator for help.");
+      setMessageType("error");
+    }
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setMessage("");
+    setMessageType("error");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ identifier: email.trim(), password }),
+      });
+      const result = await response.json();
+      if (!response.ok || result?.success !== true) {
+        setMessage(response.status === 429
+          ? "Too many login attempts. Please wait and try again."
+          : "Unable to log in. Check your email or JS Member ID and password.");
+        return;
+      }
 
-    if (error) {
-      setMessage(error.message);
+      router.replace("/");
+      router.refresh();
+    } catch {
+      setMessage("Unable to log in. Please check your connection and try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    window.location.href = "/";
   }
 
   return (
@@ -36,7 +61,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl">
         <div className="mb-5 flex justify-center">
   <Image
-    src="/js-logo.jpeg"
+    src="/logos/organization/logo-js.png"
     alt="Jingwuguan Seibukan"
     width={120}
     height={120}
@@ -52,29 +77,39 @@ export default function LoginPage() {
           Member Login
         </p>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-5">
+        <form onSubmit={handleLogin} aria-busy={loading} className="mt-8 space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
+            <label htmlFor="login-email" className="block text-sm font-medium mb-1">
+              Email or JS Member ID
             </label>
 
             <input
-              type="email"
+              id="login-email"
+              type="text"
               required
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              aria-describedby="login-identifier-help"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-500 focus:border-sky-500 focus:outline-none"              placeholder="member@email.com"
+className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-500 focus:border-sky-500 focus:outline-none"              placeholder="member@email.com or JS Member ID"
             />
+            <p id="login-identifier-help" className="mt-2 text-sm text-neutral-400">
+              Awaiting approval? Use your email. Your JS Member ID is assigned after approval.
+            </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="login-password" className="block text-sm font-medium mb-1">
               Password
             </label>
 
             <input
+              id="login-password"
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
 className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-500 focus:border-sky-500 focus:outline-none"              placeholder="Password"
@@ -84,19 +119,23 @@ className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 
           <button
             type="submit"
             disabled={loading}
-className="w-full rounded-lg bg-sky-500 py-3 font-semibold text-white transition hover:bg-sky-400 disabled:opacity-50"          >
+className="w-full rounded-lg bg-sky-700 py-3 font-semibold text-white transition hover:bg-sky-600 disabled:opacity-50"          >
             {loading ? "Logging in..." : "Log In"}
           </button>
 
-          {message && (
-            <p className="text-center text-sm text-red-600">
+            <p
+              role="status"
+              aria-live={messageType === "error" ? "assertive" : "polite"}
+              className={`text-center text-sm ${
+                messageType === "success" ? "text-green-400" : "text-red-400"
+              }`}
+            >
               {message}
             </p>
-          )}
         </form>
 
         <div className="mt-6 text-center text-sm">
-            <a href="/register" className="font-medium text-sky-400 hover:text-sky-300">
+            <a href="/register" tabIndex={0} className="font-medium text-sky-400 hover:text-sky-300">
              Create account
             </a>
         </div>

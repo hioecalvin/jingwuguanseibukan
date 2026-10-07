@@ -10,6 +10,8 @@ export type NavigationItem = {
 
   roles: AppRole[];
 
+  requiresRepositoryUpload?: boolean;
+
   section:
     | "main"
     | "management"
@@ -58,6 +60,34 @@ export const navigationItems:
   {
     label: "Calendar",
     href: "/calendar",
+
+    roles: [
+      "member",
+      "admin",
+      "super_admin",
+    ],
+
+    section: "main",
+  },
+
+
+  {
+    label: "Schedules",
+    href: "/schedules",
+
+    roles: [
+      "member",
+      "admin",
+      "super_admin",
+    ],
+
+    section: "main",
+  },
+
+
+  {
+    label: "Directory",
+    href: "/directory",
 
     roles: [
       "member",
@@ -136,6 +166,50 @@ export const navigationItems:
   },
 
 
+  /*
+   * =====================================================
+   * BREAK REQUESTS
+   * =====================================================
+   */
+
+  {
+    label: "Break Requests",
+    href: "/admin/break-request",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+
+  /*
+   * =====================================================
+   * ENROLLMENT REQUESTS
+   * =====================================================
+   */
+
+  {
+    label: "Enrollment Requests",
+    href: "/admin/enrollment-requests",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+
+  /*
+   * =====================================================
+   * CLASS MANAGEMENT
+   * =====================================================
+   */
+
   {
     label: "Classes",
     href: "/admin/classes",
@@ -187,6 +261,48 @@ export const navigationItems:
   },
 
 
+  /*
+   * =====================================================
+   * FINANCE
+   * =====================================================
+   */
+
+  {
+    label: "Payments",
+    href: "/admin/payments",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+
+  {
+    label: "Manage Schedules",
+    href: "/admin/schedules",
+
+    roles: [
+      "admin",
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
+  {
+    label: "Assessments",
+    href: "/admin/assessments",
+
+    roles: [
+      "super_admin",
+    ],
+
+    section: "management",
+  },
+
   {
     label: "Subscriptions",
     href: "/admin/subscriptions",
@@ -212,6 +328,12 @@ export const navigationItems:
     section: "management",
   },
 
+
+  /*
+   * =====================================================
+   * RECORDS / DOCUMENTS
+   * =====================================================
+   */
 
   {
     label: "Archive",
@@ -252,6 +374,12 @@ export const navigationItems:
   },
 
 
+  /*
+   * =====================================================
+   * MEMBERSHIP MOVEMENT
+   * =====================================================
+   */
+
   {
     label: "Transfers",
     href: "/admin/transfers",
@@ -285,15 +413,30 @@ export const navigationItems:
    */
 
   {
-    label: "Content",
-    href: "/admin/content",
+    label: "Repository Upload",
+    href: "/repository/upload",
 
     roles: [
+      "member",
       "admin",
       "super_admin",
     ],
 
+    requiresRepositoryUpload: true,
+
     section: "content",
+  },
+
+
+  {
+    label: "Repository Uploaders",
+    href: "/admin/repository-uploaders",
+
+    roles: [
+      "super_admin",
+    ],
+
+    section: "system",
   },
 
 
@@ -302,7 +445,6 @@ export const navigationItems:
     href: "/admin/events",
 
     roles: [
-      "admin",
       "super_admin",
     ],
 
@@ -355,15 +497,21 @@ export const navigationItems:
 ];
 
 
+/*
+ * =====================================================
+ * ROLE NAVIGATION
+ * =====================================================
+ */
+
 export function getNavigationForRole(
-  role: AppRole
+  role: AppRole,
+  capabilities?: {
+    repositoryUpload?: boolean;
+  },
 ) {
   return navigationItems.filter(
-    (
-      item
-    ) =>
-      item.roles.includes(
-        role
-      )
+    (item) =>
+      item.roles.includes(role) &&
+      (!item.requiresRepositoryUpload || capabilities?.repositoryUpload === true)
   );
 }

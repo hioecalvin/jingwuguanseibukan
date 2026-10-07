@@ -1,0 +1,132 @@
+{
+  "manifestVersion": 1,
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA"
+  },
+  "target": {
+    "environment": "staging",
+    "origin": "https://jingwuguanseibukan-staging.vercel.app",
+    "supabaseProjectRef": "eomubndonbetszdbhsrj",
+    "deploymentId": "REPLACE_WITH_EXACT_STAGING_DEPLOYMENT_ID",
+    "readOnly": true,
+    "productionAuthorization": false
+  },
+  "dataHandling": {
+    "dedicatedNonPersonalAccounts": true,
+    "productionDataUsed": false,
+    "personalDataRecorded": false,
+    "secretsRecorded": false,
+    "mutationsPerformed": false
+  },
+  "devices": [
+    {
+      "id": "macos-safari",
+      "platform": "macOS",
+      "deviceClass": "Mac",
+      "physicalDevice": true,
+      "simulator": false,
+      "browser": "Safari",
+      "playwrightWebKit": false,
+      "osVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "safariVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "testedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+      "deployedCommitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_EXACT_STAGING_DEPLOYMENT_ID",
+      "workflows": {
+        "publicNavigation": false,
+        "loginLogout": false,
+        "memberReadOnly": false,
+        "adminReadOnly": false,
+        "superAdminReadOnly": false,
+        "certificateVerification": false,
+        "responsiveLayout": false
+      },
+      "accessibility": {
+        "voiceOver": false,
+        "inputNavigation": false,
+        "textZoom": false,
+        "focusLabelsAndErrors": false,
+        "reducedMotionAndContrast": false
+      },
+      "evidence": {
+        "sessionRecordSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+        "artifactBundleSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+      }
+    },
+    {
+      "id": "ios-safari",
+      "platform": "iOS",
+      "deviceClass": "iPhone",
+      "physicalDevice": true,
+      "simulator": false,
+      "browser": "Safari",
+      "playwrightWebKit": false,
+      "osVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "safariVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "testedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+      "deployedCommitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_EXACT_STAGING_DEPLOYMENT_ID",
+      "workflows": {
+        "publicNavigation": false,
+        "loginLogout": false,
+        "memberReadOnly": false,
+        "adminReadOnly": false,
+        "superAdminReadOnly": false,
+        "certificateVerification": false,
+        "responsiveLayout": false
+      },
+      "accessibility": {
+        "voiceOver": false,
+        "inputNavigation": false,
+        "textZoom": false,
+        "focusLabelsAndErrors": false,
+        "reducedMotionAndContrast": false
+      },
+      "evidence": {
+        "sessionRecordSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+        "artifactBundleSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+      }
+    },
+    {
+      "id": "ipados-safari",
+      "platform": "iPadOS",
+      "deviceClass": "iPad",
+      "physicalDevice": true,
+      "simulator": false,
+      "browser": "Safari",
+      "playwrightWebKit": false,
+      "osVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "safariVersion": "REPLACE_WITH_NUMERIC_VERSION",
+      "testedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+      "deployedCommitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+      "deploymentId": "REPLACE_WITH_EXACT_STAGING_DEPLOYMENT_ID",
+      "workflows": {
+        "publicNavigation": false,
+        "loginLogout": false,
+        "memberReadOnly": false,
+        "adminReadOnly": false,
+        "superAdminReadOnly": false,
+        "certificateVerification": false,
+        "responsiveLayout": false
+      },
+      "accessibility": {
+        "voiceOver": false,
+        "inputNavigation": false,
+        "textZoom": false,
+        "focusLabelsAndErrors": false,
+        "reducedMotionAndContrast": false
+      },
+      "evidence": {
+        "sessionRecordSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+        "artifactBundleSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+      }
+    }
+  ],
+  "attestation": {
+    "recordedByRole": "release-tester",
+    "reviewedByRole": "independent-reviewer",
+    "reviewedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "allFindingsResolved": false
+  }
+}

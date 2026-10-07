@@ -1,0 +1,91 @@
+{
+  "manifestVersion": 1,
+  "policy": "jingwuguan-production-cutover-v1",
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "origin": "https://jingwuguanseibukan.com",
+    "windowStartsAt": "REPLACE_WITH_APPROVED_WINDOW_START_ISO_TIMESTAMP_AND_OFFSET",
+    "windowEndsAt": "REPLACE_WITH_APPROVED_WINDOW_END_ISO_TIMESTAMP_AND_OFFSET"
+  },
+  "target": {
+    "environment": "production",
+    "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+    "region": "ap-southeast-1",
+    "supabaseOrigin": "REPLACE_WITH_PRODUCTION_SUPABASE_ORIGIN",
+    "dashboardOwnershipVerified": false,
+    "dashboardRegionVerified": false
+  },
+  "database": {
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "migrationLedger": "006-058",
+    "exactLedgerPassed": false,
+    "catalogPassed": false,
+    "databaseLintPassed": false,
+    "securityVerifierPassed": false,
+    "grantsAndRlsPassed": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+  },
+  "defaultAcl": {
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "status": "REPLACE_WITH_RESOLVED_OR_TIME_BOUNDED_EXCEPTION",
+    "scope": "supabase-admin-future-object-default-acl-only",
+    "evidenceSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_SHA256",
+    "exceptionReference": "REPLACE_WITH_REFERENCE_OR_NOT_APPLICABLE",
+    "exceptionExpiresAt": null,
+    "reviewedByRole": "independent-security-reviewer"
+  },
+  "roleSecurity": {
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "readOnly": false,
+    "memberPassed": false,
+    "scopedAdminPassed": false,
+    "superAdminPassed": false,
+    "reviewedExistingAccounts": false,
+    "authSessionWritesExpected": false,
+    "applicationMutationsAttempted": true,
+    "evidenceSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_SHA256"
+  },
+  "domain": {
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "customDomain": "jingwuguanseibukan.com",
+    "dnsResolved": false,
+    "tlsValid": false,
+    "certificateHostname": "jingwuguanseibukan.com",
+    "supabaseSiteUrl": "https://jingwuguanseibukan.com",
+    "authConfirmRedirect": "https://jingwuguanseibukan.com/auth/confirm",
+    "publicConfigProjectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+    "stagingResidueFound": true,
+    "retiredResidueFound": true,
+    "evidenceSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_SHA256"
+  },
+  "probes": {
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "requiredHostProbes": 11,
+    "passedHostProbes": 0,
+    "browserAuthReadOnlyPassed": false,
+    "redirectsPassed": false,
+    "securityHeadersPassed": false,
+    "serverErrors": -1,
+    "applicationAcceptanceWrites": -1,
+    "evidenceSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_SHA256"
+  },
+  "safety": {
+    "acceptanceReadOnly": false,
+    "memberRecordsMutated": true,
+    "testAccountsCreated": true,
+    "outboundProvidersContacted": true,
+    "stagingContacted": true,
+    "retiredProjectContacted": true,
+    "rollbackDeploymentReachable": false
+  },
+  "attestation": {
+    "recordedByRole": "production-release-operator",
+    "reviewedByRole": "independent-release-reviewer",
+    "reviewedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "evidenceReviewed": false,
+    "allFindingsDispositioned": false,
+    "reviewDigest": "REPLACE_WITH_CANONICAL_64_CHARACTER_SHA256"
+  }
+}

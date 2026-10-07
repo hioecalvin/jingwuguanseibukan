@@ -1,0 +1,100 @@
+{
+  "manifestVersion": 4,
+  "recordedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+  "source": {
+    "environment": "staging",
+    "projectRef": "eomubndonbetszdbhsrj"
+  },
+  "restoreTarget": {
+    "kind": "disposable-supabase",
+    "projectRef": "REPLACE_WITH_DISPOSABLE_PROJECT_REF",
+    "disposition": {
+      "status": "PENDING",
+      "completedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+      "evidence": ""
+    }
+  },
+  "production": {
+    "exists": false,
+    "projectRef": null,
+    "mutations": 0
+  },
+  "backupArtifact": {
+    "format": "protected-export-bundle",
+    "sourceProjectRef": "eomubndonbetszdbhsrj",
+    "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "sourcePayloadSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoreInputPayloadSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "sourcePayloadBytes": -1,
+    "restoreInputPayloadBytes": -1,
+    "evidence": ""
+  },
+  "evidenceBundle": {
+    "sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "bytes": -1,
+    "finalizedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "evidence": ""
+  },
+  "objectives": {
+    "declaredRpoHours": 24,
+    "declaredRtoHours": 4,
+    "observedRestoreMinutes": -1
+  },
+  "timing": {
+    "recoveryPointAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalStartedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+    "rehearsalCompletedAt": "REPLACE_WITH_ISO_TIMESTAMP"
+  },
+  "migrationLedger": {
+    "firstVersion": "006",
+    "lastVersion": "058",
+    "migrationCount": 53,
+    "repositoryFilesSha256": "a412432bedf7c95578e7ebfb83317987c1d4350d19121fe533007a1967b26ffd",
+    "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
+  },
+  "preMigrationBaseline": {
+    "catalogFormatVersion": 1,
+    "sourceCatalogSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "restoredCatalogSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
+    "sourceObjectCount": -1,
+    "restoredObjectCount": -1
+  },
+  "controls": {
+    "backupEncrypted": false,
+    "accessRestricted": false,
+    "retentionAndDeletionRecorded": false,
+    "restoreTargetOutboundDisabled": false,
+    "rawSecretsRetainedInEvidence": false,
+    "rawPersonalDataRetainedInEvidence": false
+  },
+  "components": {
+    "applicationDatabase": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "preMigrationBaseline": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "migrationLedger": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "authUsersAndIdentities": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "storageMetadata": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "storageObjectBytes": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "databaseRolesAndGrants": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "vaultAndEncryptionKeys": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "authConfiguration": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "edgeAndProviderSecrets": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "scheduledJobs": { "status": "PENDING", "verifiedAt": "", "evidence": "" },
+    "externalProviderResources": { "status": "PENDING", "verifiedAt": "", "evidence": "" }
+  },
+  "checks": {
+    "restoreCompleted": false,
+    "sourceRestoreFactsMatch": false,
+    "preMigrationBaselineVerified": false,
+    "migrationHistoryExact": false,
+    "authLoginRefreshVerified": false,
+    "storageUploadDownloadVerified": false,
+    "storageObjectManifestMatched": false,
+    "rlsAndGrantsVerified": false,
+    "scheduledJobsDisabledOnRestore": false,
+    "outboundDeliveryIsolated": false,
+    "securitySmokePassed": false,
+    "databaseLintPassed": false,
+    "restoreTargetDecommissionedOrQuarantined": false
+  }
+}

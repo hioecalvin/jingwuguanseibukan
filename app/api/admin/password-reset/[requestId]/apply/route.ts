@@ -4,12 +4,20 @@ import {
 } from "next/server";
 
 import {
+  randomInt,
+} from "node:crypto";
+
+import {
   createClient,
 } from "@supabase/supabase-js";
 
 import {
   createAdminClient,
 } from "@/lib/supabase/admin";
+
+
+export const runtime =
+  "nodejs";
 
 
 type RouteContext = {
@@ -19,91 +27,129 @@ type RouteContext = {
 };
 
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+/*
+ * =========================================================
+ * SECURE TEMPORARY PASSWORD
+ * =========================================================
+ *
+ * - Random
+ * - Not based on DOB
+ * - Contains upper/lower/digit/symbol
+ * - Avoids some ambiguous characters
+ */
+
+const UPPERCASE =
+  "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+const LOWERCASE =
+  "abcdefghijkmnopqrstuvwxyz";
+
+const DIGITS =
+  "23456789";
+
+const SYMBOLS =
+  "!@#$%*-_";
+
+const ALL_CHARACTERS =
+  UPPERCASE +
+  LOWERCASE +
+  DIGITS +
+  SYMBOLS;
 
 
-function temporaryPasswordFromDob(
-  dateOfBirth: string
+function randomCharacter(
+  source: string
 ) {
-  /*
-   * Expected database format:
-   *
-   * YYYY-MM-DD
-   */
-
-  const match =
-    dateOfBirth.match(
-      /^(\d{4})-(\d{2})-(\d{2})$/
-    );
-
-
-  if (!match) {
-    throw new Error(
-      "Member date of birth is invalid"
-    );
-  }
-
-
-  const year =
-    match[1];
-
-  const monthNumber =
-    Number(
-      match[2]
-    );
-
-  const day =
-    match[3];
-
-
-  if (
-    monthNumber < 1 ||
-    monthNumber > 12
-  ) {
-    throw new Error(
-      "Member date of birth is invalid"
-    );
-  }
-
-
-  const month =
-    MONTHS[
-      monthNumber - 1
-    ];
-
-
-  /*
-   * Example:
-   *
-   * DOB:
-   * 1996-11-05
-   *
-   * Temporary password:
-   * 05Nov1996
-   */
-
-  return `${day}${month}${year}`;
+  return source[
+    randomInt(
+      0,
+      source.length
+    )
+  ];
 }
 
+
+function shuffleCharacters(
+  characters: string[]
+) {
+  for (
+    let index =
+      characters.length - 1;
+
+    index > 0;
+
+    index--
+  ) {
+    const randomIndex =
+      randomInt(
+        0,
+        index + 1
+      );
+
+
+    [
+      characters[index],
+      characters[randomIndex],
+    ] = [
+      characters[randomIndex],
+      characters[index],
+    ];
+  }
+
+
+  return characters;
+}
+
+
+function createTemporaryPassword() {
+  const characters = [
+    randomCharacter(
+      UPPERCASE
+    ),
+
+    randomCharacter(
+      LOWERCASE
+    ),
+
+    randomCharacter(
+      DIGITS
+    ),
+
+    randomCharacter(
+      SYMBOLS
+    ),
+  ];
+
+
+  while (
+    characters.length < 16
+  ) {
+    characters.push(
+      randomCharacter(
+        ALL_CHARACTERS
+      )
+    );
+  }
+
+
+  return shuffleCharacters(
+    characters
+  ).join("");
+}
+
+
+/*
+ * =========================================================
+ * AUTHENTICATED SUPABASE CLIENT
+ * =========================================================
+ */
 
 function createAuthenticatedClient(
   accessToken: string
 ) {
   const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env
+      .NEXT_PUBLIC_SUPABASE_URL;
 
 
   const publicKey =
@@ -149,6 +195,12 @@ function createAuthenticatedClient(
 }
 
 
+/*
+ * =========================================================
+ * ROUTE
+ * =========================================================
+ */
+
 export async function POST(
   request: NextRequest,
   context: RouteContext
@@ -156,9 +208,9 @@ export async function POST(
   try {
 
     /*
-     * ===================================================
+     * =====================================================
      * REQUEST ID
-     * ===================================================
+     * =====================================================
      */
 
     const {
@@ -183,13 +235,9 @@ export async function POST(
 
 
     /*
-     * ===================================================
-     * AUTHENTICATED ADMIN
-     * ===================================================
-     *
-     * Browser will later send:
-     *
-     * Authorization: Bearer <access token>
+     * =====================================================
+     * ADMIN AUTHENTICATION
+     * =====================================================
      */
 
     const authorization =
@@ -224,16 +272,26 @@ export async function POST(
         .trim();
 
 
+    if (
+      !accessToken
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Not authenticated.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+
     const authenticatedClient =
       createAuthenticatedClient(
         accessToken
       );
 
-
-    /*
-     * getUser() validates the JWT against
-     * Supabase Auth.
-     */
 
     const {
       data: {
@@ -268,9 +326,9 @@ export async function POST(
 
 
     /*
-     * ===================================================
-     * SERVER ADMIN CLIENT
-     * ===================================================
+     * =====================================================
+     * SERVICE-ROLE CLIENT
+     * =====================================================
      */
 
     const admin =
@@ -278,9 +336,9 @@ export async function POST(
 
 
     /*
-     * ===================================================
+     * =====================================================
      * CALLER PROFILE
-     * ===================================================
+     * =====================================================
      */
 
     const {
@@ -310,6 +368,7 @@ export async function POST(
       callerProfileError
     ) {
       console.error(
+        "Caller profile error:",
         callerProfileError
       );
 
@@ -342,9 +401,98 @@ export async function POST(
 
 
     /*
-     * ===================================================
+     * =====================================================
+     * CURRENT ADMIN SCOPE
+     * =====================================================
+     *
+     * A historical reviewed_by value is not an enduring permission. An
+     * Admin who has since been deactivated or moved out of scope must not be
+     * able to apply a privileged Auth password change.
+     */
+
+    let callerAssignments: Array<{
+      class_id: string | null;
+      dojo_id: string | null;
+    }> = [];
+
+
+    if (
+      callerProfile
+        .is_super_admin !==
+      true
+    ) {
+      const {
+        data:
+          assignmentRows,
+
+        error:
+          assignmentError,
+      } =
+        await admin
+          .from(
+            "dojo_admin_assignments"
+          )
+          .select(`
+            class_id,
+            dojo_id
+          `)
+          .eq(
+            "user_id",
+            authenticatedUser.id
+          )
+          .eq(
+            "active",
+            true
+          );
+
+
+      if (
+        assignmentError
+      ) {
+        console.error(
+          "Admin assignment verification error:",
+          assignmentError
+        );
+
+
+        return NextResponse.json(
+          {
+            error:
+              "Unable to verify administrator scope.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+
+      callerAssignments =
+        assignmentRows ??
+        [];
+
+
+      if (
+        callerAssignments.length ===
+        0
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "You are not authorised to apply password resets.",
+          },
+          {
+            status: 403,
+          }
+        );
+      }
+    }
+
+
+    /*
+     * =====================================================
      * RESET REQUEST
-     * ===================================================
+     * =====================================================
      */
 
     const {
@@ -377,6 +525,7 @@ export async function POST(
       resetRequestError
     ) {
       console.error(
+        "Reset request error:",
         resetRequestError
       );
 
@@ -409,9 +558,113 @@ export async function POST(
 
 
     /*
-     * ===================================================
-     * MUST ALREADY BE APPROVED
-     * ===================================================
+     * =====================================================
+     * TARGET-SCOPE AUTHORIZATION
+     * =====================================================
+     *
+     * Super Admins may act globally. A scoped Admin must both be the Admin
+     * who approved this request and still share an active class/dojo scope
+     * with at least one of the target Member's memberships.
+     */
+
+    let authorised =
+      callerProfile
+        .is_super_admin ===
+      true;
+
+
+    if (
+      !authorised &&
+      resetRequest
+        .reviewed_by ===
+        authenticatedUser.id
+    ) {
+      const {
+        data:
+          targetMemberships,
+
+        error:
+          targetMembershipError,
+      } =
+        await admin
+          .from(
+            "class_memberships"
+          )
+          .select(`
+            class_id,
+            dojo_id
+          `)
+          .eq(
+            "user_id",
+            resetRequest.user_id
+          );
+
+
+      if (
+        targetMembershipError
+      ) {
+        console.error(
+          "Password reset target scope error:",
+          targetMembershipError
+        );
+
+
+        return NextResponse.json(
+          {
+            error:
+              "Unable to verify Member scope.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+
+      authorised =
+        (
+          targetMemberships ??
+          []
+        ).some(
+          (
+            membership
+          ) =>
+            callerAssignments.some(
+              (
+                assignment
+              ) =>
+                assignment.dojo_id
+                  ? assignment.dojo_id ===
+                    membership.dojo_id
+                  : Boolean(
+                      assignment.class_id &&
+                      assignment.class_id ===
+                        membership.class_id
+                    )
+            )
+        );
+    }
+
+
+    if (
+      !authorised
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "You are not authorised to apply this password reset.",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
+
+
+    /*
+     * =====================================================
+     * MUST BE APPROVED
+     * =====================================================
      */
 
     if (
@@ -431,73 +684,9 @@ export async function POST(
 
 
     /*
-     * Already applied.
-     *
-     * Treat as successful/idempotent rather
-     * than resetting the password repeatedly.
-     */
-
-    if (
-      resetRequest.password_reset_at
-    ) {
-      return NextResponse.json(
-        {
-          success: true,
-
-          alreadyApplied:
-            true,
-
-          message:
-            "Temporary password has already been applied.",
-        }
-      );
-    }
-
-
-    /*
-     * ===================================================
-     * AUTHORIZATION
-     * ===================================================
-     *
-     * Super Admin:
-     * may apply any approved reset.
-     *
-     * Normal Admin:
-     * must be the Admin who approved
-     * this reset request.
-     *
-     * review_password_reset_request()
-     * already checked their class scope
-     * when approval occurred.
-     */
-
-    const authorised =
-      callerProfile.is_super_admin ===
-        true ||
-
-      resetRequest.reviewed_by ===
-        authenticatedUser.id;
-
-
-    if (
-      !authorised
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "You are not authorised to apply this password reset.",
-        },
-        {
-          status: 403,
-        }
-      );
-    }
-
-
-    /*
-     * ===================================================
+     * =====================================================
      * TARGET MEMBER
-     * ===================================================
+     * =====================================================
      */
 
     const {
@@ -513,8 +702,9 @@ export async function POST(
         )
         .select(`
           id,
+          registration_number,
           full_name,
-          date_of_birth
+          email
         `)
         .eq(
           "id",
@@ -527,6 +717,7 @@ export async function POST(
       memberProfileError
     ) {
       console.error(
+        "Member profile error:",
         memberProfileError
       );
 
@@ -558,13 +749,19 @@ export async function POST(
     }
 
 
+    const memberEmail =
+      memberProfile.email
+        ?.trim()
+        .toLowerCase();
+
+
     if (
-      !memberProfile.date_of_birth
+      !memberEmail
     ) {
       return NextResponse.json(
         {
           error:
-            "Member does not have a date of birth recorded.",
+            "Member does not have an email address.",
         },
         {
           status: 409,
@@ -574,23 +771,176 @@ export async function POST(
 
 
     /*
-     * ===================================================
-     * TEMPORARY PASSWORD
-     * ===================================================
+     * =====================================================
+     * EMAIL IDEMPOTENCY KEY
+     * =====================================================
      */
 
-    const temporaryPassword =
-      temporaryPasswordFromDob(
-        memberProfile.date_of_birth
-      );
+    const dedupeKey =
+      `password-reset-approved:${requestId}`;
 
 
     /*
-     * ===================================================
-     * RESET SUPABASE AUTH PASSWORD
-     * ===================================================
+     * =====================================================
+     * CHECK EXISTING RESET EMAIL
+     * =====================================================
      *
-     * THIS MUST NEVER BE MOVED TO CLIENT CODE.
+     * This also handles recovery from a partial previous
+     * request.
+     */
+
+    const {
+      data:
+        existingEmail,
+
+      error:
+        existingEmailError,
+    } =
+      await admin
+        .from(
+          "email_outbox"
+        )
+        .select(`
+          id,
+          status,
+          sent_at
+        `)
+        .eq(
+          "dedupe_key",
+          dedupeKey
+        )
+        .maybeSingle();
+
+
+    if (
+      existingEmailError
+    ) {
+      console.error(
+        "Existing reset email error:",
+        existingEmailError
+      );
+
+
+      return NextResponse.json(
+        {
+          error:
+            "Unable to verify reset email state.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+
+    /*
+     * =====================================================
+     * RECOVERY: EMAIL ALREADY EXISTS
+     * =====================================================
+     *
+     * If the Auth password and email queue succeeded but
+     * marking the reset as applied failed, do NOT create
+     * another password.
+     */
+
+    if (
+      existingEmail
+    ) {
+
+      if (
+        !resetRequest
+          .password_reset_at
+      ) {
+        const {
+          error:
+            recoverMarkError,
+        } =
+          await admin.rpc(
+            "mark_password_reset_applied",
+            {
+              target_request_id:
+                requestId,
+            }
+          );
+
+
+        if (
+          recoverMarkError
+        ) {
+          console.error(
+            "Password reset recovery mark error:",
+            recoverMarkError
+          );
+
+
+          return NextResponse.json(
+            {
+              error:
+                "The temporary password was already prepared, but the reset state could not be finalised.",
+            },
+            {
+              status: 500,
+            }
+          );
+        }
+      }
+
+
+      return NextResponse.json({
+        success: true,
+
+        alreadyApplied:
+          true,
+
+        emailQueued:
+          existingEmail.status !==
+            "sent",
+
+        emailSent:
+          existingEmail.status ===
+            "sent",
+
+        memberId:
+          memberProfile.id,
+
+        memberName:
+          memberProfile.full_name,
+
+        mustChangePassword:
+          true,
+
+        message:
+          existingEmail.status ===
+            "sent"
+            ? "Temporary password has already been sent to the Member."
+            : "Temporary password has already been queued for email delivery.",
+      });
+    }
+
+
+    /*
+     * =====================================================
+     * ALREADY APPLIED BUT EMAIL MISSING
+     * =====================================================
+     *
+     * We cannot recover the old random password because it
+     * was deliberately never returned to the browser.
+     *
+     * Generate a new temporary password and replace it.
+     */
+
+    const temporaryPassword =
+      createTemporaryPassword();
+
+
+    /*
+     * =====================================================
+     * UPDATE SUPABASE AUTH PASSWORD
+     * =====================================================
+     *
+     * Service-role only.
+     *
+     * Never move this to browser/client code.
      */
 
     const {
@@ -613,6 +963,7 @@ export async function POST(
       passwordError
     ) {
       console.error(
+        "Password reset Auth error:",
         passwordError
       );
 
@@ -630,14 +981,136 @@ export async function POST(
 
 
     /*
-     * ===================================================
-     * MARK TEMPORARY PASSWORD ACTIVE
-     * ===================================================
+     * =====================================================
+     * QUEUE RESET EMAIL
+     * =====================================================
      *
-     * This:
+     * The password temporarily exists in email_outbox so
+     * the worker can send it.
+     *
+     * mark_email_sent() removes temporary_password after
+     * successful delivery.
+     */
+
+    const {
+      data:
+        queuedEmailId,
+
+      error:
+        queueError,
+    } =
+      await admin.rpc(
+        "queue_email",
+        {
+          target_email:
+            memberEmail,
+
+          target_email_type:
+            "password_reset_approved",
+
+          target_subject:
+            "Your temporary Jingwuguan Seibukan password",
+
+          target_template_data: {
+            member_name:
+              memberProfile.full_name,
+
+            member_id:
+              memberProfile
+                .registration_number,
+
+            temporary_password:
+              temporaryPassword,
+          },
+
+          target_user_id:
+            memberProfile.id,
+
+          target_reference_type:
+            "password_reset_request",
+
+          target_reference_id:
+            requestId,
+
+          target_dedupe_key:
+            dedupeKey,
+        }
+      );
+
+
+    /*
+     * =====================================================
+     * VERIFY QUEUE ON ERROR
+     * =====================================================
+     *
+     * A network response could theoretically fail after
+     * the database successfully created the email.
+     *
+     * Check by dedupe key before declaring failure.
+     */
+
+    let emailId =
+      queuedEmailId;
+
+
+    if (
+      queueError
+    ) {
+      console.error(
+        "Password reset email queue error:",
+        queueError
+      );
+
+
+      const {
+        data:
+          recoveredEmail,
+
+        error:
+          recoveredEmailError,
+      } =
+        await admin
+          .from(
+            "email_outbox"
+          )
+          .select(
+            "id"
+          )
+          .eq(
+            "dedupe_key",
+            dedupeKey
+          )
+          .maybeSingle();
+
+
+      if (
+        recoveredEmailError ||
+        !recoveredEmail
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "The Member password was reset, but the email could not be queued. Retry this operation.",
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+
+      emailId =
+        recoveredEmail.id;
+    }
+
+
+    /*
+     * =====================================================
+     * MARK RESET APPLIED
+     * =====================================================
      *
      * password_reset_at = now()
-     * must_change_password = true
+     * profiles.must_change_password = true
      */
 
     const {
@@ -656,25 +1129,26 @@ export async function POST(
     if (
       markError
     ) {
-      /*
-       * Password has already been changed in
-       * Supabase Auth at this point.
-       *
-       * Do not generate a different password.
-       * Retrying this endpoint will apply the
-       * same DDMmmYYYY password again and allow
-       * the database state to recover.
-       */
-
       console.error(
+        "Mark reset applied error:",
         markError
       );
 
 
+      /*
+       * Important:
+       *
+       * The email is already safely queued with the same
+       * password that is active in Supabase Auth.
+       *
+       * A retry will detect the existing dedupe key and
+       * only repair the database state.
+       */
+
       return NextResponse.json(
         {
           error:
-            "Password was reset, but the recovery state could not be recorded. Retry this operation.",
+            "The temporary password was created and queued, but the reset state could not be finalised. Retry this operation.",
         },
         {
           status: 500,
@@ -684,16 +1158,11 @@ export async function POST(
 
 
     /*
-     * ===================================================
+     * =====================================================
      * SUCCESS
-     * ===================================================
+     * =====================================================
      *
-     * We deliberately DO NOT send the actual
-     * temporary password back to the browser.
-     *
-     * The known rule is:
-     *
-     * DDMmmYYYY
+     * Never return the temporary password to the browser.
      */
 
     return NextResponse.json({
@@ -702,20 +1171,22 @@ export async function POST(
       alreadyApplied:
         false,
 
+      emailQueued:
+        true,
+
+      emailId,
+
       memberId:
         memberProfile.id,
 
       memberName:
         memberProfile.full_name,
 
-      temporaryPasswordFormat:
-        "DDMmmYYYY",
-
       mustChangePassword:
         true,
 
       message:
-        "Temporary password applied successfully. The Member must change it after logging in.",
+        "A secure temporary password has been created and queued for email delivery. The Member must change it after signing in.",
     });
 
   } catch (

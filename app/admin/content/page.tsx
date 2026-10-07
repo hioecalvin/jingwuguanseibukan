@@ -1,13 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import CompactRecord from "@/components/compact-record";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  extractYouTubeVideoId,
+  getYouTubeEmbedUrl,
+} from "@/lib/video/youtube";
 
 type ClassItem = {
   id: string;
   name: string;
+};
+
+type RepositoryUploadScope = {
+  class_id: string;
+  class_name: string;
 };
 
 type Rank = {
@@ -53,8 +64,8 @@ export default function AdminContentPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const [videoProvider, setVideoProvider] = useState("youtube");
   const [videoInput, setVideoInput] = useState("");
+  const [editingVideoProvider, setEditingVideoProvider] = useState<string | null>(null);
 
   const [status, setStatus] = useState("draft");
   const [sortOrder, setSortOrder] = useState(1);
@@ -69,51 +80,7 @@ export default function AdminContentPage() {
     "success" | "error" | ""
   >("");
 
-  useEffect(() => {
-    async function loadPage() {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        router.replace("/login");
-        return;
-      }
-
-      const { data: classData, error: classError } =
-        await supabase
-          .from("classes")
-          .select("id, name")
-          .eq("active", true)
-          .order("name");
-
-      if (classError) {
-        setMessage(classError.message);
-        setMessageType("error");
-        setLoading(false);
-        return;
-      }
-
-      setClasses((classData ?? []) as ClassItem[]);
-
-      if (classData && classData.length > 0) {
-        setSelectedClassId(classData[0].id);
-      }
-
-      await Promise.all([
-        loadRanks(),
-        loadTiers(),
-        loadContent(),
-      ]);
-
-      setLoading(false);
-    }
-
-    loadPage();
-  }, [router, supabase]);
-
-  async function loadRanks() {
+  const loadRanks = useCallback(async () => {
     const { data, error } = await supabase
       .from("ranks")
       .select(`
@@ -133,9 +100,9 @@ export default function AdminContentPage() {
     }
 
     setRanks((data ?? []) as Rank[]);
-  }
+  }, [supabase]);
 
-  async function loadTiers() {
+  const loadTiers = useCallback(async () => {
     const { data, error } = await supabase
       .from("sub_ranks")
       .select(`
@@ -155,9 +122,9 @@ export default function AdminContentPage() {
     }
 
     setTiers((data ?? []) as Tier[]);
-  }
+  }, [supabase]);
 
-  async function loadContent() {
+  const loadContent = useCallback(async () => {
     const { data, error } = await supabase
       .from("content")
       .select(`
@@ -183,7 +150,62 @@ export default function AdminContentPage() {
     }
 
     setContent((data ?? []) as ContentItem[]);
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    async function loadPage() {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data: classData, error: classError } =
+        await supabase.rpc(
+          "get_my_repository_upload_scopes"
+        );
+
+      if (classError) {
+        setMessage(
+          "Repository upload access is unavailable."
+        );
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
+      const uploadScopes = (classData ?? []) as RepositoryUploadScope[];
+      setClasses(uploadScopes.map((scope) => ({
+        id: scope.class_id,
+        name: scope.class_name,
+      })));
+
+      if (!uploadScopes.length) {
+        setMessage(
+          "You do not have an active Repository Uploader appointment."
+        );
+        setMessageType("error");
+      }
+
+      if (uploadScopes.length > 0) {
+        setSelectedClassId(uploadScopes[0].class_id);
+      }
+
+      await Promise.all([
+        loadRanks(),
+        loadTiers(),
+        loadContent(),
+      ]);
+
+      setLoading(false);
+    }
+
+    loadPage();
+  }, [loadContent, loadRanks, loadTiers, router, supabase]);
 
   const filteredRanks = ranks.filter(
     (rank) =>
@@ -238,133 +260,6 @@ export default function AdminContentPage() {
     );
   }, [selectedRankId, tiers]);
 
-  function extractYouTubeId(
-    value: string
-  ) {
-    const trimmed = value.trim();
-
-    if (!trimmed) {
-      return "";
-    }
-
-    // Raw YouTube ID
-    if (
-      /^[A-Za-z0-9_-]{11}$/.test(trimmed)
-    ) {
-      return trimmed;
-    }
-
-    try {
-      const url = new URL(trimmed);
-
-      // youtube.com/watch?v=
-      if (
-        url.hostname.includes(
-          "youtube.com"
-        )
-      ) {
-        const watchId =
-          url.searchParams.get("v");
-
-        if (watchId) {
-          return watchId;
-        }
-
-        // youtube.com/shorts/VIDEO_ID
-        if (
-          url.pathname.startsWith(
-            "/shorts/"
-          )
-        ) {
-          const parts =
-            url.pathname.split("/");
-
-          return parts[2] ?? "";
-        }
-
-        // youtube.com/embed/VIDEO_ID
-        if (
-          url.pathname.startsWith(
-            "/embed/"
-          )
-        ) {
-          const parts =
-            url.pathname.split("/");
-
-          return parts[2] ?? "";
-        }
-      }
-
-      // youtu.be/VIDEO_ID
-      if (
-        url.hostname === "youtu.be" ||
-        url.hostname ===
-          "www.youtu.be"
-      ) {
-        return url.pathname
-          .replace("/", "")
-          .split("?")[0];
-      }
-
-      return "";
-    } catch {
-      return "";
-    }
-  }
-
-  function extractVimeoId(
-    value: string
-  ) {
-    const trimmed =
-      value.trim();
-
-    if (!trimmed) {
-      return "";
-    }
-
-    if (
-      /^\d+$/.test(trimmed)
-    ) {
-      return trimmed;
-    }
-
-    try {
-      const url =
-        new URL(trimmed);
-
-      if (
-        !url.hostname.includes(
-          "vimeo.com"
-        )
-      ) {
-        return "";
-      }
-
-      const parts =
-        url.pathname
-          .split("/")
-          .filter(Boolean);
-
-      const lastPart =
-        parts[
-          parts.length - 1
-        ];
-
-      if (
-        lastPart &&
-        /^\d+$/.test(
-          lastPart
-        )
-      ) {
-        return lastPart;
-      }
-
-      return "";
-    } catch {
-      return "";
-    }
-  }
-
   function getVideoId() {
     if (
       !videoInput.trim()
@@ -372,25 +267,7 @@ export default function AdminContentPage() {
       return "";
     }
 
-    if (
-      videoProvider ===
-      "youtube"
-    ) {
-      return extractYouTubeId(
-        videoInput
-      );
-    }
-
-    if (
-      videoProvider ===
-      "vimeo"
-    ) {
-      return extractVimeoId(
-        videoInput
-      );
-    }
-
-    return "";
+    return extractYouTubeVideoId(videoInput) ?? "";
   }
 
   const parsedVideoId =
@@ -401,21 +278,7 @@ export default function AdminContentPage() {
       return null;
     }
 
-    if (
-      videoProvider ===
-      "youtube"
-    ) {
-      return `https://www.youtube.com/embed/${parsedVideoId}`;
-    }
-
-    if (
-      videoProvider ===
-      "vimeo"
-    ) {
-      return `https://player.vimeo.com/video/${parsedVideoId}`;
-    }
-
-    return null;
+    return getYouTubeEmbedUrl(parsedVideoId);
   }
 
   const previewUrl =
@@ -427,11 +290,8 @@ export default function AdminContentPage() {
     setTitle("");
     setDescription("");
 
-    setVideoProvider(
-      "youtube"
-    );
-
     setVideoInput("");
+    setEditingVideoProvider(null);
 
     setStatus("draft");
     setSortOrder(1);
@@ -460,14 +320,12 @@ export default function AdminContentPage() {
     }
 
     if (
+      editingVideoProvider !== "mux" &&
       videoInput.trim() &&
       !parsedVideoId
     ) {
       setMessage(
-        videoProvider ===
-        "youtube"
-          ? "The YouTube URL or video ID is invalid."
-          : "The Vimeo URL or video ID is invalid."
+        "The YouTube URL or video ID is invalid."
       );
 
       setMessageType(
@@ -497,12 +355,16 @@ export default function AdminContentPage() {
             description.trim(),
 
           provider:
-            videoInput.trim()
-              ? videoProvider
-              : "",
+            editingVideoProvider === "mux"
+              ? "mux"
+              : videoInput.trim()
+                ? "youtube"
+                : "",
 
           provider_video_id:
-            parsedVideoId,
+            editingVideoProvider === "mux"
+              ? videoInput
+              : parsedVideoId,
 
           content_status:
             status,
@@ -555,7 +417,7 @@ export default function AdminContentPage() {
 
           provider:
             videoInput.trim()
-              ? videoProvider
+              ? "youtube"
               : "",
 
           provider_video_id:
@@ -625,13 +487,11 @@ export default function AdminContentPage() {
       item.description ?? ""
     );
 
-    setVideoProvider(
-      item.video_provider ??
-        "youtube"
-    );
-
     setVideoInput(
       item.video_id ?? ""
+    );
+    setEditingVideoProvider(
+      item.video_provider
     );
 
     setStatus(
@@ -760,7 +620,7 @@ export default function AdminContentPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={70}
               height={70}
@@ -770,7 +630,7 @@ export default function AdminContentPage() {
             <div>
 
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-red-400">
-                Administration
+                Repository Uploader
               </p>
 
               <h1 className="text-3xl font-bold">
@@ -778,8 +638,7 @@ export default function AdminContentPage() {
               </h1>
 
               <p className="mt-1 text-sm text-neutral-400">
-                Add, edit and publish
-                repository content.
+                Add, edit and publish repository content for your appointed classes.
               </p>
 
             </div>
@@ -791,12 +650,12 @@ export default function AdminContentPage() {
             type="button"
             onClick={() =>
               router.push(
-                "/admin"
+                "/repository"
               )
             }
             className="self-start rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
           >
-            ← Admin
+            ← Repository
           </button>
 
         </header>
@@ -1065,31 +924,11 @@ export default function AdminContentPage() {
                   Video Provider
                 </label>
 
-                <select
-                  value={
-                    videoProvider
-                  }
-                  onChange={(e) => {
-                    setVideoProvider(
-                      e.target.value
-                    );
-
-                    setVideoInput(
-                      ""
-                    );
-                  }}
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-                >
-
-                  <option value="youtube">
-                    YouTube
-                  </option>
-
-                  <option value="vimeo">
-                    Vimeo
-                  </option>
-
-                </select>
+                <div className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white">
+                  {editingVideoProvider === "mux"
+                    ? "Mux (Signed Playback)"
+                    : "YouTube (Legacy)"}
+                </div>
 
               </div>
 
@@ -1109,16 +948,16 @@ export default function AdminContentPage() {
                       e.target.value
                     )
                   }
-                  placeholder={
-                    videoProvider ===
-                    "youtube"
-                      ? "Paste YouTube URL or video ID"
-                      : "Paste Vimeo URL or video ID"
-                  }
+                  placeholder="Paste an unlisted YouTube URL or video ID"
+                  disabled={editingVideoProvider === "mux"}
                   className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
                 />
 
-                {videoInput.trim() && (
+                {editingVideoProvider === "mux" ? (
+                  <p className="mt-2 text-xs text-neutral-400">
+                    Mux identifiers are managed by JS Video Uploader and cannot be replaced here.
+                  </p>
+                ) : videoInput.trim() && (
 
                   <p
                     className={`mt-2 text-xs ${
@@ -1159,6 +998,9 @@ export default function AdminContentPage() {
                       }
                       title="Video Preview"
                       className="h-full w-full"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     />
@@ -1297,7 +1139,7 @@ export default function AdminContentPage() {
               {filteredContent.map(
                 (item) => (
 
-                  <article
+                  <CompactRecord summary={<>{item.title}</>}
                     key={
                       item.id
                     }
@@ -1416,7 +1258,7 @@ export default function AdminContentPage() {
 
                     </div>
 
-                  </article>
+                  </CompactRecord>
 
                 )
               )}
