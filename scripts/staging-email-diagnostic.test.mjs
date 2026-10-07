@@ -59,6 +59,17 @@ test('disabled diagnostic never produces a report even with a valid secret',asyn
  }
 });
 
+test('bodyless adapter stream is accepted, non-empty streaming input is rejected',async()=>{
+ const h=route(env);
+ for(const hasContent of [false,true]){
+  const stream=new ReadableStream({start(c){if(hasContent)c.enqueue(new TextEncoder().encode('x'));c.close();}});
+  const req=new Request(`${guard.STAGING_EMAIL_ORIGIN}/api/system/staging-email-diagnostic`,{
+   method:'POST',headers:{'x-worker-secret':secret,'x-staging-diagnostic-commit':sha},body:stream,duplex:'half'});
+  const r=await h.POST(req);assert.equal(r.status,hasContent?400:200);
+  if(!hasContent)assert.equal((await r.json()).requestBodyStreamPresent,true);
+ }
+});
+
 test('diagnostic sources cannot invoke providers, database clients, mutate env or log secrets',()=>{
  for(const path of ['app/api/system/staging-email-diagnostic/route.ts','lib/email/staging-email-diagnostic.ts']){
   const source=readFileSync(new URL('../'+path,import.meta.url),'utf8');

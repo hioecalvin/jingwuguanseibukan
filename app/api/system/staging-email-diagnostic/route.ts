@@ -15,7 +15,18 @@ export async function POST(request: NextRequest) {
     return reply(403, { code: "not_authorised" });
   }
   const expectedCommit = request.headers.get("x-staging-diagnostic-commit") ?? "";
-  if (request.body !== null || !/^[a-f0-9]{40}$/.test(expectedCommit)) return reply(400, { code: "invalid_request" });
+  if (!/^[a-f0-9]{40}$/.test(expectedCommit)) return reply(400, { code: "invalid_commit" });
+  // A server adapter may represent a bodyless POST as an empty stream, not null.
+  // Inspect one chunk only, cancel it, and reject any non-empty/unfinished input.
+  if (request.body !== null) {
+    const reader = request.body.getReader();
+    try {
+      const chunk = await reader.read();
+      if (!chunk.done) return reply(400, { code: "body_not_allowed" });
+    } finally {
+      await reader.cancel();
+    }
+  }
   // Exact hostname is reported as a boolean (never echo URL/headers). No caller
   // content or credentials are returned. No database, provider, RPC or send code.
   return reply(200, {
@@ -23,5 +34,6 @@ export async function POST(request: NextRequest) {
     ...stagingEmailDiagnosticReport(process.env, expectedCommit, Date.now()),
     exactRequestUrl: request.url === `${STAGING_EMAIL_ORIGIN}/api/system/staging-email-diagnostic`,
     directNodeRuntimeProduction: process.env.NODE_ENV === "production",
+    requestBodyStreamPresent: request.body !== null,
   });
 }
