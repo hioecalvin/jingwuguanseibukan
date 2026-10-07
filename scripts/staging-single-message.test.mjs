@@ -106,8 +106,79 @@ function request(options = {}) {
   return new Request(options.url ?? `${guard.STAGING_EMAIL_ORIGIN}/api/system/staging-email-test`, {
     method: 'POST', headers: { 'x-staging-email-secret': baseline.STAGING_EMAIL_TEST_SECRET,
       'x-staging-email-id': id, ...options.headers }, ...options.body && { body: options.body },
+    ...(options.body instanceof ReadableStream ? { duplex: 'half' } : {}),
   });
 }
+
+function emptyStream() {
+  return new ReadableStream({ start(controller) { controller.close(); } });
+}
+
+test('empty adapter stream follows the same fixed single-send contract as a null body (mock only)', async () => {
+  const h = harness(); const req = request({ body: emptyStream() });
+  assert.notEqual(req.body, null);
+  const result = await h.POST(req);
+  assert.equal(result.status, 200); assert.equal(result.headers.get('cache-control'), 'no-store');
+  assert.equal(req.body.locked, false);
+  assert.equal(h.calls.sends.length, 1); assert.equal(h.row.attempts, 1);
+  assert.deepEqual([...h.calls.sends[0].message.to], [baseline.STAGING_EMAIL_TEST_RECIPIENT]);
+  assert.equal(h.calls.sends[0].message.subject, guard.STAGING_EMAIL_SUBJECT);
+  assert.equal(h.calls.sends[0].config.idempotencyKey, `email-outbox/${id}`);
+  assert.equal((await h.POST(request({ body: emptyStream() }))).status, 409);
+  assert.equal(h.calls.sends.length, 1);
+});
+
+test('stream content and empty chunks are rejected before database work regardless of content-length', async () => {
+  for (const bytes of [new Uint8Array(), new TextEncoder().encode('{}'), new Uint8Array([0]), new TextEncoder().encode(' ')]) {
+    let cancelled = false;
+    const stream = new ReadableStream({start(c) { c.enqueue(bytes); },cancel() { cancelled = true; }});
+    const req = request({body: stream, headers: {'content-length': '0'}});
+    const h = harness(); const r = await h.POST(req);
+    assert.equal(r.status, 400); assert.equal(r.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await r.json(), {code: 'body_not_allowed'});
+    assert.equal(cancelled, true); assert.equal(req.body.locked, false);
+    assert.equal(h.calls.clients, 0); assert.equal(h.calls.sends.length, 0); assert.equal(h.row.attempts, 0);
+  }
+});
+
+test('errored, consumed, locked or cancellation-failing streams fail closed without raw error disclosure', async () => {
+  const errored = request({body: new ReadableStream({start(c) {c.error(Error('private request error'));}})});
+  const consumed = request({body: emptyStream()}); await consumed.text();
+  const locked = request({body: emptyStream()}); const lock = locked.body.getReader();
+  const badCancel = request({body: new ReadableStream({start(c) {c.enqueue(new Uint8Array([1]));},cancel() {throw Error('private cancellation error');}})});
+  for (const req of [errored, consumed, locked, badCancel]) {
+    const h = harness(); const r = await h.POST(req);
+    assert.equal(r.status, 400); assert.deepEqual(await r.json(), {code: 'body_not_allowed'});
+    assert.equal(h.calls.clients, 0); assert.equal(h.calls.sends.length, 0); assert.equal(h.logs.length, 0);
+  }
+  lock.releaseLock();
+});
+
+test('disabled or unauthorized gates return before reading any stream', async () => {
+  for (const options of [{env: {STAGING_EMAIL_TEST_ENABLED: undefined}}, {}]) {
+    let touched = false;
+    const req = {url: `${guard.STAGING_EMAIL_ORIGIN}/api/system/staging-email-test`,
+      headers: new Headers({'x-staging-email-id': id, 'x-staging-email-secret': 'wrong'}),
+      get body() { touched = true; throw Error('must not read'); }};
+    const h = harness(options); const r = await h.POST(req);
+    assert.equal(r.status, options.env ? 404 : 403); assert.equal(touched, false); assert.equal(h.calls.clients, 0);
+  }
+});
+
+test('expiry while consuming an empty stream prevents database work or sends', async () => {
+  const h = harness({expireAtCheck: 2});
+  const r = await h.POST(request({body: emptyStream()}));
+  assert.equal(r.status, 404); assert.equal(h.calls.clients, 0);
+  assert.equal(h.calls.sends.length, 0); assert.equal(h.row.attempts, 0);
+});
+
+test('concurrent empty adapter streams retain the one-claim one-send latch (mock only)', async () => {
+  const h = harness();
+  const responses = await Promise.all(Array.from({length: 8}, () => h.POST(request({body: emptyStream()}))));
+  assert.equal(responses.filter(r => r.status === 200).length, 1);
+  assert.equal(responses.filter(r => r.status === 409).length, 7);
+  assert.equal(h.calls.sends.length, 1); assert.equal(h.row.attempts, 1);
+});
 
 test('gate requires every explicit staging setting and a short unexpired release-bound window', () => {
   assert.ok(guard.stagingEmailConfig(baseline, now));

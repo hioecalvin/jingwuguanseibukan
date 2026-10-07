@@ -23,7 +23,29 @@ export async function POST(request: NextRequest) {
     return reply(403, "not_authorised");
   }
   // Content, recipient and UUID are operator-bound, never taken from a request body.
-  if (request.body !== null) return reply(400, "body_not_allowed");
+  // Vercel can represent a bodyless POST as a closed, empty stream instead of null.
+  // Read only once: accept immediate EOF, reject every chunk (including empty
+  // chunks), and never buffer or parse caller content. Fail closed on read errors.
+  if (request.body !== null) {
+    try {
+      if (request.bodyUsed) return reply(400, "body_not_allowed");
+      const reader = request.body.getReader();
+      try {
+        const chunk = await reader.read();
+        if (!chunk.done) return reply(400, "body_not_allowed");
+      } finally {
+        try {
+          await reader.cancel();
+        } finally {
+          reader.releaseLock();
+        }
+      }
+    } catch {
+      return reply(400, "body_not_allowed");
+    }
+    // Reading a stream is asynchronous: the approved window may have closed.
+    if (!stagingEmailConfig(process.env)) return reply(404, "disabled");
+  }
 
   try {
     const admin = createAdminClient();

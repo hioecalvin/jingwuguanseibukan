@@ -12,6 +12,15 @@ an account/event, or reset/requeue a failed message. The ordinary worker is unch
 No new migration is needed: the guard uses existing `email_outbox` fields and
 `mark_email_sent`. The recorded active migration inventory remains 006–058.
 
+Bodyless POSTs may arrive as either a null body or a closed empty stream. After
+authentication, the handler accepts immediate end-of-stream, rejects any chunk
+(even a zero-length chunk), cancels/releases the reader, and rejects read/lock/
+cancellation errors without logging caller content. It never buffers/parses a
+request body or trusts Content-Length to establish emptiness. After asynchronous
+stream validation it rechecks the approved time window before database work.
+This compatibility correction is locally verified, not yet deployed or live-send
+verified. It does not explain the earlier unauthenticated disabled-gate response.
+
 The gate requires all of the following, with no enabling defaults:
 
 - `STAGING_EMAIL_TEST_ENABLED=true`, `NODE_ENV=production`, `VERCEL_ENV=preview`.
