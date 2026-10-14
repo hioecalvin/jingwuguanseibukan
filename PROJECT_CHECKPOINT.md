@@ -1,5 +1,2911 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Finance browser release preparation — 14 October 2026
+
+Local review found that the live guarded suite never opened the subscription
+pages. Added Member/Admin/Super Admin non-mutating finance inspection: offline
+Playwright collection now finds 36 cases (12 per WebKit device), versus 27 before.
+The nine new live finance cases have NOT been executed against staging.
+
+Reviewed four read-only page-load RPCs using migration sources and the saved
+8 October routine catalog. Added only these reads to the staging browser guard.
+Moved RPC classification before the GET/HEAD fast path so those methods cannot
+bypass the allowlist. Payment/receipt/waiver mutations, quote requests, unknown
+RPCs, off-origin traffic and worker POSTs remain blocked.
+
+Verified: typecheck; 29 focused SQL/security/browser-guard tests; 11 shared
+browser/schedule/training guard tests (overlap, not additive); targeted lint and
+diff whitespace; offline collection of all 36 staging cases with fake credentials.
+Production-mode isolated build plus 210 local WebKit desktop/tablet/mobile browser
+tests passed with zero failures. These use mock data and are not live evidence.
+The first build stopped on sandbox trace-file EPERM before tests; the unchanged
+mock-only command passed under the Windows user identity. Both logs preserved.
+
+Initial inventory: 228 non-CLI-metadata changed/new paths before this review's
+report was added; nine `supabase/.temp` files excluded. Filename/size scan found
+no credential/dump filenames or files over 2 MiB, but this is NOT a complete
+secret-content/source review. Final intended-file review remains before commit.
+Git index empty; HEAD remains `319fb20`. No push, deployment, remote project or
+provider contact, migrations, protected-secret changes or outbound messages.
+
+Next approval: final intended-file review, commit/push release candidate, existing
+staging Preview deployment/alias, then exact staging read-only preflight, 11 host
+probes and 36 guarded browser cases using existing test accounts. No finance
+writes, SQL reapplication, account resets or production access. See
+`release/staging-060-verification-plan.md` for the boundaries.
+
+## Active migration/release contracts synchronized — 14 October 2026
+
+Local-only milestone on `release/v1-readiness-20260918`, HEAD still `319fb20`.
+Exact-byte copies of the already-applied 059 and 060 sources now live in the active
+`supabase/migrations` chain. Original reviewed copies remain in `supabase/pending`
+as explicitly historical evidence, NOT pending work. No SQL was applied this turn.
+Targeted LF checkout rules preserve the six exact-byte-pinned finance SQL files.
+
+Current release/recovery/bootstrap/cutover/rollback/window contracts require all
+55 migrations, 006–060, repository fingerprint
+`1fb8ea8facf8f4553d81d40f2ae808665290709a52367facd7a227be988ff8f2`.
+Historical pre-application finance checks retain an explicitly separate 006–058
+contract. Regression tests prove old evidence cannot pass current release gates.
+No prior backup, restore receipt or live acceptance evidence was relabelled.
+
+Verified locally: `npm test` (typecheck + 868 tests, zero failures/skips); final
+focused release/recovery/layout suite (102 tests, zero failures/skips, including
+one LF regression added after the full suite had loaded its tests); full ESLint
+and final targeted ESLint; isolated production-mode Next build using mock localhost
+configuration; synthetic PostgreSQL 17 finance/security/concurrency suite; current
+migration fingerprint and `git diff --check`. Disposable PG cluster stopped.
+No protected backup was read by the synthetic suite. Local results are not fresh
+live-browser, CI, provider-delivery or managed-recovery evidence.
+
+Next approval-dependent work: review/commit/push only the intended candidate,
+deploy the existing staging Preview and run guarded staging UI/role acceptance
+as described in `release/staging-060-verification-plan.md`. Separately obtain a
+fresh encrypted 006–060 backup and isolated recovery evidence using
+`recovery/RESTORE_060_PLAN.md`. No production readiness claim or production access.
+No remote project/provider contact, account/scheduler changes, messages, commit,
+push or deployment occurred this turn. Unrelated dirty work was preserved.
+Sanitized results: `operations/finance-active-chain-review-20261014.json`.
+
+## Post-commit finance/security acceptance PASSED — 14 October 2026, 17:31 Sydney
+
+The explicitly approved corrected attempt ran ONCE on staging eomubndonbetszdbhsrj.
+Fresh exact 006–060 ledger, accepted catalog, capability and three-account checks
+passed before the fixture. The pinned fixture/assertions reached the exact Z0590
+rollback sentinel (psql exit 3). No migration body was reapplied.
+
+Verified live coverage: selected-month payment reports remain pending until receipt
+confirmation; assigned Admin confirms both months; first overdue month is waived
+with audit; skipped unpaid debt remains; Member, scoped Admin, Super Admin and
+missing-claims boundaries; direct/cross-dojo financial bypass denial; transactional
+in-app notification recipients; unchanged original profiles, memberships,
+appointments, notifications, outbox and sequences. Fixture notifications were
+rolled back, with no external delivery/provider call.
+
+The reserved distinct READ ONLY TLS observer proves transaction aborted and the
+physical mutation backend absent. Independent before/after checks prove ZERO
+RESIDUE across all 67 public tables, six sequences, catalog, exact ledger (55
+migrations, 006–060), and all three original actors. All clients closed cleanly.
+Protected receipt hashes were independently rechecked after the runner completed.
+
+Consumed successful journal: C:\protected\jwg-finance-059-060-postcommit-acceptance-02.
+Verified at 2026-10-14T06:31:34.300Z. Receipt SHA256:
+a3b9f39770d1db02a31e47396e9645d85724ab724faa32c95c0e8df7cf66145e.
+Preserve all previous failed attempts and original application/reconciliation
+evidence. Never rerun this journal or reapply 059/060.
+
+This turn ran the corrected runner, offline import/PowerShell syntax checks and
+post-run receipt hash checks. The prior 858-test full suite, ten focused tests and
+synthetic PG17 results remain historical; they were not rerun in this live turn.
+No production/retired/disposable project, external provider, messages, Auth/account
+or scheduler/settings change, commit/push/deployment occurred. Existing source
+changes remain uncommitted and preserved.
+
+Next: synchronize the already-applied pinned 059/060 sources into the active
+repository migration chain and current release/recovery contracts, retaining
+historical 006–058 backup/restore proof unchanged. Then rerun local release gates
+and prepare staging UI/browser acceptance. This milestone is not production
+readiness or deployment approval. See operations/finance-postcommit-acceptance-review-20261014.json.
+
+## Observer connection gate resolved READ ONLY — 14 October 2026, 17:28 Sydney
+
+The observer timeout was reproduced with an inert local child: small
+BaseStream.WriteAsync calls completed into a buffer without delivering the query.
+The new finance-interactive-input.ps1 explicitly flushes while draining bounded
+output. Small-input and 500 KB input/700 KB output backpressure regressions pass.
+The original consumed runner/controller sources remain byte-for-byte unchanged;
+corrected -02 workspace copies are prepared, not executed for acceptance.
+
+A separate READ ONLY probe reached two distinct staging backends but its initial
+freshness check mixed UTC and local DateTime values. Direct parsing of preserved
+JSON confirms both responses were within one second, not stale. That failed
+capture is preserved. DateTimeOffset-based comparison now passes equivalent UTC,
+Sydney and Jakarta instants and rejects stale, future and malformed timestamps.
+
+Corrected staging-only READ ONLY probe verified at 2026-10-14T06:28:21.4106088Z:
+two distinct TLS backends, expected server identity, both readers closed cleanly,
+and a subsequent read-only probe confirms zero remaining witness sessions.
+Evidence: C:\protected\jwg-finance-observer-flush-readonly-02\capture.json.
+SHA256: 1fe2d35c8c2e910542b103a303d283e8f2b7c10f397988de5c674e386db58623.
+Ten focused pipe/guard/acceptance regression tests pass with no skips; offline
+timestamp tests and corrected runner syntax/import checks pass. The full 858-test
+result below is historical and was not rerun in this diagnostic turn.
+
+NO acceptance write test was retried. No migrations, settings, accounts, delivery
+providers, messages, production/other projects, push or deployment were touched.
+The new postcommit-acceptance-02 journal remains absent. Next requires approval
+for one corrected rollback-contained finance/role acceptance with fresh exact
+006–060 evidence, followed by independent closure and full zero-residue checks.
+Never reuse postcommit-acceptance-01 or either read-only diagnostic journal.
+Active migration/recovery-contract synchronization remains after acceptance.
+See operations/finance-observer-flush-review-20261014.json.
+
+## Post-commit preflight passed; observer stopped before writes — 14 October 2026, 09:14 Sydney
+
+Added a dedicated POST-COMMIT acceptance assembler/verifier for the full exact
+006–060 ledger, without reapplying 059/060 or relaxing historical 006–058 recovery
+checks. It reuses the pinned three-account fixture and SQL guard, requires the
+accepted committed catalog, and checks independent rollback/ledger/data/actor
+evidence. The old rehearsal/application entry points retain their existing gates.
+
+Verification: typecheck +858 unit tests passed (zero failures/skips), 12 focused
+tests passed, targeted ESLint and PowerShell/import checks passed. Synthetic local
+PG17 finance/role/waiver/repricing/concurrency/savepoint tests passed and the cluster
+stopped. Initial sandbox runs encountered Windows filesystem/identity restrictions;
+the successful full suite and local PG run used the real Windows account.
+
+Fresh staging-only READ ONLY preflight at 09:14 passed: exact 55 migrations
+(006–060), accepted catalog, 67 public-table baselines, six sequences and three
+unchanged bound test actors. The concurrently opened read-only observer then timed
+out with no output. The runner stopped BEFORE invoking any mutation client:
+mutationAttempted=false; no mutation.json exists. The rollback fixture did NOT run.
+Do not call this completed post-commit acceptance or post-test zero-residue proof.
+
+Consumed journal: C:\protected\jwg-finance-059-060-postcommit-acceptance-01.
+Preserve its claim, preflight and timeout evidence; do not reuse or automatically
+retry it. A separate READ ONLY connection diagnostic succeeded and confirmed zero
+remaining acceptance sessions. Server max_connections=60 is NOT evidence of the
+session pooler's configured capacity; the concurrent observer timeout cause remains
+unverified. No account/settings changes, messages/providers, production/other
+projects, migration reapplication, commit/push/deployment occurred.
+
+Next: resolve the independent-observer connection gate, then use fresh evidence and
+a newly approved one-attempt journal for post-commit acceptance. Active migration
+and recovery-contract synchronization still follows acceptance; do not relabel
+older backup/restore evidence. See operations/finance-postcommit-review-20261014.json.
+
+## Independent application reconciliation PASSED — 14 October 2026, 08:57 Sydney
+
+The approved corrected READ ONLY verification completed on staging
+eomubndonbetszdbhsrj. A distinct observer confirmed the original transaction
+committed, no original session remained, exact ledger names/statements/catalog
+cover 006–060 (55 migrations), and the accepted catalog matches. All 67 public
+table baselines, six sequences and three test actors' profile/membership/assignment
+digests are preserved. Both clients closed cleanly; all six evidence rows are
+READ ONLY with TLS. No migration was reapplied and no data was changed.
+
+New owner-only evidence: C:\protected\jwg-finance-059-060-application-reconciliation-02.
+Capture SHA256: 2385d414dcab5a679555f472b508d13b026f926e891632551dc7337029d8da8d.
+Prior failed capture and original application receipt were hash-checked unchanged.
+The original unverified-stop-no-retry outcome is preserved as history; the new
+verified.json separately records application-independently-reconciled. Never
+overwrite/reuse either journal or retry the already-applied migration transaction.
+
+The corrected asynchronous input/draining path passed an offline backpressure test
+with 500000 input bytes and 700000 output characters. Seven focused application
+assembly/evidence tests and syntax checks passed; the full 852-test suite result
+below is from the previous application turn, not rerun here.
+
+Next: prepare guarded POST-COMMIT rollback-contained finance/role acceptance using
+fresh exact 006–060 evidence and independent post-test closure/residue checks.
+That post-commit test has NOT run. Active repository migration/recovery contract
+synchronization remains outstanding before any deployment. This verification is
+not production readiness, a deployment, or new authorization for external changes.
+Production, other projects, delivery providers, email/push/monitors and schedulers
+were untouched. See operations/finance-staging-reconciliation-review-20261014.json.
+
+## Staging 059–060 APPLIED; final verification incomplete — 14 October 2026
+
+This section supersedes the older "unapplied" status below. One approved atomic
+application committed 059 then 060 on eomubndonbetszdbhsrj at approximately
+08:45 Sydney. Exact saved ledger names/statements now cover 006–060 (55 rows).
+DO NOT reapply either migration or rerun the consumed application journal.
+
+A fresh encrypted consistent database/Storage backup was verified at
+C:\protected\jingwuguan-recovery-source-20261014-ac02b357; all previous backups
+are preserved. Authenticated decryption and byte comparison passed; temporary
+plaintext was removed. Six stored logo files are included.
+
+The pinned finance/security fixture passed INSIDE the application transaction,
+then its savepoint rolled back before COMMIT. Original data across 67 public
+tables and six sequences was compared before commit, and saved post-commit
+snapshots match the accepted catalog, exact ledger and three original actors.
+However, all sequential checks reused the mutation backend. The strict independent
+observer gate correctly stopped before post-commit rollback acceptance.
+
+A separate two-connection READ ONLY reconciliation reported committed from a
+different backend and no remaining original session, but its capture then stalled.
+Only its exact locally-owned read-only psql child was stopped; all clients closed.
+Its partial evidence, original application claim/outcome and prior rehearsal remain
+unchanged. A bounded asynchronous input correction is prepared locally, NOT rerun.
+Do not describe the incomplete reconciliation as complete zero-residue acceptance.
+
+Local verification: typecheck +852 tests passed with no failures/skips before
+application; synthetic PG17 finance/concurrency and savepoint cleanup passed and
+cluster stopped. Three late-reconciliation verifier tests and targeted ESLint pass.
+A Windows ESM import error was corrected before any application claim/mutation;
+the actual migration transaction was attempted exactly once.
+
+Next: approve one corrected READ ONLY independent staging reconciliation in a new
+protected evidence directory. Then finish the already-requested post-commit
+rollback acceptance using fresh 006–060 evidence. Do not retry the migrations.
+The active repository recovery contract is still 006–058: promotion of the pinned
+059–060 files and contract synchronization remain pending verification. Deployment
+is blocked until that work is reconciled. No production/retired/disposable or
+delivery-provider contact, emails/push, scheduler enablement, Auth changes,
+commit/push/deploy occurred. See operations/finance-staging-application-review-20261014.json.
+
+## Live staging rollback rehearsal VERIFIED — 14 October 2026
+
+One approved 059–060 rollback-contained rehearsal passed on staging
+eomubndonbetszdbhsrj only. The fixed journal records verified-rollback at
+2026-10-13 21:17:09 UTC (14 October 08:17 Sydney), with zero failures. Fresh
+read-only prerequisites/baseline/ledger/identity/actor captures preceded the run.
+The unmodified pinned guard/account recheck, both migration bodies, three-account
+fixture and all assertions reached the exact Z0590 rollback sentinel (psql exit 3).
+
+Independent post-run checks prove transaction aborted and physical mutation backend
+gone, with unchanged catalog/data across 67 public tables and all 6 sequences.
+Ledger names/statements/catalog remain 006–058 (53 rows), and three bound actor
+profile/membership/assignment digests are unchanged. Observers used different
+backends from mutation; after-baseline also differs from before-baseline backend.
+All clients closed and the durable fixed-journal outcome was recorded. No retries.
+
+Acceptance covers first-month waiver, retained skipped debt, two-month pending
+report, assigned receiver confirmation, role/RLS boundaries, denied direct finance
+writes, expected transactional alerts/audit and preserved original records/outbox.
+No emails/push/provider calls, Auth changes, persistent migrations, production/
+retired/disposable contact, commit/push or deployment. 059–060 remain unapplied.
+
+Preparation initially stopped locally (zero database connections, empty unclaimed
+folders): the credential writer includes createdUtc, but the protected reader only
+accepted the legacy six-field shape. Added support for precisely that known extra
+field with strict UTC timestamp validation; unknown keys, malformed metadata and
+all wrong target/SID/hash/ACL cases still fail. Credential/password bytes unchanged.
+After tests, resumed only the same empty private folders before the first DB attempt.
+No claim/outcome or previous evidence was cleared, changed or reused.
+
+Verification: typecheck +845 tests pass, zero failures/skips; nine protected-transport
+and ten assembler/guard/fixture focused tests pass; lint and syntax checks pass.
+Full report: operations/finance-staging-rehearsal-review-20261014.json.
+Fixed evidence: C:\protected\jwg-finance-059-060-staging-rehearsal (do not reuse).
+Inputs: C:\protected\jwg-finance-rehearsal-inputs-749c443975264cb7ad714085b0c7dedc.
+Branch/HEAD remain release/v1-readiness-20260918 / 319fb20; unrelated work preserved.
+
+Next gate: separate explicit approval for permanent staging application of 059 then
+060 and guarded post-application acceptance. This successful rehearsal does not
+authorize migration application, deployment or production access.
+
+## Live read-only staging evidence passed — 13 October 2026
+
+Executed the approved read-only batch against eomubndonbetszdbhsrj only, using the
+existing protected staging credential, pinned Node/psql/CA and TLS verify-full.
+Seven client connections, no retries. All captures report read-only transactions
+and server TLS. Eight new owner-only files (including locally derived independent
+bindings) are preserved under C:\protected\jwg-finance-readonly-a823c8874a05448db72f977a3e684fee.
+All previous evidence and credential files were preserved.
+
+Verified at 08:05:49 UTC: baseline covers 67 public tables and 6 sequences; all
+53 ledger names/statements (006–058) match repository sources; three dedicated
+test-account identities, independent bindings and role eligibility pass. Required
+pooler capabilities, statistics visibility, baseline prerequisites and consistent
+server identity pass. Private loader and complete offline bundle assembly pass.
+This is NOT a login/security-write test or a successful live rollback rehearsal.
+The sequential connections reused one physical backend; independent post-mutation
+closure/reconciliation remains unproven and its distinct-backend gates unchanged.
+
+One-off capture/verifier syntax checks and seven focused assembler/guard tests
+pass. Application code unchanged; prior full typecheck +843-test result retained,
+not rerun this turn. See operations/finance-readonly-evidence-review-20261013.json.
+No database writes, messages, other-project/provider/production access, migrations,
+commit/push or deployment. 059–060 remain unapplied; HEAD remains 319fb20.
+
+Next requires separate explicit approval for one rollback-contained 059–060 staging
+rehearsal and fresh before/after captures with independent zero-residue, ledger,
+actor and session checks. Evidence freshness passed only at the recorded time:
+refresh immediately before any separately approved rehearsal; never retimestamp
+or reuse expired captures. Persistent migration application is a later approval.
+
+## Reviewed protected preparation entry point — 13 October 2026
+
+Added finance-reviewed-staging-preparation.mjs: exact fixed-target inputs load
+owner-only evidence, build the pinned rollback bundle and prepare the existing
+fixed-journal/protected controller. Caller SQL, source paths, raw evidence, custom
+adapters, journal overrides and framing/timeout changes are rejected. Resource and
+target values are copied before async reads. Preparation exposes only an immutable
+hash receipt, not SQL or private actor/baseline data, and does not dispatch work.
+
+The separately callable runApproved requires the exact project/nonce/bundle hash
+and rollback-rehearsal operation. This is a binding acknowledgement, NOT a substitute
+for human approval. Existing controller freshness, single-attempt, protected
+journal and independent rollback/ledger/actor reconciliation remain unchanged.
+No CLI or automatic execution has been added; readyToExecute remains false.
+
+Thirteen protected-loader/preparation tests and four assembler tests pass, along
+with focused ESLint. Synthetic owner-only files remain unchanged; nonexistent
+credential/client/certificate resources are never opened. All acknowledgement
+tests intentionally mismatch, so the real fixed journal and transport never run.
+Full npm test passes typecheck and all 843 tests, zero failures/skips. Whitespace
+checks pass and both pending migration hashes remain unchanged.
+
+Correction to the prior next-step wording: an unmodified complete successful
+staging guard cannot be exercised against the intentionally rejected loopback
+database. No bypass, fabricated live evidence or weakened guard was introduced.
+Positive live TLS/account/assembly execution remains unverified. The next external
+step requires separate approval for fresh read-only staging evidence (baseline,
+capabilities, ledger, actor bindings); it does not authorize a write rehearsal.
+No remote service, real protected credential/backup, migration, commit, push or
+deployment was used. 059–060 remain unapplied; branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20. Unrelated changes preserved.
+
+## Pinned rollback-only assembly — 13 October 2026
+
+Added an offline assembler with exact target/nonce/baseline/release-evidence inputs.
+It reads only four fixed repository sources, verifies their raw SHA256 bytes, and
+orders transaction/timeouts/assertions, server/account guard, xid8 identity, 059,
+060, three-account fixture, assertions and deliberate rollback sentinel. Reviewed
+migration transaction envelopes are removed; no COMMIT is included. No caller SQL,
+paths, framing, timeout overrides or guard bypass are accepted. Immutable output
+includes complete/component hashes and explicitly remains readyToExecute=false.
+
+Verification: npm test passed typecheck and all 840 tests, zero failures/skips.
+Ten focused tests and ESLint were rerun after aligning the fixed statement timeout
+to the existing launch plan's 15 seconds. Actual local PG17 rerun passed unmodified
+bundle rejection before identity/migration work, existing independent rollback
+baselines, simulated-ticket fixture assertions and all eleven concurrency cases.
+Both disposable clusters js-fee-test-oK3sdJ and js-fee-test-Ub8hiK are stopped.
+Original migration and local-fixture hashes remain unchanged; whitespace checks pass.
+
+This does NOT prove the complete positive TLS/guard/assembly path: that integration
+and a restricted connection to the protected executor remain next. Only afterward
+request separately approved fresh live evidence/rehearsal. No real credentials,
+protected source backups, remote services, migration, commit/push or deployment
+were used. 059–060 remain unapplied; branch/HEAD remain release/v1-readiness-20260918
+/ 319fb20. Existing unrelated working-tree changes were preserved.
+
+## Separate three-account fixture — 13 October 2026
+
+Added separate 059_060_staging_fixture.sql and assertions, preserving the original
+local-only fixture, fourth-account assertions and sequence-negative tests byte for
+byte. The new component requires a transaction-local nonce/binding ticket, owner
+role, read-write transaction and enabled assertions. The pre-work guard emits that
+ticket only after server/account checks; the fixture consumes it. This ticket is
+an ordering contract, not standalone authorization or proof of the target server.
+
+The fixture inserts only isolated classes, dojos, memberships, one assignment, rates
+and charges for the three independently bound accounts. It does not create accounts,
+modify profiles/original memberships/assignments, invoke monthly generators, or
+contain COMMIT. Assertions cover waiver, retained skipped debt, pending-before-paid,
+assigned receiver confirmation, three-role/missing-claim boundaries, exact alerts,
+and unchanged original profiles/memberships/assignments/audit/outbox/sequence state.
+The owner-only baseline is not granted to authenticated; only fixture IDs are shared.
+
+Six focused fixture/guard tests and focused ESLint pass. Actual local PG17 executes
+the new fixture/assertions with an explicitly simulated ticket, rejects missing or
+wrong tickets, duplicate actors and original-profile mutation, and independently
+verifies unchanged public catalog/data/sequences after every rollback. Existing
+finance regression and all eleven concurrency cases pass. Cluster js-fee-test-s2AGKM
+stopped; no protected source backups or real credentials read. Final npm test passed
+typecheck and all 836 tests, zero failures/skips. Focused ESLint and whitespace
+checks pass. Branch/HEAD remain release/v1-readiness-20260918 / 319fb20.
+
+The positive staging TLS guard remains unverified; simulated local tickets do NOT
+prove that path. Next: pinned rollback-only assembler and complete positive guard/
+assembly integration tests, followed by separately approved fresh live evidence.
+No remote access, migration, commit/push or deployment. 059–060 remain unapplied.
+
+## Staging pre-work identity/account guard — 13 October 2026
+
+Added an offline guard builder requiring the exact staging target, nonce, protected
+baseline and complete release evidence. It snapshots inputs and validates the
+existing evidence gates before generating SQL. In an already-open transaction the
+guard checks database/user, address/port/cluster, TLS, read-write state, nonce marker
+and baseline/account freshness before recomputing the pinned account SELECT and
+comparing the exact three-account snapshot. No account or migration writes occur.
+Application name is transaction-local; no local bypass or caller SQL is accepted.
+
+This is ONLY a pre-work component, not a complete fixture/assembler or executable
+release command. It returns completeBundle/readyToExecute false. The local fixture,
+fourth synthetic account and deliberate sequence-negative test remain unchanged.
+
+Three new offline tests pass. The unmodified generated guard compiles on local
+PG17 and rejects loopback/non-TLS and read-only contexts before account/migration
+work, with no surviving nonce session. Its positive staging/TLS path and account
+comparison execution remain unverified. Do not describe rejection as live success.
+
+The first PG17 run failed an existing retained-backend test's intended committed
+transaction assertion because Node/PostgreSQL clock ordering failed first. The
+synthetic retained-client model now witnesses release on the server clock and
+explicitly checks ordering; production clientFinishedAt validation is unchanged.
+Full PG17 rerun passed rollback, catalog/data/sequence checks and all eleven races.
+Both clusters stopped: failed js-fee-test-fJB1yB and successful js-fee-test-ZAvZdx.
+No protected source backups were read. Final npm test passed typecheck and all 833
+tests, zero failures/skips. Focused ESLint and whitespace checks passed.
+
+Next: separate three-account staging fixture/assertions and pinned transaction
+assembler; positive guard integration must be verified before proposing live use.
+No remote service, real credential, migration, commit/push or deployment. Candidate
+059–060 and original fixture hashes remain unchanged; neither migration applied.
+
+## Protected version-2 ledger/account captures — 13 October 2026
+
+Added exclusive CaptureReleaseLedger and CaptureReleaseActors modes to the existing
+protected preflight. Both require explicit read-only staging/session-pooler flags,
+private output and pinned Node/client/CA resources. They use the already reviewed
+server-bound queries without modifying historical SQL, v1 capture modes or files.
+Independent actor bindings must have a caller-provided matching SHA-256; invalid
+bindings are refused before client startup. No arbitrary SQL parameter was added.
+
+Create-once ledger-v2-capture.json and actors-v2-capture.json retain actual snapshots
+before semantic verification. Complete server identity, TLS, freshness, exact ledger
+content and independently bound eligible accounts are checked. Failed evidence or
+empty reservations are preserved and block reuse; public output is receipt-only.
+The complete evidence loader still separately enforces cross-capture server identity.
+
+Seven new focused tests pass (six capture tests plus one combined integration test).
+The combined test runs inventory, baseline, capability, ledger and actor captures
+through the protected preflight using synthetic DPAPI credentials and no-network
+inert clients, then successfully loads the complete private evidence set. Failures,
+timeouts, mixed modes, bad bindings and unchanged historical files are covered.
+Final regression: npm test passed typecheck and all 830 tests, zero failures/skips.
+Focused ESLint and git diff --check pass. Branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20; unrelated work remains untouched.
+
+Next: separately reviewed staging-only fixture/SQL assembler and final integration
+review, then explicit permission for fresh live evidence and any write rehearsal.
+No live provenance or Supavisor rollback behavior has been verified by these tests.
+No staging/production/provider contact, real credential access, migration, commit,
+push or deployment. Migrations 059–060 and all pinned SQL hashes remain unchanged.
+
+## Protected capability capture integration — 13 October 2026
+
+Added exclusive CapturePoolerCapabilities mode to the existing protected preflight.
+It requires explicit read-only staging/session-pooler flags, protected output and
+pinned Node/client/CA resources. The offline bridge supplies only the fixed query;
+no caller SQL is accepted. The bounded child uses the existing clean environment,
+TLS verification and read-only defaults. Output is saved create-once to
+capabilities-capture.json, then checked by the existing capability verifier.
+
+Invalid capability content is preserved privately and rejected; failed child I/O
+leaves its reserved file and cannot be retried into the same path. Public output
+contains only a receipt, never capability rows or credentials. Successful capture
+does not prove rollback, independent server closure, or authorization to rehearse.
+
+All 15 focused capture tests pass, including five new capability cases covering
+fixed-query planning, private success/no overwrite, mode/resource guards, semantic
+failure preservation, bounded output and timeout/client cleanup. The shared test
+exit probe now supports the exact baseline-inert executable as well as protected-inert,
+avoiding recyclable PID checks. No runtime process safeguard was relaxed.
+
+Final regression completed: npm test passed typecheck and all 823 tests, zero
+failures or skips. Focused ESLint and git diff --check passed. Branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20; unrelated changes remain untouched.
+
+Next: version-2 ledger/actor preflight capture and the separately reviewed staging
+fixture/SQL assembler. Capability SQL and migration/source hashes are unchanged.
+No staging/production/provider contact, real credential access, migration, commit,
+push or deployment; 059–060 remain unapplied. Live use requires fresh authorization.
+
+## Protected evidence file loader — 13 October 2026
+
+Added a local-only, read-only file boundary for the future finance rehearsal.
+The Windows reader requires an owner-only directory and file ACL, rejects reparse
+ancestors/files, holds a deny-write/delete read handle, bounds size before hashing,
+checks the receipt and strict UTF-8, and rechecks ACLs before returning private IPC.
+The Node loader independently checks the bounded receipt/bytes and validates all
+baseline, capability, version-2 ledger/actor and independent binding content.
+Failures have fixed messages without private evidence or paths.
+
+The additive prepareFixedProtectedStagingPoolerRollbackFromFiles entry reads only
+the five fixed capture filenames. It snapshots caller configuration and prepares
+the existing controller, never invoking it. No credentials, client/CA resources or
+actual staging journal are opened during preparation. Existing internal transport
+factories remain primitives, not reviewed release commands or SQL allowlists.
+
+Ten new synthetic tests cover unchanged files, ACLs, junctions, missing/tampered
+files, encoding/size limits, stale/wrong-server/version evidence, configuration
+mutation and preparation-only behavior. npm test passed typecheck and all 818
+tests, zero skipped. Focused ESLint passed. SQL unchanged; no PG cluster needed.
+
+Still required: protected preflight capture integration and a separately reviewed
+staging fixture/SQL assembler, then fresh live evidence with explicit authorization.
+File privacy and hash consistency do not authenticate remote provenance. This was
+local-only: no remote contact, real secrets, migration, commit/push or deployment.
+Migrations 059–060 remain unapplied; unrelated work is preserved.
+
+## Server-bound ledger/account evidence — 13 October 2026
+
+Completed the final read-only diff review blocked by the previous usage limit;
+branch/HEAD remain release/v1-readiness-20260918 / 319fb20. Preserved unrelated edits.
+
+Release evidence now requires version-2 ledger and actor envelopes with server
+address, port and cluster ID matching capability/public-baseline identity. Both
+preclaim and post-run checks reject missing or different server identity even when
+data matches. Historical SQL and version-1 evidence are unchanged and cannot be
+upgraded by copying metadata. Original source hashes and complete extended query
+hashes are pinned; the protected after-capture bridge accepts only the new queries.
+
+Added negative tests for old envelopes, incomplete clients, wrong query/source
+digests, wrong bindings and missing/different server identities. Actual extended SQL
+preserves ledger contents and actor digests on local PG17. Full local finance
+rollback and eleven races passed; js-fee-test-6EW7nC stopped, no source backups read.
+
+The first full suite hit EPERM in a test-only post-exit PID probe. A PID alone can
+be recycled on Windows and is not stable child identity. Replaced that probe with
+an exact synthetic-executable check, preserving protected clientClosed assertions.
+A negative test confirms it rejects a running child, ignores another executable
+path and passes after shutdown. No application process safeguards were changed.
+
+Final verification: npm test passed typecheck and all 808 tests, zero skipped.
+Focused evidence/controller tests (18), protected bridge tests (6), ESLint and
+whitespace checks pass. The initial PID-probe failure is not counted as a successful
+run; the full rerun passed after the test-only correction.
+
+Next: protected version-2 preflight capture/evidence loader and separate reviewed
+staging fixture/assembler. Content/hash/server matching still does not independently
+authenticate live provenance. No staging/production/provider contact, real secrets,
+actual staging claim, migration, commit, push or deployment. 059–060 remain unapplied.
+
+## Mandatory pooler capability content gate — 12 October 2026
+
+Added finance-pooler-capabilities.mjs with a fixed, bounded READ ONLY query and
+offline receipt/snapshot validation. Both fixed pooler factories now require its
+capture through releaseEvidence.capabilities. The gate checks function permissions,
+statistics visibility, self activity, TLS/read-only state and freshness. Before a
+journal claim it binds address/port/database/user/cluster to the public baseline.
+The query reads bootstrap xid 1 status and requires no xid assigned to its own
+transaction. Missing capability evidence, denied permissions, stale captures or
+server mismatch block dispatch. This does not prove live capture provenance.
+
+Actual query verified on disposable local PG17 in two independent read-only sessions;
+remote verification rejects loopback evidence. Full local finance rollback and all
+eleven concurrency cases passed; js-fee-test-2Lgmvu stopped. No source backups read.
+
+The first full-suite run exposed an unrelated intermittent provider-config test:
+OpenSSL can export a random P-256 scalar as 31 bytes, making an intended valid
+configuration fail length validation (and destabilizing pair-mismatch tests too).
+Reproduced with a leading-zero scalar;
+made positive/mismatch synthetic keys deterministic and added a 31-byte rejection
+regression. Production/provider validator and all real credential values unchanged.
+
+Final verification: npm test passed typecheck and all 804 tests, zero skipped.
+Focused ESLint and git diff --check passed. The earlier failing full-suite run is
+not counted as success; the complete rerun passed after the test-only correction.
+
+Next: protected capability capture/evidence-loading provenance boundary, then the
+separately reviewed staging fixture/SQL assembler. Existing ledger/actor captures
+still lack server-address/cluster metadata. No live services, real credentials,
+actual staging journal, migration, deployment, commit or push. 059–060 remain
+unapplied; branch/HEAD release/v1-readiness-20260918 / 319fb20 unchanged.
+
+## Mandatory pooler ledger/account gate — 12 October 2026
+
+Added finance-pooler-release-evidence.mjs and wired it into both fixed pooler
+factories. Pinned capture envelopes and independent three-account bindings are
+mandatory. Freshness, eligibility and exact 006–058 ledger content are rechecked
+before a journal claim; stale or invalid evidence cannot dispatch a client.
+
+Protected adapters/bridge now capture ledger and actors through unchanged pinned
+read-only SQL, reserving private phase files create-once. Independent comparisons
+run after the attempted mutation even when another check fails. Either ledger or
+account drift/failure prevents verified success, and both booleans are persisted in
+the sanitized journal. Raw SQL, account identifiers and transport errors stay private.
+
+Tests cover missing/stale/corrupt/changed evidence, clock expiry after preparation,
+ineligible actors, reused backends, pre-completion evidence and failures of either
+capture. The synthetic Windows bridge executes all five phases using inert clients,
+temporary owner-only ACL/DPAPI evidence and fake credentials. Fixed a test-client
+encoding defect by explicitly emitting UTF-8 so full migration text round-trips.
+
+Verification: npm test (typecheck +798 tests) passed, zero skipped; focused ESLint
+and git diff --check passed. No SQL/migration body changed, and no PostgreSQL cluster
+or remote service was started this milestone. No real credentials, staging claim,
+deployment, commit or push. Branch/HEAD remain release/v1-readiness-20260918 / 319fb20.
+
+059–060 remain unapplied. This is local gate implementation, not live acceptance.
+Next: capability/provenance gate (existing ledger/actor queries lack address/cluster
+metadata), followed by a separately reviewed staging fixture/SQL assembler. Only
+after local verification should fresh live evidence and explicit rehearsal approval
+be proposed. See operations/FINANCE_FINAL_BUNDLE_REVIEW_20261012.md.
+
+## Final-bundle review: real-client diagnostic fix and remaining gates — 12 October 2026
+
+Reviewed local rehearsal assembly, fixture/assertions, pinned candidate hashes,
+protected factory/adapters and separate ledger/actor verifiers. See
+operations/FINANCE_FINAL_BUNDLE_REVIEW_20261012.md for the precise gap list.
+
+Found a real transport incompatibility missed by inert tests: mutation psql used
+terse diagnostics, which omit SQLSTATE required by isExpectedRollback. Changed
+mutation plans/protected helper to verbose; read-only evidence remains terse.
+Added actual local psql regression proving terse rejection and verbose acceptance
+using the exact nonce/SQLSTATE sentinel. Raw diagnostics remain private.
+
+Full typecheck +792 tests pass, none skipped; focused lint/whitespace pass. Actual
+local PG17 diagnostic test, finance rollback and eleven races pass; temporary
+js-fee-test-uTNxyP cluster stopped. Existing fixture guards and migrations unchanged.
+
+Important correction of scope: protected transport wiring is locally complete, but
+there is no reviewed executable staging SQL bundle or complete release prerequisite
+gate. Current fixed factory does not require exact ledger/actor/capability evidence;
+its public-only after-baseline does not cover the separate migration ledger. Local
+fixture/schema/fourth-actor/negative-sequence setup must not be copied to staging.
+Required next work is mandatory outer evidence gating and independent ledger/actor
+reconciliation, followed by a separate staging fixture/assembler and local tests.
+
+No live services, real credentials, source backups, staging journal claim,
+migration, deployment, commit or push. 059–060 unapplied; branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20. No live rehearsal approval inferred.
+
+## Protected controller and private evidence wiring — 12 October 2026
+
+Added finance-protected-pooler-adapters.mjs and the internal PowerShell receipt
+bridge, wired through prepareFixedProtectedStagingPoolerRollback. The fixed factory
+offers no journal-directory, ACL, transport, comparator or closure overrides and
+does not dispatch or read credentials during preparation. The existing fixed
+attempt journal must be claimed before any child can start.
+
+Each bridge phase checks the private schema-2 staging journal, nonce, bundle digest,
+scope and unfinished state. Mutation input must match the journal digest. Exact
+private mutation/closure/baseline capture files are reserved create-once BEFORE
+credential use/client startup; empty or partial files are retained and block reuse.
+Only a small phase/hash receipt crosses stdout. Raw bounded client results stay in
+owner-only capture files; the adapter verifies receipt/content binding before use.
+Protected baseline envelopes are reconstructed from the original verified inventory
+and the independently captured result. No captured password is returned to Node.
+
+End-to-end tests exercise real Windows ACL/DPAPI, process bridge, pinned inert
+executable, controller and journal. Synthetic rollback succeeds with retained idle
+backend semantics. Wrong sentinel, committed transaction and changed catalog fail
+while independent baseline evidence is still collected. Missing claims/reused phase
+files prevent mutation; resource replacement after preparation prevents any client
+startup and persists failure. All started synthetic children are verified exited.
+Tests never invoke the real fixed C:\protected journal or a database executable.
+
+Verified: five focused integration tests, typecheck +792 tests (none skipped),
+focused lint and whitespace checks pass. An initial new-test field-name typo was
+corrected and both focused/full suites rerun successfully. No SQL/database behavior
+was exercised by the inert simulator; this is NOT live pooler or migration evidence.
+
+No real credentials, live services, actual staging journal claim, migrations,
+deployment, commit or push. Branch/HEAD remain release/v1-readiness-20260918 /
+319fb20; 059–060 unapplied. The protected wiring milestone is complete locally.
+Remaining before live use: final SQL/fixture bundle review, fresh exact ledger,
+actors/baseline/capability evidence, real pooler visibility/behavior verification,
+and explicit live-rehearsal approval. The internal primitive/bridge must not be
+used as a bypass of that review or the fixed factory.
+
+## Protected pooler credential/transport primitive — 12 October 2026
+
+Added finance-protected-pooler-process.ps1 as an internal library, not a live-run
+CLI or approval gate. It validates owner-only directory/file ACLs, local non-reparse
+paths, encrypted-record SHA256, bounded record size, Windows SID, project/purpose,
+and the exact staging PSCredential binding before using DPAPI credentials.
+Client/CA bytes are checked immediately before use and held under read-only file
+sharing through child completion. No supplied host, environment or connection
+arguments are accepted; modes match the independently tested launch plans.
+
+Only the child ProcessStartInfo receives PGPASSWORD. Its parent copy is removed
+after spawn and in cleanup; the SecureString is disposed. Plaintext strings are
+still managed memory: this is not a memory-zeroization guarantee. SQL is exact
+hash-bound strict UTF-8 (no BOM/NUL), written asynchronously. The process has bounded
+input/output, a five-second input deadline, thirty-second completion deadline and
+five-second termination wait. Failures discard partial output and return fixed
+categories. Exit 3 remains raw internal evidence, never a rollback success verdict.
+No retry is implemented. Successful raw output must remain private in the caller.
+
+Seven new tests use only newly generated synthetic DPAPI records and a compiled
+no-network executable. Both modes match the launch plans; secret isolation,
+wrong bindings/hashes/ACLs/paths/input, unknown parameters, rollback exit, oversized
+or invalid output and timeout cleanup pass. Every started synthetic child is
+verified exited. Fixed a culture-sensitive BOM comparison during testing by using
+ordinal comparison. Typecheck +787 tests pass, none skipped; focused lint and
+whitespace checks pass. Existing preflight and controller behavior is unchanged.
+
+No real credentials, live connections, source backup access, staging journal claim,
+migration, deployment, commit or push. 059–060 remain unapplied. Branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20. Final Node/controller bridge and private
+evidence capture wiring are still outstanding; the primitive alone does not enforce
+the fixed journal or SQL semantic review. Next: wire those boundaries using inert
+end-to-end tests, then obtain fresh capabilities/evidence and explicit live approval.
+
+## Pooler launcher resource/environment layer — 12 October 2026
+
+Added preparation-only finance-pooler-launch-plan.mjs. It accepts exact configuration,
+snapshots caller inputs before asynchronous checks, pins the existing staging
+session-pooler target and SHA256-reviewed client/CA files, and rejects path links,
+Windows UNC/device paths and alternate streams before reading those resources.
+Separate rollback-rehearsal and read-only-evidence plans fix TLS, psql startup flags,
+connection/statement/lock/idle timeouts and bounded output. Only four OS environment
+variables are carried forward; ambient secrets, PG connection overrides, startup
+hooks and proxy variables are not copied. Unknown config and ambiguous OS keys fail.
+
+The plans carry no password or execution authority, are frozen and explicitly
+require resource revalidation and credential loading before future dispatch. This
+is the launcher's resource/environment layer, NOT a completed protected live launcher.
+Client/CA hashes prove byte identity only, not executable trust or certificate validity.
+
+Verified: typecheck +780 tests pass, none skipped; nine focused launch/direct-plan
+tests and focused lint pass. A compiled inert Windows executable (no network or
+database code) receives both modes' exact arguments, environment and Unicode/CRLF
+input through the bounded runner. Mutation of config, resource replacement and
+untrusted path/environment controls fail. The interrupted prior whitespace check
+was rerun successfully; no local PG cluster was needed or started this turn.
+
+No live connections, real secrets, staging journal claim, migration, deployment,
+commit or push. Branch/HEAD remain release/v1-readiness-20260918 / 319fb20; 059–060
+remain unapplied. Next is protected credential loading and final dispatch/controller
+wiring with inert tests; capability/visibility checks, fresh evidence and separately
+approved real-pooler rehearsal remain outstanding.
+
+## Pooler controller and fixed journal integration — 12 October 2026
+
+Completed code/local-test assembly of the separate pooler path. The fixed factory
+uses the existing single staging journal directory with no path, mode, ACL or
+closure override. Preparation performs no filesystem claim or remote operation.
+Exact UTF-8 SQL bytes/hash and protected baseline bytes are copied before dispatch;
+baseline freshness is checked again before the create-once journal claim.
+
+Bounded client completion/input hash, nonce/XID identity, baseline server/time,
+independent read-only closure evidence, exact rollback sentinel and independent
+public catalog/data/sequence reconciliation must all pass. Invalid identities
+cannot reach the observer. Post-dispatch failures still attempt reconciliation;
+existing claims or failed persistence never permit automatic retry.
+
+Pooler journal schema 2 records closureKind=pooler-transaction, closureVerified and
+physicalBackendGone, rejecting the legacy sessionClosed field. An aborted/idle
+retained backend is not reported as physical shutdown. The direct path remains
+separate and its regression tests pass. Mock adapters prove assembly only, not
+SQL semantic safety, protected transport or real Supavisor behavior.
+
+Verified: 21 focused controller/journal tests; typecheck and all 775 tests pass,
+none skipped; focused lint and Git whitespace pass. Full local PG17 finance,
+rollback and eleven concurrency cases pass; js-fee-test-2v6UVW stopped. Branch/HEAD
+remain release/v1-readiness-20260918 / 319fb20; unrelated changes preserved.
+
+No live connection, real credential read, source-backup access, staging journal
+claim, migration, deployment, commit or push. 059–060 remain unapplied. Next:
+prepare the protected pooler launcher and transport adapters with inert local
+tests, then obtain fresh capability/visibility, ledger/actor/baseline evidence and
+separate live-rehearsal approval. This supersedes the journal-integration TODO below,
+not the remaining launcher, fixture or live-evidence requirements.
+
+## Explicit session-pooler preparation and closure model — 12 October 2026
+
+User approved option 2 (code/local tests only). Added finance-pooler-rehearsal.mjs
+with an exact session-pooler preparation target: staging eomubndonbetszdbhsrj,
+aws-0-ap-southeast-2.pooler.supabase.com:5432, project-qualified postgres user and
+verify-full TLS. It grants no execution authority and does not change the existing
+direct-only write-target validator or fixed staging journal entry point.
+
+Pooler identity captures pg_current_xact_id() as xid8 before work. A separate fresh
+READ ONLY observer must prove pg_xact_status is aborted, bind the nonce/transaction/
+server/cluster, use a different PID and follow client completion. A retained backend
+must be exactly idle, with matching backend start, no xact_start/backend_xid and no
+original LOCAL application marker. Committed/in-progress/unknown status, active or
+open reused transactions, PID replacement, stale/ambiguous evidence all fail.
+Result distinguishes rehearsalScopeClosed from physicalBackendGone and never claims
+baseline equality. The direct physical-backend-absence verifier remains unchanged.
+
+Actual disposable PG17 model kept a psql backend alive after rollback and proved
+acceptance of aborted/idle state plus rejection of open, committed and reused-open
+transactions. This models backend retention; it is NOT live Supavisor/pooler
+acceptance or proof of real frontend disconnect behavior. Global PostgreSQL XID
+allocation is expected and is not an application sequence mutation.
+
+Six new unit tests plus existing direct target/closure tests pass; focused lint
+passes. Full local finance/rollback and eleven races pass; js-fee-test-9S9Nye stopped.
+Final typecheck +771 tests pass, none skipped; whitespace checks pass. Branch/HEAD
+remain release/v1-readiness-20260918 / 319fb20; unrelated dirty work preserved.
+No live services, real credentials, source backups, migration, deployment, commit
+or push. 059–060 remain unapplied; staging journal not created/claimed.
+
+Remaining before live use: protected pooler launcher/journal integration with
+explicit closure semantics, capability/visibility checks for pg_xact_status and
+pg_stat_activity, real session-pooler evidence, fresh baseline/ledger/actors,
+cross-schema/resource review and reviewed staging fixtures. No implicit fallback,
+automatic retry or permission for a live write was added by this preparation.
+
+## Transport decision required before staging write integration — 12 October 2026
+
+Read-only local network inspection again found zero preferred non-loopback/non-link-
+local IPv6 addresses and zero IPv6 default routes. No DNS lookup or remote request
+was made. The prior direct-endpoint diagnosis was IPv6-only; that endpoint was not
+requeried today. finance-rehearsal-target.mjs still permits only the exact staging
+direct host, postgres user, port 5432 and verify-full TLS. The successful staging
+catalog audits used the separately approved read-only session-pooler transport.
+
+Do not continue towards an unusable direct-only live launch or silently convert the
+read-only pooler permission into write authority. User choice needed: provide an
+IPv6-capable execution connection/host, or approve preparation of an explicit
+staging session-pooler rehearsal path with reviewed identity/closure semantics.
+Pooler backend reuse must not be hidden by dropping the independent closure check.
+Code preparation would not authorize a live write; rehearsal and migration application
+remain separate approvals. No target/credential/fixture guard changed this turn.
+
+No application changes or new test run this step; last verified local result remains
+765 tests plus typecheck and disposable PG17 rollback/eleven-race acceptance.
+059–060 remain unapplied. No staging/production/provider contact, migration,
+deployment, commit or push. Local credential contents were not accessed.
+
+## Bounded execution tested on disposable PostgreSQL — 12 October 2026
+
+Added finance-bounded-process.mjs and integrated it into the actual local 059–060
+rollback rehearsal. The runner copies exact input bytes/arguments/environment,
+hashes input, uses no shell, bounds stdout/stderr by bytes and enforces a deadline.
+Timeout/pipe/output failures attempt child termination and wait for closure; an
+unconfirmed close stays a failure. Partial output is discarded on transport errors.
+Expected exit-code-3 rollback evidence remains available for semantic verification.
+Client closure does not replace the independent database-session closure check.
+
+Seven inert-process tests pass: Unicode/CRLF byte preservation, no inherited
+application secrets, input mutation, nonzero sentinel output, timeout/limits,
+invalid encoding/closed pipes/missing executable and reconciliation without retry.
+Node on Windows supplies some standard OS environment entries; this primitive is
+not a replacement for the protected launcher's credential/target/environment checks.
+
+Actual synthetic PostgreSQL 17 rehearsal passed with exact journal-bound input,
+independent session closure and unchanged catalog/row/sequence baselines. All eleven
+finance concurrency cases pass. Cluster js-fee-test-HuJU7Z stopped; no source backup
+or real credential read. The remote fixed journal remains uncreated/unclaimed.
+Final typecheck +765 tests pass (none skipped), focused ESLint and whitespace
+checks pass. Branch/HEAD remain release/v1-readiness-20260918 / 319fb20.
+
+This is a tested process primitive and local integration, NOT an enabled staging
+executor. The protected staging credential bridge, fresh evidence gates, reviewed
+staging fixture scope and transport remain to be integrated. Existing direct-only
+write and loopback-fixture guards are unchanged. No live connections, migrations,
+deployment, commit or push; 059–060 remain unapplied.
+
+## SQL/journal binding and fixed staging journal — 12 October 2026
+
+prepareJournaledRollback now requires the exact SQL bundle bytes and verifies their
+SHA-256 against the journal digest before any claim or dispatch. It rejects empty,
+oversized, invalid UTF-8, BOM and NUL input; preserves Unicode and CRLF bytes; and
+passes immutable SQL/hash/nonce/target to the captured execution adapter. Later
+caller changes to the Buffer, config or callback cannot alter the prepared payload.
+Hash equality binds input only: it is not SQL semantic review or server execution proof.
+
+Added finance-fixed-staging-journal.mjs: the future staging entry point pins
+C:\protected\jwg-finance-059-060-staging-rehearsal and the real Windows ACL checker.
+It accepts no directory, mode or ACL override, and retains the direct-only target
+guard. Preparation performs no I/O. The actual directory/claim was NOT created;
+no remote transport, credentials, automatic retry or live execution was introduced.
+
+Eight focused journal-controller tests pass, including immutable input, altered hash,
+invalid encodings, failure reconciliation, outcome-persistence failure and blocked
+reuse. Initial sandbox run failed on Windows realpath access; rerun with required
+local access passed without changing filesystem guards. Focused ESLint and Git
+whitespace checks pass. Final typecheck +758 tests pass, none skipped. No new local
+PostgreSQL, production-build or browser run was needed for this controller-only change;
+the new binding tests use mock transport and do not establish live executor acceptance.
+
+No live service or protected-secret access, migration, deployment, commit or push.
+Existing dirty work preserved; branch/HEAD remain release/v1-readiness-20260918 /
+319fb20. 059–060 remain unapplied. Remaining: protected executor and staging fixture
+integration, cross-schema/dependency/resource review, fresh evidence and separately
+approved live rehearsal. The fixed journal entry point alone is not execution approval.
+
+## Staging catalog prerequisites captured and reviewed — 11 October 2026
+
+Ran the approved single metadata-only READ ONLY capture on eomubndonbetszdbhsrj
+through its fixed session pooler, with pinned psql/CA/Node and verify-full TLS.
+Saved 70,738 bytes in a new owner-only protected directory. No member rows,
+sequence values, migrations, other projects, providers or messages were involved.
+See operations/finance-prerequisites-review-20261011.json for the sanitized receipt.
+
+Initial wrapper verification failed because PostgreSQL inet::text returned an IPv6
+host with /128. Stopped without reconnecting or retrying. Fixed the offline verifier
+to accept exact /32 IPv4 and /128 IPv6 host masks, while rejecting subnets, malformed
+addresses and loopback (including expanded/mapped IPv6). Original capture/query/hash
+are unchanged. Reverification passed at 08:37:31Z, within five minutes of capture.
+The original nonzero wrapper result remains recorded; it is not retroactively hidden.
+
+Catalog findings: 67 ordinary tables and six sequences; all relation SELECT checks
+pass. All 67 tables have RLS, 11 forced; the audited postgres role has BYPASSRLS,
+not superuser. pg_control_system EXECUTE privilege exists, but it was not invoked.
+All 12 inspected output/JSON-cast functions are in pg_catalog and executable.
+Eight noncatalog types are public enums. No unsupported public relation kind or
+detected prerequisite blocker. This is not an application-role security test.
+53 relations have unknown row estimates; estimates are not resource guarantees.
+
+Typecheck +754 tests pass (none skipped), focused ESLint and whitespace checks pass.
+No SQL query change or second live connection. No new build/browser run, migration,
+deployment, commit or push. Branch/HEAD remain release/v1-readiness-20260918 / 319fb20.
+
+Next: finish cross-schema/inheritance/resource review and protected executor/journal/
+fixture integration locally. Fresh row baselines/ledger/actors and any write rehearsal
+need their own approved scope; 059–060 remain unapplied. Empty prerequisite blockers
+do not mean production-ready, full baseline approval or independent server closure.
+
+## Baseline prerequisite catalog audit prepared — 11 October 2026
+
+Added fixed READ ONLY catalog SQL and exclusive CaptureBaselinePrerequisites mode
+to the protected preflight. It checks (without invoking) pg_control_system EXECUTE
+permission, public table/sequence SELECT permissions, role/RLS restrictions and
+unsupported relation kinds. It captures column type dependencies through domains,
+arrays, composites, ranges and multiranges, plus output functions and JSON casts.
+Only catalog metadata and definition hashes are captured: no member rows, sequence
+values, application function execution or full row hashing. Counts are estimates.
+
+The existing pinned psql/CA/Node, owner-only DPAPI, bounded pipes and create-once
+private evidence handling are reused. Errors preserve evidence; no automatic retry.
+Permission/custom-function findings remain blockers for review, not execution
+approval. Even an empty blocker list does NOT certify dependency safety or authorize
+a baseline read/write rehearsal. This narrow audit has no cluster identity claim;
+it must not substitute for full baseline identity, cross-schema dependency/resource
+review, fresh ledger/actors, independent closure or rollback reconciliation.
+
+Verified locally: typecheck +753 tests, none skipped; focused ESLint; whitespace
+checks. Fixed and retested PowerShell empty/singleton blocker array serialization.
+Actual synthetic PG17 follows the nested type graph and captures a deliberately
+throwing custom JSON cast without invoking it. Local finance/rollback and eleven
+concurrency cases pass; js-fee-test-9q3CaC stopped. No live services or real secrets
+read; no migration, deployment, commit or push. Branch/HEAD remain
+release/v1-readiness-20260918 / 319fb20; unrelated dirty work preserved.
+
+Next approval needed: ONE catalog-only read on staging eomubndonbetszdbhsrj via
+the fixed session pooler, saved in a new owner-only C:\protected directory, followed
+by offline review. No public/member row reads, migrations, messages, retries or
+other-project access. 059–060 remain unapplied; production readiness is not implied.
+
+## Independent closure and private journal integrated locally — 11 October 2026
+
+Added finance-session-closure.mjs with fixed mutation-identity and read-only closure
+SQL. Identity captures the nonce, PID, backend/transaction start, application name,
+database/server/cluster, session user, TLS and timestamp before rehearsal work.
+Closure requires a fresh distinct observer after client completion on the same
+server/cluster and no pg_stat_activity row matching either the recorded PID or
+nonce-bound application name. Active, idle, aborted and reused-PID cases fail closed.
+No cancellation/termination SQL, credential reads or remote transport introduced.
+An explicit synthetic loopback mode cannot validate remote identities.
+
+Actual local PostgreSQL testing proves rejection while the transaction remains
+open and acceptance only after client completion plus an independent absence check.
+The disposable 059–060 rollback rehearsal now uses this identity/closure verifier
+instead of only counting application-name matches. Missing identity cannot pass;
+the attempt controller still performs independent baseline reconciliation on errors.
+
+The same actual local rehearsal now claims and flushes an owner-only journal before
+mutation, hashes the exact SQL bundle, records the verified rollback outcome after
+closure/baseline checks, and proves that the existing claim blocks reuse. Windows
+ACLs are checked by the real adapter; the preserved journal contains synthetic
+evidence only. The synthetic temp location is NOT an approved remote journal path.
+The production/staging journaled wrapper and direct-only write guard are unchanged.
+
+Six new tests cover surviving backends, PID reuse, stale/wrong/TLS identity, ordering,
+injection, explicit loopback mode, and reconciliation/no-retry after closure failure.
+Typecheck +749 tests pass (none skipped), focused ESLint and whitespace checks pass.
+Synthetic PG17 finance/rollback and all eleven concurrency checks pass;
+js-fee-test-hf4qJp stopped. Branch release/v1-readiness-20260918 / HEAD 319fb20 unchanged.
+No live services, real protected credentials, deployment, commit, push or new build/
+browser run. 059–060 remain unapplied; local test DDL is not staging application.
+
+Remaining before remote rehearsal: current dependency/type/resource/permission
+review and fresh protected evidence; bind identity/closure capture to the actual
+remote executor and fixed private journal location; finalize staging fixture/role
+scope and transport without weakening existing guards. Pooler PID reuse deliberately
+remains a failure/uncertainty condition, not permission to retry or relax comparison.
+No additional staging or write approval is implied by this local milestone.
+
+## Protected inventory/baseline capture implemented locally — 11 October 2026
+
+Added exclusive CapturePublicInventory / CapturePublicBaseline modes to the
+protected preflight. Both require explicit read-only staging session transport,
+owner-only evidence, pinned psql/CA and an additional pinned Windows Node binary.
+The fixed Node bridge accepts only inventory planning, baseline planning from a
+verified private inventory, and offline verification; no arbitrary SQL or file-path
+input. It inherits no PG credentials, NODE_OPTIONS, tokens, PATH or proxy settings.
+The client still receives only the fixed staging transport and child-only password.
+
+CreateNew reserves public-inventory-capture.json or public-baseline-capture.json
+before any child starts. Input/output operations are bounded; failures kill/wait
+for the client, preserve empty/partial evidence, suppress raw errors and never retry.
+Valid JSON server responses are saved privately before semantic validation, so a
+wrong SSL/identity response is retained but cannot report success. Baselines retain
+the exact source inventory text and receipt hash, binding query generation and
+verification to the same bytes. New finance-baseline-capture.mjs applies the existing
+freshness/identity/inventory/table/catalog/sequence gates without relaxing them.
+Success means a verified read-only capture, NOT rollback or full managed-schema proof.
+
+Local tests caught and fixed two Windows PowerShell transport bugs: an async-write
+return object contaminating JSON, and default-codepage conversion of non-ASCII input.
+The helper now suppresses the return value and writes explicit strict UTF-8 bytes.
+Positive tests include Chinese identifiers, actual DPAPI/ACL plumbing, pinned runtime
+rejection and inherited NODE_OPTIONS isolation. Failure tests cover altered source,
+wrong receipts, stale data, server mismatch, malformed/oversized output, timeout,
+child closure, exclusive modes and no overwrite/retry. All clients are inert and
+have no networking. SQL now fixes standard_conforming_strings=on before quoted names.
+
+Final typecheck +743 tests pass (none skipped), focused ESLint and whitespace checks
+pass. Actual SQL still ran ONLY in synthetic PG17; baseline/finance/rollback and all
+eleven concurrency checks pass; js-fee-test-tujgGC stopped. No new remote baseline,
+real credential read, provider call, build/browser run, deployment, commit or push.
+Branch release/v1-readiness-20260918 / HEAD 319fb20 unchanged; 059–060 unapplied.
+
+Still required before live rehearsal: current dependency/type/resource/permission
+review (including managed pg_control_system availability and a quiet capture window),
+fresh protected ledger/actor/baseline capture, fixed attempt-journal integration and
+independent mutation-session closure. These new modes have NOT run against staging
+and do not authorize them. Existing local-only fixture and direct-only write-target
+guards remain intact; no pooler write execution or new migration authority added.
+
+## Public baseline adapter prepared and tested locally — 11 October 2026
+
+Extracted the existing public table/catalog/sequence query and content validation
+into finance-baseline-core.mjs so local and prepared staging paths use the same
+coverage. local-finance-baseline.mjs still requires 127.0.0.1 and independent PIDs;
+the direct-only write-target guard is unchanged. Shared SQL now includes capture
+time, session identity and backend SSL, with row_security=off so RLS cannot silently
+produce a filtered full-table fingerprint. Transactions remain repeatable-read,
+READ ONLY, pg_catalog search path, UTC/ISO and bounded statement/lock timeouts.
+
+finance-staging-baseline.mjs is an OFFLINE adapter: exact staging session-pooler
+read target, complete public inventory, generated-query binding and capture receipt
+hash checks. It rejects stale/non-TLS/local identity, unsupported foreign/materialized
+relations, inventory drift, incomplete table/sequence coverage, same backend,
+changed server/cluster and reversed capture order. Before/after comparisons detect
+row, catalog and nontransactional sequence drift. It explicitly does not claim
+remote provenance, full managed-schema coverage, rollback success or write readiness.
+No executable transport, credential access, retry or write API was introduced.
+
+Eight new unit tests pass. Actual generated SQL ran only against disposable local
+PG17: complete public coverage and equal independent snapshots passed; actual
+loopback/non-TLS captures were correctly refused by staging verification without
+adding a local bypass. Existing catalog drift, finance/rollback and eleven race
+checks pass; js-fee-test-Quj6J1 stopped. Initial full suite exposed one static test
+looking for DDL-hook SQL in its old file; changed it to inspect generated SQL with
+the same assertions. Final typecheck +734 tests (none skipped), focused ESLint and
+whitespace checks pass. No production build or browser tests run for this tooling.
+
+Next: integrate protected inventory/baseline capture (including live type/dependency
+and resource/permission review), combine fresh ledger/actor evidence, and bind the
+fixed attempt journal/session-closure adapters. Public coverage does not include
+managed-schema row fingerprints; do not present it as complete Supabase restoration
+or security acceptance. Sequence values are not MVCC and concurrent activity still
+invalidates equality. Fresh remote capture and any write rehearsal/application need
+separate approval. No remote services or real credentials accessed this step;
+059–060 remain unapplied, no deployment/commit/push, unrelated changes preserved.
+
+## Staging overlapping-session diagnostic passed — 11 October 2026
+
+Ran the explicitly approved diagnostic ONCE against eomubndonbetszdbhsrj only.
+Exactly two fixed session-pooler client connections; no fallback or retry. Existing
+protected DPAPI staging binding, pinned client/CA and verify-full TLS verified.
+Both server snapshots report postgres database/session user, READ ONLY and SSL.
+The primary stayed open while the observer saw its matching PID, backend start,
+transaction start, nonce-bound application name and idle-in-transaction state.
+The two backend PIDs were distinct. Both clients then exited cleanly.
+
+Saved create-once, owner-only evidence under
+C:\protected\jwg-finance-witness-6d8be23a157e4c499bbf8fe87af09142\session-witness-capture.json.
+Receipt SHA256 f791df33eca16adf8a5cb2881dc84ed85c1200c52ca73fd0eb8f8327fe2d6a39.
+Primary captured 07:36:27.604993 UTC, observer 07:36:27.906514 UTC. Offline verification
+immediately passed receipt/query hashes, fixed target, freshness and strict
+overlapping/distinct-backend requirements. Sanitized record:
+operations/finance-session-witness-review-20261011.json. No raw server rows or
+credentials printed; previous captures untouched.
+
+This establishes staging's ability to provide distinct overlapping read-only
+sessions; it does not retroactively change the earlier same-PID captures or prove
+future before/after independence. Client clean exits are not a separate server-side
+closure probe. Offline JSON integrity is not independent remote authentication.
+No member records, fresh ledger or full catalog captured in this diagnostic.
+No writes, migrations, messages, other projects/providers, deployment, commit or
+push. 059–060 remain unapplied. Prior local typecheck +726 tests unchanged, not
+rerun as part of this live read-only step. Remote baseline/catalog/journal integration
+and separately approved rollback-contained rehearsal/application remain next.
+
+## Protected session-witness capture ready locally — 11 October 2026
+
+Added exclusive CaptureSessionWitness mode to finance-protected-preflight.ps1.
+It reuses the existing DPAPI staging identity, exact session-pooler target,
+executable/CA hashes, verify-full TLS and child-only allowlisted environment.
+Before either client starts, it reserves an owner-only CreateNew evidence file.
+The primary READ ONLY transaction stays open during the observer query; both
+streams have 64 Ki-character limits and bounded waits. Finally paths stop both
+clients, clear credential environment copies and preserve failed reservations.
+No fallback, retry, arbitrary SQL or overwritten evidence is supported.
+
+finance-session-witness-capture.ps1 saves a private nonce/query-hash-bound envelope
+only after both clients exit cleanly. The receipt explicitly reports capture only,
+NOT semantic acceptance. finance-session-witness-capture.mjs then checks byte/hash,
+fixed target/query metadata, freshness and the existing overlapping/distinct-backend
+rules offline. Reused PID evidence is preserved but fails that gate. A receipt/hash
+does not independently authenticate remote provenance or prove server closure.
+
+Six new tests exercise actual Windows DPAPI/ACL plumbing with a compiled NO-NETWORK
+inert client: successful two-client capture, exact SQL equality with the tested JS
+builder, no overwrite, mode guards, reused PID rejection, early exit, stderr,
+oversized/trailing output, primary/observer/close timeout and child cleanup.
+Typecheck +726 tests pass, none skipped; focused ESLint and whitespace checks pass.
+Synthetic PG17 session/finance/rollback checks and all eleven concurrency cases
+pass; disposable js-fee-test-YV6i41 stopped. Branch release/v1-readiness-20260918,
+HEAD 319fb20 unchanged; existing unrelated work preserved.
+
+Next requires explicit approval for ONE read-only overlapping-session diagnostic
+on staging eomubndonbetszdbhsrj, with a new private evidence directory under
+C:\protected and offline receipt/witness comparison. No retry on failure. This
+diagnostic does not validate a future write rollback or relax its independence
+checks. Fresh catalog/baseline/journal integration and separate write/application
+approvals remain outstanding. 059–060 remain unapplied. This step read no real
+protected credentials and contacted no staging, production or providers; no
+build/browser run, migration, deployment, commit or push.
+
+## Overlapping read-only session witness — local proof, 11 October 2026
+
+Added finance-session-witness.mjs: fixed, nonce-bound read-only SQL keeps a primary
+transaction open while a second observer records its PID, backend start, transaction
+start, application name and idle-in-transaction state from pg_stat_activity. The
+verifier requires distinct PIDs, matching live-primary metadata, ordered/fresh
+timestamps, same server endpoint and read-only/SSL evidence (SSL excluded only for
+explicit synthetic loopback mode). No relaxed existing ledger/actor/baseline guards.
+No helper accepts arbitrary SQL; diagnostic uses no advisory locks or sleep query.
+Bounded statement and idle-transaction timeouts prevent an indefinite open primary.
+
+Five tests cover reused PID, missing/ended/mismatched peer, stale/unsafe metadata,
+injection and explicit local-only mode. Actual synthetic PG17 integration proves
+two overlapping distinct backends and clean primary closure. It uses no credentials
+or remote network; complete finance/rollback checks and eleven races also pass.
+Disposable cluster js-fee-test-BllPJJ stopped. Typecheck +720 tests (none skipped),
+focused ESLint and whitespace checks pass.
+
+This is a locally tested diagnostic design, NOT staging-pooler acceptance, proof of
+future before/after rollback independence, or a completed remote baseline adapter.
+Existing staging same-PID evidence is unchanged. Protected remote wrapper/evidence
+integration and explicit read-only diagnostic approval are required before staging
+use. Do not treat historical identity evidence as fresh authorization. Complete
+catalog/baseline/journal integration and separate write/application approvals still
+remain. 059–060 unapplied. No protected credential reads, staging/production/provider
+contact, build/browser run, deployment, commit or push this step.
+
+## Staging identities and actor eligibility verified — 11 October 2026
+
+Completed approved narrow read-only identity lookup for exactly the three dedicated
+test mailboxes/JS IDs (Member 0101, Admin 0002, Super Admin 0001). Each expected
+mailbox maps to one Auth UUID and one matching active/living profile with the
+expected role. No passwords, tokens, unrelated Auth rows or raw emails returned.
+Saved verified independent UUID bindings privately, then ran one actor capture.
+Both fixed staging session-pooler connections passed verify-full TLS, backend SSL
+and server READ ONLY. Exactly two client processes, no remote retry.
+
+Protected evidence is in C:\protected\jwg-finance-identities-802f8e8f99d44b19a92b527c2e50a4ea:
+identity-capture.json, bindings-capture.json and actors-capture.json. New owner-only
+directory, CreateNew/flush/readback checks; previous evidence unchanged. Offline
+receipt/binding hashes, target/query metadata, freshness, identity and account
+eligibility passed. No UUIDs or secrets printed. Sanitized evidence is recorded in
+operations/finance-identity-actor-review-20261011.json.
+
+Important limitation: separate client processes received the SAME server backend
+PID from the pooler. An extra distinct-PID check initially rejected the combined
+report. Offline diagnosis confirmed hash/ordering/content checks pass, but different
+backend proof is NOT established. No remote retry or relaxation of existing
+independent-backend rollback gates. These reads are identity/eligibility evidence,
+not Auth login, behavioural RLS tests or a rollback-residue result.
+
+Added hash-pinned CaptureIdentity mode, narrow SQL, offline binding validator/save
+and synthetic integration coverage. Local tests caught a file-hash helper issue;
+hashing the exact in-memory bytes fixed it before live use. Typecheck +715 tests
+(none skipped), focused ESLint and whitespace checks pass. Exact SQL passed in
+synthetic PostgreSQL, including duplicate Auth detection and no password/unrelated
+data output; full finance/rollback suite and eleven races pass. js-fee-test-XxQvvu
+stopped. No build/browser run, deployment, commit or push.
+
+No account/membership/database writes, password reset, login, message/provider or
+production/other-project contact. 059–060 remain unapplied. Remaining: fresh catalog,
+complete remote baseline/journal integration and independent reconciliation session
+proof before separately approved rollback writes and permanent application.
+
+## Identity-binding prerequisite located — offline review, 11 October 2026
+
+Reviewed the existing security-test runner and account-rotation audit implementation.
+run-staging-security-tests.mjs pins the dedicated Member/Admin/Super Admin mailboxes
+and JS IDs. security-test-account-rotation.mjs already defines the independent check:
+Auth email must resolve to exactly one user, whose UUID must match exactly one
+profile with the expected JS ID, active/living state and expected resolved role.
+These are useful independently known identifiers, not independently verified UUIDs.
+The inspected saved audit receipt and local scripts do not supply a usable saved
+UUID binding. Do not infer UUIDs or derive expectations from the actor capture.
+
+No password file was opened or credential decrypted in this review. C:\protected
+was inspected by filenames only for account/identity evidence. No live audit, login,
+password rotation, Auth token generation, migration, test suite, build, deployment,
+commit or push ran. Prior verified result remains 711 local tests, not rerun here.
+
+Next external prerequisite requires explicit approval: a read-only staging lookup
+limited to the three already recorded dummy test mailboxes and JS IDs (0101, 0002,
+0001), returning only UUID/identity/state/role evidence, never password/token fields.
+Save a verified mapping in a new owner-only C:\protected folder, preserving existing
+files; then run the already prepared read-only actor capture and offline comparison.
+No all-user Auth export, login, messages or account changes are needed. On mismatch,
+preserve evidence and stop without creating accounts or retrying.
+
+This clears only actor identity/eligibility if successful. Complete remote baseline
+and journal integration plus fresh catalog evidence remain outstanding; the current
+baseline adapter deliberately accepts only synthetic loopback targets. 059–060
+remain unapplied and are not authorized by the proposed read-only checks.
+
+## Rollback catalog coverage hardened — local verification, 11 October 2026
+
+Reviewed saved September staging account audit: it records successful Auth/member
+number/active-living/role checks but does not provide usable independent UUID
+bindings. No bindings were invented or taken from the candidate actor capture.
+Actual test-account binding remains outstanding; no credential or live account read.
+
+Closed a concrete local baseline gap: pg_rules excludes internal view _RETURN
+rules, so view-body changes were not necessarily covered. local-finance-baseline.mjs
+now explicitly includes view definitions, relation security/options/partition
+metadata, default privileges, database-role settings, inheritance and role connection
+limits/expiry. Search path, timezone and date formatting are pinned during capture.
+No password catalog is read. Existing loopback-only guards remain unchanged; this
+is not a remote baseline adapter or proof of complete managed-Supabase coverage.
+
+Added real local catalog-drift controls for view body, view security option, default
+ACL, role connection limit and database-role setting. Each changed comparison was
+rejected without relying on row-count/content differences. Only synthetic probe
+objects were removed afterward. Existing rollback/role/ledger/actor/sequence tests
+and all eleven finance concurrency scenarios passed. Disposable PostgreSQL cluster
+js-fee-test-HHhT5U is stopped. Source backups were not read.
+
+Initial test dispatch was blocked by approval-service usage capacity before any
+execution. After the user continued, the same approved local tests ran successfully:
+typecheck +711 tests (none skipped), focused ESLint and whitespace checks pass.
+No staging/production/provider contact, migrations, deployment, commit or push.
+059–060 remain unapplied. Next: independently verified actor bindings, fresh scoped
+catalog evidence and complete remote baseline/journal integration before separately
+approved rollback-write rehearsal. No application build/browser rerun this step.
+
+## Protected actor-capture integration — local verification, 11 October 2026
+
+finance-protected-preflight.ps1 now supports exclusive -CaptureActors mode with
+-ConfirmReadOnlyStaging, -ConfirmSessionPooler, -EvidenceDirectory and a private
+-ActorBindingsPath. Before client startup it checks the staging-bound, three-UUID
+binding document, pins the reviewed actor SQL bytes and reserves actors-capture.json
+using the existing owner-only ACL/CreateNew/flush/readback evidence guard. Ledger
+mode remains separate; callers cannot mix capture modes or supply arbitrary SQL.
+Captured JS IDs and UUIDs must match the independent binding. Receipt explicitly
+leaves actorEligibilityCompared=false until the offline comparison succeeds.
+
+New finance-actor-capture.mjs verifies capture receipt SHA256, binding-file SHA256,
+query SHA256 and fixed staging/session/TLS metadata, then applies the tested actor
+eligibility/freshness verifier. It refuses local-probe bypass and does not report
+JSON/hash checks as independent remote provenance, Auth login or live role security.
+Actual binding UUIDs must come from independently verified dedicated identities;
+no real binding file was created or read in this step.
+
+Seven tests added. Full typecheck +710 tests (none skipped), focused ESLint and
+git diff --check pass. Real Windows PowerShell integration uses synthetic DPAPI
+credentials, real temporary ACLs and a compiled inert client with NO networking
+code. It checks exact arguments, query bytes and child environment, returns fixture
+data, and verifies protected capture plus offline comparison. Repeated evidence
+use is blocked before client startup; invalid binding starts no client; wrong actor
+response preserves an empty reserved file and cannot retry. This is NOT live TLS,
+database connectivity or staging acceptance evidence. Synthetic test artifacts were
+removed; existing protected evidence and credentials were untouched.
+
+No remote contact, migration, application build/browser/PG harness rerun, deployment
+or commit/push. Actual SQL was unchanged from the preceding successful local PG17
+milestone. 059–060 remain unapplied. Remaining: independently verified real actor
+bindings, explicitly approved fresh catalog/actor captures, complete independent
+remote baseline reconciliation and fixed attempt-journal integration, followed by
+distinct rollback-write and persistent-application approvals.
+
+## Dedicated actor binding — local preparation, 11 October 2026
+
+Added fixed tests/sql/059_060_actors_readonly.sql for JS IDs 0101, 0002 and 0001.
+It uses repeatable-read READ ONLY, fixed pg_catalog search path and timeouts; reads
+only these profiles and their memberships/assignments. Returns minimal identity/
+eligibility fields and SHA256 row-set digests, not raw contact details. No Auth
+reads, application helper calls, account changes or arbitrary caller SQL. Query
+SHA256: 723e23d15bfcdff8127a39f15550154c4b68e03fc9c30e83fbb231677ae04d80.
+
+finance-actor-evidence.mjs requires three distinct independently supplied UUIDs
+matching the exact JS IDs; active/non-deceased profiles; correct Super Admin flag;
+eligible Member/Admin memberships; no active Admin appointment for Member; and an
+active assignment for Admin. Rejects stale, incomplete, wrong-target metadata and
+duplicate identities. Independent before/after comparisons detect changes to full
+profile, membership and assignment digests. Output excludes UUIDs and never claims
+login, live role-security success or write authority. Supplied bindings must come
+from independently verified dedicated identities, NOT be copied from the same
+capture. Counts are eligibility checks, not complete dojo-scope authorization.
+
+Seven new tests pass. npm test: typecheck and 703 tests passed, none skipped.
+Focused ESLint and whitespace checks pass. Actual prepared query executed in a
+separate synthetic loopback PG17 database: equality, changed-private-field,
+disabled/deceased, missing active Admin assignment and duplicate-JS-ID controls
+passed. Raw private fixture notes were not returned. Existing remote fixture
+guards and migration drafts were not relaxed or changed.
+The full synthetic finance/rollback/role suite and all eleven concurrency cases
+also passed; disposable cluster js-fee-test-gSeezg is stopped.
+
+No protected credentials read or remote systems contacted. This actor query has
+NOT run on staging and is not wired into the protected remote capture wrapper.
+Remaining: independent real actor UUID binding, fresh catalog/actor evidence,
+complete remote baseline/journal integration and separately approved rollback-only
+writes. 059–060 remain unapplied. No build/browser run, deployment, commit or push.
+
+## Full staging ledger captured and compared — 11 October 2026
+
+Completed ONE approved read-only full-ledger capture against eomubndonbetszdbhsrj
+through its bound session-pooler endpoint. Pinned client, CA and query verified;
+verify-full TLS, backend SSL and server READ ONLY passed. Saved only to new private
+current-user-only C:\protected\jwg-finance-ledger-b3aad0b7d54f45cbba6e2db666d622eb\ledger-capture.json.
+CreateNew reservation, flush/readback and offline capture-hash checks passed.
+No raw SQL bodies or credential values printed; all prior evidence preserved.
+
+Offline comparison within the five-minute freshness window passed the repository
+migration contract and all 53 migration versions, names and SQL bodies (006–058),
+using the existing narrowly normalized SQL matcher. Captured ledger-table catalog
+digest is evidence for later comparison, not an independent full-schema audit.
+Sanitized receipt: operations/finance-full-ledger-review-20261011.json.
+
+Local setup encountered a host PowerShell compatibility issue before any connection;
+direct invocation of the tested Windows PowerShell runtime verified private ACLs.
+Exactly one remote capture then succeeded; no retry or additional remote probe.
+
+No database writes, password reset, credential changes, member/Auth reads, provider,
+production/other-project access, deployment, commit or push. No application code
+changed or full local suite rerun (prior 696-test result unchanged). Migrations
+059–060 remain unapplied. Remaining: complete catalog/actor binding, independent
+remote baseline reconciliation and fixed protected journal integration; distinct
+approval is still required for rollback-contained writes and permanent application.
+
+## Protected ledger capture — local verification, 11 October 2026
+
+Added an explicit full-ledger mode to finance-protected-preflight.ps1. It requires
+the existing staging-only read-only/session-pooler confirmations, pinned client/CA,
+and a reviewed fixed SQL hash. No arbitrary SQL or write executor was added.
+The query now records pg_stat_ssl for the current backend; its current SHA256 is
+2c80c6b732c80ff9ad3ad645ef672a31a3dcccd5804ab675a62dcd7405eed3e9
+(supersedes the earlier query hash recorded below).
+
+New finance-private-capture.ps1 verifies current-user-only directory/file ACLs and
+non-reparse paths, reserves ledger-capture.json with CreateNew before client start,
+and blocks reuse of existing, empty or partial evidence. Saves UTF-8 JSON only after
+ACL revalidation and a 4 MiB size check, flushes to disk and verifies readback.
+Raw SQL bodies stay in the private file; stdout contains only a sanitized receipt.
+The receipt explicitly says ledgerContentsCompared=false: successful capture is
+not successful body verification or authorization for a write rehearsal. Client
+output is buffered before the size check, not a bounded streaming implementation.
+
+Four real Windows ACL/file tests and two preflight guard tests added. All 14 focused
+tests pass; npm test passes typecheck and 696 tests (none skipped). Focused ESLint
+and git diff --check pass. The synthetic-only PostgreSQL 17 harness passes, including
+ledger query checks, role/rollback/sequence checks and eleven finance races. Cluster
+js-fee-test-LWccYS is stopped. No application build/browser rerun was needed for
+these local operational scripts.
+
+No protected real credentials read, remote connection, migration, deployment or
+commit/push in this step. Full-ledger capture has NOT run on staging. Next: approve
+one read-only staging capture to a new private evidence directory and verify its
+full bodies offline with the existing verifier, preserving incomplete evidence on
+failure and never automatically retrying. Fresh catalog/actor binding, complete
+independent remote baseline reconciliation and fixed journal integration remain
+required before separately approved rollback-only writes. 059–060 remain unapplied.
+
+## Full ledger-content and drift checks — local milestone, 11 October 2026
+
+Prepared tests/sql/059_060_ledger_readonly.sql: repeatable-read READ ONLY, fixed
+pg_catalog search path and time limits, full stored migration version/name/body
+capture plus a digest of the ledger table's definition, ACL/RLS, constraints,
+indexes, triggers and policies. Does not read member/Auth rows or invoke application
+functions. Raw statement bodies must remain in protected evidence, not logs.
+Query SHA256: a6e90e60a8288280e68b69a1a13f25f3cb593621498f5c0be2f83a7ed1783a93.
+
+Added offline finance-ledger-evidence.mjs, reusing existing release-contract,
+ledger-fingerprint and SQL comparison logic. Requires all 53 versions 006–058,
+matching names and full SQL bodies, valid read-only/session metadata, and a capture
+within five minutes (at most 30 seconds future clock skew). Independent before/
+after captures must have different backend PIDs and ordered timestamps; stored
+statement or ledger-catalog drift is surfaced. Output contains hashes/flags only.
+JSON metadata is NOT remote identity proof: target/TLS must be bound independently
+by the future capture wrapper. Verifier never grants write/rehearsal authority.
+
+Seven new tests, typecheck +690 tests, focused ESLint and git diff --check pass.
+Actual fixed query passed in the disposable loopback PG17 catalog database with
+all 53 repository migration bodies stored as synthetic ledger data (not applied
+there). Independent equal captures passed; column-drift and altered-body negative
+controls failed closed. Existing local rollback/role/notification/sequence checks
+and all eleven concurrency scenarios also passed. Cluster js-fee-test-gZhb1Y stopped.
+
+No staging/production/provider connection, credentials, migrations, deployment or
+commit/push this milestone. No browser/build rerun. The new full-content query has
+NOT run on staging: last live evidence remains TLS/login/READ ONLY and versions
+006–058 only. Next: protected remote capture integration plus fresh full ledger,
+catalog/actor and independent baseline binding; then separately approved write
+rehearsal. 059–060 remain pending/unapplied.
+
+## Staging read-only connection verified — 11 October 2026
+
+Completed the explicitly approved credential refresh and ONE read-only retry.
+Created a new Windows-DPAPI record at
+C:\protected\jwg-finance-staging-credential-40228b0a8abc4a82bff0c0379466bd9b\staging.credential.xml
+from the existing staging-bound STAGING_DB_URL password. Verified sole current-user
+full-control ACL, decryption round trip and exact unchanged hashes for the source
+environment and old encrypted credential. No secret values emitted or server
+password reset. Original record and all prior evidence preserved.
+
+Local setup corrections: used explicit String.Split overload for Windows PowerShell;
+then avoided unnecessary owner reassignment when securing the newly created empty
+directory. Its correct owner was verified and only its DACL restricted before any
+credential write. No existing directory/file permissions changed.
+
+Single live session-pooler probe returned exit 0: verify-full TLS passed, login
+succeeded, database/session user are postgres, server READ ONLY verified, and
+ledger versions are exactly 006–058. No database writes, messages, provider or
+production/other-project contact. This is version-only ledger evidence, not a fresh
+comparison of migration statement bodies/catalog/actor scope. Receipt:
+operations/finance-session-preflight-success-20261011.json.
+
+059–060 remain unapplied. Next work is complete remote baseline/reconciliation,
+fresh complete ledger/catalog/actor binding and a fixed owner-only attempt journal;
+write rehearsal and permanent application still require distinct approval.
+No application/probe code edits, build/browser/full-suite rerun, deployment or
+commit/push this milestone; prior full suite remains 683 passed. HEAD 319fb20.
+
+## Session-pooler preflight: saved credential mismatch — 11 October 2026
+
+Staging management GETs confirmed ACTIVE_HEALTHY and the exact pooler host
+aws-0-ap-southeast-2.pooler.supabase.com, postgres.eomubndonbetszdbhsrj user and
+postgres database. API lists transaction port 6543; official Supabase docs specify
+session mode on the same host at port 5432. No endpoint/settings change performed.
+
+Added explicit ConfirmSessionPooler to the fixed read-only probe. It requires live
+read-only mode, pins this host/project-qualified user/session port, preserves
+verify-full TLS and never falls back on failure. Existing direct-only Node target
+and mutation guards were not relaxed. Eight focused tests, typecheck +683 tests
+and focused lint pass; no build/browser or local SQL rehearsal rerun.
+
+One session-pooler probe reached the endpoint but exited AUTHENTICATION_FAILED.
+No retry; login and ledger remain unverified, no SQL writes/migrations. Local-only
+comparison then found the DPAPI password (record last written 31 August) differs
+from the staging-bound STAGING_DB_URL password in C:\protected\jingwuguan-staging.env.
+No values were displayed/changed; environment password acceptance is NOT verified.
+Receipt: operations/finance-session-preflight-20261011.json.
+
+Next approval: save a new owner-only encrypted credential from the existing
+staging-bound STAGING_DB_URL value, preserve the old record, and perform one
+read-only session-pooler preflight. No remote password reset is proposed. No
+production/other-project/provider access, messages, configuration changes,
+deployment, commit or push. 059–060 remain pending; rehearsal/application still
+require distinct authority and complete remote safety integration.
+
+## Read-only DNS diagnosis completed — 10 October 2026
+
+Approved project-metadata GET confirmed staging eomubndonbetszdbhsrj is
+ACTIVE_HEALTHY in ap-southeast-2 and advertises the exact configured direct host.
+DNS-only A query returned no IPv4 address (SOA response); AAAA returned one IPv6
+address. Windows system resolver reports HostNotFound. Local interface/route
+inspection found zero non-loopback/non-link-local IPv6 addresses and zero IPv6
+default routes. The healthy direct endpoint requires an IPv6 path unavailable here;
+this does not establish whether the saved database password is accepted.
+
+Sanitized evidence: operations/finance-staging-dns-diagnosis-20261010.json.
+Used a fixed-project, no-redirect GET wrapper in workspace staging-readiness;
+management credential stayed in memory, raw API bodies/secrets were not printed.
+No database login retry, SQL, settings/routing changes, password reset, migration,
+production/other-project/provider access or messages. Read public Supabase docs,
+which document session pooling on port 5432 as the IPv4-compatible alternative.
+
+Next proposed approval: inspect the exact staging session-pooler metadata, prepare
+an explicitly bound session-pooler read-only probe with verify-full TLS, then run
+one preflight. No fallback is enabled and no pooler endpoint is guessed. Existing
+direct-only guards remain unchanged. 059–060 remain pending; remote write rehearsal
+and application are separately gated. Prior full suite: 681 passed, not rerun for
+this metadata/documentation-only milestone. No commit/push or deployment.
+
+## Approved diagnostic retry: DNS failure — 10 October 2026
+
+Ran exactly one explicitly approved revised read-only staging probe. Exit 1 with
+DNS_FAILED: the PostgreSQL client could not resolve the fixed direct hostname
+db.eomubndonbetszdbhsrj.supabase.co. No database connection/login was reached;
+TLS, credential server acceptance and ledger remain unverified. This is not
+evidence of a wrong password. The first generic failure's cause remains unknown.
+
+Saved separate non-secret receipt operations/finance-readonly-probe-retry-20261010.json;
+earlier evidence preserved. No additional retry, alternate routing, password reset,
+database/settings changes, migration, messages, production or provider contact.
+No code changes, commit or push. Previous full test result remains 681 passing;
+not rerun for this documentation-only update.
+
+Next proposed action: read-only inspection of this staging project's status and
+advertised direct hostname, plus DNS/network diagnosis. Not yet performed; obtain
+approval before expanding the probe. Do not assume a pooler fallback is authorized.
+059–060 remain unapplied; no write rehearsal or application approval is implied.
+
+## Approved read-only probe stopped — 10 October 2026
+
+Ran the approved fixed staging TLS/login/ledger probe once using the previously
+checked credential/client/CA paths and pinned hashes. Exit 1 with generic sanitized
+FINANCE_PREFLIGHT_FAILED. This version did not retain failure-stage evidence; the
+cause and whether a server connection was established remain unknown. TLS, login,
+server read-only state and ledger are NOT verified. No retry or alternate routing.
+Preserved the exact non-secret outcome in
+operations/finance-readonly-probe-attempt-20261010.json. No write SQL, migrations,
+password resets, production/provider access, messages or configuration changes.
+
+Improved local diagnostics afterward: fixed phase codes and allowlisted client
+error categories (authentication/TLS/DNS/network/unknown); never emit raw error
+strings or secrets. Six focused preflight tests, full typecheck +681 tests and
+focused ESLint pass. Existing synthetic DPAPI/ACL rejection tests now check phase
+codes; new classifier test covers known/unknown/empty synthetic errors. No live
+retry of the changed probe. No build/browser/local PG rerun, commit or push.
+
+Next requires approval for ONE revised read-only diagnostic probe on the same
+staging endpoint. Do not reset credentials, select a pooler or weaken TLS on
+failure. 059–060 remain unapplied; complete remote reconciliation and distinct
+write-rehearsal/application approvals are still outstanding.
+
+## Actual local connection prerequisites — 10 October 2026
+
+Located the existing staging DPAPI credential using its documented location.
+ValidateCredentialOnly passed: owner-only file/parent permissions, current SID,
+staging project/purpose binding and decryption. No password was printed, copied,
+changed or sent to a server; its current server validity is unknown.
+
+Existing psql reports PostgreSQL 17.11. Saved Supabase Root 2021 CA parses as a CA,
+has a valid self-signature and validity through 26 April 2031. Captured local file
+hashes and passed the offline planner's real-path, no-link and hash checks. Initial
+sandbox realpath EPERM resolved with approved local-only escalation. These checks
+do not independently establish vendor provenance or a live TLS trust chain.
+
+Exact non-secret paths/hashes and limitations are recorded in
+operations/finance-connection-prerequisites-20261010.json. No code or migration
+changes this milestone. Existing unrelated edits preserved; HEAD remains 319fb20.
+No remote contact, ledger refresh, migration application, provider activity,
+deployment, commit or push. Previous full suite remains 680 passing tests; not
+rerun for this documentation-only milestone.
+
+Next gate: explicit approval for the fixed read-only staging connection probe
+(TLS/login/server READ ONLY and exact ledger versions 006–058). No mutations or
+arbitrary SQL. Full ledger contents/catalog/actor binding and independent remote
+rollback reconciliation remain separate work. 059–060 remain pending/unapplied.
+
+## Protected credential preflight — local verification, 9 October 2026
+
+Added scripts/finance-protected-preflight.ps1 with two explicit modes: local
+credential validation or a separately approved fixed read-only staging probe.
+Validates owner-only file/directory ACLs, non-reparse local paths, Windows DPAPI
+credential format, current SID and exact staging project/purpose binding. No
+arbitrary SQL or password arguments. The probe requires reviewed client/CA hashes,
+verify-full TLS, a cleared/allowlisted child environment and bounded timeouts.
+Only the child receives PGPASSWORD; the parent launch-info copy is removed after
+start. Raw client errors and credentials are never emitted. The fixed query checks
+server read-only/SSL, postgres user/database and ledger versions exactly 006–058;
+this is not a ledger statement-content or full catalog comparison.
+
+Five new tests passed using synthetic DPAPI credentials and temporary Windows ACLs:
+valid decryption, wrong target/SID/empty rejection, invalid modes/missing resources,
+broad-access rejection and static read-only/secret-output guards. Typecheck and all
+680 tests pass; focused ESLint and git diff --check pass. No real protected
+credential was read, no client/CA/live TLS was verified, and no network, database,
+provider, deployment or Git write occurred. No build/browser/local PG rerun.
+
+The live probe path remains unexecuted. Configure/review the actual protected
+credential, binary and CA before requesting a live read-only connection check.
+The offline Node launch plan and PowerShell probe are not yet integrated into the
+remote rollback runner. Fixed journal location, fresh complete catalog/ledger/actor
+baselines and independent remote reconciliation remain outstanding. 059–060 stay
+pending; write rehearsal and persistent application require separate approvals.
+
+## Real Windows ACL adapter and offline connection plan — 9 October 2026
+
+Added finance-private-directory.ps1/.mjs: read-only current-user owner/full-control,
+protected inheritance, child-inheritance and reparse-path checks. Tested against
+actual Windows ACLs on new temporary synthetic directories, including broad-access
+denial and permission drift before journal completion. Real adapter integrates with
+the persistent journal; no existing protected folder permissions were changed.
+Resolved Windows PowerShell module-path incompatibility by using .NET ACL APIs.
+
+Added finance-psql-plan.mjs: offline read-only launch planning pins executable/CA
+file hashes, rejects link/junction paths, validates the exact staging direct target,
+requires verify-full TLS, disables GSS encryption substitution, disables psql startup
+files/prompts, and sets connection/statement/lock/idle time limits. An environment
+allowlist excludes inherited PostgreSQL routing/service/options, proxy/startup
+settings and app secrets. No password is accepted or placed in process arguments.
+Tests use inert file bytes, not a real client binary, CA certificate or credential.
+
+Seven new tests, typecheck +675 total tests and focused lint pass. No credential
+read, network call, staging write, migration application, deployment or commit/push.
+No local PG/build/browser rerun. Temporary synthetic ACL evidence cleaned by tests;
+existing protected evidence unchanged. 059–060 remain pending.
+
+The plan is not a runnable remote transport: actual reviewed PostgreSQL binary/CA,
+credential injection, TLS handshake/server identity and fresh ledger/catalog/actor
+binding remain unverified. Real private-directory adapter is implemented, but a
+fixed production-use journal path is not configured. Keep remote readiness false;
+write rehearsal and application still require distinct approvals.
+
+## Persistent attempt journal and target gate — local milestone, 9 October 2026
+
+Added create-once, flushed/read-back attempt records and separate create-once
+outcome records. Existing, incomplete, corrupt or orphaned records block reuse;
+success does not unlock the journal. No reset/delete recovery API. Claims bind
+nonce, candidate-bundle digest, mode and fixed staging reference without passwords
+or raw errors. Directory ancestors reject links/junctions; a caller-supplied private
+ACL check is mandatory. A two-process race test proves only one claim succeeds in
+the same journal directory. File flush is not a guarantee against every hardware/
+power-loss failure; an uncertain/partial record remains a stop condition.
+
+Added strict direct-target validation: only db.eomubndonbetszdbhsrj.supabase.co,
+port 5432, postgres database/user and verify-full TLS mode; reject unknown options,
+other projects, poolers, IPs and URL/default fallbacks. Offline target validation
+does NOT establish a real TLS session or server identity.
+
+Mocked assembly claims before executing the one-attempt controller, then records
+the result. A journal-write failure cannot pass or dispatch again. Sixteen new
+tests, typecheck +668 total tests and focused lint pass. Corrected a lint-only test
+variable name. No network/credentials/live database, migrations, deployment or
+commit/push; no SQL/browser/build rerun this milestone.
+
+Remote path remains incomplete: fixed owner-only journal location/Windows ACL
+adapter, real credential/TLS connection, reviewed SQL-bundle binding, fresh
+identity/catalog/ledger/actor evidence and complete remote reconciliation adapter
+must still be connected and reviewed. Mock ACL/transport callbacks are tests only.
+The eventual wrapper must never choose a fresh directory to bypass an old claim.
+059–060 remain unapplied; any write rehearsal still needs separate approval.
+
+## One-attempt rollback controller — local milestone, 9 October 2026
+
+Added scripts/finance-rollback-attempt.mjs and integrated it into the disposable
+local runner. One controller instance dispatches at most once, including concurrent
+invocation or failed execution. Exact nonce/SQLSTATE abort, confirmed session exit
+and independent unchanged baselines are all required. Even execution/closure errors
+still attempt reconciliation. Sanitized failure categories replace raw SQL/transport
+errors; no failed/uncertain result is converted to a pass or automatically retried.
+The local mutation session has a unique application_name; a separate read-only
+pg_stat_activity check verifies its absence before independent baseline comparison.
+
+Nine controller tests cover exceptions, timeout/error results, wrong nonce, uncertain
+closure, missing/failed reconciliation, residue, concurrent invocation and baseline
+mutation. Typecheck +652 tests, focused lint, full local PG17 rehearsal and eleven
+races pass; disposable cluster stopped. No remote contact this milestone. No
+migration candidate changes, deployment, commit/push or build/browser rerun.
+
+This is transport-independent control flow exercised locally, NOT a completed
+remote execution wrapper. It supplies neither credentials nor target/approval
+checks. The once-only latch is per instance/in-memory, not a durable cross-process
+attempt journal. Remote TLS/identity, fresh catalog/ledger and actor binding,
+durable uncertainty handling and remote baseline adapter remain outstanding.
+059–060 remain pending; new write-rehearsal approval is still required before use.
+
+## Approved staging index/dependency audit — 9 October 2026, 18:49 Sydney
+
+Executed the specifically approved hash-pinned read-only query against
+eomubndonbetszdbhsrj only. Project identity/healthy state and server read-only mode
+verified. New owner-only evidence saved without overwriting earlier captures;
+receipt/file digest checked independently. Sanitized report:
+operations/finance-index-dependency-review-20261009.json.
+
+All ten scoped tables found with RLS enabled, postgres ownership, no partitions or
+forced RLS. All 33 indexes valid/ready/live; ordinary btree column indexes, zero
+expression indexes and three simple partial predicates. Five dependency helpers
+manually inspected and matched prior protected definitions. No new application
+function path found in these index expressions/predicates. Ledger versions exactly
+006–058; ledger statement contents were not re-compared in this narrow audit.
+
+Offline structure validation and six focused validator tests pass. Full 643-test
+suite, build/browser and SQL acceptance were not rerun during this read-only audit.
+No member/Auth rows read, application RPCs invoked, database/settings changes,
+messages, scheduler/delivery calls, other-project contact, deployment or commit/push.
+059–060 remain unapplied. Index-metadata gap closed at capture time; complete remote
+rollback-only executor, actor binding and fresh comprehensive baselines still needed.
+The audit approval does not authorize write rehearsal or persistent application.
+
+## Index metadata query validated locally — 9 October 2026
+
+Executed the unchanged prepared index/dependency query in a server-enforced
+READ ONLY transaction against a separate synthetic finance_catalog_probe database
+inside the disposable loopback PG17 cluster. All ten target tables, twelve test
+indexes and five application-function dependencies (expression, predicate, default,
+check and policy) captured. Deliberately throwing function bodies prove inspection
+does not invoke them. Synthetic ledger only: this is not staging evidence.
+
+Added offline structural validation rejecting missing/duplicate relations/indexes,
+invalid indexes, incomplete function bodies, wrong database/read-only mode and
+unexpected 006–058 versions. Output is sanitized counts with readyToExecute,
+transitiveReviewComplete and liveAcceptance all false; no identity/receipt binding
+or remote executor is implied. Corrected local fixture default setup after its
+intentional tripwire fired during ADD COLUMN; both failed/successful clusters stopped.
+
+Typecheck +643 tests, focused lint, local metadata query, combined rollback,
+independent fingerprints and all eleven concurrency cases passed. No remote contact,
+migration application, deployment, commit/push or browser/build rerun. 059–060 pending.
+Next external gate remains explicit approval for read-only staging index/dependency
+capture; a generic continue does not bypass that gate or authorize write rehearsal.
+
+## Captured notification writer and fixture path review — 9 October 2026
+
+The combined local rollback fixture now uses the exact captured create_notification
+body and class/dojo name-normalization triggers. The original synthetic failure
+injection stub remains only in the broader, separate local test tranches. Verified
+five exact in-app notifications: two assigned-Admin pending alerts, two Member
+receipt alerts and one Member waiver alert, with correct references and wording.
+Existing notifications/outbox/history/sequence baselines remain unchanged. Added
+assignment and rate-setting UUIDs to the fixture manifest. No real actor changes.
+
+Local PG17 combined rollback, independent baselines, general DDL notification
+controls, captured RLS checks and eleven races pass; cluster stopped. Typecheck
++637 tests and focused lint pass. No migration candidate edits, remote contact,
+deployment, commit/push, build/browser rerun or production work this milestone.
+
+See operations/FINANCE_FIXTURE_PATH_REVIEW.md for reviewed paths and exclusions.
+Saved metadata lacks ordinary index definitions/predicates/dependencies. Prepared
+tests/sql/059_060_rehearsal_indexes_readonly.sql for a separate approved read-only
+staging capture; NOT executed or yet runtime-validated. Dynamic/transitive function
+calls still require manual review after capture. Remote wrapper is incomplete;
+059–060 remain pending. Next external step needs explicit read-only staging approval,
+not permission to rehearse writes, apply migrations, deploy or invoke delivery.
+
+## Captured DDL notifications and finance read policies — local milestone, 9 October 2026
+
+Installed exact reviewed copies of the two general captured schema-watch hooks in
+disposable local PostgreSQL. An independent LISTEN connection receives committed
+CREATE/DROP controls, receives no notification from the combined 059–060 rollback,
+and receives a final committed control. Independent catalog fingerprints now cover
+event-trigger identity, configuration, ownership and function definitions as well.
+The four extension-only hooks are not installed: neither candidate changes extensions.
+
+Locally exercised nine captured SELECT policies across profiles, memberships,
+assignments, charges, receipts and fee history, with three exact captured helpers.
+Verified those bodies/expressions against protected saved metadata without any live
+connection. Member-own, assigned-Admin, cross-dojo denial, Super Admin, unassigned
+synthetic actor, missing-claim and direct-write-denial checks pass. Fixed local-only
+helper ordering and account-status enum to match policy dependencies. SELECT grants
+are harness grants, not a reproduction or verification of all live ACLs. The fourth
+actor is synthetic/local-only, not additional authority for staging test accounts.
+
+Typecheck +634 tests, focused lint, local combined migration/fixture rollback,
+independent data/catalog/ACL/sequence fingerprints and eleven concurrency cases pass.
+Local clusters stopped. No staging writes/connections, provider contact, migration
+application, deployment, commit/push or production access. No build/browser rerun.
+059–060 remain pending. Next: finish the complete reachable fixture/candidate
+call-chain review and remote hash-bound rollback-only executor; a separately approved
+staging rehearsal with fresh target/ledger/actor/baseline checks is still required.
+This closes local general-DDL-notification and selected-policy coverage only, not
+the entire Supabase schema, managed Auth, live notification rollback or release gate.
+
+## Combined migration/fixture rollback — local milestone, 9 October 2026
+
+Local PG17 runner now rehearses the actual 059 then 060 draft DDL and payment
+fixtures in ONE transaction before applying them to its disposable synthetic
+database for the existing test suite. New offline transaction helper accepts only
+the two reviewed SHA256 byte sequences, strips exactly their outer BEGIN/COMMIT,
+forces deferred constraints and raises a unique Z0590 end-of-test exception.
+The caller requires psql exit 3 plus one exact SQLSTATE/nonce error; a success exit,
+timeout, wrong exception or extra error cannot pass. Separate read-only sessions
+compare data/catalog/ACL/sequence baselines even on an unexpected execution error.
+Combined DDL/fixture rollback passed with identical independent baselines.
+
+Removed empty-history assumptions from fixture assertions. Owner-only temporary
+baselines now compare pre-existing status history, legacy outbox, notifications and
+both identity states. Seeded unrelated synthetic records prove preservation even
+when tables are nonempty and identities already consumed. New notifications may
+target only the fixture Member/Admin. Local-only negative control still proves
+identity advances can survive restored rows; no sequence reset or trigger bypass.
+
+Typecheck +628 tests, focused ESLint, local combined DDL rollback, independent
+fingerprints and all eleven concurrency cases pass. Disposable clusters stopped.
+No live connections, credentials/backups, new migration edit, deploy, commit/push
+or production work this milestone. Actual staging 059–060 remain unapplied; HEAD
+319fb20. Synthetic schema remains incomplete relative to Supabase: managed ledger,
+full RLS/trigger call-chain review, actual event-hook notification rollback, fixed
+remote actor binding and full remote wrapper still require completion/review.
+The helper is local-only, not authorization or a runnable staging write command.
+
+## Remaining staging metadata reviewed — 9 October 2026, 17:26 Sydney
+
+Executed the explicitly approved, hash-bound read-only metadata query against
+eomubndonbetszdbhsrj only. Verified project identity/healthy status, server read-only
+mode and ledger versions exactly 006–058. This follow-up checks versions, not a new
+full statement-content comparison. Captured three Auth helpers, six DDL event
+triggers, public enum labels and four owned public identity-sequence mappings.
+Owner-only raw evidence is referenced by sanitized report
+operations/finance-remaining-metadata-review-20261009.json; all previous evidence kept.
+
+Auth uid/role/jwt are SQL/STABLE readers of request claim settings. Confirmed current
+membership_status includes active/break/break_1/break_2/inactive; account_status is
+active/disabled. Two general DDL hooks inspect command/drop metadata and issue
+NOTIFY pgrst; four other hooks are limited to CREATE/DROP EXTENSION. Current drafts
+perform neither extension action. No hook, application function, worker or job was
+invoked. Sequence ownership confirms status-history/outbox identities plus two
+repository audit/event identities; their values were not read or advanced.
+
+Local finance harness now loads reviewed copies of all three captured Auth-helper
+bodies instead of constant-role behavior. Compared bodies with captured definitions
+after whitespace normalization; tested scalar/JSON precedence, missing claims and
+malformed UUID rejection under authenticated role. This does not validate managed
+Auth login or real JWTs. Expanded PG17 suite, independent rollback fingerprints and
+all eleven races pass; local cluster stopped. Typecheck +624 tests and focused lint
+pass. No new build/browser run. No live member/Auth rows, settings/data writes,
+migration application, email, provider/other-project contact, deployment or commit/push.
+
+059–060 remain pending, HEAD 319fb20. Remaining work is the complete candidate,
+fixture and RLS call-chain review and hash-bound rollback-only remote wrapper,
+followed by separately approved rehearsal using only the dedicated test actors
+and fresh independent baselines. Metadata review is not permission to run writes
+or proof that the full application is production-ready. Month-end billing disabled.
+
+## Independent rollback fingerprints — local milestone, 9 October 2026
+
+Added scripts/local-finance-baseline.mjs and six regression tests. The loopback
+runner now captures before/after state using separate psql processes and explicit
+REPEATABLE READ READ ONLY transactions. Target binding includes loopback address,
+port, database and PostgreSQL system identifier; reused backend PID is rejected.
+Inventory is checked against capture coverage and drift. Hashes cover public table
+contents/counts, catalog definitions, policies, triggers, ACLs, roles/memberships,
+public/Auth routine definitions, enum definitions and sequence definitions/state.
+No raw records or definitions are returned by the baseline query. Unsupported
+foreign/materialized relations cause refusal instead of silent data omission.
+
+Normal fixture rollback produced identical captured table hashes, catalog hash,
+and last_value/is_called for sequences. An independent LOCAL-ONLY negative control
+advances a pre-existing synthetic probe sequence within an aborted transaction;
+the verifier correctly reports sequences changed, without resetting the sequence.
+The disposable cluster was stopped afterward. This remains synthetic evidence,
+not full staging schema, real migration-ledger or managed Auth security evidence.
+
+Typecheck +622 tests and focused ESLint pass; local SQL suite including all eleven races passes.
+Initial local capture refused inet text with a CIDR suffix; SQL now uses host()
+without loosening the strict 127.0.0.1 target guard. No application/migration changes,
+live contact, deployment, commit/push or production access. HEAD remains 319fb20.
+
+Prepared (NOT executed) tests/sql/059_060_rehearsal_remaining_metadata_readonly.sql
+to resolve missing current public enums, Auth uid/role/jwt definitions, database-wide
+DDL event triggers and owned sequence mappings. These are schema/catalog reads only,
+with raw definitions kept private. Need staging-only read-only approval before this
+follow-up, then complete transitive review and a separately approved write rehearsal.
+059–060 remain pending; the remote wrapper is not ready. Month-end billing disabled.
+
+## Isolated finance fixtures — local milestone, 9 October 2026
+
+Added a loopback-only fixture and authenticated-role acceptance tranche for 059–060.
+It binds three existing synthetic actors, creates new UUID-scoped classes/dojos,
+memberships, assignment, rates and bills, and never inserts Auth users/profiles or
+updates existing memberships. The proposed staging counterpart would use only the
+dedicated Member 0101, Admin 0002 and Super Admin 0001 after explicit approval and
+fresh identity verification; no such accounts were accessed this turn.
+
+Local assertions verify Member cannot waive/confirm receipt, Admin cannot quote
+the other fixture dojo, Super Admin can, first month becomes Waived with audit,
+reported months remain Pending until Admin confirms, skipped debt stays unpaid,
+all three actor profiles stay identical and both legacy identity sequences remain
+uncalled. Deferred constraints are forced; fixture rows/temporary schema roll back.
+Added a LOCAL-ONLY negative control: a deliberate status change inside an aborted
+subtransaction leaves zero audit/outbox rows but advances identities, demonstrating
+why row counts alone cannot establish zero residue. Never run this control remotely.
+
+The tranche uses the actual migration 030 rate resolver, actual migration 037
+assignment validator and reviewed captured membership-status trigger body. Fixed
+the pre-existing synthetic enum to include legacy 'break', matching the historical
+catalog (current live enum still needs fresh metadata verification). Other parts
+remain simplified synthetic schema: this is NOT complete Supabase/RLS/Auth coverage.
+No trigger disabling, sequence reset, external connection or source backup used.
+
+Verification: typecheck +616 tests pass; focused ESLint passes. Expanded local PG17
+suite and all eleven two-session payment/adjustment races pass. Disposable clusters
+were stopped, including the initial enum-mismatch run. No new build/browser tests.
+No migration edits/application, staging contact, deployment, commit/push or production.
+059–060 remain pending; HEAD remains 319fb20. Full-schema dependency review, current
+enum/Auth-helper verification, independent baseline/residue runner and explicit
+staging rehearsal approval remain outstanding. Month-end billing remains disabled.
+
+## Staging dependency audit — read-only, 8 October 2026, 11:40 UTC
+
+Explicit approval executed for eomubndonbetszdbhsrj only. Verified exact project,
+server-enforced read-only transaction and versions 006–058. Captured 223 function
+bodies and 23 public triggers, defaults, policies and extensions; no public foreign
+tables/rewrite rules. All 13 formerly missing bodies plus five helpers are available.
+Raw capture is owner-only under C:\protected; sanitized digest/findings are in
+operations/finance-dependency-review-20261008.json. No member rows/application RPCs,
+settings changes, migrations, jobs, delivery providers or other projects contacted.
+
+Reviewed notification creation, legacy bridge, queue_email and fixture triggers.
+Found identity-backed membership_status_history and notification_outbox writes:
+rollback does not restore sequence state, even when the legacy bridge suppresses
+its row. Expanded baseline inventory and added a hash-bound offline inventory guard
+plus five tests. Missing identified definitions is now zero; transitiveReviewComplete
+and readyToExecute remain false. Auth/profile fixture prerequisites, candidate/RLS
+call chains and complete-schema assertion/independent residue runner remain unfinished.
+No trigger bypass, sequence reset, real-member edit or delivery invocation is allowed.
+
+Typecheck +612 tests pass; focused ESLint passes. Initial sandbox test run failed
+protected temporary-evidence reads; approved normal-filesystem rerun passed unchanged.
+No new build/browser tests; no commit/push/deployment. HEAD remains 319fb20.
+Next: finish the isolated fixture/assertion runner locally, avoiding legacy sequence
+paths; request explicit rehearsal approval only after isolation is verified.
+059–060 remain pending. Month-end automatic billing remains unimplemented/disabled.
+
+## Rollback rehearsal preparation — local only, 8 October 2026
+
+Prepared operations/FINANCE_REHEARSAL_059_060_PLAN.md and an offline guard in
+scripts/prepare-finance-rehearsal.mjs. Output binds the existing staging snapshot,
+ledger and draft hashes in operations/finance-rehearsal-preparation-20261008.json.
+It explicitly reports readyToExecute=false and runnerImplemented=false; no runnable
+remote mutation helper or approval is implied. It inventories 13 missing reachable
+routine bodies, including create_notification, full-payment triggers and email bridge.
+Presence of a definition is not treated as transitive side-effect review or proof
+that database rollback prevents provider calls/sequence changes.
+
+Prepared tests/sql/059_060_rehearsal_dependency_readonly.sql for a metadata-only
+follow-up; NOT executed. Raw function definitions must go to private evidence, not
+console or repository, since definitions may contain sensitive literals. No ordinary
+member-record edits, trigger bypass, scheduler changes or provider calls are allowed.
+Fixture IDs, transitive call-chain review, complete-schema assertions and independent
+before/after catalog/ledger/data-residue checks remain prerequisites. No acceptance
+runner was rushed past those missing checks. Existing synthetic tests are unchanged.
+
+npm test: typecheck +607 tests passed. Focused ESLint and diff whitespace check pass.
+Guard tests cover missing and overloaded definitions, replica/always triggers, and
+absence of credential/network/execution code. No new build/browser run. No remote
+contact, migration application, deployment, commit/push or change to active 006–058.
+Next: authorize/read the staging dependency definitions, review isolation and prepare
+the actual guarded fixture/assertion runner; then request explicit rehearsal approval.
+
+## Read-only staging finance preflight passed — 8 October 2026, 11:26 UTC
+
+User continued after the explicit read-only staging approval question. Contacted
+only Supabase management endpoints for eomubndonbetszdbhsrj: project metadata GET
+and database/query POST with read_only=true. Verified target ID, ACTIVE_HEALTHY,
+database=postgres and server transaction_read_only=on. Region remains ap-southeast-2;
+no region/configuration change was attempted. Protected credential stayed in memory.
+
+Current staging ledger is exactly 006–058 (53 entries). All 53 names and ordered SQL
+statement contents match repository migrations, allowing CRLF/outer whitespace and
+CLI-stripped statement separators only. Repository migration fingerprint remains
+a412432bedf7c95578e7ebfb83317987c1d4350d19121fe533007a1967b26ffd;
+live ledger fingerprint is
+9d341d30c586cfe85fd8c328e05ef97d008f26623f7dc9506b615f89cbd6c4d1.
+Pending 059–060 are NOT applied. Fresh catalog confirms no candidate RPC collision,
+no payment_group_id column or proposed policy collision, expected fee-history check,
+all six guarded replacement prerequisites, and no direct browser mutation grants on
+the four inspected finance tables. All 29 captured finance definitions match their
+saved historical counterparts. Direct impact remains 25 helper consumers/seven policies.
+
+Evidence: workspace staging-readiness/finance059060-readonly-20261008T112627271Z.
+Reviewed summary: operations/finance-staging-readonly-preflight-20261008.json.
+Raw function definitions were limited to the finance scope; other public routines
+have catalog metadata/digests. No business/member rows, application RPC calls,
+worker execution, email, settings changes, deployment or other-project contact.
+Catalog prerequisites passed does NOT mean behavioural acceptance or apply approval.
+The summary intentionally remains readyToApply=false.
+
+New offline verifier checks exact ledger statements and guarded replacement shapes;
+tests reject changed literals, reordered/missing statements, comments removed and
+overloaded/missing definitions. npm test passed typecheck +603 tests; focused lint
+and diff whitespace validation passed. No UI changes or browser/build rerun.
+
+Next: prepare and obtain approval for complete-schema rollback-contained staging
+rehearsal of BOTH drafts, with no delivery/provider calls, reviewed isolated fixtures,
+trigger/outbox safety preflight and independent ledger/residue comparison. Do not
+apply migrations or deploy until that rehearsal passes and explicit application
+approval is given. Month-end automatic billing remains unimplemented/disabled.
+
+## Historical finance compatibility review — local only, 8 October 2026
+
+Reviewed five schema-only JSON exports from the stopped 29 September recovery
+catalog (not member rows, protected env files or a current remote database).
+New offline review tool records per-file SHA256 and inventories 25 direct finance
+helper consumers and seven RLS policies. Evidence is in
+operations/advance-payment-catalog-review-20261008.json. Its readyToApply remains
+false: no current-ledger or complete-schema execution claim. The pretty-printed
+history constraint has equivalent parentheses; pending 060's exact runtime check
+remains unchanged. No existing snapshot or migration fingerprint was overwritten.
+
+Two compatibility gaps were found and fixed in the LOCAL candidates:
+- Pending 059 adds a SELECT-only dojo policy using the caller-bound finance helper.
+  Authorized Admins retain access to assigned inactive dojos; Super Admin sees all.
+  Existing public active-dojo policy remains unchanged; no write grant added.
+- Pending 060 also corrects zero-fee status in three reviewed legacy internal
+  functions: adjust_current_membership_fee, generate_dojo_monthly_subscription_charges,
+  system_generate_monthly_subscriptions. Each guarded body replacement requires one
+  exact old branch, preserves signature/ACL, and changes only new zero-fee results
+  to Waived. Existing rows are not rewritten and no scheduler is activated.
+
+Actual migration-030 rate resolver tested with synthetic tables: scheduled changes,
+bounded member overrides/expiry, old-rate fallback, internal resolver EXECUTE denial,
+stale quotes, mixed currencies, paid amounts preserved and reported bill pricing
+retained through confirmation. Three schema-only legacy function definitions were
+copied into a clearly marked test fixture with source hash; no member data copied.
+Local actual-role SELECT tests cover Member, Admin, Super Admin, inactive Admin and
+anonymous visibility. Zero-fee generation/replay creates no artificial payments;
+prepaid advances survive later zero rates and repeat generation.
+
+Final verification: npm test passed typecheck +601 tests; focused ESLint and diff
+whitespace check passed. Expanded local PostgreSQL suite and all eleven two-session
+races passed; final cluster js-fee-test-aIhjBc stopped. One initial suite hit a
+synthetic rollback-duration timing race; fixed fixture to use one clock sample,
+not a relaxed production validator. Full suite passed afterward. No new UI changes,
+build or browser run this milestone; prior 210 browser/55-page build result remains
+historical evidence, not a new live acceptance result.
+
+NOT a complete restored-schema acceptance. Real profiles/membership policies,
+indirect finance consumers, settlement/report interactions, trigger/outbox isolation,
+current ledger and actual staging RPC definitions still need guarded verification.
+Next remote step requires read-only staging catalog/ledger approval; application
+and deployment remain separate. 059–060 are still pending, month-end automation
+still unimplemented/disabled, and production/providers were never contacted.
+
+## Selected months and competing fee changes — local milestone, 8 October 2026
+
+Supersedes the range-only/Super Admin loader gaps in the earlier entries below.
+Member/Admin forms now show a range of up to 12 months with individual checkboxes;
+unticked months are excluded from both the quote and mutation. A Member can choose
+the oldest loaded unpaid bill as a suggestion, without automatic submission.
+Changing the selection invalidates the quote. Group review lists the exact months,
+not a misleading continuous range. This is not yet a full arrears-catalog picker.
+
+Pending 059 accepts an optional explicit date array, rejects duplicate/null/noncanonical
+dates and count mismatches, sorts dates before locks, and locks/updates only selected
+bills. Its preflight rejects any existing same-named RPC overload. Legacy positional
+calls remain valid through the default argument. Pending 060's prerequisite matches.
+The existing Admin page now loads all dojos for Super Admin and preserves assignment
+filters for ordinary Admin; browser fixtures verify both and lookup-error behaviour.
+Real Supabase RLS/catalog compatibility still requires separately guarded verification.
+
+Verified locally: typecheck + 595 app tests; focused lint; isolated Next production
+build (55 pages); 210/210 Chromium mobile and WebKit desktop/mobile fixture tests;
+final 31 SQL/static security contract tests. Synthetic PostgreSQL tests verify paying
+first/third overdue months leaves the middle bill's entire row unchanged, exact group
+review months, no skipped future charge generation, and invalid selection rejection.
+The new SQL test initially inherited immediate constraint timing from a prior test;
+reset to deferred at its boundary (the production trigger is already deferred).
+A fixture PromiseLike type was corrected before the final passing typecheck.
+
+Eleven two-session races pass: prior duplicate receipt/report/group-review races,
+plus waiver/repricing versus report/receipt with BOTH winner orderings forced.
+The second session is observed waiting on a real lock before the first commits;
+it must reject rather than leave conflicting bill/payment/confirmation/audit records.
+Final synthetic cluster js-fee-test-Xg6Tzg is identified by runner output, stopped
+after testing; no protected backups or remote credentials are used.
+
+No migrations applied, no remote contact, no commit/push or deployment. Candidates
+059–060 remain under supabase/pending; unrelated recovery/.temp changes preserved.
+Next: complete-schema compatibility/security acceptance and separately authorized
+read-only staging catalog/ledger review before requesting application. Month-end
+09:00 Asia/Jakarta billing remains unimplemented and disabled.
+
+## Overdue fee adjustment and waiver — local candidate, 8 October 2026
+
+Reused existing waived charge state and membership_fee_adjustment_history (verified
+against migration 015 and the saved 29 September schema-only catalog). Pending 060
+adds a selected-charge adjustment RPC and extends the existing history type check;
+no new history table. Required reason/expected old fee, dojo scope, ordered locks,
+and no paid/pending/closed bill changes. Fee zero becomes Waived, not Paid; original
+amount remains in history with actor/date/reason. Notification and audit failure
+roll back the entire adjustment. Existing current-month zero-fee API branches are
+also repaired by a fail-closed body replacement, without rewriting past records.
+
+Existing Member/Admin subscription pages now preserve Waived labels and prevent
+payment on closed bills. Admin has a compact per-bill adjustment control. Pending
+059 now permits existing overdue bills while refusing to manufacture missing past
+bills. Single-month or consecutive-range selection works; arbitrary nonconsecutive
+checkbox selection/automatic oldest-month selection is not implemented.
+
+Synthetic PostgreSQL test verifies three overdue months, first waived, remaining
+two reported/rejected, second repriced/paid alone, third still due. Permission,
+pending/paid/stale/duplicate checks, notification rollback, authenticated-role
+execution and old zero-fee API pass; prior three payment concurrency races pass.
+Clusters stopped. Typecheck and 595 app tests passed outside the Windows sandbox
+after the first run's synthetic protected-path evidence access failures; focused
+lint and isolated optimized build passed. Final browser rerun: all 195 tests passed
+across Chromium mobile and WebKit desktop/mobile. Corrected the new test's missing
+nested-disclosure expansion after two initial mobile failures; no failed run counted
+as a pass. This is local emulation, not live/physical-device acceptance.
+
+No live catalog, credentials, staging/production/provider contact, deployment,
+commit/push or migration application. 059 and 060 remain under supabase/pending;
+verified active ledger remains unchanged. Before deployment: reconcile Super Admin
+finance-page dojo selection/copy, run waiver/payment race tests and complete-schema
+acceptance, review staging catalog/ACL/RLS and obtain explicit migration approval.
+Monthly automation remains unimplemented. Unrelated working changes preserved.
+
+## Multi-month dojo payment workflow verified locally — 7 October 2026
+
+Added local Member full-total reports (Pending until receipt), scoped dojo-Admin
+group approval/rejection and direct received-payment entry, with Super Admin
+oversight. Reuses existing monthly bills, rate resolver, payment records and alerts.
+Paid months retain prices and are excluded from ordinary monthly due messages.
+No partial payments or automatic money collection added.
+
+Candidate SQL 059 remains in supabase/pending, NOT the active 006–058 migration set.
+Adds a nullable confirmation group ID/index, atomic group trigger and five RPCs;
+also tightens the shared finance helper's active-account checks and includes Super
+Admin oversight. The shared helper's existing consumers require full-catalog review.
+UI lives in the existing Member/Admin subscription pages and two new components.
+
+Verified: typecheck +593 app tests, focused lint, isolated Next build (55 pages),
+and 186 Chromium-mobile/WebKit-desktop/WebKit-mobile fixture tests passed. Fixed a
+new test's wrapped-select locator after the initial six browser failures; full
+rerun passed. No physical-iPhone or live browser result claimed.
+
+Disposable synthetic PostgreSQL 17 tests passed ownership/dojo/ACL/disabled-account
+checks, amount/quote/replay checks, pending/receipt/rejection flows and last-month
+failure rollback of earlier bills/payments/alerts. Three synchronized two-session
+races (direct receipt/report/group review) each commit exactly once; final counts
+and totals verified. Clusters stopped; no real backups, credentials or remote data
+used. Synthetic rate/catalog fixtures do not replace staging acceptance.
+
+Full scope, commands, limitations and next gates:
+operations/ADVANCE_SUBSCRIPTION_PAYMENTS.md. Monthly last-day 09:00 Jakarta automation
+still needs implementation and remains disabled. No remote catalog audit, migration
+application, commit/push, deployment, provider call or scheduler activation occurred.
+Existing unrelated local changes preserved. HEAD remains 319fb20.
+
+## Disabled no-send probe deployed to staging — 7 October 2026
+
+Under explicit user approval, committed and pushed only the four no-send probe
+files as 319fb201a0da4172709d9e7e813c9773009e8680 on release/v1-readiness-20260918.
+Existing Vercel project prj_uCQO2Y5KiACpA5YAWKAWp8yb5rZ8 built Preview
+dpl_HW2ismrCKo8tw1trEbcdXtcUtxKH to READY. Assigned only
+jingwuguanseibukan-staging.vercel.app and independently verified its deployment ID.
+Previous Ready Preview dpl_B77ksoPScNXXNN5QFrfZWQzU1htS remains the rollback target.
+
+Preview configuration was checked before deployment and after alias assignment:
+staging project/site bindings match, SCHEDULER_ACCEPTANCE_* and temporary email-test/
+diagnostic variables are absent, and environment inventory is unchanged. No secrets
+were created or uploaded. Live unauthenticated probe POST returned 404/disabled with
+Cache-Control no-store; GET returned 405. No email/queue/memorial work was invoked.
+
+Fresh verification: typecheck and all 588 application tests, focused ESLint, all 44
+local scheduler/deployment-guard tests, and all 11 staging host probes plus security
+headers passed. Host probes initially failed at Windows sandbox TLS before HTTP;
+reran outside the sandbox with certificate verification intact and all passed.
+Vercel production build succeeded. No browser-role or live scheduler trial claimed.
+
+Only the four intended files were committed. Unrelated checkpoint/recovery and
+Supabase temporary-link edits remain local and preserved. Cloudflare and Healthchecks
+were not accessed or changed; no cron enabled, no pings or emails sent, no production,
+retired or disposable project contacted. No database migration was performed.
+Evidence: workspace staging-readiness/email-scheduler/probe-disabled-319fb201a0da4172709d9e7e813c9773009e8680.json
+and DISABLED_PROBE_DEPLOYMENT_2026-10-07.md. Next gate is separately approved disabled
+Cloudflare deployment with valid scoped credentials, not recurring activation.
+
+## Local bounded no-send scheduler safeguards verified — 7 October 2026
+
+Under the user's local-only implementation approval, added the staging scheduler
+probe route/config guard, its four handler tests and operations runbook. The probe
+is default-disabled and bound to the exact Preview branch/project/site/commit,
+v4 trial ID, independent secret and at-most-ten-minute UTC window. It has no
+database/queue/memorial/Resend dependencies; no request can process unrelated work.
+This is explicitly a no-send routing probe, not normal-worker acceptance.
+
+Workspace scheduler core now requires an explicit execution mode, pins acceptance
+to the no-send route, and persists a maximum 1–3 claimed attempts plus immutable
+trial identity/bounds in the existing SQLite object. Restart, overlap, UUID/window/
+commit/cap edits or switching mode cannot silently renew the allowance. Expiry is
+checked before/inside/after claim with full request/heartbeat time reserved; expiry
+or uncertainty retains the lock. Acceptance credentials are not sent to Healthchecks,
+and the ordinary worker secret is never sent to the probe. No reset endpoint added.
+Checked-in ENABLED=false, zero crons and disabled public URLs remain. Historical
+deployed hashes were preserved; local core/config now intentionally differ.
+
+Verification: npm test passed typecheck and all 588 app tests; 40 scheduler core/
+workerd/SQLite tests passed, with fake credentials and intercepted HTTP. Focused
+ESLint and git diff --check passed. Optimized isolated build passed (55 pages).
+Loopback-only built-server probe: GET 405, POST 404/disabled/no-store; server stopped.
+The initial new handler harness lacked the server-only/crypto mock imports; fixed
+the harness and reran the full suite successfully. No failed run counted as a pass.
+
+App files: app/api/system/staging-scheduler-probe/route.ts,
+lib/email/staging-scheduler-probe.ts, scripts/staging-scheduler-probe.test.mjs,
+operations/STAGING_SCHEDULER_PROBE.md. Workspace scheduler files: core.mjs,
+core.test.mjs, runtime.test.mjs, wrangler.jsonc and README.md. Unrelated edits retained.
+No migration, commit/push, deployment, credential generation/read/upload, live tests,
+monitoring pings, worker execution, production/retired/disposable/provider contact.
+
+Next: review the local candidate and separately approve its disabled staging
+deployment/provisioning scope. Any live no-send scheduler trial requires its own
+bounded window, valid control-plane shutdown access and monitor approval. Normal
+worker execution/producer isolation and recurring activation remain separate gates.
+
+## Scheduler acceptance safety review — 7 October 2026
+
+Local HEAD remains 15669c3. Passed 39 focused repository tests plus 27 scheduler
+core/workerd/SQLite tests (66 total), with fake credentials and intercepted HTTP.
+No remote calls or changes. Existing scheduler source/config hashes still match
+recorded disabled deployment evidence; this is not a fresh remote-state check.
+
+Two live-trial boundaries remain: the scheduler has no absolute acceptance expiry
+or total-attempt cap, and the ordinary worker can publish memorials and claim up to
+20 unfiltered emails. Empty-queue snapshots do not isolate concurrent producers.
+Prepared workspace staging-readiness/email-scheduler/SCHEDULER_NEXT_GATE_2026-10-07.md
+with a bounded acceptance-mode proposal and separate producer-isolation gate.
+No implementation/deployment, token renewal, activation or worker execution here.
+Next requires agreeing the local guard/isolation scope before any live trial.
+
+## Both monitoring alerts received — 7 October 2026
+
+User explicitly confirmed both UP and DOWN emails received at 17:38 (Sydney) in
+the existing alert mailbox. This supersedes the earlier non-receipt report and
+closes recipient acceptance for this bounded monitor-only failure/recovery cycle.
+Recovery receipt is user-confirmed, not a newly verified provider-dispatch log.
+The monitor remains in its last independently verified Paused state; no retest,
+ping, settings change or remote contact was made to record this confirmation.
+Live Cloudflare scheduler cadence, ordinary application-worker execution and
+independent backup-alert routing remain separate gates, not passed by this test.
+
+## Monitoring receipt gate not passed — 7 October 2026
+
+User reports receiving neither monitoring email. Read-only provider recheck still
+shows recipient repository.js@gmail.com and Last Notification Delivered; this is
+provider-reported status only, not proof of inbox receipt. Recovery-email dispatch
+also remains unverified. Do not count end-to-end alert delivery as passed. The
+monitor was left paused; no new alert, ping, recipient change or repeat cycle was
+performed. Next: confirm the user checked that exact mailbox including Spam/All
+Mail and resolve delivery before any separately approved retest. The earlier
+successful Resend email to whv.calvin@gmail.com is a separate delivery path.
+
+## Monitor-only cycle completed and paused — 7 October 2026
+
+Under explicit approval, exercised only the existing staging Healthchecks check
+40bb4907-a229-41a1-a1e4-55cad99872ab. Exactly two UI success heartbeats; observed
+paused -> up -> late -> down -> up -> paused. Window 06:34:30–06:40:51 UTC
+(17:34–17:40 Sydney), under the approved 10-minute cap. The Down email to
+repository.js@gmail.com was recorded and the integration reported Delivered.
+Recovery state was verified, but recovery-email dispatch/recipient receipt remains
+unverified. Read-only integration inspection shows both Up and Down enabled; the
+log's Downtime alert filter does not establish whether an Up email was sent.
+No automatic repeat, third ping, settings change or integration test was performed.
+
+Independently reloaded and verified Paused after shutdown. Existing 1-minute period,
+2-minute grace and shared recipient integration preserved. No application worker,
+Cloudflare activation, database or production/retired/disposable contact. The
+monitor-only result does not certify scheduler cadence or application-worker safety.
+Evidence: workspace staging-readiness/email-scheduler/MONITOR_ACCEPTANCE_RESULT_2026-10-07.md
+and monitor-down-20261007.jpg / monitor-paused-20261007.jpg. Next: confirm receipt
+of both test notifications, then scope the remaining scheduler/worker acceptance.
+
+## Recipient receipt confirmed; monitoring preflight — 7 October 2026
+
+User explicitly confirmed receipt of the single authorized staging test email.
+The provider-delivered and human-received checks for that exact message are now
+complete; no further send or repeat of the consumed fixture was performed.
+
+Read-only Healthchecks dashboard inspection verified the existing check
+`Jingwuguan staging email scheduler` remains paused, with 1-minute period and
+2-minute grace. Its only enabled notification method is the existing email
+integration to repository.js@gmail.com, shown Ready to deliver with no previous
+notification. The unrelated My First Check was not changed. No ping, alert,
+integration modification or unpause was performed. Cloudflare remote state was
+not rechecked; the local disabled/no-cron configuration remains unchanged.
+
+Reran the 20 offline scheduler-core tests: all pass. These are mock-based safety
+checks, not live scheduler execution or alert evidence. Next is a separately
+approved monitor-only missing-heartbeat/recovery test, after confirming the owner
+can receive the existing alert mailbox. Keep Cloudflare and the normal application
+worker inactive; do not infer ordinary-worker safety from an empty queue snapshot.
+No database, production, retired/disposable project or delivery API contacted here.
+
+## One-message staging delivery verified — 7 October 2026
+
+Completed the separately approved single-email acceptance on staging
+eomubndonbetszdbhsrj at commit 15669c3. Independently verified the existing fixture
+was unused before execution; no additional fixture was inserted. The bounded gate
+window was 05:52:47–06:04:47 UTC. Exactly one authorized request at 05:53:38 UTC
+returned HTTP 200/provider_accepted. The outbox now records sent, attempts 1 of 1,
+with a provider ID and sent timestamp. Resend's exact-message dashboard visibly
+confirmed Sent and Delivered for the approved owner mailbox. This is provider
+delivery evidence, not confirmation that the recipient read or saw it in Inbox.
+
+Shutdown completed at 05:53:51 UTC: only the staging alias was restored to normal
+disabled Preview dpl_B77ksoPScNXXNN5QFrfZWQzU1htS, all eight temporary project
+settings were removed, unrelated configuration metadata was unchanged, and the
+alias returned HTTP 404/disabled/no-store. The immutable temporary Preview retains
+its original expiring configuration; the fixture's one-attempt allowance is consumed.
+No resend, ordinary worker invocation, or scheduler activation was performed.
+
+All 68 database baselines were unchanged excluding the exact authorized fixture.
+That consumed fixture is intentionally retained for audit, not claimed as zero
+residue. Independent read-only audit at 05:56 UTC confirmed exact ledger 006–058,
+expected email-function definitions/ACLs and outbox RLS, no pending/due/stuck queue,
+and two sent rows total including the pre-existing historical row. All 11 read-only
+staging host/security-header probes passed. Production, retired and disposable
+projects were not contacted. No migrations or application source changes this step.
+
+Evidence: workspace staging-readiness/email-scheduler/single-email-15669c3-20261007.json;
+protected reconciliation jwg-database-access-ad3490877f79490bbf4f0dfed14551da;
+independent audit jwg-database-access-06ca13cacc0b4a649c11a5e41476da26/
+staging-email-audit-1791352604387; Resend message 01a114ec-bb44-7494-be83-e829ea8df5f2.
+Prior milestone entries below are historical. Next: recipient receipt confirmation,
+then separately scoped scheduler/monitoring acceptance. This test does not certify
+ordinary-worker scheduling, Auth/reset delivery, or overall production readiness.
+
+## Empty-stream fix deployed with sending disabled — 7 October 2026
+
+Under the user's explicit commit/push/staging-deployment approval, committed only
+the send route, its regression tests and single-message runbook as
+15669c3ca64260756524bb661c2c3a3b29b094f7; pushed the existing release/v1-readiness-20260918
+branch. Preserved unrelated checkpoint/recovery/Supabase metadata changes.
+Fresh npm test passed (typecheck and 584 tests); focused ESLint passed. The previous
+isolated optimized build remains applicable to unchanged runtime source.
+
+Vercel Preview dpl_B77ksoPScNXXNN5QFrfZWQzU1htS built Ready from the exact commit,
+jingwuguanseibukan-94wyxq0zl-js1-ccd7.vercel.app. Verified project/branch/SHA/Preview
+identity and staging bindings, no STAGING_EMAIL_TEST_* or STAGING_EMAIL_DIAGNOSTIC_*
+settings, and unchanged before/after Preview configuration metadata. Assigned only
+jingwuguanseibukan-staging.vercel.app and read back the exact deployment target.
+
+Initial immediate endpoint verification stopped and restored the old alias. Preserved
+that journal. Reused the same already-Ready deployment (no duplicate build), assigned
+the alias and used bounded unauthenticated observations to allow propagation. The
+diagnostic GET initially returned 404 then 405; final both routes returned POST
+404/disabled/no-store and GET 405. This demonstrates transient routing in this run,
+not definitive proof of the earlier single-message 404's cause.
+All 11 read-only staging host/security-header probes passed afterward.
+
+No sending gate enabled, authenticated send attempt, provider/email contact, worker
+invocation, scheduler activation, database access/write/migration, production,
+retired or disposable project contact. Retained fixture untouched. Delivery and
+live execution of the corrected authenticated send path remain unverified.
+
+Evidence: workspace staging-readiness/email-scheduler/disabled-fix-20261007.json
+(preserved initial check failure) and disabled-fix-20261007-reconciled.json (success).
+Next is a separately approved short single-email window, with the existing fixture
+independently confirmed unused, one attempt only, gate shutdown and reconciliation.
+
+## Send-route empty-stream fix verified locally — 7 October 2026
+
+Under the approved fix-and-test-only scope, updated the staging-email-test handler
+to accept a null body or immediate EOF from an empty adapter stream, after existing
+authentication. Every chunk, including an empty chunk, is rejected before database
+work. Consumed/locked/errored streams and cancellation failures return a sanitized
+400; reader locks are released. The approved window is checked again after stream
+validation. No recipient/content, atomic claim, attempt limit or provider behavior
+was changed. The ordinary worker and diagnostic route are unchanged.
+
+Added six regression tests covering empty-stream success/replay, body rejection
+despite Content-Length: 0, error/consumed/locked/cancel-failure cases, authentication
+before stream access, expiry before database work and eight concurrent empty-stream
+requests sharing one mocked send latch. All network/database/provider dependencies
+in these handler tests are fakes. Full npm test passed: typecheck plus 584 tests;
+23 focused diagnostic/send tests, focused ESLint and isolated optimized Next build
+(54 pages) also passed. No live security/delivery test was run in this step.
+
+Files changed: app/api/system/staging-email-test/route.ts,
+scripts/staging-single-message.test.mjs, operations/STAGING_SINGLE_MESSAGE.md,
+and these checkpoint/progress notes. Changes remain local/uncommitted; no push,
+deployment, migration, environment change, database access, message or provider
+contact. Previously retained fixture was not touched. Production/retired/disposable
+projects were not contacted. Existing unrelated dirty files preserved.
+
+Next requires approval to commit/push this scoped fix and deploy to staging with
+sending disabled, then verify the disabled gate. A new bounded single-email window
+is separate; do not infer it from this local compatibility-fix approval.
+
+## No-send diagnostic completed; empty-stream blocker identified — 7 October 2026
+
+Approved diagnostic-only work committed/pushed as 6b398e8 and a6edfe9. Four diagnostic
+files added; existing email-send route/guard and unrelated working changes preserved.
+578 tests (17 focused) passed; typecheck, focused lint and initial isolated optimized
+build passed. Corrected Preview a6edfe9 also built Ready as
+dpl_XhECHd6eURiTtmKQYr1uDhfP2Ltb. Both probes used the original diagnostic window
+05:25:20.336Z–05:37:20.336Z, not an extended window. No sending configuration enabled.
+
+First diagnostic returned 400; after accepting empty adapter streams (still rejecting
+non-empty input), authenticated diagnostic returned 200 with fixed labels/booleans.
+All stable runtime checks passed, exact request URL matched, synthetic in-memory
+config was accepted by the original pure guard, actual send config remained disabled.
+Vercel confirmed requestBodyStreamPresent=true for a bodyless POST. The unchanged
+send route rejects this representation, identifying a definite future-send blocker.
+This does not by itself explain the earlier unauthenticated 404; previous per-test
+configuration/alias propagation remains unverified. No provider validity/delivery claim.
+
+Restored staging alias to dpl_81iWNn1dZT83kpxUhsiitwnn3jZD, removed the three temporary
+diagnostic settings, verified no test/diagnostic settings and unchanged unrelated
+metadata. Send endpoint 404/disabled; all 11 host/security-header probes passed.
+Read-only SQL confirmed ledger 006–058, expected email ACL/RLS/source, quiet queue
+and retained unused synthetic fixture. No database write, message, worker/scheduler
+activation, production/retired/disposable contact or migration in this diagnostic.
+
+Report: workspace staging-readiness/email-scheduler/DIAGNOSTIC_RESULT_2026-10-07.md;
+immutable diagnostic evidence in diagnostic-20261007.json and diagnostic-stream-20261007.json.
+Next: approved compatibility fix/tests for the sending route, then separately bounded
+future acceptance. Do not send/rearm/delete the retained fixture automatically.
+
+## Single-email acceptance stopped safely at live gate — 7 October 2026
+
+Vercel CLI refreshed the user's login; exact staging Preview access recovered.
+Created one approved synthetic email_outbox fixture b58477e6-8c2c-4a0e-8ff8-1e6019ace778
+for whv.calvin@gmail.com. Corrected a local helper error: Vercel env-pull sensitive
+values are empty redactions, not runtime values, and must not overwrite protected
+local values during a local shape check. No deployed secrets or application code changed.
+
+Continued with the same unused fixture, preserved earlier logs, and kept the original
+12-minute window (05:04:52.370Z–05:16:52.370Z). Eight temporary branch-scoped Preview
+variables were acknowledged/read back. Exact commit 198747a built Ready as
+dpl_APxoAFwqxfSG8EULYYjNBt9zYhwJ. After assigning only the staging alias, its
+unauthenticated gate probe returned 404/disabled, not expected 403/not_authorised.
+No authorized send request or provider send was attempted; no automatic retry.
+
+Restored alias to dpl_81iWNn1dZT83kpxUhsiitwnn3jZD, removed all eight temporary
+variables and verified unchanged unrelated environment metadata. Restored gate
+404/disabled/no-store and all 11 host/security-header probes passed. All 68 baseline
+table checks matched excluding the exact fixture. Fixture remains cancelled with
+attempts 0/max 1 and no provider ID/sent time; retained, not deleted or reset.
+Independent read-only staging audit reconfirmed 006–058, expected email ACL/RLS and
+function sources, quiet actionable queue and recipient isolation from profiles/Auth.
+
+Runtime-gate cause remains unverified: deployment metadata includes required names,
+exact branch/SHA and autoExposeSystemEnvs=true, but does not prove runtime values;
+immediate alias propagation is not excluded. Do not weaken the gate or send again.
+Next requires narrowly scoped secret-free staging diagnostics before a new window.
+No scheduler activation, normal-worker call, production/retired/disposable contact,
+migration, source commit or push. Immutable test Preview retains its expired-by-design
+window even though project variables were removed; alias restoration was verified.
+
+Report: workspace staging-readiness/email-scheduler/SINGLE_EMAIL_STOPPED_2026-10-07.md.
+Sanitized journals: single-email-20261007-resumed.json and single-email-20261007-send.json.
+Protected reconciliation: C:/protected/jwg-database-access-84ad3ea09a1e4941875e05c57be5814f.
+
+## Approved single-message test blocked before mutation — 7 October 2026
+
+Approval received for one synthetic fixture and one test email to whv.calvin@gmail.com,
+with a gate lasting at most 15 minutes, shutdown and reconciliation, and no retries.
+Refreshed staging-only read-only audit: exact versions 006–058, empty actionable queue,
+recipient absent from profiles/Auth/outbox, SQL definitions matching offline 058,
+and expected email ACL/RLS. Resend UI shows staging-v3 sending-only/domain-scoped
+key and verified domain. Cloudflare staging scheduler remains ENABLED=false with
+no cron, queue or email triggers. No settings changed through either dashboard.
+
+Prepared syntax-checked one-shot helper with a 12-minute gate, exact-row fixture,
+single authorized POST, alias restoration, gate-variable removal and public-table
+baseline reconciliation. Execution stopped on its first Vercel project GET:
+HTTP 403, code forbidden, invalidToken=true (independently read-only confirmed).
+No fixture insertion, enabling configuration, redeployment, alias change or send
+was attempted. Live staging guard still returns 404/disabled/no-store.
+
+Evidence: workspace staging-readiness/email-scheduler/single-email-20261007.json;
+fresh audit under C:/protected/jwg-database-access-06ca13cacc0b4a649c11a5e41476da26/
+staging-email-audit-1791348828939. The new protected evidence directory
+C:/protected/jwg-database-access-3e71f3221c304728bddd1ea5a4c6d072 contains no test
+secret or fixture evidence because the operation stopped before those steps.
+Next: reauthenticate the Vercel CLI, then resume the approved scope with a fresh
+one-shot journal after verifying that this attempt made no remote mutations.
+Do not replay or overwrite the failed-attempt journal. Actual delivery remains open.
+
+## Approved Preview email configuration synchronized — 7 October 2026
+
+User confirmed ownership/access to the proposed whv.calvin@gmail.com inbox, then
+separately approved the configuration step. Reapplied only SUPABASE_SECRET_KEY and
+RESEND_API_KEY from the owner-only protected staging file, keeping both sensitive,
+and added STAGING_PROJECT_REF=eomubndonbetszdbhsrj as non-secret configuration.
+All three are scoped only to Preview/release/v1-readiness-20260918. Vercel acknowledged
+each write; subsequent scope/type readback passed. Unrelated Preview metadata was
+compared before/after and unchanged. Source credential values were not edited or logged.
+
+Created one new same-commit Preview after the updates:
+dpl_81iWNn1dZT83kpxUhsiitwnn3jZD, commit 198747a5303754416b82ae230a8ab381128c2d56,
+jingwuguanseibukan-hxdt08joo-js1-ccd7.vercel.app. Verified Ready and exact identity,
+then assigned only jingwuguanseibukan-staging.vercel.app and verified alias readback.
+All 11 host probes/security headers passed. Live unauthenticated guard POST returns
+404/{code:disabled}/no-store and GET returns 405. No enabling guard settings added.
+
+This is acknowledged configuration synchronization and a verified disabled deployment,
+not decrypted runtime-secret equality, provider-key validity or inbox delivery proof.
+Secret readback remains unavailable. No fixture, message, worker execution, scheduler
+activation, Supabase write/migration, production/retired/disposable contact or
+deployment-protection change. No code commit/push; unrelated working changes preserved.
+
+Sanitized one-shot journal: workspace staging-readiness/email-scheduler/
+config-sync-198747a-20261007.json; report CONFIG_SYNC_VERIFIED_2026-10-07.md.
+Do not replay the sync helper: it refuses an existing journal and records uncertain
+writes/deployments for reconciliation. Next remains separately approved one-message
+fixture/configuration window with post-send disablement; actual delivery unverified.
+
+## Read-only single-message prerequisites audited — 7 October 2026
+
+Read-only staging SQL verified exact version inventory 006–058, zero queued/due/
+processing/exhausted mail, and no due memorials on Jakarta 7–8 October. Proposed
+replacement inbox has zero profile/Auth-user/Auth-identity/outbox matches and differs
+from local sender/security-test emails. Ownership/deliverability remain unverified.
+Claim, acknowledgement and normalization function bodies match reviewed offline 058
+schema; browser-role execute/table access denied; service-role access and enabled
+normalization trigger inspected. No function invocation or data/schema change.
+
+Vercel reverified Ready 198747a and exact staging alias. Current Preview branch
+settings' site URL, Supabase URL and sender match local protected values. Three
+secrets are sensitive and branch-scoped, but their equality is unverified. Required
+STAGING_PROJECT_REF is absent; no guard settings were added. Deployment-specific
+configuration read returned 400: current project settings are not deployed-value proof.
+Initial encrypted list-record comparison produced false mismatches; corrected CLI
+Preview-pull evidence supersedes that attempt, without overwriting failure evidence.
+
+Evidence and boundaries: workspace staging-readiness/email-scheduler/
+READ_ONLY_PREFLIGHT_2026-10-07.md. New SQL evidence directory suffix is
+staging-email-audit-1791310873216 under the existing protected 06ca13c directory;
+explicit current-user-only ACLs and all three file hashes verified. No source
+credential changes, fixture, sends, provider delivery, scheduler activation,
+production/retired/disposable contact, commit, push or deployment this turn.
+
+Next requires inbox ownership confirmation and separately approved runtime-secret
+verification/configuration preparation. Actual fixture/send/cleanup remains unapproved.
+
+## Disabled guard staging alias and host acceptance passed — 7 October 2026
+
+Vercel CLI device sign-in completed successfully after the user's website approval.
+Authenticated readback verified Ready Preview `dpl_9vu4U6DsV7sUDeScyHVz8gCSS1KA`,
+exact commit `198747a5303754416b82ae230a8ab381128c2d56`, existing project/team and
+`release/v1-readiness-20260918`. Under the existing scoped approval, assigned only
+`jingwuguanseibukan-staging.vercel.app` to this deployment; independent alias API
+readback verified both deployment and project IDs. No second deployment was created.
+
+`scripts/probe-staging-host.ps1` passed all 11 read-only HTTP cases and required
+security headers on the newly assigned staging alias. The new guard's bodyless,
+unauthenticated POST returned HTTP 404 with exactly `{ "code": "disabled" }` and
+`Cache-Control: no-store`; GET returned HTTP 405. Redirects were not followed.
+This verifies the live guard is disabled, not live sending or database concurrency.
+
+No guard settings/secrets changed, fixture created, email sent, normal worker run,
+database migration/mutation, scheduler activation or production/retired/disposable
+contact. No deployment protection changes. No authenticated browser/role suite or
+new CI run in this alias-only milestone. Existing local changes remain preserved.
+
+The prior alias/auth blocker below is resolved. Next is separately scoped read-only
+recipient/deployed-configuration/SQL acceptance preparation; actual fixture creation,
+one-message sending, cleanup, monitoring and scheduler activation remain separately
+unapproved. Evidence summary: workspace staging-readiness/email-scheduler/
+ALIAS_198747A_VERIFIED_2026-10-07.md.
+
+## Guard committed; Preview Ready; alias update blocked — 6 October 2026
+
+Under explicit approval, committed only four guard files (route, config, tests and
+operator runbook) as `198747a5303754416b82ae230a8ab381128c2d56`, then pushed the existing
+`release/v1-readiness-20260918` branch. Remote SHA independently matched. Existing
+checkpoint/recovery notes and Supabase temporary-file changes remain uncommitted
+and preserved; no unrelated work was included. All 11 guard tests passed again.
+
+Vercel browser verified no STAGING_EMAIL_TEST variables in either Project or Shared
+Preview settings. Preview branch tracking remains disabled. Created one explicit
+Preview from the release branch after the UI resolved exactly commit 198747a.
+Deployment `dpl_9vu4U6DsV7sUDeScyHVz8gCSS1KA` reached Ready (41-second build):
+`jingwuguanseibukan-blzxvuzbq-js1-ccd7.vercel.app`. No gate variables or secrets added;
+the implementation remains disabled by default. No send or fixture was attempted.
+
+The custom staging alias was NOT reassigned. Existing CLI authentication returned
+403 forbidden even for the new Preview's read-only deployment detail. Dashboard
+deployment actions offered no alias assignment; the staging alias is absent from
+the project's domain-settings list. No permissions or protection were weakened,
+and no replacement token was created. The new Preview's unauthenticated GET to the
+guard returned 302 to Vercel authentication, without following the redirect.
+Therefore the live disabled-route response and new-release host probes remain
+unverified; probes on the old staging alias would not certify the new commit.
+
+Screenshot evidence: workspace `staging-readiness/email-scheduler/preview-198747a-ready.png`.
+No production/retired/disposable contact, database changes, email sends, scheduler
+activation or new CI dispatch. Next: restore authorized Vercel CLI/API access,
+assign only `jingwuguanseibukan-staging.vercel.app` to this Ready deployment, then
+verify its disabled route and host probes. Live test-email approval stays separate.
+
+## Single-message staging email guard locally verified — 6 October 2026
+
+Implemented the approved local-only guard at `POST /api/system/staging-email-test`,
+with configuration in `lib/email/staging-single-message.ts`, 11 focused tests in
+`scripts/staging-single-message.test.mjs`, and the operator contract in
+`operations/STAGING_SINGLE_MESSAGE.md`. The normal worker is unchanged.
+
+Disabled by default; requires the exact staging project/origin, Preview release
+branch/commit, separate secret, matching UUID/recipient and a maximum 15-minute
+window. Checks recipient absence in profiles/Auth and conditionally claims only
+one exact cancelled synthetic outbox row with attempts 0/max_attempts 1. No ordinary
+queue claim or memorial RPC. Consumed attempts are never reset/requeued on failure.
+Provider address is pinned; redirects refused; timeout bounded; one idempotency key.
+Replies are sanitized and distinguish provider acceptance from inbox delivery.
+
+Verification completed locally:
+
+- `npm test`: typecheck and all **572 tests passed**, including all 11 new tests.
+- `npm run lint`: passed, with no warnings/errors.
+- Optimized Next build using `smokeEnvironment()` and `.next-browser-smoke`: passed,
+  including all 53 static pages and the new dynamic route.
+- Built Next server on loopback only: disabled POST returned 404 `{code: disabled}`
+  with no-store; GET returned 405; local server stopped afterward.
+- Installed Resend SDK tested with mocked fetch: timeout, no redirect, idempotency
+  header, no automatic retry and no raw-error logging in the required runtime mode.
+
+Initial sandbox full-suite/build failures were Windows canonical-path/access errors;
+unchanged checks passed after approved local execution outside the sandbox. The
+concurrency test uses an in-memory atomic-claim model, NOT a live PostgREST/SQL test.
+Existing claim/ack/normalization function bodies and table shape were inspected
+from the protected offline 058 schema; no new migration was created or applied.
+
+Unverified: live conditional-update behavior and grants, deployed gate/secret
+identity, recipient ownership/isolation and actual delivery. Account inventory is
+not a transactional lock against new registration; acceptance requires independent
+recipient/producer checks. This guard does not certify scheduler or reset delivery.
+
+No commit/push/deploy, fixture, message, remote database write or provider request
+was made for this implementation. No production/retired/disposable contact. Local
+HEAD remains 2a06eb3; unrelated recovery and Supabase temporary-file edits preserved.
+Next requires review and separate staging-only deployment approval with the gate
+disabled, followed by explicit approval of one named recipient/fixture/send window.
+
+## Read-only staging delivery preflight refreshed — 6 October 2026
+
+Read-only staging SQL at 10:37 UTC (21:37 Sydney) verified version inventory
+006–058, outbox RLS/internal worker ACLs, no outstanding/processing/exhausted mail,
+no due memorial candidates for Jakarta 6–7 October, and no database cron tables.
+Memorial source bodies match migration 040; no RPC or worker was invoked.
+
+Saved Cloudflare/Vercel credentials returned 401/403. Read-only browser fallbacks
+confirmed staging scheduler disabled/no triggers/public URLs, Healthchecks paused,
+and Resend verified sender domain with domain-restricted sending-only Staging v3 key.
+No credential changes or production-key detail inspection. Vercel dashboard shows
+Ready Preview dpl_9SmayAxT3GgDyHLP68EGtssLSzcP, commit 8143a20, release branch and
+staging alias. Independent registration-bundle inspection found only the staging
+Supabase hostname across 11 scripts. This does not prove deployed server secrets.
+
+Full sanitized report: workspace staging-readiness/email-scheduler/
+READ_ONLY_PREFLIGHT_2026-10-06.md. Protected SQL evidence is staging-email-audit-
+1791283022697 under C:\protected\jwg-database-access-06ca13cacc0b4a649c11a5e41476da26.
+Remaining blockers: deployed secret equality, dedicated recipient verification,
+enforceable single-fixture/producer isolation, installed claim/ack source comparison,
+then explicit send/cleanup and separate alert/activation approval. Current worker
+can process memorials and up to 20 outbox rows; queue emptiness is not isolation.
+No messages, pings, remote settings/data writes, production/disposable contact,
+code/migration changes, commit, push or deployment. Live delivery remains unverified.
+
+## Email/scheduler next-gate preparation refreshed — 6 October 2026
+
+Reused the existing workspace `staging-readiness/email-scheduler/GUARDED_DELIVERY_PLAN.md`
+and historical read-only preflight; no duplicate implementation. Verified local
+HEAD 2a06eb35eeb228fded7dec5e9399a5da59816d16 and no committed changes to the
+worker/email/admin-client/rate-limit paths since recorded staging release 8143a20.
+Remote deployment, provider configuration and queue observations were NOT refreshed.
+
+Seventy-five focused local tests pass: 48 repository email-worker/scheduler/
+monitoring/provider-delivery/Auth-email guards, 20 scheduler core tests and seven
+workerd/SQLite runtime/config checks. Initial sandbox runtime startup failed six
+cases with Access Denied; unchanged tests passed outside the sandbox with mocked
+outbound requests and telemetry disabled. No application code or test policy changed.
+
+Worker scope still includes memorial publication and up to 20 outbox claims;
+queue emptiness is not producer isolation or permission for a single-recipient send.
+Existing delivery plan now distinguishes current recorded 006–058/8143a20 from
+historical 006–056 preflight, and staging evidence from production-bound manifests.
+
+Next requires scoped Phase A read-only inspection of staging and its existing
+Vercel/Cloudflare/Resend/Healthchecks resources. Sending, Auth recovery messages,
+worker/RPC execution, heartbeat pings and recurring activation remain separately
+unapproved. No protected credentials read, remote requests, production contact,
+disposable resume, commit, push or deployment in this preparation turn.
+
+## Disposable original-password recovery acceptance PASSED — 6 October 2026
+
+The separately approved readiness-gated run completed only on disposable
+`xiqvkarqcvhbiexuzglo`. Member 0101, Admin 0002 and Super Admin 0001 each passed
+original-password login, server-side user/session identity verification, refresh,
+local logout and rejection of the logged-out refresh token (`refresh_token_not_found`).
+No password resets, signup, messages, member/profile changes or import replay.
+
+Before any password grant, the pinned full database verifier, stable DB probes,
+account/role/password checks, prior-attempt reconciliation, six logo hashes and
+isolation checks passed. GET `/auth/v1/settings` first reported email disabled,
+then enabled about 15 seconds later. Two enabled samples 15 seconds apart were
+required before login. Disablement likewise took effect on the next sample and
+was verified twice. This run directly observed delayed effective-settings changes;
+prior failure evidence is retained, not rewritten as a successful attempt.
+
+Independent postflight passed: application tables, migration ledger, catalog/RLS/
+grants, Storage metadata and all six logo hashes unchanged; no scheduled jobs.
+Only the three tested auth.users records changed in permitted sign-in/update
+timestamp fields. All immutable user data and identities remained unchanged,
+zero Auth audit rows were added, and zero sessions/refresh tokens remained.
+No Auth/audit rows were explicitly deleted by the runner. Original backup and
+both failed-attempt journals/results remained hash-pinned and unchanged.
+
+The runner and wrapper passed and verified INACTIVE. An independent read-only
+inspection at **2026-10-06T07:21:54.4847118Z** confirmed INACTIVE, Auth disabled,
+SMTP absent, zero Edge Functions and zero secrets. The new 20-file evidence
+directory is explicitly current-user-only with inheritance disabled; its contents
+were hash-checked unchanged after ACL hardening.
+
+Evidence: `C:\protected\jwg-database-access-1b49534ec6d144368bceedfdcecaebfd\auth-service-ready-1791270788205`.
+Result SHA-256: `e51aef77ada87c25ad8c154b620bf5ac60fe50187c6df73f3299386737d0c81f`.
+After-baseline SHA-256: `16b952b43c81c7926c148ef44cc2161de68b912f464175f920fd1e8623b4be6a`.
+
+Local verification: Node syntax, PowerShell parser and 22 recovery preparation,
+Storage-plan, Auth-boundary/readiness tests passed. New one-shot helpers in the
+workspace staging-readiness folder are Run-Recovery058AuthServiceReady.mjs and
+Invoke-Recovery058AuthServiceReady.ps1; their exclusive attempt marker prohibits
+replay. No application code, migrations, commit, push or deployment changed.
+
+This closes the hosted original-password recovery acceptance gate for the
+006–058 disposable restore. It does not certify production, physical Safari,
+password-reset email, live delivery/scheduler/monitoring or cutover. The next
+recommended release task is a scoped staging delivery/scheduler/monitoring
+acceptance plan; any live sending or worker execution needs explicit approval.
+No staging, production, retired project, older disposable or delivery provider
+was contacted during this run. Historical incomplete entries below are superseded
+only by the verified results above.
+
+## Disposable Auth diagnostic — effective provider disabled, 6 October 2026
+
+One separately approved diagnostic retry ran only on `xiqvkarqcvhbiexuzglo`.
+The original failed attempt, baseline and result were hash-pinned and unchanged.
+Read-only reconciliation before retry found no changed tables, added Auth audits,
+sessions or refresh records. Password hashes/identities for all three accounts,
+full database preflight, isolation and six logo hashes passed again.
+
+After the management API accepted `external_email_enabled:true` and returned the
+enabled setting with no other configuration change, the first Member password
+request returned HTTP 422, `email_provider_disabled`, "Email logins are disabled".
+Request ID: `01a10ff6-1d2f-74bf-a5af-e42f00e373ae`. This proves an effective
+Auth-provider/configuration mismatch at request time, not an invalid-password
+response. Configuration propagation delay is a hypothesis, not yet verified.
+Admin/Super Admin login and all refresh/logout tests remain NOT RUN; no account passed.
+
+The runner restored the disabled Auth baseline and independently reconciled data
+after failure: no changed table fingerprints, no added audit rows, zero sessions
+and refresh records, unchanged catalog, all six logo hashes matching and no jobs.
+Failure postflight passed; historical success-only booleans in result.json remain
+false because hosted acceptance did not pass, not because data drift was detected.
+Evidence: `C:\protected\jwg-database-access-1b49534ec6d144368bceedfdcecaebfd\auth-diagnostic-1791268872141`.
+Independent final inspection at 2026-10-06T06:48:57.2084782Z confirmed INACTIVE,
+Auth disabled, SMTP absent, zero Edge Functions and zero secrets.
+
+Prepared an offline-tested effective-service readiness guard using the documented
+GET `/auth/v1/settings`: require signup disabled, no other enabled provider and two
+email-enabled observations 15–60 seconds apart before any password grant. Thirteen
+Auth guard/readiness tests pass. This pure helper has no network/configuration
+effects and has not been live-tested or integrated into another authorized attempt.
+Reference: https://raw.githubusercontent.com/supabase/auth/master/openapi.yaml
+(public settings endpoint). A further readiness-gated test needs explicit approval;
+retain distinct immutable journals and all prior evidence. No resets, imports,
+Auth/audit-row deletions, messages, other-project contact, commits or deployment.
+
+## Disposable Auth acceptance stopped safely — 6 October 2026
+
+User explicitly approved original-password login/refresh/logout for restored
+Member 0101, Admin 0002 and Super Admin 0001 on `xiqvkarqcvhbiexuzglo` only,
+with no resets/messages and mandatory provider disablement/pause afterward.
+New target-pinned helpers were prepared; 21 selected local tests passed. Offline
+bcrypt comparisons proved all three protected passwords match the hash-pinned
+006–058 backup. Live read-only account checks also confirmed all three passwords,
+identities, roles, confirmation/active state and absence of MFA factors.
+
+Stable database probes, the pinned full database verifier, no-job checks, baseline
+capture and six logo hashes passed before temporarily enabling password login.
+The first Member password-grant response was unsuccessful. No account passed;
+Admin/Super Admin login, refresh/logout and independent post-Auth data reconciliation
+were NOT reached. No password, profile or membership was explicitly modified.
+Do not interpret incomplete postflight booleans as proof of detected data changes.
+
+The original runner saved only "Password login failed", not the HTTP status or
+machine-readable Auth error code. The cause remains unknown despite matching
+password hashes; do not diagnose invalid credentials or provider timing without
+evidence. Added bounded machine-code/status capture for future failed requests,
+without raw bodies, passwords, emails or tokens; nine Auth guard tests passed.
+This diagnostic change has NOT been live-retried. Exclusive attempt evidence is
+preserved, and automatic retry remains prohibited.
+
+Evidence:
+`C:\protected\jwg-database-access-1b49534ec6d144368bceedfdcecaebfd\auth-acceptance-1791267985539`.
+The runner restored the original disabled Auth configuration and verified pause.
+Independent inspection at 2026-10-06T06:32:32.6792704Z confirmed INACTIVE,
+Auth disabled, SMTP absent, zero Edge Functions and zero secrets. No other project
+or delivery provider was contacted; no import, deployment, commit or push occurred.
+Next: separately approve one diagnostic retry with a new immutable journal and
+baseline reconciliation, preserving this failed attempt. Do not reset passwords,
+clear Auth/audit rows or treat the prior DB/Storage success as hosted Auth success.
+
+## New disposable 006–058 database and Storage restore verified — 6 October 2026
+
+Execution approval followed the clean-target plan below. Created exactly one
+new free Singapore disposable, `xiqvkarqcvhbiexuzglo`
+(`js-recovery-058-20261006`); the older disposable and all source backups are
+preserved. No staging, production, retired-project or delivery-provider requests
+were made during this new-target recovery execution.
+
+Auth providers, signup, hooks and notifications remain disabled, with no SMTP,
+Edge Functions or Edge secrets. Initial metadata-preflight failures were retained;
+a corrected direct TLS/read-only preflight established an empty compatible target.
+The rollback rehearsal passed exact data equality for 70 tables/403 rows,
+15 application catalog comparisons, six sequence values and the exact 006–058
+ledger (53 versions). Independent before/after baseline hashes matched.
+
+One hash-pinned persistent import was then committed and acknowledged. Its separate
+verification passed the same data/catalog/ledger/security/sequence checks and
+confirmed 18 managed catalog datasets unchanged. No automatic replay is allowed.
+Protected evidence:
+`C:\protected\jwg-database-access-1b49534ec6d144368bceedfdcecaebfd\persistent-restore-1791265513733`.
+Source ciphertext and original failed/preflight/rehearsal evidence are preserved.
+The database wrapper verified final INACTIVE at 2026-10-06T05:51:06.3265670Z;
+Auth isolation remained verified. A separately guarded Storage phase may resume
+only this same target and must independently pause it afterward.
+
+The separate Storage phase completed: two buckets and six logos (3,412,943 bytes),
+create-only uploads without overwrites, six private and six public hash matches,
+six anonymous private-download denials, two empty/denied anonymous listings and
+anonymous upload denied by RLS. Ownership, MIME/cache metadata, bucket restrictions
+and unchanged Storage RLS passed. The empty private video bucket uses the explicitly
+approved 50 MiB destination limit instead of the source 2 GiB; there was no video
+object to test. No existing objects were overwritten or deleted.
+
+Database lint passed for public using cached CLI 2.117.0, read-only database options
+and warnings treated as failures. Telemetry/update checks were disabled and CLI
+HTTP egress blocked. Read-only SQL role checks passed for the restored Member,
+scoped Admin and Super Admin: directory field privacy, foreign-dojo progression
+denial for Admin, anonymous denial and internal-function ACLs. These are SQL role
+checks, not browser login or comprehensive mutation-workflow acceptance. Full
+data/catalog/ledger/sequence verification passed again after Storage and role tests.
+
+Storage evidence:
+`C:\protected\jwg-database-access-1b49534ec6d144368bceedfdcecaebfd\storage-restore-1791266145211`.
+The wrapper verified INACTIVE at 2026-10-06T06:04:03.0252874Z. A separate read-only
+inspection at 2026-10-06T06:08:35.4911437Z independently confirmed INACTIVE,
+Auth disabled, SMTP absent, zero Edge Functions and zero secrets. No passwords
+were reset, Auth enabled or messages sent. Protected extracted plaintext remains
+quarantined under current-user-only ACLs; originals and all evidence are preserved.
+
+Thirty-five selected local guard/helper tests passed. Original-password
+login/refresh/logout remains a separate explicitly authorized test on this new
+target, and is NOT claimed complete. No deployment, commit or push was performed.
+
+## Clean-target 006–058 restore plan prepared — 6 October 2026 (Sydney)
+
+Prepared `recovery/RESTORE_058_PLAN.md` under planning approval. Reverified the
+existing encrypted source locally via authenticated streaming decryption; exact
+006–058/53-version metadata, 4,159 catalog objects and six Storage files remain
+verified. No plaintext written. Twelve selected persistent-plan/Auth-guard unit
+tests passed; these are helper tests, not a new hosted restore or Auth acceptance.
+
+Recommended next execution target: one new empty free disposable in Singapore,
+leaving the valid older `wtnonpldqvzipqmwgbru` restore paused and untouched. Free
+capacity is unverified; stop if unavailable rather than deleting another project
+or enabling billing. The old runner is pinned to 006–056 and is not reusable as-is.
+The new plan requires source-derived 058 expectations, an exact new target binding,
+reviewed rollback rehearsal, persisted verification, Storage acceptance and pause.
+Execution approval is still required. No remote requests, project creation,
+resumes, imports, deployments, commits or pushes were performed this planning turn.
+Original-password recovery remains separately open; keep Auth disabled in the
+proposed database/Storage phase. Prior evidence is preserved without relabelling.
+
+## Disposable restored baseline reconciled — 6 October 2026 (Sydney)
+
+With explicit approval, resumed only disposable `wtnonpldqvzipqmwgbru`, checked
+its existing restored baseline using read-only transactions, and paused it again.
+Final API state INACTIVE verified at 2026-10-05T18:46:58.723Z (6 October locally).
+Auth providers/hooks/notifications remained disabled, signup disabled, recovery
+site URL unchanged, no SMTP configuration, Edge Functions or Edge secrets.
+No Auth settings were patched and no login/password operation was attempted.
+
+All 103 table count/SHA-256 fingerprints and all 21 catalog sections match the
+protected 4 October pre-Auth-attempt baseline. Independent before/after snapshots
+also match byte-for-byte. Exact historical ledger remains 006–056 (51 versions),
+with 57 Auth users, 57 identities, zero sessions/refresh tokens, two Storage
+buckets and six object metadata records. No scheduled jobs, database webhooks,
+subscriptions or foreign servers were found. Local independent verification
+confirmed snapshot hashes, the sorted exact ledger and current-user-only ACLs
+on all four new evidence files.
+
+Protected evidence prefix:
+`C:\protected\jwg-database-access-06ca13cacc0b4a649c11a5e41476da26\baseline-20261006-449dbb7e-56f5-4a80-a10d-f7781255d41f`.
+New workspace helpers: `staging-readiness/Inspect-RestoredBaseline-20261006.ps1`
+and `staging-readiness/inspect-restored-baseline-20261006.mjs`. Run with PowerShell
+7; the first Windows PowerShell launch failed locally compiling the credential
+reader before any remote request. JavaScript and PowerShell syntax checks and
+the 21-query read-only guard passed before the successful run.
+
+No restore/import, schema or member-data writes, account changes, messages,
+staging/production/retired-project/provider requests, or source-backup changes.
+Storage bytes were not downloaded/rehashed in this baseline-only audit. This is
+NOT new 006–058 restore acceptance or hosted password-login acceptance.
+
+Next: separately approve a clean-target restore plan for the new 006–058 package.
+The disposable already contains a valid older restore; do not import over it or
+discard its data without explicit approval. Preserve all backups and prior
+failed/successful evidence. Original-password recovery remains unresolved.
+
 ## Approved encrypted staging backup verified — 6 October 2026 (Sydney)
 
 Created a new current-user-only protected package at

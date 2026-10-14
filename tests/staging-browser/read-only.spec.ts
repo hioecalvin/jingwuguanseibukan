@@ -171,6 +171,45 @@ test('a random certificate UUID is not found', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Certificate not found' })).toBeVisible();
 });
 
+async function expandFinanceSection(page: Page, name: string) {
+  const toggle = page.getByRole('button', { name: new RegExp(`^${name}(?: Hide details| Details & actions)$`) });
+  if (await toggle.isVisible() && await toggle.getAttribute('aria-expanded') === 'false') await toggle.click();
+}
+
+test('Member can inspect the multi-month payment form without reporting money', async ({ page, requestAudit, browserDiagnostics }) => {
+  await login(page, credentials('MEMBER'), requestAudit, browserDiagnostics);
+  const confirmations = page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/rest/v1/rpc/get_my_payment_confirmations');
+  await page.goto('/subscription');
+  expect((await confirmations).ok(), 'Read-only payment history loads').toBe(true);
+  await expect(page.getByRole('heading', { name: 'My Subscription', exact: true })).toBeVisible();
+  await expandFinanceSection(page, 'Report payment for several months');
+  await expect(page.getByText('Your dojo Admin must confirm receipt', { exact: false })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Membership', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Review monthly fees', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Report payment — awaiting receipt', exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+for (const role of ['ADMIN', 'SUPER'] as const) {
+  test(`${role} can inspect finance forms and grouped reports without recording receipts`, async ({ page, requestAudit, browserDiagnostics }) => {
+    await login(page, credentials(role), requestAudit, browserDiagnostics);
+    const reads = ['get_dojo_receiving_account', 'get_dojo_monthly_payment_summary', 'get_pending_advance_payment_groups'];
+    const responses = reads.map(name => page.waitForResponse(response =>
+      new URL(response.url()).pathname === `/rest/v1/rpc/${name}`));
+    await page.goto('/admin/subscriptions');
+    for (const response of await Promise.all(responses)) expect(response.ok(), 'Required finance read succeeds').toBe(true);
+    await expect(page.getByRole('heading', { name: 'Subscription & Payments', exact: true })).toBeVisible();
+    await expect(page.getByText(role === 'SUPER' ? 'Super Admin financial oversight covers all dojos.' : 'Financial access is limited to your assigned dojos.', { exact: true })).toBeVisible();
+    for (const name of ['Member Payments', 'Record several months received', 'Payment Confirmations', 'Multi-month payments awaiting receipt']) await expandFinanceSection(page, name);
+    await expect(page.getByText('Use only after you have received the full payment.', { exact: false })).toBeVisible();
+    await expect(page.getByText('Confirm only after checking the money arrived.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Review monthly fees', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Confirm money received', exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+}
+
 for (const [role, memberId, allowedPath, heading, deniedPath] of [
   ['MEMBER', '0101', '/profile', 'My Profile', '/admin'],
   ['ADMIN', '0002', '/admin/members', 'Member Management', '/admin/applications'],

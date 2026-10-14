@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import { createECDH, generateKeyPairSync, randomBytes } from "node:crypto";
+import { createECDH, generateKeyPairSync } from "node:crypto";
 import test from "node:test";
 
 import { evaluateProviderConfiguration } from "./provider-config-readiness.mjs";
 
 function validEnvironment() {
   const ecdh = createECDH("prime256v1");
-  ecdh.setPrivateKey(randomBytes(32));
+  // Test-only scalar with a nonzero leading byte: OpenSSL can otherwise export
+  // a random scalar as 31 bytes, testing length rejection instead of the case.
+  ecdh.setPrivateKey(Buffer.alloc(32, 0x11));
   const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   return {
     NEXT_PUBLIC_SITE_URL: "https://staging.example.org/",
@@ -107,7 +109,7 @@ test("the configured site URL must be an exact secure origin", () => {
 test("a mismatched VAPID pair and reused secrets fail closed", () => {
   const env = validEnvironment();
   const other = createECDH("prime256v1");
-  other.generateKeys();
+  other.setPrivateKey(Buffer.alloc(32, 0x22));
   env.VAPID_PRIVATE_KEY = other.getPrivateKey().toString("base64url");
   env.PUSH_API_SECRET = env.EMAIL_WORKER_SECRET;
   const result = evaluateProviderConfiguration(env, options);
@@ -122,6 +124,23 @@ test("server credentials exposed through NEXT_PUBLIC names fail closed", () => {
   const result = evaluateProviderConfiguration(env, options);
   assert.equal(result.ready, false);
   assert.ok(result.blockers.some(({ path }) => path === "NEXT_PUBLIC_RESEND_API_KEY"));
+});
+
+test("a shortened VAPID scalar fails length validation rather than pair-mismatch validation", () => {
+  const env = validEnvironment();
+  const scalar = Buffer.alloc(32, 1);
+  scalar[0] = 0;
+  const ecdh = createECDH("prime256v1");
+  ecdh.setPrivateKey(scalar);
+  const exported = ecdh.getPrivateKey();
+  assert.equal(exported.length, 31);
+  env.VAPID_PRIVATE_KEY = exported.toString("base64url");
+  env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = ecdh.getPublicKey().toString("base64url");
+  const result = evaluateProviderConfiguration(env, options);
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path, message }) =>
+    path === "VAPID_PRIVATE_KEY" && message.includes("valid matching P-256")
+  ));
 });
 
 test("a production configuration requires role-correct Supabase credentials and exact project binding", () => {

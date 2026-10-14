@@ -1,6 +1,9 @@
 "use client";
 
 import CompactRecord from "@/components/compact-record";
+import AdvancePaymentForm from "@/components/advance-payment-form";
+import AdvancePaymentReviews from "@/components/admin/advance-payment-reviews";
+import ChargeFeeAdjustment from "@/components/admin/charge-fee-adjustment";
 
 import {
   useEffect,
@@ -1037,6 +1040,15 @@ export default function SubscriptionPage() {
         profileData as
           Profile
       );
+
+      if (profileData.is_super_admin) {
+        const { data: allDojos, error: dojoError } = await supabase.from("dojos").select("id").order("name");
+        if (dojoError) { showError(dojoError.message); setLoading(false); return; }
+        const allIds = (allDojos ?? []).map(dojo => dojo.id as string);
+        await Promise.all([loadDojos(allIds), loadMembers(allIds)]);
+        setBillingMonth(monthString()); setDojoFeeDate(todayString()); setPaymentDate(todayString());
+        setLoading(false); return;
+      }
 
 
       const {
@@ -3208,7 +3220,7 @@ export default function SubscriptionPage() {
           paymentStatusFilter ===
           "paid"
         ) {
-          return outstanding <=
+          return charge.status !== "waived" && charge.status !== "cancelled" && outstanding <=
             0;
         }
 
@@ -3387,7 +3399,7 @@ export default function SubscriptionPage() {
         <section className="mt-6 rounded-xl border border-emerald-900 bg-emerald-950/10 p-4">
 
           <p className="text-sm text-emerald-200">
-            Financial access is based on your Dojo Admin assignment. Super Admin status alone does not grant access to this page.
+            {profile?.is_super_admin ? "Super Admin financial oversight covers all dojos." : "Financial access is limited to your assigned dojos."}
           </p>
 
 
@@ -3395,7 +3407,7 @@ export default function SubscriptionPage() {
             ?.is_super_admin && (
 
             <p className="mt-2 text-xs text-neutral-500">
-              This account is also a Super Admin, but you are viewing this finance area through your Dojo Admin assignment.
+              Select a dojo to review its fees, payments and receipt confirmations. Every financial action is checked by the server.
             </p>
 
           )}
@@ -4420,6 +4432,11 @@ export default function SubscriptionPage() {
 
             <CompactRecord summary={<>Member Payments</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
+              <AdvancePaymentForm key={selectedDojoId} mode="admin"
+                memberships={members.filter(m => m.dojo_id === selectedDojoId).map(m => ({ id: m.membership_id,
+                  label: `${m.registration_number ?? ""} ${m.full_name} — ${m.class_name}` }))}
+                onComplete={async () => { await Promise.all([loadCharges(), loadPayments(), loadMonthlySummary()]); }} />
+
               <h2 className="text-2xl font-bold">
                 Member Payments
               </h2>
@@ -4547,7 +4564,7 @@ export default function SubscriptionPage() {
 
                               <StatusBadge
                                 status={
-                                  outstanding <= 0 ? "paid" : "unpaid"
+                                  charge.status === "waived" || charge.status === "cancelled" ? charge.status : outstanding <= 0 ? "paid" : "unpaid"
                                 }
                               />
 
@@ -4593,7 +4610,7 @@ export default function SubscriptionPage() {
                           <button
                             type="button"
                             disabled={
-                              outstanding <=
+                              charge.status === "waived" || charge.status === "cancelled" || outstanding <=
                               0
                             }
                             onClick={() =>
@@ -4608,6 +4625,10 @@ export default function SubscriptionPage() {
 
                         </div>
 
+
+                        {charge.status === "unpaid" && paid === 0 && !hasPendingConfirmation(charge.id) &&
+                          <ChargeFeeAdjustment key={`${charge.id}:${charge.amount}`} charge={charge}
+                            onComplete={async () => { await Promise.all([loadCharges(), loadMonthlySummary()]); }} />}
 
                         {paying && (
 
@@ -4775,6 +4796,9 @@ export default function SubscriptionPage() {
           <section className="mt-6">
 
             <CompactRecord summary={<>Payment Confirmations</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+
+              <AdvancePaymentReviews key={selectedDojoId} dojoId={selectedDojoId}
+                onComplete={async () => { await Promise.all([loadConfirmations(), loadCharges(), loadPayments(), loadMonthlySummary()]); }} />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -5271,7 +5295,7 @@ export default function SubscriptionPage() {
                           <td className="px-4 py-4">
                             <StatusBadge
                               status={
-                                Number(row.outstanding_amount) <= 0
+                                row.payment_status === "waived" || row.payment_status === "cancelled" ? row.payment_status : Number(row.outstanding_amount) <= 0
                                   ? "paid"
                                   : "unpaid"
                               }
@@ -5568,7 +5592,9 @@ function StatusBadge({
 }: {
   status:
     | "paid"
-    | "unpaid";
+    | "unpaid"
+    | "waived"
+    | "cancelled";
 }) {
   const style =
     status ===
@@ -5581,7 +5607,7 @@ function StatusBadge({
     status ===
     "paid"
       ? "PAID"
-      : "UNPAID";
+      : status.toUpperCase();
 
 
   return (

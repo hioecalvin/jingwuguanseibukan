@@ -47,9 +47,9 @@
   },
   "migrationLedger": {
     "firstVersion": "006",
-    "lastVersion": "058",
-    "migrationCount": 53,
-    "repositoryFilesSha256": "a412432bedf7c95578e7ebfb83317987c1d4350d19121fe533007a1967b26ffd",
+    "lastVersion": "060",
+    "migrationCount": 55,
+    "repositoryFilesSha256": "1fb8ea8facf8f4553d81d40f2ae808665290709a52367facd7a227be988ff8f2",
     "sourceLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256",
     "restoredLedgerSha256": "REPLACE_WITH_64_CHARACTER_SHA256"
   },

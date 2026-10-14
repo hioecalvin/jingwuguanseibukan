@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { RELEASE_MIGRATION_RANGE } from "./recovery-ledger-fingerprint.mjs";
 
 export const RELEASE_BRANCH =
   "release/v1-readiness-20260918";
@@ -364,7 +365,7 @@ export function evaluateReleaseWindow(
       release,
     });
     if (productionCutover.origin !== PRODUCTION_ORIGIN) add(blockers, "gateEvidence.productionCutover.origin", `must equal ${PRODUCTION_ORIGIN}`);
-    if (productionCutover.migrationLedger !== "006-058") add(blockers, "gateEvidence.productionCutover.migrationLedger", "must equal 006-058");
+    if (productionCutover.migrationLedger !== RELEASE_MIGRATION_RANGE) add(blockers, "gateEvidence.productionCutover.migrationLedger", `must equal ${RELEASE_MIGRATION_RANGE}`);
     if (productionCutover.policy !== PRODUCTION_CUTOVER_POLICY) add(blockers, "gateEvidence.productionCutover.policy", `must equal ${PRODUCTION_CUTOVER_POLICY}`);
   }
 

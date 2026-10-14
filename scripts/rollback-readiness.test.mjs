@@ -48,7 +48,7 @@ export function validRollbackManifest() {
       targetKind: "disposable-managed",
       backupSha256: "34".repeat(32),
       evidenceBundleSha256: "56".repeat(32),
-      migrationLedger: "006-058",
+      migrationLedger: "006-060",
       exactLedgerPassed: true,
       catalogPassed: true,
       databaseLintPassed: true,
@@ -84,6 +84,15 @@ export function validRollbackManifest() {
   manifest.attestation.reviewDigest = calculateRollbackReviewDigest(manifest);
   return manifest;
 }
+
+test("otherwise valid historical 058 rollback evidence cannot pass the current release", () => {
+  const manifest = validRollbackManifest();
+  manifest.databaseRecovery.migrationLedger = "006-058";
+  manifest.attestation.reviewDigest = calculateRollbackReviewDigest(manifest);
+  const result = evaluateRollbackReadiness(manifest, options());
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "databaseRecovery.migrationLedger"));
+});
 
 function options(overrides = {}) {
   return {

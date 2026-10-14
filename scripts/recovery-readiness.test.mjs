@@ -7,7 +7,17 @@ import {
   STAGING_PROJECT_REF,
   evaluateRecoveryManifest,
 } from "./recovery-readiness.mjs";
-import { RELEASE_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
+import { RELEASE_MIGRATION_CONTRACT, HISTORICAL_058_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
+
+test("historical 058 recovery evidence cannot satisfy the current release", () => {
+  const manifest = validManifest();
+  Object.assign(manifest.migrationLedger, HISTORICAL_058_MIGRATION_CONTRACT);
+  const result = evaluateRecoveryManifest(manifest);
+  assert.equal(result.ready, false);
+  for (const key of ["lastVersion", "migrationCount", "repositoryFilesSha256"]) {
+    assert.ok(result.blockers.some(({ path }) => path === `migrationLedger.${key}`));
+  }
+});
 
 const verifiedAt = "2026-09-16T02:00:00.000Z";
 
@@ -240,7 +250,7 @@ test("stale recovery points and inconsistent rehearsal timing fail closed", () =
     path === "objectives.observedRestoreMinutes" && /timestamps/.test(message)));
 });
 
-test("the exact 006-058 release contract and matching restored ledger are required", () => {
+test("the exact 006-060 release contract and matching restored ledger are required", () => {
   const manifest = validManifest();
   manifest.migrationLedger.lastVersion = "046";
   manifest.migrationLedger.restoredLedgerSha256 = "b".repeat(64);

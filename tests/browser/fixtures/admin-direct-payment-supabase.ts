@@ -12,6 +12,8 @@ declare global {
 }
 
 const user = { id: 'fixture-finance-admin' };
+const params = new URLSearchParams(location.search);
+const isSuperAdmin = params.get('role') === 'super_admin';
 
 export const fixtureState: DirectPaymentState = {
   failNextPayment: false,
@@ -23,7 +25,7 @@ window.__directPaymentFixture = fixtureState;
 const profile = {
   id: user.id,
   full_name: 'Fixture Finance Admin',
-  is_super_admin: false,
+  is_super_admin: isSuperAdmin,
 };
 
 const assignment = {
@@ -70,8 +72,10 @@ const payments: Array<Record<string, unknown>> = [];
 
 function resultFor(table: string) {
   if (table === 'profiles') return { data: profile, error: null };
-  if (table === 'dojo_admin_assignments') return { data: [assignment], error: null };
-  if (table === 'dojos') return { data: [dojo], error: null };
+  if (table === 'dojo_admin_assignments') return { data: isSuperAdmin ? [] : [assignment], error: null };
+  if (table === 'dojos') return params.has('dojo_error')
+    ? { data: [], error: new Error('Synthetic dojo lookup failed') }
+    : { data: [dojo, { ...dojo, id:'other-dojo', name:'Other Dojo' }], error: null };
   if (table === 'admin_visible_members') return { data: [member], error: null };
   if (table === 'dojo_subscription_settings') {
     return {
@@ -91,14 +95,21 @@ function resultFor(table: string) {
 }
 
 function queryFor(table: string) {
-  const query: Record<string, unknown> & PromiseLike<ReturnType<typeof resultFor>> = {
+  const filters: {field:string;values:unknown[]}[]=[];
+  function filteredResult() {
+    const result=resultFor(table);
+    if(!Array.isArray(result.data))return result;
+    return {...result,data:result.data.filter(row=>filters.every(filter=>
+      filter.values.includes((row as Record<string,unknown>)[filter.field])))};
+  }
+  const query: Record<string, unknown> & PromiseLike<ReturnType<typeof filteredResult>> = {
     select: () => query,
     eq: () => query,
-    in: () => query,
+    in: (field:string,values:unknown[]) => { filters.push({field,values});return query; },
     not: () => query,
-    order: async () => resultFor(table),
-    single: async () => resultFor(table),
-    then: (resolve, reject) => Promise.resolve(resultFor(table)).then(resolve, reject),
+    order: async () => filteredResult(),
+    single: async () => filteredResult(),
+    then: (resolve, reject) => Promise.resolve(filteredResult()).then(resolve, reject),
   };
   return query;
 }
@@ -132,6 +143,11 @@ export function createClient() {
       }
       if (name === 'get_dojo_payment_confirmations') return { data: [], error: null };
       if (name === 'get_dojo_monthly_payment_summary') return { data: [summary()], error: null };
+      if (name === 'adjust_unpaid_subscription_charge') {
+        charge.amount = Number(args.new_amount);
+        charge.status = charge.amount === 0 ? 'waived' : 'unpaid';
+        return { data: { status: charge.status }, error: null };
+      }
       if (name === 'record_membership_payment') {
         fixtureState.paymentCalls.push({ ...args });
         if (fixtureState.failNextPayment) {

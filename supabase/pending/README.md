@@ -1,5 +1,20 @@
 # Pending SQL — not an executable migration source
 
+Status update, 14 October 2026: the exact pinned 059 and 060 sources in this
+directory were applied once, in order, to staging eomubndonbetszdbhsrj. They must
+NOT be reapplied. Independent read-only reconciliation now verifies the exact
+006–060 ledger, committed transaction and preserved catalog/data/actor baselines
+(14 October, 08:57 Sydney). Corrected post-commit rollback acceptance PASSED at
+17:31 Sydney: independent transaction-aborted/backend-gone proof, all 67 public
+tables/six sequences, exact ledger and three actors verified unchanged.
+These files retain their original reviewed bytes as historical evidence only.
+Exact-byte copies now exist in `supabase/migrations`, the ONLY active migration
+chain. Current release/recovery contracts require all 55 migrations, 006–060.
+The copies here are NOT pending application work and must NOT be passed to the CLI.
+Historical backup/restore evidence remains scoped to its original chain and cannot
+satisfy the current release gate. No deployment is authorized by this status. See
+operations/finance-postcommit-acceptance-review-20261014.json and PROJECT_CHECKPOINT.md.
+
 Status update, 5 October 2026: 057 and 058 are now approved, promoted to
 `supabase/migrations`, applied and accepted on staging only. This directory is
 not a migration source. Historical draft notes below are superseded by the

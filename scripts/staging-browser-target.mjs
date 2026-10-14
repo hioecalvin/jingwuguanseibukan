@@ -18,6 +18,8 @@ const READ_ONLY_RPCS = new Set([
   "get_bulk_assessment_candidates",
   "get_dojo_admin_settlements",
   "get_dojo_payment_confirmations",
+  "get_dojo_monthly_payment_summary",
+  "get_dojo_receiving_account",
   "get_dojo_settlement_configs",
   "get_dojo_settlement_item_details",
   "get_latest_valid_rank_promotion",
@@ -28,6 +30,7 @@ const READ_ONLY_RPCS = new Set([
   "get_membership_title_history",
   "get_my_member_directory",
   "get_my_member_directory_v2",
+  "get_my_payment_confirmations",
   "get_my_repository_upload_scopes",
   "get_my_last_training_sessions",
   "get_my_available_class_enrollments",
@@ -37,6 +40,7 @@ const READ_ONLY_RPCS = new Set([
   "get_official_member_record",
   "get_prepared_bulk_assessment",
   "get_prepared_bulk_assessments",
+  "get_pending_advance_payment_groups",
   "get_regular_class_schedules",
   "get_repository_uploader_candidates",
   "get_repository_uploader_options",
@@ -137,6 +141,18 @@ export function classifyStagingBrowserRequest(method, rawUrl) {
   if (![STAGING_APP_ORIGIN, STAGING_SUPABASE_ORIGIN].includes(url.origin)) {
     return deny("off-origin request");
   }
+  // Check RPCs before the generic read-method branch: GET/HEAD must not bypass
+  // the same audited function allowlist used for POST calls.
+  const rpcPrefix = "/rest/v1/rpc/";
+  if (url.origin === STAGING_SUPABASE_ORIGIN && url.pathname.startsWith(rpcPrefix)) {
+    if (!["GET", "HEAD", "OPTIONS", "POST"].includes(normalizedMethod)) return deny("backend mutation request");
+    let rpcName;
+    try { rpcName = decodeURIComponent(url.pathname.slice(rpcPrefix.length)); }
+    catch { return deny("invalid RPC name"); }
+    return READ_ONLY_RPCS.has(rpcName)
+      ? allow("allowlisted read-only RPC")
+      : deny("mutation or unapproved RPC");
+  }
   if (["GET", "HEAD", "OPTIONS"].includes(normalizedMethod)) {
     return allow("read request");
   }
@@ -157,18 +173,6 @@ export function classifyStagingBrowserRequest(method, rawUrl) {
   if (url.pathname === "/auth/v1/logout" &&
       (!url.searchParams.has("scope") || url.searchParams.get("scope") === "local")) {
     return allow("ephemeral session cleanup");
-  }
-  const rpcPrefix = "/rest/v1/rpc/";
-  if (url.pathname.startsWith(rpcPrefix)) {
-    let rpcName = "";
-    try {
-      rpcName = decodeURIComponent(url.pathname.slice(rpcPrefix.length));
-    } catch {
-      return deny("invalid RPC name");
-    }
-    return READ_ONLY_RPCS.has(rpcName)
-      ? allow("allowlisted read-only RPC")
-      : deny("mutation or unapproved RPC");
   }
   return deny("backend mutation request");
 }

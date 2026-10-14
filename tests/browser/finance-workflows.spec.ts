@@ -21,6 +21,24 @@ type SettlementState = {
   reviewCalls: Array<Record<string, unknown>>;
 };
 
+test('finance dojo selector distinguishes assigned Admin from assignment-free Super Admin', async ({page})=>{
+  await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments`);
+  await expect(page.getByRole('heading',{name:'Subscription & Payments'})).toBeVisible();
+  await expect(page.locator('option[value="fixture-dojo"]')).toHaveCount(1);
+  await expect(page.locator('option[value="other-dojo"]')).toHaveCount(0);
+  await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments&role=super_admin`);
+  await expect(page.getByRole('heading',{name:'Subscription & Payments'})).toBeVisible();
+  await expect(page.locator('option[value="fixture-dojo"]')).toHaveCount(1);
+  await expect(page.locator('option[value="other-dojo"]')).toHaveCount(1);
+});
+
+test('Super Admin dojo lookup failure does not expose a usable finance selector',async({page})=>{
+  await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments&role=super_admin&dojo_error=1`);
+  await expect(page.getByText('Synthetic dojo lookup failed')).toBeVisible();
+  await expect(page.locator('option[value="fixture-dojo"]')).toHaveCount(0);
+  await expect(page.locator('option[value="other-dojo"]')).toHaveCount(0);
+});
+
 test('Admin records a complete payment without a Member confirmation request', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments`);
   await expect(page).toHaveTitle('Direct payment workflow fixture');
@@ -53,6 +71,20 @@ test('Admin records a complete payment without a Member confirmation request', a
     payment_notes: 'Recorded at the dojo desk.',
   }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('waived bill stays Waived rather than Paid in the real Admin payment list', async ({ page }) => {
+  await page.goto(`${NAV_ORIGIN}/admin-direct-payment?tab=payments`);
+  await expandCompactRecords(page, 'Member Payments');
+  await expandCompactRecords(page, 'Adjust or waive this unpaid month');
+  const payments = page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Member Payments' }) });
+  await payments.getByLabel('New fee', { exact: true }).fill('0');
+  await payments.getByLabel('Adjustment reason').fill('Exempt for this month');
+  page.once('dialog', dialog => dialog.accept());
+  await payments.getByRole('button', { name: 'Save month adjustment' }).click();
+  await expect(payments.getByText('WAIVED', { exact: true })).toBeVisible();
+  await expect(payments.getByText('PAID', { exact: true })).toHaveCount(0);
+  await expect(payments.getByRole('button', { name: 'Mark Full Payment' })).toBeDisabled();
 });
 
 test('Full-payment rejection remains retryable with the entered audit details', async ({ page }) => {

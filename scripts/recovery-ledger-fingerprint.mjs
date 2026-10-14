@@ -4,6 +4,16 @@ import { pathToFileURL } from "node:url";
 
 export const RELEASE_MIGRATION_CONTRACT = Object.freeze({
   firstVersion: "006",
+  lastVersion: "060",
+  migrationCount: 55,
+  repositoryFilesSha256: "1fb8ea8facf8f4553d81d40f2ae808665290709a52367facd7a227be988ff8f2",
+});
+export const RELEASE_MIGRATION_RANGE = "006-060";
+
+// Historical evidence ONLY. Never use this contract to satisfy current release,
+// cutover, bootstrap or recovery readiness. Do not relabel old captures as 060.
+export const HISTORICAL_058_MIGRATION_CONTRACT = Object.freeze({
+  firstVersion: "006",
   lastVersion: "058",
   migrationCount: 53,
   repositoryFilesSha256: "a412432bedf7c95578e7ebfb83317987c1d4350d19121fe533007a1967b26ffd",
@@ -12,8 +22,12 @@ export const RELEASE_MIGRATION_CONTRACT = Object.freeze({
 export async function fingerprintMigrationDirectory(
   directory = new URL("../supabase/migrations/", import.meta.url),
 ) {
+  return fingerprintDirectory(directory, false);
+}
+async function fingerprintDirectory(directory, historical058) {
   const files = (await readdir(directory))
     .filter((name) => /^\d{3}_.+\.sql$/.test(name))
+    .filter((name) => !historical058 || name.slice(0, 3) <= "058")
     .sort();
   const rows = [];
 
@@ -37,6 +51,13 @@ function canonicalStatement(statement) {
 }
 
 export function fingerprintLedgerRows(rows) {
+  return fingerprintRows(rows, RELEASE_MIGRATION_CONTRACT);
+}
+// Requires the WHOLE historical 53-row capture; never truncates a supplied ledger.
+export function fingerprintHistorical058LedgerRows(rows) {
+  return fingerprintRows(rows, HISTORICAL_058_MIGRATION_CONTRACT);
+}
+function fingerprintRows(rows, contract) {
   if (!Array.isArray(rows)) {
     throw new Error("Ledger export must be a JSON array.");
   }
@@ -55,12 +76,12 @@ export function fingerprintLedgerRows(rows) {
 
   const versions = normalized.map(({ version }) => version);
   const expectedVersions = Array.from(
-    { length: RELEASE_MIGRATION_CONTRACT.migrationCount },
-    (_, index) => String(index + Number(RELEASE_MIGRATION_CONTRACT.firstVersion)).padStart(3, "0"),
+    { length: contract.migrationCount },
+    (_, index) => String(index + Number(contract.firstVersion)).padStart(3, "0"),
   );
   if (new Set(versions).size !== versions.length ||
       JSON.stringify(versions) !== JSON.stringify(expectedVersions)) {
-    throw new Error("Ledger export must contain each migration from 006 through 058 exactly once.");
+    throw new Error(`Ledger export must contain each migration from ${contract.firstVersion} through ${contract.lastVersion} exactly once.`);
   }
 
   const ledgerSha256 = createHash("sha256")
@@ -86,6 +107,17 @@ export async function verifyReleaseMigrationContract() {
       .every(([key, value]) => actual[key] === value),
     actual,
     expected: RELEASE_MIGRATION_CONTRACT,
+  };
+}
+
+export async function verifyHistorical058MigrationContract() {
+  const actual = await fingerprintDirectory(new URL("../supabase/migrations/", import.meta.url), true);
+  return {
+    matches: Object.entries(HISTORICAL_058_MIGRATION_CONTRACT).every(([key, value]) => actual[key] === value),
+    actual,
+    expected: HISTORICAL_058_MIGRATION_CONTRACT,
+    scope: "historical-006-058-only",
+    currentReleaseEvidence: false,
   };
 }
 

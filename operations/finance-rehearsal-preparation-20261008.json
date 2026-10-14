@@ -1,0 +1,243 @@
+{
+  "kind": "finance-rehearsal-preparation-only",
+  "preparedAt": "2026-10-08T11:36:17.278Z",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "captureTimestamp": "2026-10-08T11:26:27.5495986Z",
+  "snapshotSha256": "9385201b8e73a4135c755084a8387b9dad2ecd95089ff01f8d647ecbfcfb2935",
+  "ledger": {
+    "firstVersion": "006",
+    "lastVersion": "058",
+    "migrationCount": 53,
+    "ledgerSha256": "9d341d30c586cfe85fd8c328e05ef97d008f26623f7dc9506b615f89cbd6c4d1"
+  },
+  "candidates": [
+    {
+      "file": "059_advance_subscription_payment_records.sql",
+      "sha256": "29221922c65519fe6ff5d29ba5fbb13f8e99d843db8cf6f37875b84a7a90c5af"
+    },
+    {
+      "file": "060_selected_month_fee_adjustment.sql",
+      "sha256": "7121c44cc6ad3386a5aec768e5d6e7c274be59f703d8e7349aaace239d1fbb47"
+    }
+  ],
+  "readyToExecute": false,
+  "triggers": [
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER membership_status_change BEFORE UPDATE ON public.class_memberships FOR EACH ROW EXECUTE FUNCTION on_membership_status_change()",
+      "table_name": "class_memberships",
+      "schema_name": "public",
+      "trigger_name": "membership_status_change",
+      "function_name": "on_membership_status_change",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalize_class_fields_trigger BEFORE INSERT OR UPDATE ON public.classes FOR EACH ROW EXECUTE FUNCTION normalize_class_fields()",
+      "table_name": "classes",
+      "schema_name": "public",
+      "trigger_name": "normalize_class_fields_trigger",
+      "function_name": "normalize_class_fields",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER validate_dojo_admin_assignment_trigger BEFORE INSERT OR UPDATE ON public.dojo_admin_assignments FOR EACH ROW EXECUTE FUNCTION validate_dojo_admin_assignment()",
+      "table_name": "dojo_admin_assignments",
+      "schema_name": "public",
+      "trigger_name": "validate_dojo_admin_assignment_trigger",
+      "function_name": "validate_dojo_admin_assignment",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalize_dojo_fields_trigger BEFORE INSERT OR UPDATE ON public.dojos FOR EACH ROW EXECUTE FUNCTION normalize_dojo_fields()",
+      "table_name": "dojos",
+      "schema_name": "public",
+      "trigger_name": "normalize_dojo_fields_trigger",
+      "function_name": "normalize_dojo_fields",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalize_email_outbox_trigger BEFORE INSERT OR UPDATE ON public.email_outbox FOR EACH ROW EXECUTE FUNCTION normalize_email_outbox()",
+      "table_name": "email_outbox",
+      "schema_name": "public",
+      "trigger_name": "normalize_email_outbox_trigger",
+      "function_name": "normalize_email_outbox",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER membership_payment_confirmations_require_full_balance BEFORE INSERT ON public.membership_payment_confirmations FOR EACH ROW EXECUTE FUNCTION enforce_full_payment_confirmation()",
+      "table_name": "membership_payment_confirmations",
+      "schema_name": "public",
+      "trigger_name": "membership_payment_confirmations_require_full_balance",
+      "function_name": "enforce_full_payment_confirmation",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER membership_payments_require_full_balance BEFORE INSERT ON public.membership_payments FOR EACH ROW EXECUTE FUNCTION enforce_full_membership_payment()",
+      "table_name": "membership_payments",
+      "schema_name": "public",
+      "trigger_name": "membership_payments_require_full_balance",
+      "function_name": "enforce_full_membership_payment",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER route_legacy_notification_to_email_outbox_trigger BEFORE INSERT ON public.notification_outbox FOR EACH ROW EXECUTE FUNCTION route_legacy_notification_to_email_outbox()",
+      "table_name": "notification_outbox",
+      "schema_name": "public",
+      "trigger_name": "route_legacy_notification_to_email_outbox_trigger",
+      "function_name": "route_legacy_notification_to_email_outbox",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER guard_deceased_profile_fields_trigger BEFORE UPDATE OF date_of_passing, account_status ON public.profiles FOR EACH ROW EXECUTE FUNCTION guard_deceased_profile_fields()",
+      "table_name": "profiles",
+      "schema_name": "public",
+      "trigger_name": "guard_deceased_profile_fields_trigger",
+      "function_name": "guard_deceased_profile_fields",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalise_profile_identity_before_write BEFORE INSERT OR UPDATE OF registration_number, email, full_name, phone ON public.profiles FOR EACH ROW EXECUTE FUNCTION normalise_profile_identity()",
+      "table_name": "profiles",
+      "schema_name": "public",
+      "trigger_name": "normalise_profile_identity_before_write",
+      "function_name": "normalise_profile_identity",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalize_profile_fields_trigger BEFORE INSERT OR UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION normalize_profile_fields()",
+      "table_name": "profiles",
+      "schema_name": "public",
+      "trigger_name": "normalize_profile_fields_trigger",
+      "function_name": "normalize_profile_fields",
+      "function_schema": "public"
+    },
+    {
+      "enabled": "O",
+      "definition": "CREATE TRIGGER normalize_rank_fields_trigger BEFORE INSERT OR UPDATE ON public.ranks FOR EACH ROW EXECUTE FUNCTION normalize_rank_fields()",
+      "table_name": "ranks",
+      "schema_name": "public",
+      "trigger_name": "normalize_rank_fields_trigger",
+      "function_name": "normalize_rank_fields",
+      "function_schema": "public"
+    }
+  ],
+  "dependencies": [
+    {
+      "qualifiedName": "public.create_notification",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.on_membership_status_change",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalize_class_fields",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.validate_dojo_admin_assignment",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalize_dojo_fields",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalize_email_outbox",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.enforce_full_payment_confirmation",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.enforce_full_membership_payment",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.route_legacy_notification_to_email_outbox",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.guard_deceased_profile_fields",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalise_profile_identity",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalize_profile_fields",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    },
+    {
+      "qualifiedName": "public.normalize_rank_fields",
+      "overloadCount": 1,
+      "definitionsCaptured": false
+    }
+  ],
+  "blockers": [
+    "Missing full reachable routine definition: public.create_notification",
+    "Missing full reachable routine definition: public.on_membership_status_change",
+    "Missing full reachable routine definition: public.normalize_class_fields",
+    "Missing full reachable routine definition: public.validate_dojo_admin_assignment",
+    "Missing full reachable routine definition: public.normalize_dojo_fields",
+    "Missing full reachable routine definition: public.normalize_email_outbox",
+    "Missing full reachable routine definition: public.enforce_full_payment_confirmation",
+    "Missing full reachable routine definition: public.enforce_full_membership_payment",
+    "Missing full reachable routine definition: public.route_legacy_notification_to_email_outbox",
+    "Missing full reachable routine definition: public.guard_deceased_profile_fields",
+    "Missing full reachable routine definition: public.normalise_profile_identity",
+    "Missing full reachable routine definition: public.normalize_profile_fields",
+    "Missing full reachable routine definition: public.normalize_rank_fields",
+    "Review the complete transitive function/trigger/default/RLS call chain for nontransactional side effects.",
+    "Bind reviewed synthetic fixture UUIDs and prerequisite rows without modifying real profiles or memberships.",
+    "Prepare complete-schema acceptance assertions and independent before/after catalog, ledger and residue verification.",
+    "Obtain explicit approval for one staging-only rollback-contained rehearsal; no application approval implied."
+  ],
+  "runnerImplemented": false,
+  "remoteContact": false,
+  "sqlExecuted": false,
+  "boundary": {
+    "production": false,
+    "otherProjects": false,
+    "providers": false,
+    "sendMessages": false,
+    "persistentDDL": false,
+    "ledgerInsert": false,
+    "settingsChanges": false,
+    "workerOrSchedulerInvocation": false
+  },
+  "plannedTests": [
+    "selected/nonconsecutive months and unchanged skipped debt",
+    "Member reports remain pending until authorized receipt confirmation",
+    "waiver versus paid, required reason, expected old amount and audit attribution",
+    "Super Admin, assigned Admin, out-of-scope Admin, Member, anonymous and disabled boundaries",
+    "actual rate intervals, old/new fee APIs, prepaid generation preservation",
+    "group atomicity, duplicate/stale request rejection and no direct browser writes",
+    "notification/outbox transaction rollback with zero provider calls",
+    "post-rollback exact ledger, catalog, fixture residue and captured baseline comparison"
+  ]
+}

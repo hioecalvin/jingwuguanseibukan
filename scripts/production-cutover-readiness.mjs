@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { lstat, readFile, realpath } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { RELEASE_MIGRATION_RANGE } from "./recovery-ledger-fingerprint.mjs";
 
 export const CUTOVER_POLICY = "jingwuguan-production-cutover-v1";
 export const RELEASE_BRANCH = "release/v1-readiness-20260918";
@@ -127,7 +128,7 @@ export function evaluateProductionCutoverReadiness(manifest, {
   const database = object(manifest.database);
   exactKeys(blockers, database, "database", ["capturedAt", "migrationLedger", "exactLedgerPassed", "catalogPassed", "databaseLintPassed", "securityVerifierPassed", "grantsAndRlsPassed", "evidenceSha256"]);
   validateFreshTimestamp(blockers, database.capturedAt, "database.capturedAt", now);
-  if (database.migrationLedger !== "006-058") add(blockers, "database.migrationLedger", "must equal 006-058");
+  if (database.migrationLedger !== RELEASE_MIGRATION_RANGE) add(blockers, "database.migrationLedger", `must equal ${RELEASE_MIGRATION_RANGE}`);
   for (const key of ["exactLedgerPassed", "catalogPassed", "databaseLintPassed", "securityVerifierPassed", "grantsAndRlsPassed"]) requireTrue(blockers, database[key], `database.${key}`);
   if (!validDigest(database.evidenceSha256)) add(blockers, "database.evidenceSha256", "must be a non-placeholder SHA-256 evidence digest");
 

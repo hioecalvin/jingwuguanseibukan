@@ -1,0 +1,59 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "approved-once-read-only-overlapping-session-diagnostic",
+  "attempts": 1,
+  "clientConnections": 2,
+  "retries": 0,
+  "transport": {
+    "type": "session-pooler",
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
+    "port": 5432,
+    "connectionUser": "postgres.eomubndonbetszdbhsrj",
+    "sslmode": "verify-full",
+    "pinnedClientAndCaVerified": true,
+    "protectedStagingCredentialBindingVerified": true,
+    "bothBackendSsl": true,
+    "bothReadOnly": true
+  },
+  "capture": {
+    "path": "C:\\protected\\jwg-finance-witness-6d8be23a157e4c499bbf8fe87af09142\\session-witness-capture.json",
+    "sha256": "f791df33eca16adf8a5cb2881dc84ed85c1200c52ca73fd0eb8f8327fe2d6a39",
+    "ownerOnlyCreateNewFlushReadbackVerified": true,
+    "primaryCapturedAt": "2026-10-11T07:36:27.604993+00:00",
+    "observerCapturedAt": "2026-10-11T07:36:27.906514+00:00",
+    "primaryQuerySha256": "6457f670467433b92a70a3ab48ab198f07c49759d6801e3ae2317bb78101bde6",
+    "observerQuerySha256": "644b97d482e36bad8e5954593baddc268dc02f978066f28ae52647fa15f05e00"
+  },
+  "offlineVerification": {
+    "passed": true,
+    "receiptAndQueryHashesMatched": true,
+    "fixedTargetMatched": true,
+    "freshnessPassedAtVerification": true,
+    "distinctBackends": true,
+    "overlappingReadOnlyTransactions": true,
+    "primaryIdentityMatchedByObserver": true,
+    "clientsExitedCleanly": true,
+    "remoteProvenanceIndependentlyVerified": false,
+    "serverClosureIndependentlyVerified": false,
+    "writeRollbackVerified": false,
+    "readyForWriteRehearsal": false
+  },
+  "boundaries": {
+    "databaseWrites": false,
+    "memberRecordsRead": false,
+    "ledgerRecaptured": false,
+    "migrations059060Applied": false,
+    "productionContact": false,
+    "retiredProjectContact": false,
+    "providerContact": false,
+    "messagesSent": false,
+    "deployment": false,
+    "commitOrPush": false
+  },
+  "remaining": [
+    "Finish the remote baseline/catalog and attempt-journal integration locally without relaxing distinct-backend guards.",
+    "Obtain separately scoped approval for fresh remote baseline capture and rollback-contained write rehearsal when prepared.",
+    "Apply migrations 059 and 060 only after rehearsal acceptance and explicit persistent-application approval."
+  ]
+}

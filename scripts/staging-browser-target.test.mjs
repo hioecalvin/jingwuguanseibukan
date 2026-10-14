@@ -31,6 +31,22 @@ function protectedEnvironment(overrides = {}) {
   };
 }
 
+test("finance reads are explicit while payment, waiver and worker actions stay blocked", () => {
+  for (const name of ["get_my_payment_confirmations", "get_dojo_receiving_account", "get_dojo_monthly_payment_summary", "get_pending_advance_payment_groups"]) {
+    for (const method of ["GET", "HEAD", "POST"]) {
+      assert.equal(classifyStagingBrowserRequest(method, `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/${name}`).allowed, true);
+    }
+  }
+  for (const name of ["submit_advance_subscription_payment", "record_advance_subscription_payment", "review_advance_subscription_payment", "adjust_unpaid_subscription_charge", "submit_membership_payment_confirmation", "review_membership_payment_confirmation", "quote_advance_subscription_payment", "unknown_function"]) {
+    for (const method of ["GET", "HEAD", "POST", "PATCH", "DELETE"]) {
+      assert.equal(classifyStagingBrowserRequest(method, `${STAGING_SUPABASE_ORIGIN}/rest/v1/rpc/${name}`).allowed, false, `${method} ${name}`);
+    }
+  }
+  for (const path of ["/api/email-worker", "/api/push", "/api/subscribe"]) {
+    assert.equal(classifyStagingBrowserRequest("POST", `${STAGING_APP_ORIGIN}${path}`).allowed, false);
+  }
+});
+
 test("the deployed browser target is the exact HTTPS staging origin", () => {
   assert.equal(parseExactStagingOrigin(STAGING_APP_ORIGIN), STAGING_APP_ORIGIN);
   for (const target of [

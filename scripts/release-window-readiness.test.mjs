@@ -12,6 +12,14 @@ const NOW = Date.parse("2026-10-02T10:00:00+10:00");
 const PRODUCTION_PROJECT_REF = "abcdefghijklmnopqrst";
 const DEPLOYMENT_ID = "dpl_release_candidate";
 
+test("historical 058 cutover evidence cannot satisfy the current release window", () => {
+  const manifest = validManifest();
+  manifest.gateEvidence.productionCutover.migrationLedger = "006-058";
+  const result = evaluateReleaseWindow(manifest, options());
+  assert.equal(result.ready, false);
+  assert.ok(result.blockers.some(({ path }) => path === "gateEvidence.productionCutover.migrationLedger"));
+});
+
 function options(overrides = {}) {
   return { expectedCommit: RELEASE_SHA, expectedDeploymentId: DEPLOYMENT_ID, expectedProductionProjectRef: PRODUCTION_PROJECT_REF, now: NOW, ...overrides };
 }
@@ -126,7 +134,7 @@ function validManifest(overrides = {}) {
         commitSha: RELEASE_SHA,
         deploymentId: "dpl_release_candidate",
         origin: "https://jingwuguanseibukan.com",
-        migrationLedger: "006-058",
+        migrationLedger: "006-060",
         policy: "jingwuguan-production-cutover-v1",
       },
       providerDelivery: {

@@ -83,6 +83,9 @@ export function createClient() {
     },
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args: RpcArguments = {}) => {
+      if (name === 'get_pending_advance_payment_groups') {
+        return { data: [], error: null };
+      }
       if (name === 'get_dojo_payment_confirmations') {
         return { data: confirmations.map(row => ({ ...row })), error: null };
       }

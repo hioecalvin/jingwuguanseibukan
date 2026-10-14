@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { lstat, readFile, realpath } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { RELEASE_MIGRATION_RANGE } from "./recovery-ledger-fingerprint.mjs";
 
 export const ROLLBACK_POLICY = "jingwuguan-production-rollback-v1";
 export const RELEASE_BRANCH = "release/v1-readiness-20260918";
@@ -203,7 +204,7 @@ export function evaluateRollbackReadiness(manifest, {
   if (!validDigest(database.backupSha256)) add(blockers, "databaseRecovery.backupSha256", "must be a non-placeholder SHA-256 digest");
   if (!validDigest(database.evidenceBundleSha256) || database.evidenceBundleSha256 === database.backupSha256 || database.evidenceBundleSha256 === rehearsal.evidenceBundleSha256) add(blockers, "databaseRecovery.evidenceBundleSha256", "must be a distinct non-placeholder SHA-256 digest");
   if (validDigest(database.backupSha256) && database.backupSha256 === rehearsal.evidenceBundleSha256) add(blockers, "databaseRecovery.backupSha256", "must be distinct from the application rehearsal evidence digest");
-  if (database.migrationLedger !== "006-058") add(blockers, "databaseRecovery.migrationLedger", "must equal 006-058");
+  if (database.migrationLedger !== RELEASE_MIGRATION_RANGE) add(blockers, "databaseRecovery.migrationLedger", `must equal ${RELEASE_MIGRATION_RANGE}`);
   for (const key of ["exactLedgerPassed", "catalogPassed", "databaseLintPassed", "grantsAndRlsPassed", "roleSecurityPassed", "restoreCompleted", "zeroResidueVerified"]) requireTrue(blockers, database[key], `databaseRecovery.${key}`);
 
   const timings = object(manifest.timings);

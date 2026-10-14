@@ -1,0 +1,86 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "approved-once-catalog-only-baseline-prerequisites",
+  "attempts": 1,
+  "clientConnections": 1,
+  "retries": 0,
+  "transport": {
+    "type": "session-pooler",
+    "sslmode": "verify-full",
+    "pinnedClientCaNodeVerified": true,
+    "protectedStagingCredentialBindingVerified": true,
+    "backendSsl": true,
+    "transactionReadOnly": true
+  },
+  "capture": {
+    "path": "C:\\protected\\jwg-finance-prerequisites-2940e21c71d9424796863ca3756794e2\\public-prerequisites-capture.json",
+    "sha256": "1db34a4b94f68e258521dfaa84d375536d89befe6748854127c85cf9842976e5",
+    "querySha256": "2b7991c17a5917cff043e30f17b326146e87acbc638ef72f83adeaa3531408a5",
+    "bytes": 70738,
+    "capturedAt": "2026-10-11T08:34:57.014461+00:00",
+    "ownerOnlyCreateNewFlushReadbackVerified": true,
+    "originalPreserved": true
+  },
+  "initialVerification": {
+    "passed": false,
+    "reason": "Verifier rejected PostgreSQL inet text containing an IPv6 /128 host mask.",
+    "wrapperExitedNonzero": true,
+    "clientExitedCleanlyBeforeCaptureSaved": true
+  },
+  "offlineReverification": {
+    "passed": true,
+    "verifiedAt": "2026-10-11T08:37:31.237Z",
+    "freshnessPassedAtVerification": true,
+    "originalReceiptAndQueryHashMatched": true,
+    "fixedTargetMatched": true,
+    "fix": "Accept exact IPv4 /32 and IPv6 /128 host masks; reject subnets, malformed addresses and loopback.",
+    "additionalNetworkConnections": 0,
+    "remoteProvenanceIndependentlyVerified": false,
+    "serverClosureIndependentlyVerified": false,
+    "readyForBaselineRead": false,
+    "readyForWriteRehearsal": false
+  },
+  "findings": {
+    "publicTables": 67,
+    "publicSequences": 6,
+    "columns": 800,
+    "typesIncludingDependencies": 19,
+    "nonCatalogTypes": 8,
+    "allNonCatalogTypesArePublicEnums": true,
+    "outputAndJsonCastFunctions": 12,
+    "allInspectedFunctionsInPgCatalog": true,
+    "jsonCasts": 1,
+    "deniedRelationSelects": 0,
+    "deniedFunctionExecutions": 0,
+    "unsupportedPublicRelationKinds": 0,
+    "rlsEnabledTables": 67,
+    "forceRlsTables": 11,
+    "auditRoleBypassesRls": true,
+    "auditRoleSuperuser": false,
+    "controlSystemExecutePermission": true,
+    "controlSystemActuallyInvoked": false,
+    "catalogReportedPages": 16,
+    "relationsWithUnknownRowEstimate": 53,
+    "detectedPrerequisiteBlockers": []
+  },
+  "boundaries": {
+    "databaseWrites": false,
+    "memberRecordsRead": false,
+    "sequenceValuesRead": false,
+    "ledgerRecaptured": false,
+    "migrations059060Applied": false,
+    "productionContact": false,
+    "otherProjectContact": false,
+    "providerContact": false,
+    "messagesSent": false,
+    "deployment": false,
+    "commitOrPush": false
+  },
+  "remaining": [
+    "Complete cross-schema/inheritance, dependency and resource review; catalog estimates are not actual counts or a runtime guarantee.",
+    "Finish the protected remote executor, fixed journal and staging fixture scope without relaxing existing guards.",
+    "Fresh full baseline/ledger/actor evidence and any rollback-contained write rehearsal require separate scope and approval.",
+    "Persistent application of migrations 059 and 060 and staging deployment remain separate approval gates."
+  ]
+}

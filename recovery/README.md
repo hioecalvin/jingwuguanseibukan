@@ -1,5 +1,26 @@
 # Recovery evidence gate
 
+Current contract (14 October 2026): active migrations are 006–060, 55 versions.
+The current gate requires their exact checked-in fingerprint. The finance migrations
+are already applied and accepted on staging; copying them into the repository did
+not reapply them. No fresh 006–060 backup or restore is claimed by this local update.
+Older recovery evidence remains historical and cannot satisfy this gate. See
+`RESTORE_060_PLAN.md` for the next approval-dependent recovery work.
+
+Historical source refresh (2 October 2026): a protected AES-256-GCM archive captures
+the exact 006–056 ledger, database/Auth/Storage metadata, global roles without role
+passwords, 4,151 catalog objects and six Storage objects. Authenticated decryption,
+archive-byte comparison and dump listing passed. Source metadata remained unchanged
+during object capture. The database uses one shared read-only snapshot; role globals
+and Storage bytes were captured separately. Both prior September archives remain.
+The new package's `encryption.json` records its nonce/tag and separate key filename;
+it is **not** the older OpenSSL CBC/PBKDF2 format. Keep the key and metadata with the
+protected recovery materials and use the recorded format when preparing an approved
+restore. Only sanitized hashes, counts and limitations are in PROJECT_CHECKPOINT.md.
+No managed restore or hosted configuration/provider recovery is claimed by this refresh.
+
+The following local rehearsal remains historical 006–055 evidence:
+
 The project has captured a protected staging package containing the application
 database, Auth and Storage metadata, database roles, and the retained Storage object's
 bytes. A disposable loopback-only PostgreSQL 17.11 rehearsal restored the exact
@@ -16,7 +37,7 @@ The offline gate therefore remains intentionally blocked until those checks are 
 do not mark managed components verified based only on the local PostgreSQL rehearsal.
 
 `scripts/recovery-readiness.mjs` is an offline, read-only release gate. Manifest
-version 4 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–056,
+version 4 binds the next drill to staging `eomubndonbetszdbhsrj`, migrations 006–060,
 the checked-in migration-file fingerprint, matching source/restored ledger and
 pre-migration schema-catalog fingerprints, the exact protected backup payload used as
 restore input, a digest of the finalized sanitized rehearsal-evidence bundle, explicit
@@ -60,7 +81,7 @@ npm.cmd run recovery:check -- C:\protected\evidence\recovery-manifest.json
 ```
 
 Before and after the restore, export the ordered `version`, `name` and `statements`
-columns for migrations 006–056 from `supabase_migrations.schema_migrations` into
+columns for migrations 006–060 from `supabase_migrations.schema_migrations` into
 protected JSON arrays. Generate sanitized fingerprints without printing the SQL:
 
 ```powershell

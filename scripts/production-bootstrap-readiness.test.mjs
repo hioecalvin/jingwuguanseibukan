@@ -9,7 +9,18 @@ import {
   calculateProductionBootstrapAttestation,
   evaluateProductionBootstrap,
 } from "./production-bootstrap-readiness.mjs";
-import { RELEASE_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
+import { RELEASE_MIGRATION_CONTRACT, HISTORICAL_058_MIGRATION_CONTRACT } from "./recovery-ledger-fingerprint.mjs";
+
+test("historical 058 bootstrap evidence cannot satisfy the current release", () => {
+  const manifest = validManifest();
+  Object.assign(manifest.migrationLedger, HISTORICAL_058_MIGRATION_CONTRACT);
+  manifest.independentReview.attestationSha256 = calculateProductionBootstrapAttestation(manifest);
+  const result = evaluate(manifest);
+  assert.equal(result.ready, false);
+  for (const key of ["lastVersion", "migrationCount", "repositoryFilesSha256"]) {
+    assert.ok(result.blockers.some(({ path }) => path === `migrationLedger.${key}`));
+  }
+});
 
 const PROJECT_REF = "abcdefghijklmnopqrst";
 const COMMIT = "1".repeat(40);
@@ -112,7 +123,7 @@ test("accepts a reviewed offline plan bound to the exact empty Singapore product
   assert.equal(result.summary.projectRef, PROJECT_REF);
   assert.equal(result.summary.productionMutationsPerformed, 0);
   assert.deepEqual(result.summary.migrationContract, {
-    firstVersion: "006", lastVersion: "058", migrationCount: 53,
+    firstVersion: "006", lastVersion: "060", migrationCount: 55,
   });
 });
 
@@ -161,7 +172,7 @@ test("requires the protected pre-006 baseline instead of treating migrations as 
   assert.ok(result.blockers.some(({ path }) => path === "controls.applyMigrationsToEmptyTarget"));
 });
 
-test("requires the immutable 006-058 repository contract and matching source ledger", () => {
+test("requires the immutable 006-060 repository contract and matching source ledger", () => {
   const manifest = validManifest();
   manifest.migrationLedger.firstVersion = "007";
   manifest.migrationLedger.repositoryFilesSha256 = "cd".repeat(32);
