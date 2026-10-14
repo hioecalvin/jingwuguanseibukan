@@ -1,5 +1,29 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Approved staging release and dependency patch — 14 October 2026
+
+- Reviewed and backed up the 229-file candidate, preserving nine unrelated
+  Supabase CLI metadata changes. Committed and pushed `9c29cad` to the existing
+  `release/v1-readiness-20260918` branch; no merge or production action.
+- GitHub Actions run `38529639411` failed at the dependency audit, before lint,
+  unit/build or browser jobs. Newly blocking findings were `sharp` and
+  `source-map-js`; the failed run remains preserved as evidence.
+- Applied compatible lockfile-only patches: sharp 0.35.4 -> 0.35.5, its matching
+  platform/libvips packages, and source-map-js 1.2.1 -> 1.2.2. No direct dependency,
+  application API, migration, or audit exception was changed. Full audit policy
+  passes; production audit reports zero vulnerabilities. The existing dev-only
+  braces exception still expires 19 October 2026 and is not a patched finding.
+- Patched isolated production-mode build and 96px PNG image-pipeline smoke pass.
+  Full regression tests are in progress; no completed result is claimed here.
+- Authenticated Vercel UI confirms release-specific Preview public configuration
+  targets only staging `eomubndonbetszdbhsrj` and its staging hostname. Existing
+  alias remains on Ready Preview `dpl_HW2ismrCKo8tw1trEbcdXtcUtxKH` / `319fb20`.
+  CLI API token returned HTTP 403; no credentials were created or changed.
+- New Preview submission was held on the CI failure. Deployment, 11 host probes,
+  and 36 guarded live browser tests are still pending for the patched candidate.
+  No migrations, business records, workers, schedulers, provider deliveries,
+  production, retired, or disposable projects were touched.
+
 ## Finance browser release preparation — 14 October 2026
 
 Local review found that the live guarded suite never opened the subscription

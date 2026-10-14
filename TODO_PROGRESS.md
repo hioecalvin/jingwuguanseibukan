@@ -1,5 +1,15 @@
 # Jingwuguan Seibukan production progress
 
+## Approved release dependency follow-up — 14 October 2026
+
+- [x] Back up and push the intended 229-file candidate as `9c29cad`; preserve CLI metadata.
+- [x] Dispatch CI `38529639411`; retain its dependency-audit failure evidence.
+- [x] Patch only sharp/source-map-js and matching sharp binaries in the lockfile.
+- [x] Full audit policy, zero-vulnerability production audit, isolated production build, and PNG processing check pass.
+- [ ] Complete the patched full regression suite and fresh remote CI.
+- [ ] Deploy the verified patched Preview, assign only the staging alias, and run 11 host probes plus 36 guarded browser tests.
+- Vercel CLI token is rejected (403); authenticated UI is available. No credential changes or production contact.
+
 ## Finance browser readiness preparation — 14 October 2026
 
 - [x] Add nine live finance inspection cases (three roles x three WebKit devices); collect 36 total offline, without credentials or network.
