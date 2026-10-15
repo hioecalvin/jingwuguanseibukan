@@ -194,18 +194,26 @@ test('Member can inspect the multi-month payment form without reporting money', 
 for (const role of ['ADMIN', 'SUPER'] as const) {
   test(`${role} can inspect finance forms and grouped reports without recording receipts`, async ({ page, requestAudit, browserDiagnostics }) => {
     await login(page, credentials(role), requestAudit, browserDiagnostics);
-    const reads = ['get_dojo_receiving_account', 'get_dojo_monthly_payment_summary', 'get_pending_advance_payment_groups'];
+    const reads = ['get_dojo_receiving_account', 'get_dojo_monthly_payment_summary'];
     const responses = reads.map(name => page.waitForResponse(response =>
       new URL(response.url()).pathname === `/rest/v1/rpc/${name}`));
     await page.goto('/admin/subscriptions');
     for (const response of await Promise.all(responses)) expect(response.ok(), 'Required finance read succeeds').toBe(true);
     await expect(page.getByRole('heading', { name: 'Subscription & Payments', exact: true })).toBeVisible();
     await expect(page.getByText(role === 'SUPER' ? 'Super Admin financial oversight covers all dojos.' : 'Financial access is limited to your assigned dojos.', { exact: true })).toBeVisible();
-    for (const name of ['Member Payments', 'Record several months received', 'Payment Confirmations', 'Multi-month payments awaiting receipt']) await expandFinanceSection(page, name);
+    await page.getByRole('button', { name: 'Payments', exact: true }).click();
+    for (const name of ['Member Payments', 'Record several months received']) await expandFinanceSection(page, name);
     await expect(page.getByText('Use only after you have received the full payment.', { exact: false })).toBeVisible();
-    await expect(page.getByText('Confirm only after checking the money arrived.', { exact: false })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Review monthly fees', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Confirm money received', exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    // Grouped reports mount only on the confirmations tab, not at page load.
+    const groupedReports = page.waitForResponse(response =>
+      new URL(response.url()).pathname === '/rest/v1/rpc/get_pending_advance_payment_groups');
+    await page.getByRole('button', { name: 'Payment Confirmations', exact: true }).click();
+    expect((await groupedReports).ok(), 'Grouped payment read succeeds').toBe(true);
+    for (const name of ['Payment Confirmations', 'Multi-month payments awaiting receipt']) await expandFinanceSection(page, name);
+    await expect(page.getByText('Confirm only after checking the money arrived.', { exact: false })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
