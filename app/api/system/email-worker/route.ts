@@ -14,6 +14,19 @@ import {
 import {
   renderEmail,
 } from "@/lib/email/render-email";
+import {
+  emailProviderAbortSignal,
+  emailWorkerDeadline,
+  remainingWorkerTimeMs,
+} from "@/lib/email/worker-runtime";
+import {
+  configuredRateLimit,
+  consumeDurableRateLimit,
+  durableRateLimitHeaders,
+} from "@/lib/security/durable-rate-limit";
+import {
+  matchesSecret,
+} from "@/lib/security/constant-time-secret";
 
 
 export const runtime =
@@ -24,26 +37,155 @@ const MAX_EMAILS_PER_RUN =
   20;
 
 
+type EmailQueueHealth = {
+  status: "PASS" | "FAIL";
+  checks: {
+    stuckProcessingEmails: number;
+    exhaustedFailures: number;
+    oldPendingEmails: number;
+    overdueReadyEmails: number;
+    queuedEmails: number;
+    dueEmails: number;
+    oldestReadyAgeSeconds: number | null;
+    duplicateDedupeKeys: number;
+  };
+  checkedAt: string;
+};
+
+
+type MemorialProcessorHealth = {
+  status: "PASS" | "FAIL";
+  createdAnnouncements: number | null;
+};
+
+
+function strictNonnegativeInteger(
+  value: unknown,
+) {
+  return typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 0
+    ? value
+    : null;
+}
+
+
+function normaliseQueueHealth(
+  value: unknown,
+): EmailQueueHealth | null {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+
+  const raw = value as Record<string, unknown>;
+  const rawChecks =
+    raw.checks &&
+    typeof raw.checks === "object" &&
+    !Array.isArray(raw.checks)
+      ? raw.checks as Record<string, unknown>
+      : null;
+
+  if (
+    (raw.status !== "PASS" && raw.status !== "FAIL") ||
+    !rawChecks
+  ) {
+    return null;
+  }
+
+  const stuckProcessingEmails =
+    strictNonnegativeInteger(
+      rawChecks.stuck_processing_emails,
+    );
+  const exhaustedFailures =
+    strictNonnegativeInteger(
+      rawChecks.failed_emails_exhausted,
+    );
+  const oldPendingEmails =
+    strictNonnegativeInteger(
+      rawChecks.old_pending_emails,
+    );
+  const overdueReadyEmails =
+    strictNonnegativeInteger(
+      rawChecks.overdue_ready_emails,
+    );
+  const queuedEmails =
+    strictNonnegativeInteger(
+      rawChecks.queued_emails,
+    );
+  const dueEmails =
+    strictNonnegativeInteger(
+      rawChecks.due_emails,
+    );
+  const oldestReadyAgeSeconds =
+    rawChecks.oldest_ready_age_seconds === null
+      ? null
+      : strictNonnegativeInteger(
+          rawChecks.oldest_ready_age_seconds,
+        );
+  const duplicateDedupeKeys =
+    strictNonnegativeInteger(
+      rawChecks.duplicate_dedupe_keys,
+    );
+  const checkedAt =
+    typeof raw.checked_at === "string" &&
+    raw.checked_at.trim().length > 0 &&
+    /^\d{4}-\d{2}-\d{2}T/.test(
+      raw.checked_at,
+    ) &&
+    Number.isFinite(
+      Date.parse(raw.checked_at),
+    )
+      ? raw.checked_at
+      : null;
+
+  if (
+    stuckProcessingEmails === null ||
+    exhaustedFailures === null ||
+    oldPendingEmails === null ||
+    overdueReadyEmails === null ||
+    queuedEmails === null ||
+    dueEmails === null ||
+    (
+      rawChecks.oldest_ready_age_seconds !== null &&
+      oldestReadyAgeSeconds === null
+    ) ||
+    duplicateDedupeKeys === null ||
+    checkedAt === null
+  ) {
+    return null;
+  }
+
+  return {
+    status: raw.status,
+    checks: {
+      stuckProcessingEmails,
+      exhaustedFailures,
+      oldPendingEmails,
+      overdueReadyEmails,
+      queuedEmails,
+      dueEmails,
+      oldestReadyAgeSeconds,
+      duplicateDedupeKeys,
+    },
+    checkedAt,
+  };
+}
+
+
 function authorised(
   request:
     NextRequest
 ) {
-  const secret =
-    process.env
-      .EMAIL_WORKER_SECRET;
-
-
-  if (
-    !secret
-  ) {
-    return false;
-  }
-
-
-  return (
+  return matchesSecret(
     request.headers.get(
       "x-worker-secret"
-    ) === secret
+    ),
+    process.env
+      .EMAIL_WORKER_SECRET,
   );
 }
 
@@ -65,6 +207,58 @@ export async function POST(
       {
         status: 401,
       }
+    );
+  }
+
+  try {
+    const rateLimit =
+      await consumeDurableRateLimit({
+        bucket:
+          "email-worker",
+        subject:
+          "authorised-scheduler",
+        limit:
+          configuredRateLimit(
+            "EMAIL_WORKER_RATE_LIMIT",
+            12,
+            10_000,
+          ),
+        windowSeconds:
+          configuredRateLimit(
+            "EMAIL_WORKER_RATE_WINDOW_SECONDS",
+            60,
+            86_400,
+          ),
+      });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "Too many worker requests.",
+        },
+        {
+          status: 429,
+          headers:
+            durableRateLimitHeaders(
+              rateLimit,
+            ),
+        },
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Email worker rate-limit error:",
+      error,
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Email worker is temporarily unavailable.",
+      },
+      {
+        status: 503,
+      },
     );
   }
 
@@ -111,6 +305,66 @@ export async function POST(
     createAdminClient();
 
 
+  const workerDeadline =
+    emailWorkerDeadline();
+
+
+  let memorialProcessor: MemorialProcessorHealth = {
+    status: "PASS",
+    createdAnnouncements: 0,
+  };
+
+
+  const {
+    data:
+      memorialData,
+
+    error:
+      memorialError,
+  } =
+    await supabase.rpc(
+      "process_memorial_anniversaries"
+    );
+
+
+  if (
+    memorialError
+  ) {
+    console.error(
+      "Memorial anniversary processor failed:",
+      memorialError,
+    );
+
+    memorialProcessor = {
+      status: "FAIL",
+      createdAnnouncements: null,
+    };
+  } else {
+    const rawMemorial =
+      memorialData &&
+      typeof memorialData === "object" &&
+      !Array.isArray(memorialData)
+        ? memorialData as Record<string, unknown>
+        : null;
+
+    const createdAnnouncements =
+      strictNonnegativeInteger(
+        rawMemorial?.created_count,
+      );
+
+    memorialProcessor =
+      createdAnnouncements === null
+        ? {
+            status: "FAIL",
+            createdAnnouncements: null,
+          }
+        : {
+            status: "PASS",
+            createdAnnouncements,
+          };
+  }
+
+
   let sent =
     0;
 
@@ -119,6 +373,9 @@ export async function POST(
 
   let processed =
     0;
+
+  let budgetExhausted =
+    false;
 
 
   for (
@@ -129,6 +386,18 @@ export async function POST(
 
     index++
   ) {
+
+    const remainingRunTimeMs =
+      remainingWorkerTimeMs(
+        workerDeadline,
+      );
+
+
+    if (remainingRunTimeMs <= 0) {
+      budgetExhausted =
+        true;
+      break;
+    }
 
     const {
       data:
@@ -150,7 +419,16 @@ export async function POST(
         claimError
       );
 
-      break;
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unable to claim queued email.",
+          processed,
+          sent,
+          failed,
+        },
+        { status: 500 }
+      );
     }
 
 
@@ -187,6 +465,24 @@ export async function POST(
         );
 
 
+      /*
+       * Resend's runtime forwards standard fetch options even though its
+       * public request-option type currently documents only headers/query.
+       * Keeping this as an inferred variable preserves that runtime option
+       * without weakening the email payload's type.
+       */
+      const resendRequestOptions = {
+        idempotencyKey:
+          `email-outbox/${email.email_id}`,
+        signal:
+          emailProviderAbortSignal(
+            remainingWorkerTimeMs(
+              workerDeadline,
+            ),
+          ),
+      };
+
+
       const {
         data,
         error,
@@ -215,10 +511,7 @@ export async function POST(
              * Resend supports idempotency keys.
              */
 
-            {
-              idempotencyKey:
-                `email-outbox/${email.email_id}`,
-            }
+            resendRequestOptions,
           );
 
 
@@ -304,16 +597,105 @@ export async function POST(
           "Could not mark email failed:",
           markFailedError
         );
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Unable to persist email retry state.",
+            processed,
+            sent,
+            failed,
+          },
+          { status: 500 }
+        );
       }
     }
   }
 
 
-  return NextResponse.json({
-    success: true,
+  const {
+    data:
+      healthData,
 
-    processed,
-    sent,
-    failed,
-  });
+    error:
+      healthError,
+  } =
+    await supabase.rpc(
+      "email_backend_health_check"
+    );
+
+
+  if (
+    healthError
+  ) {
+    console.error(
+      "Email queue health check failed:",
+      healthError,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Unable to verify email queue health.",
+        processed,
+        sent,
+        failed,
+      },
+      { status: 500 },
+    );
+  }
+
+
+  const queueHealth =
+    normaliseQueueHealth(
+      healthData,
+    );
+
+
+  if (
+    !queueHealth
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Email queue health returned an invalid result.",
+        processed,
+        sent,
+        failed,
+      },
+      { status: 500 },
+    );
+  }
+
+
+  const queueHealthy =
+    queueHealth.status ===
+      "PASS";
+
+
+  return NextResponse.json(
+    {
+      success:
+        failed === 0 &&
+        !budgetExhausted &&
+        queueHealthy &&
+        memorialProcessor.status === "PASS",
+      processed,
+      sent,
+      failed,
+      budgetExhausted,
+      memorialProcessor,
+      queueHealth,
+    },
+    {
+      status:
+        failed > 0
+          ? 502
+          : !budgetExhausted &&
+              queueHealthy &&
+              memorialProcessor.status === "PASS"
+            ? 200
+            : 503,
+    }
+  );
 }

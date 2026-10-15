@@ -1,0 +1,34 @@
+{
+  "dateSydney": "2026-10-10",
+  "scope": "approved read-only staging project metadata and DNS/network diagnosis",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "managementApi": {
+    "method": "GET",
+    "status": "ACTIVE_HEALTHY",
+    "region": "ap-southeast-2",
+    "advertisedDirectHost": "db.eomubndonbetszdbhsrj.supabase.co",
+    "matchesConfiguredHost": true
+  },
+  "dns": {
+    "aRecords": 0,
+    "aQueryReturnedSoa": true,
+    "aaaaRecords": ["2406:da1c:16f1:f601:f046:4566:e664:b5dd"],
+    "windowsSystemResolverResult": "HostNotFound"
+  },
+  "localNetwork": {
+    "nonLoopbackNonLinkLocalIPv6AddressCount": 0,
+    "ipv6DefaultRouteCount": 0,
+    "ipv6BindingEnabledCount": 5,
+    "ipv6BindingDisabledCount": 1
+  },
+  "conclusion": "Healthy staging, correct IPv6-only direct hostname, no usable local IPv6 path. This blocks the direct probe; not evidence of an incorrect password.",
+  "databaseConnectionAttempted": false,
+  "settingsChanged": false,
+  "migrationsApplied": false,
+  "productionContact": false,
+  "otherProjectsContacted": false,
+  "messagesSent": false,
+  "suggestedNextStep": "With explicit approval, retrieve this staging project's advertised IPv4-compatible session-pooler endpoint, bind exact host/port/project-qualified user, preserve verify-full TLS and run one read-only preflight. No automatic fallback.",
+  "notYetVerified": ["session-pooler endpoint", "pooler TLS trust chain", "server password acceptance", "fresh ledger"],
+  "documentation": "https://supabase.com/docs/guides/database/connecting-to-postgres"
+}

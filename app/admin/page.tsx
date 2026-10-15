@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useEffect,
   useMemo,
@@ -26,16 +28,6 @@ type Profile = {
 };
 
 type Membership = {
-  role:
-    | "user"
-    | "admin";
-
-  status:
-    | "active"
-    | "break_1"
-    | "break_2"
-    | "inactive";
-
   classes: {
     name: string;
   } | null;
@@ -99,6 +91,11 @@ export default function AdminDashboardPage() {
     setMessage,
   ] =
     useState("");
+
+  const [
+    hasRepositoryUpload,
+    setHasRepositoryUpload,
+  ] = useState(false);
 
   /*
    * ============================================================
@@ -171,7 +168,7 @@ export default function AdminDashboardPage() {
       }
 
       /*
-       * CLASS MEMBERSHIPS
+       * ACTIVE ADMIN ASSIGNMENTS
        */
 
       const {
@@ -183,12 +180,9 @@ export default function AdminDashboardPage() {
       } =
         await supabase
           .from(
-            "class_memberships"
+            "dojo_admin_assignments"
           )
           .select(`
-            role,
-            status,
-
             classes (
               name
             ),
@@ -200,6 +194,10 @@ export default function AdminDashboardPage() {
           .eq(
             "user_id",
             user.id
+          )
+          .eq(
+            "active",
+            true
           );
 
       if (
@@ -209,28 +207,41 @@ export default function AdminDashboardPage() {
           "Admin membership load error:",
           membershipError
         );
+
+        if (
+          active
+        ) {
+          setMessage(
+            "Unable to load your current Admin scope."
+          );
+
+          setLoading(
+            false
+          );
+        }
+
+        return;
       }
 
       const adminMemberships =
         (
-          (
-            membershipData ??
-            []
-          ) as unknown as Membership[]
-        ).filter(
-          (
-            membership
-          ) =>
-            membership.role ===
-              "admin" &&
-            [
-              "active",
-              "break_1",
-              "break_2",
-            ].includes(
-              membership.status
-            )
+          membershipData ??
+          []
+        ) as unknown as Membership[];
+
+      const {
+        data: repositoryUploadScopes,
+        error: repositoryUploadError,
+      } = await supabase.rpc(
+        "get_my_repository_upload_scopes"
+      );
+
+      if (repositoryUploadError) {
+        console.error(
+          "Repository Uploader scope load error:",
+          repositoryUploadError
         );
+      }
 
       /*
        * ACCESS CHECK
@@ -258,6 +269,10 @@ export default function AdminDashboardPage() {
 
         setMemberships(
           adminMemberships
+        );
+
+        setHasRepositoryUpload(
+          (repositoryUploadScopes?.length ?? 0) > 0
         );
 
         setLoading(
@@ -299,17 +314,6 @@ export default function AdminDashboardPage() {
     AdminCard[] = [
       {
         title:
-          "Applications",
-
-        description:
-          "Approve or reject new membership applications.",
-
-        href:
-          "/admin/applications",
-      },
-
-      {
-        title:
           "Members",
 
         description:
@@ -328,6 +332,17 @@ export default function AdminDashboardPage() {
 
         href:
           "/admin/transfers",
+      },
+
+      {
+        title:
+          "Regular Schedules",
+
+        description:
+          "Maintain weekly timetable information for your assigned dojo and class scope.",
+
+        href:
+          "/admin/schedules",
       },
 
       {
@@ -385,27 +400,11 @@ export default function AdminDashboardPage() {
           "/admin/tiers",
       },
 
-      {
-        title:
-          "Add Content",
-
-        description:
-          "Add training videos and references to Class → Rank → Tier.",
-
-        href:
-          "/admin/content",
-      },
-
-      {
-        title:
-          "Manage Content",
-
-        description:
-          "Publish, draft, edit or remove existing repository content.",
-
-        href:
-          "/admin/content/manage",
-      },
+      ...(hasRepositoryUpload ? [{
+        title: "Repository Upload",
+        description: "Add, publish, edit or remove repository content for your appointed classes.",
+        href: "/repository/upload",
+      }] : []),
 
       {
         title:
@@ -452,6 +451,20 @@ export default function AdminDashboardPage() {
 
   const superAdminCards:
     AdminCard[] = [
+      {
+        title:
+          "Applications",
+
+        description:
+          "Approve or reject new membership applications and assign permanent Member IDs.",
+
+        href:
+          "/admin/applications",
+
+        tone:
+          "super",
+      },
+
       {
         title:
           "Events",
@@ -832,7 +845,7 @@ export default function AdminDashboardPage() {
        * MANAGEMENT
        */}
 
-      <section
+      <CompactRecord summary={<>Management</>} detail={`${managementCards.length} tools · members, schedules & payments`} as="section"
         className="
           mt-10
         "
@@ -912,14 +925,14 @@ export default function AdminDashboardPage() {
             )
           )}
         </div>
-      </section>
+      </CompactRecord>
 
       {/*
        * SUPER ADMIN
        */}
 
       {isSuperAdmin && (
-        <section
+        <CompactRecord summary={<>Organisation Management</>} detail={`${superAdminCards.length} Super Admin tools`} as="section"
           className="
             mt-12
           "
@@ -993,7 +1006,7 @@ export default function AdminDashboardPage() {
               )
             )}
           </div>
-        </section>
+        </CompactRecord>
       )}
 
       {/*
@@ -1064,6 +1077,7 @@ function AdminCardButton({
 
       className={`
         group
+        compact-action
         rounded-2xl
         border
         p-6

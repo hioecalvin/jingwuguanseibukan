@@ -1,5 +1,8 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+import AdvancePaymentForm, { type PaymentMembership } from "@/components/advance-payment-form";
+
 import {
   useCallback,
   useEffect,
@@ -106,6 +109,7 @@ type MessageType =
 
 
 export default function MemberSubscriptionsPage() {
+  const [paymentMemberships, setPaymentMemberships] = useState<PaymentMembership[]>([]);
   const supabase =
     useMemo(
       () => createClient(),
@@ -171,13 +175,6 @@ export default function MemberSubscriptionsPage() {
     useState<
       string | null
     >(null);
-
-
-  const [
-    transferAmount,
-    setTransferAmount,
-  ] =
-    useState("");
 
 
   const [
@@ -525,6 +522,9 @@ export default function MemberSubscriptionsPage() {
             []
           ) as unknown as MembershipLookup[];
 
+        setPaymentMemberships(memberships.map(m => ({ id: m.id,
+          label: `${m.classes?.name ?? "Class"} — ${m.dojos?.name ?? "No dojo"}` })));
+
 
         if (
           memberships.length ===
@@ -751,7 +751,8 @@ export default function MemberSubscriptionsPage() {
                 );
 
 
-              const outstandingAmount =
+              const closed = charge.status === "waived" || charge.status === "cancelled";
+              const outstandingAmount = closed ? 0 :
                 Math.max(
                   0,
                   chargeAmount -
@@ -759,23 +760,16 @@ export default function MemberSubscriptionsPage() {
                 );
 
 
-              let paymentStatus =
-                "unpaid";
+              let paymentStatus = closed ? charge.status : "unpaid";
 
 
               if (
-                outstandingAmount <=
+                !closed && outstandingAmount <=
                 0
               ) {
                 paymentStatus =
                   "paid";
 
-              } else if (
-                paidAmount >
-                0
-              ) {
-                paymentStatus =
-                  "partial";
               }
 
 
@@ -823,9 +817,11 @@ export default function MemberSubscriptionsPage() {
           );
 
 
-        setSubscriptions(
-          rows
-        );
+        setSubscriptions(rows);
+        setPaymentMemberships(memberships.map(m => ({ id: m.id,
+          label: `${m.classes?.name ?? "Class"} — ${m.dojos?.name ?? "No dojo"}`,
+          unpaidMonths: rows.filter(row => row.membership_id === m.id && row.payment_status === "unpaid" && row.outstanding_amount > 0).map(row => row.billing_month),
+        })));
       },
 
       [
@@ -1074,13 +1070,6 @@ export default function MemberSubscriptionsPage() {
     );
 
 
-    setTransferAmount(
-      String(
-        subscription.outstanding_amount
-      )
-    );
-
-
     setTransferDate(
       todayString()
     );
@@ -1100,10 +1089,6 @@ export default function MemberSubscriptionsPage() {
   function closePaymentForm() {
     setExpandedChargeId(
       null
-    );
-
-    setTransferAmount(
-      ""
     );
 
     setTransferDate(
@@ -1126,10 +1111,7 @@ export default function MemberSubscriptionsPage() {
     subscription:
       SubscriptionRow
   ) {
-    const amount =
-      Number(
-        transferAmount
-      );
+    const amount = Number(subscription.outstanding_amount);
 
 
     if (
@@ -1140,19 +1122,7 @@ export default function MemberSubscriptionsPage() {
         0
     ) {
       showError(
-        "Enter the amount you transferred."
-      );
-
-      return;
-    }
-
-
-    if (
-      amount >
-      subscription.outstanding_amount
-    ) {
-      showError(
-        "The transferred amount cannot be greater than the outstanding subscription amount."
+        "This charge has no outstanding balance."
       );
 
       return;
@@ -1377,6 +1347,9 @@ export default function MemberSubscriptionsPage() {
         </p>
       </header>
 
+      <AdvancePaymentForm mode="member" memberships={paymentMemberships}
+        onComplete={async () => { await Promise.all([loadSubscriptions(), loadConfirmations()]); }} />
+
 
       {/*
        * MESSAGE
@@ -1496,9 +1469,8 @@ export default function MemberSubscriptionsPage() {
                 subscription.charge_id;
 
 
-              const isPaid =
-                subscription.outstanding_amount <=
-                0;
+              const isClosed = subscription.payment_status === "waived" || subscription.payment_status === "cancelled";
+              const isPaid = !isClosed && subscription.outstanding_amount <= 0;
 
 
               const pending =
@@ -1512,7 +1484,10 @@ export default function MemberSubscriptionsPage() {
 
 
               return (
-                <article
+                <CompactRecord summary={<>{formatMonth(
+                          subscription.billing_month
+                        )}</>}
+                  detail={<>{subscription.class_name} · {isClosed ? subscription.payment_status : isPaid ? "Paid" : pending ? "Pending confirmation" : rejected ? "Rejected" : "Unpaid"} · {formatCurrency(subscription.outstanding_amount, subscription.currency)} outstanding</>}
                   key={
                     subscription.charge_id
                   }
@@ -1570,6 +1545,7 @@ export default function MemberSubscriptionsPage() {
 
 
                     <PaymentStatusBadge
+                      closedStatus={isClosed ? subscription.payment_status : undefined}
                       paid={
                         isPaid
                       }
@@ -1583,11 +1559,6 @@ export default function MemberSubscriptionsPage() {
                         !isPaid
                       }
 
-                      partial={
-                        !isPaid &&
-                        subscription.paid_amount >
-                          0
-                      }
                     />
                   </div>
 
@@ -1709,7 +1680,7 @@ export default function MemberSubscriptionsPage() {
 
 
                   {rejected &&
-                    !isPaid && (
+                    !isPaid && !isClosed && (
                     <div
                       className="
                         mt-5
@@ -1760,7 +1731,7 @@ export default function MemberSubscriptionsPage() {
                   )}
 
 
-                  {!isPaid &&
+                  {!isPaid && !isClosed &&
                     !pending &&
                     !formOpen && (
                     <button
@@ -1943,43 +1914,13 @@ export default function MemberSubscriptionsPage() {
                           sm:grid-cols-2
                         "
                       >
-                        <Field
-                          label="Amount Transferred"
-                        >
-                          <input
-                            type="number"
-
-                            min="1"
-
-                            max={
-                              subscription.outstanding_amount
-                            }
-
-                            value={
-                              transferAmount
-                            }
-
-                            onChange={(
-                              event
-                            ) =>
-                              setTransferAmount(
-                                event.target.value
-                              )
-                            }
-
-                            className="
-                              w-full
-                              rounded-lg
-                              border
-                              border-neutral-700
-                              bg-neutral-900
-                              px-3
-                              py-3
-                              outline-none
-                              focus:border-emerald-600
-                            "
-                          />
-                        </Field>
+                        <MoneySummary
+                          label="Full Payment Amount"
+                          value={formatCurrency(
+                            subscription.outstanding_amount,
+                            subscription.currency
+                          )}
+                        />
 
 
                         <Field
@@ -2190,7 +2131,7 @@ export default function MemberSubscriptionsPage() {
                       </div>
                     </div>
                   )}
-                </article>
+                </CompactRecord>
               );
             }
           )}
@@ -2425,16 +2366,17 @@ function MoneySummary({
 
 
 function PaymentStatusBadge({
+  closedStatus,
   paid,
   pending,
   rejected,
-  partial,
 }: {
+  closedStatus?: string;
   paid: boolean;
   pending: boolean;
   rejected: boolean;
-  partial: boolean;
 }) {
+  if (closedStatus) return <span className="rounded-full border border-neutral-600 px-3 py-1 text-xs font-bold uppercase">{closedStatus}</span>;
   if (
     paid
   ) {
@@ -2499,29 +2441,6 @@ function PaymentStatusBadge({
         "
       >
         DECLINED
-      </span>
-    );
-  }
-
-
-  if (
-    partial
-  ) {
-    return (
-      <span
-        className="
-          rounded-full
-          border
-          border-orange-800
-          bg-orange-950/30
-          px-3
-          py-1
-          text-xs
-          font-bold
-          text-orange-300
-        "
-      >
-        PARTIAL
       </span>
     );
   }

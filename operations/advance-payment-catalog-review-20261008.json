@@ -1,0 +1,189 @@
+{
+  "sourceFiles": {
+    "policies": {
+      "sha256": "977a5ce036ed676ea1aa11287eb4648aef4b00f320e57f7ea395dd6f63c09ea6",
+      "rowCount": 69
+    },
+    "relations": {
+      "sha256": "bfa62b67efb29d9e7933b4e9c337fe1aff1196b247a9be8fc039c901c0d88f7f",
+      "rowCount": 85
+    },
+    "constraints": {
+      "sha256": "0acaf8cf66936aee2967391273f1e0ab2c201b87bcbb1e412e2d8307dae0b465",
+      "rowCount": 442
+    },
+    "table-privileges": {
+      "sha256": "738a20a509836e71f2eda3dd700c0242cbdce8dc41263452ad089c2e39e83af6",
+      "rowCount": 1344
+    },
+    "routines": {
+      "sha256": "aa1a051d9211a006959d5d69708a404e0ac2e83a2a56c7d56d018ee415355bd7",
+      "rowCount": 236
+    }
+  },
+  "kind": "offline-historical-catalog-review",
+  "liveVerified": false,
+  "readyToApply": false,
+  "directHelperConsumers": [
+    {
+      "name": "adjust_current_membership_fee",
+      "arguments": "target_membership_id uuid, new_amount numeric, adjustment_reason text"
+    },
+    {
+      "name": "apply_membership_fee_adjustment",
+      "arguments": "target_membership_id uuid, new_amount numeric, adjustment_mode text, adjustment_reason text"
+    },
+    {
+      "name": "cancel_dojo_settlement",
+      "arguments": "target_settlement_id uuid"
+    },
+    {
+      "name": "create_dojo_settlement",
+      "arguments": "target_dojo_id uuid, target_month date, payment_ids uuid[], settlement_notes text"
+    },
+    {
+      "name": "generate_and_notify_monthly_subscriptions",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "generate_dojo_monthly_subscription_charges",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "get_admin_member_subscription_summary",
+      "arguments": "target_membership_id uuid"
+    },
+    {
+      "name": "get_dojo_admin_settlements",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_dojo_financial_report",
+      "arguments": "target_dojo_id uuid, report_month date"
+    },
+    {
+      "name": "get_dojo_monthly_payment_summary",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "get_dojo_payment_confirmations",
+      "arguments": "target_dojo_id uuid, requested_status text"
+    },
+    {
+      "name": "get_dojo_receiving_account",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_dojo_settlement_items",
+      "arguments": "target_settlement_id uuid"
+    },
+    {
+      "name": "get_my_dojo_settlement_config",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_settlement_eligible_payments",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "notify_monthly_subscription_charges",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "notify_unpaid_subscription_reminders",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "record_membership_payment",
+      "arguments": "target_charge_id uuid, payment_amount numeric, payment_method_value text, payment_reference_value text, payment_date_value date, payment_notes text"
+    },
+    {
+      "name": "remove_member_subscription_rate",
+      "arguments": "target_membership_id uuid"
+    },
+    {
+      "name": "review_membership_payment_confirmation",
+      "arguments": "target_confirmation_id uuid, decision text, rejection_note text"
+    },
+    {
+      "name": "set_dojo_receiving_account",
+      "arguments": "target_dojo_id uuid, new_bank_name text, new_account_holder_name text, new_account_number text, new_instructions text"
+    },
+    {
+      "name": "set_dojo_settlement_transfer",
+      "arguments": "target_settlement_id uuid, new_transfer_date date, new_transfer_method text, new_transfer_note text"
+    },
+    {
+      "name": "set_dojo_subscription_rate",
+      "arguments": "target_dojo_id uuid, new_fee numeric, rate_effective_from date, new_currency text"
+    },
+    {
+      "name": "set_member_subscription_rate",
+      "arguments": "target_membership_id uuid, new_fee numeric, rate_effective_from date, rate_effective_until date, rate_reason text, new_currency text"
+    },
+    {
+      "name": "submit_dojo_settlement",
+      "arguments": "target_settlement_id uuid"
+    }
+  ],
+  "helperPolicies": [
+    {
+      "table": "dojo_settlement_items",
+      "name": "read dojo settlement items",
+      "command": "SELECT"
+    },
+    {
+      "table": "dojo_settlements",
+      "name": "read dojo settlements",
+      "command": "SELECT"
+    },
+    {
+      "table": "dojo_subscription_settings",
+      "name": "read dojo subscription settings",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_fee_adjustment_history",
+      "name": "finance admin read fee adjustment history",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_payments",
+      "name": "read membership payments",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_subscription_charges",
+      "name": "read membership subscription charges",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_subscription_overrides",
+      "name": "read member subscription overrides",
+      "command": "SELECT"
+    }
+  ],
+  "zeroFeePaidWriters": [
+    "adjust_current_membership_fee",
+    "apply_membership_fee_adjustment",
+    "generate_dojo_monthly_subscription_charges",
+    "system_generate_monthly_subscriptions"
+  ],
+  "dojoSelectPolicies": [
+    {
+      "name": "public dojo list",
+      "roles": [
+        "public"
+      ],
+      "expression": "(active = true)"
+    }
+  ],
+  "unsafeGrants": [],
+  "blockers": [],
+  "outstanding": [
+    "Saved catalog is historical, not a current staging read.",
+    "Dependency discovery is textual/direct only; indirect and dynamic calls require review.",
+    "Complete-schema execution, role/RLS acceptance and current ledger remain unverified.",
+    "No migration application or deployment is authorized by this report."
+  ]
+}

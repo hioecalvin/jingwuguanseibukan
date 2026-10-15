@@ -1,35 +1,10 @@
+import "server-only";
+
 import webpush from "web-push";
 
-
-const publicKey =
-  process.env
-    .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-
-const privateKey =
-  process.env
-    .VAPID_PRIVATE_KEY;
-
-const subject =
-  process.env
-    .VAPID_SUBJECT;
-
-
-if (
-  !publicKey ||
-  !privateKey ||
-  !subject
-) {
-  throw new Error(
-    "VAPID configuration is incomplete."
-  );
-}
-
-
-webpush.setVapidDetails(
-  subject,
-  publicKey,
-  privateKey
-);
+import {
+  trustedPushEndpoint,
+} from "@/lib/push/endpoint";
 
 
 export type PushPayload = {
@@ -53,10 +28,52 @@ export async function sendWebPush(
   payload:
     PushPayload
 ) {
+  const endpoint =
+    trustedPushEndpoint(
+      subscription.endpoint,
+    );
+
+  if (!endpoint) {
+    throw new Error(
+      "Push subscription endpoint is not trusted."
+    );
+  }
+
+  const publicKey =
+    process.env
+      .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+  const privateKey =
+    process.env
+      .VAPID_PRIVATE_KEY;
+
+  const subject =
+    process.env
+      .VAPID_SUBJECT;
+
+
+  if (
+    !publicKey ||
+    !privateKey ||
+    !subject
+  ) {
+    throw new Error(
+      "VAPID configuration is incomplete."
+    );
+  }
+
+
+  webpush.setVapidDetails(
+    subject,
+    publicKey,
+    privateKey
+  );
+
+
   return webpush.sendNotification(
     {
       endpoint:
-        subscription.endpoint,
+        endpoint,
 
       keys: {
         p256dh:

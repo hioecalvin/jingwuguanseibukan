@@ -1,0 +1,82 @@
+{
+  "manifestVersion": 1,
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA"
+  },
+  "target": {
+    "environment": "staging",
+    "origin": "https://jingwuguanseibukan-staging.vercel.app",
+    "supabaseProjectRef": "eomubndonbetszdbhsrj",
+    "platform": "Windows",
+    "architecture": "x64",
+    "productionContacted": false,
+    "muxContacted": false
+  },
+  "artifact": {
+    "fileName": "JS-Video-Uploader-Setup.exe",
+    "sha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_SHA256",
+    "bytes": 0,
+    "format": "NSIS-per-user"
+  },
+  "signature": {
+    "artifactSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_SHA256",
+    "authenticodeStatus": "REPLACE_WITH_VALID_STATUS",
+    "certificatePurpose": "code-signing",
+    "signerSubject": "REPLACE_WITH_APPROVED_ORGANIZATION_SUBJECT",
+    "signerThumbprint": "REPLACE_WITH_APPROVED_UPPERCASE_CERTIFICATE_THUMBPRINT",
+    "digestAlgorithm": "SHA256",
+    "timestamped": false,
+    "timestamp": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "timestampAuthority": "REPLACE_WITH_TIMESTAMP_AUTHORITY",
+    "timestampSignatureValid": false
+  },
+  "malwareScan": {
+    "artifactSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_SHA256",
+    "engine": "REPLACE_WITH_SCAN_ENGINE",
+    "engineVersion": "REPLACE_WITH_ENGINE_VERSION",
+    "definitionVersion": "REPLACE_WITH_DEFINITION_VERSION",
+    "scannedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "result": "REPLACE_WITH_CLEAN_RESULT",
+    "detections": -1
+  },
+  "secretScan": {
+    "artifactSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_SHA256",
+    "asarInspected": false,
+    "publicConfigOnly": false,
+    "secretPatternsFound": -1,
+    "privateKeysFound": -1,
+    "providerCredentialsFound": -1,
+    "scannedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET"
+  },
+  "interactiveAcceptance": {
+    "artifactSha256": "REPLACE_WITH_64_CHARACTER_INSTALLER_SHA256",
+    "physicalMachine": false,
+    "interactiveDesktop": false,
+    "windowsVersion": "REPLACE_WITH_NUMERIC_WINDOWS_VERSION",
+    "architecture": "x64",
+    "testedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "cleanInstallBaseline": false,
+    "installerCompleted": false,
+    "applicationLaunched": false,
+    "stagingSignInCompleted": false,
+    "videoSelected": false,
+    "localProcessingCompleted": false,
+    "uploadBoundaryVerified": false,
+    "uploadRequestSent": false,
+    "repositoryDraftCreated": false,
+    "muxAssetCreated": false,
+    "applicationExited": false,
+    "uninstallerCompleted": false,
+    "installDirectoryRemoved": false,
+    "testAccountDataRecorded": false,
+    "evidenceBundleSha256": "REPLACE_WITH_DISTINCT_64_CHARACTER_EVIDENCE_SHA256"
+  },
+  "attestation": {
+    "recordedByRole": "release-tester",
+    "reviewedByRole": "independent-reviewer",
+    "reviewedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "artifactAndEvidenceReviewed": false,
+    "allFindingsResolved": false
+  }
+}

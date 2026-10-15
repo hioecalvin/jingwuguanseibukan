@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "releaseWindowManifest": "C:\\protected\\REPLACE_WITH_RELEASE_WINDOW_MANIFEST.json",
+  "evidenceFiles": {
+    "recovery": "C:\\protected\\REPLACE_WITH_RECOVERY_EVIDENCE.json",
+    "rollback": "C:\\protected\\REPLACE_WITH_ROLLBACK_EVIDENCE.json",
+    "physicalSafari": "C:\\protected\\REPLACE_WITH_PHYSICAL_SAFARI_EVIDENCE.json",
+    "monitoring": "C:\\protected\\REPLACE_WITH_MONITORING_EVIDENCE.json",
+    "productionIdentity": "C:\\protected\\REPLACE_WITH_PRODUCTION_IDENTITY_EVIDENCE.json",
+    "managedRestore": "C:\\protected\\REPLACE_WITH_MANAGED_RESTORE_EVIDENCE.json",
+    "productionTarget": "C:\\protected\\REPLACE_WITH_PRODUCTION_TARGET_EVIDENCE.json",
+    "productionSecrets": "C:\\protected\\REPLACE_WITH_PRODUCTION_SECRETS_EVIDENCE.json",
+    "productionCutover": "C:\\protected\\REPLACE_WITH_PRODUCTION_CUTOVER_EVIDENCE.json",
+    "providerDelivery": "C:\\protected\\REPLACE_WITH_PROVIDER_DELIVERY_EVIDENCE.json",
+    "emailScheduler": "C:\\protected\\REPLACE_WITH_EMAIL_SCHEDULER_EVIDENCE.json"
+  }
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
   useEffect,
   useMemo,
@@ -1515,7 +1517,7 @@ export default function RepositoryClassPage() {
                       false;
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{rank.name}</>}
                     key={rank.id}
                     className={`
                       overflow-hidden
@@ -1825,7 +1827,7 @@ export default function RepositoryClassPage() {
                         )}
                       </div>
                     )}
-                  </article>
+                  </CompactRecord>
                 );
               }
             )}
