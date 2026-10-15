@@ -1,5 +1,59 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Staging release reconciliation — 15 October 2026
+
+- Deployed runtime is `ea004d36d8fd9e65bda981b6e131f6b739392690` after the
+  lockfile security follow-up. Test-only commit `cf21b75` is pushed to the release
+  branch; its sole change is finance browser-test tab sequencing. The nine
+  pre-existing Supabase CLI metadata changes remain untouched and uncommitted.
+- GitHub Actions run `38530390876` completed successfully for that exact commit:
+  checks, Chromium/Linux, Firefox/Linux, WebKit/Linux and WebKit/macOS all passed.
+  This is isolated-fixture CI, not the 36 deployed staging browser cases.
+- On 14 October the authenticated Vercel UI verified Ready Preview
+  `dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y`, URL
+  `jingwuguanseibukan-b7wznx9ka-js1-ccd7.vercel.app`, built from `ea004d3` on the
+  approved release branch. A screenshot is preserved in the task workspace.
+- After the user's login confirmation, the installed Vercel CLI refreshed its
+  existing OAuth session through `whoami`; project API access changed from 403
+  to 200. No new API token, protection bypass, or production promotion.
+- Independently verified exact local/remote SHA, successful CI, Preview identity,
+  branch-specific staging configuration and previous alias target. Assigned only
+  `jingwuguanseibukan-staging.vercel.app` to `dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y`;
+  a separate alias read verified the assignment. Previous deployment retained.
+- All 11 staging host probes and security-header checks passed. Initial browser
+  execution exposed a test sequencing defect: grouped-payment RPC responses were
+  awaited before selecting the tab that mounts their component. Corrected only
+  the test to open Payments and Payment Confirmations explicitly; typecheck,
+  targeted lint and five unchanged browser-guard tests passed.
+- The corrected full run passed 31/36. Five final mobile cases received HTTP 429
+  at login after consecutive test runs exhausted the existing client limit
+  (30 attempts per 600 seconds). These are not successful acceptance cases.
+  After a full natural cooldown, a single fresh run passed all 36 cases in 5.8
+  minutes (12 each desktop/tablet/mobile), with zero request-guard violations.
+  No rate-limit counter, security setting, account or business record was reset.
+- Browser coverage includes registration inspection, invalid confirmation,
+  Member/Admin/Super Admin read and denial boundaries, certificate nonexistence,
+  multi-month finance forms, grouped reports, exact JS-ID login and logout.
+  No payment, receipt, waiver, registration or assessment was submitted. Expected
+  Auth-session and login-limiter operational writes are not business mutations.
+  No independent SQL residue/ledger recapture was performed in this release run;
+  the separate 14 October SQL evidence retains its original scope and timestamp.
+- Test-fix CI `38688688960` passed all five jobs, including WebKit/macOS.
+  Runtime CI `38530390876` also passed all five. Staging alias and Ready Preview
+  were independently rechecked after browser acceptance and CI completion.
+  Sanitized results: `operations/staging-release-060-acceptance-20261015.json`.
+- The full Windows regression rerun had two inert-test failures (interactive
+  witness timeout and child-PID liveness assertion). The interrupted serial
+  rerun result could not be retrieved. A fresh serial rerun of those two files
+  passed 12/12 on 15 October, with output retained in the task workspace as
+  `staging-readiness/release060-windows-serial-20261015.log`. This resolves the
+  focused rerun, not a claim that the earlier full-Windows run passed.
+- No live database changes, migration application, provider messages, scheduler
+  enablement, production, retired-project, or disposable-project access.
+- Next approval-dependent gate is a fresh encrypted 006–060 staging backup and
+  isolated managed recovery rehearsal, preserving older evidence. This staging
+  acceptance is not production cutover approval or proof of complete readiness.
+
 ## Approved staging release and dependency patch — 14 October 2026
 
 - Reviewed and backed up the 229-file candidate, preserving nine unrelated

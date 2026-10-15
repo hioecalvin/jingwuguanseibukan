@@ -1,5 +1,19 @@
 # Jingwuguan Seibukan production progress
 
+## Staging release reconciliation — 15 October 2026
+
+- [x] Push security-patched release `ea004d3` and verify CI `38530390876`: all five jobs passed.
+- [x] Create and verify Ready Preview `dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y` on 14 October.
+- [x] Refresh existing Vercel CLI OAuth session; exact project API access now succeeds.
+- [x] Assign only the staging hostname to verified Ready Preview `ea004d3`; 11 host/security-header probes pass.
+- [x] Correct read-only finance test tab order; typecheck, lint and five guard tests pass.
+- [x] Complete 36 guarded live browser cases: fresh run 36/36 after natural cooldown; 12 per device and zero request-guard violations. Preserve earlier 31/36 run with five HTTP 429 failures.
+- [x] Push test-only tab-sequencing fix `cf21b75`; deployed runtime stays `ea004d3`.
+- [x] Test-fix CI `38688688960`: all five jobs passed, including macOS WebKit; staging alias independently rechecked.
+- [x] Reconcile two Windows-only inert-test failures: serial rerun of both files passed 12/12; retain original failure and rerun evidence. No live database retry.
+- [ ] Fresh encrypted 006–060 backup and isolated managed recovery evidence, after separate approval; previous 006–058 recovery does not satisfy this gate.
+- Production unchanged. This milestone does not authorize production cutover, provider delivery, schedulers or recovery mutations.
+
 ## Approved release dependency follow-up — 14 October 2026
 
 - [x] Back up and push the intended 229-file candidate as `9c29cad`; preserve CLI metadata.
