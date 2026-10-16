@@ -40,7 +40,7 @@ npm.cmd run rollback:check -- `
 The evidence must show authentication, authorization and host-probe success after the
 known-good application deployment is activated, followed by restoration of the
 candidate. Database recovery must use the exact protected backup, prove ledger
-`006-056`, catalog, lint, grants/RLS and role-security results, remain within the
+`006-060`, catalog, lint, grants/RLS and role-security results, remain within the
 documented RTO, and leave zero disposable-target residue.
 
 The final release evidence packet reruns this rollback semantic gate using the immutable identities in

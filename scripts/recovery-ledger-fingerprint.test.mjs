@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   RELEASE_MIGRATION_CONTRACT,
+  RELEASE_MIGRATION_RANGE,
   HISTORICAL_058_MIGRATION_CONTRACT,
   fingerprintHistorical058LedgerRows,
   verifyHistorical058MigrationContract,
@@ -68,6 +69,19 @@ test("all current release templates require 060 without asserting verification",
   assert.equal(rollback.databaseRecovery.migrationLedger, "006-060");
   const window = await read("../release/release-window-manifest.template.json");
   assert.equal(window.gateEvidence.productionCutover.migrationLedger, "006-060");
+});
+
+test("current launch runbooks use the enforced migration range", async () => {
+  for (const name of [
+    "PRODUCTION_BOOTSTRAP_READINESS.md", "PRODUCTION_CUTOVER_READINESS.md",
+    "RELEASE_EVIDENCE_PACKET.md", "ROLLBACK_READINESS.md",
+  ]) {
+    const text = (await readFile(new URL(`../operations/${name}`, import.meta.url), "utf8"))
+      .replaceAll("–", "-");
+    const ranges = text.match(/006-\d{3}/g) ?? [];
+    assert.ok(ranges.length > 0, `${name} must state the release ledger`);
+    assert.ok(ranges.every((range) => range === RELEASE_MIGRATION_RANGE), name);
+  }
 });
 
 test("source and restored ledger exports have a stable order-independent fingerprint", () => {

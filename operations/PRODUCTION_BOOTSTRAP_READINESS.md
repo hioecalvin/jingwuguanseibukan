@@ -16,7 +16,7 @@ production. It requires:
 - a fresh read-only inventory proving the target contains no application objects,
   application migration rows, Auth accounts, or Storage objects;
 - the protected staging baseline payload and positive pre-006 catalog fingerprint;
-- the immutable repository migration contract, exactly 006–056 and its checked-in
+- the immutable repository migration contract, exactly 006–060 (55 migrations) and its checked-in
   file fingerprint, plus the protected source-ledger fingerprint;
 - a managed full-import package that binds the baseline payload, catalog and ledger,
   with a successful recovery-manifest digest;
@@ -46,4 +46,4 @@ The checked-in template intentionally fails. A passing preflight means only that
 bootstrap package and plan are ready for a separately approved release window. Before
 any production change, an operator must still obtain explicit approval for the exact
 managed import operation. After import, stop on any catalog or ledger mismatch; never
-try to repair a missing pre-006 baseline by blindly applying migrations 006–056.
+try to repair a missing pre-006 baseline by blindly applying migrations 006–060.

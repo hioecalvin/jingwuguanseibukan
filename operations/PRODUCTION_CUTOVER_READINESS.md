@@ -17,7 +17,7 @@ The record must bind:
 - the exact `release/v1-readiness-20260918` commit and immutable production
   deployment;
 - the independently observed Singapore production project and Supabase origin;
-- fresh exact migration history 006–056, catalog, database lint, strict security
+- fresh exact migration history 006–060, catalog, database lint, strict security
   verifier, grants and RLS evidence;
 - either a resolved managed-platform future-object default ACL or the narrowly scoped
   exception shown in the template, independently reviewed and expiring within 30

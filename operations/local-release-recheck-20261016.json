@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-16",
+  "scope": "local-only-release-recheck",
+  "branch": "release/v1-readiness-20260918",
+  "baseCommit": "d5785c6",
+  "runtimeChanged": false,
+  "typecheck": "passed",
+  "lint": "passed",
+  "fullNodeTestSuite": "passed",
+  "focusedReleaseGateTestsPassed": 202,
+  "workspaceRecoveryGuardTestsPassed": 20,
+  "productionModeBuild": "passed-with-isolated-synthetic-environment",
+  "isolatedWebKit": {"passed": 210, "failed": 0, "projects": ["webkit-desktop", "webkit-tablet", "webkit-mobile"], "reportedDurationMinutes": 2.1},
+  "earlierAttempts": [
+    "Sandboxed full Node suite failed Windows synthetic credential/ACL fixture setup; the full suite passed outside the sandbox.",
+    "Sandboxed Turbopack build failed junction creation with Windows access denied; isolated production build passed outside the sandbox.",
+    "Browser skip-build refused the missing build-provenance marker; the normal browser runner rebuilt and all 210 tests passed."
+  ],
+  "changes": [
+    "Correct four current launch runbooks from 006-056 to the enforced 006-060 contract.",
+    "Add a regression test requiring current runbook ledger ranges to match the exported release contract.",
+    "Add the remaining production launch checklist without asserting any incomplete gate passed."
+  ],
+  "commands": [
+    "npm.cmd run typecheck",
+    "npm.cmd run lint",
+    "node --test --test-reporter=dot scripts/*.test.mjs",
+    "node --test scripts/recovery-ledger-fingerprint.test.mjs scripts/*readiness.test.mjs",
+    "next build using smokeEnvironment() synthetic values",
+    "node scripts/browser-smoke.mjs --project=webkit-desktop --project=webkit-tablet --project=webkit-mobile",
+    "git diff --check"
+  ],
+  "liveAcceptance": false,
+  "physicalSafariAcceptance": false,
+  "productionAuthorization": false,
+  "productionContacted": false,
+  "providerDeliveryAttempted": false,
+  "deploymentPerformed": false
+}

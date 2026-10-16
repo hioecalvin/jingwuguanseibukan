@@ -1,5 +1,78 @@
 # Jingwuguan Seibukan production progress
 
+## Rollback preflight and audit refresh — 16 October 2026
+
+- [x] Reverify staging alias and both exact Ready Preview identities read-only.
+- [x] Review older source and dependency baseline; reject automatic rollback to the pre-waiver, pre-security-patch Preview.
+- [x] Fresh production audit has zero vulnerabilities; full-tree policy passes with the unchanged expiring development exception.
+- [ ] Select and verify a compatible fallback pair before an actual application rollback rehearsal. No alias changed.
+
+## Restored-account Auth recovery completed — 16 October 2026
+
+- [x] Fresh 8/8 stability probes, exact restored baseline/security and logo checks.
+- [x] All three restored roles pass login, identity verification, refresh, logout and post-logout denial without password resets.
+- [x] Exact disabled Auth config restored; effective service disablement verified.
+- [x] Independent snapshot comparison: application/catalog unchanged, only approved login timestamps changed, no remaining sessions/refresh tokens.
+- [x] Independently confirm INACTIVE/Auth disabled/no SMTP/functions/secrets; all 306 private-file ACLs pass.
+- [x] Preserve original backup and failed attempts; record success separately.
+
+## Autonomous local release recheck — 16 October 2026
+
+- [x] Typecheck, lint, full local Node suite and isolated production-mode build pass.
+- [x] 202 focused release-gate tests and 20 workspace recovery-guard tests pass.
+- [x] 210/210 synthetic WebKit desktop/tablet/mobile tests pass; no physical-device claim.
+- [x] Correct four launch runbooks to 006–060 and add contract regression coverage.
+- [x] Document remaining launch gates without marking deferred work passed.
+- [x] Complete current disposable Auth postflight and final independent quarantine verification; see successful recovery above.
+- [ ] Physical Safari, release-bound operations evidence, application rollback and explicitly approved production cutover remain separate gates.
+
+## Disposable read-only stability diagnostic — 16 October 2026
+
+- [x] Complete bounded target-only diagnostic: eight read-only TLS probes pass over 233.884 seconds, one server-start value, stable final five.
+- [x] Retrieve bounded prior/current startup logs; preserve shutdown/restart evidence without claiming an unproven initiator or exact client correlation.
+- [x] Independently verify paused/disabled isolation; no Auth enablement, logins, settings patches or other-project access. Verify owner-only ACLs for 255 evidence files.
+- [ ] Separately approved three-account Auth acceptance after fresh stable readiness, with strict config capture/comparison and final postflight. Previous 0/3 result is not superseded by database probes.
+
+## Disposable Auth retry 1 — 16 October 2026
+
+- [x] Prepare strict current-baseline retry with full protected config capture; 39 local guard tests pass.
+- [x] Preserve prior attempt and restore evidence; confirm three saved passwords still match.
+- [x] Run the approved retry once; stop at database readiness after server connection closure (SQLSTATE 57P01), before enabling Auth or logging in.
+- [x] Independently verify disposable INACTIVE, Auth disabled, no SMTP/functions/secrets; 199 protected-file ACLs pass.
+- [ ] Resolve stable database readiness before any separately approved further attempt; do not automatically rerun the consumed retry wrapper.
+- [ ] Complete three-account login/refresh/logout and postflight. Current live result is 0/3, not passed.
+
+## Disposable Auth recovery follow-up — 16 October 2026
+
+- [x] Verify three protected passwords against the restored backup and live restored identities; no resets.
+- [x] Resume only the approved disposable target and check database/Storage/isolation prerequisites.
+- [x] Stop before account login when full Auth configuration comparison detects unexpected drift.
+- [x] Disable password provider, pause, and independently verify INACTIVE/Auth disabled/no SMTP or workers.
+- [ ] Resolve exact configuration discrepancy; historical comparison points to `custom_oauth_max_providers`, but exact pre-enable delta is unproven.
+- [ ] Complete separately approved login/refresh/logout acceptance and postflight; this attempt passed 0/3 accounts and was not retried.
+- No messages or other-project access. Preserve failed-attempt and prior successful restore evidence separately.
+
+## Managed recovery 006–060 — completed 15 October, reconciled 16 October 2026
+
+- [x] Create exactly one new free Singapore disposable: `lzkpibxeqxytewbwgklj`; preserve existing projects/backups.
+- [x] Verify isolated empty baseline, source authentication and Auth-column compatibility.
+- [x] Pass rollback rehearsal: 70 tables / 407 rows, exact ledger/catalog/security, six sequences and independent zero residue.
+- [x] Perform one committed database restore and independent persisted verification; pause afterward.
+- [x] Record explicit approval for disposable-only empty-video limit of 50 MiB; source remains 2 GiB.
+- [x] Restore two buckets/six objects without overwrites; verify hashes/access, database lint, role boundaries and final isolation/pause (independent INACTIVE check 16 October).
+- [x] Reverify original archive locally and owner-only ACLs for all 175 evidence files; record sanitized recovery receipt and preserve attempt evidence.
+- Hosted password-login/provider-configuration recovery remains unverified; the completed rehearsal is not a production go-live approval.
+- Auth remains disabled; no password login, staging/production requests or provider delivery permitted in this phase.
+
+## Current-chain encrypted backup — 15 October 2026
+
+- [x] Capture a new read-only staging 006–060 backup, preserving every previous archive.
+- [x] Capture database/Auth, catalog, roles, two Storage buckets and six object files.
+- [x] Encrypt with AES-256-GCM, store key separately, verify owner-only ACLs, and remove only this run's temporary plaintext.
+- [x] Independently verify authenticated decryption, byte counts, hashes and plaintext absence locally; migration-contract tests 7/7 passed.
+- [x] Review and approve isolated managed restore target and isolation plan; see completed managed recovery above.
+- [x] Perform approved database/Storage restore and independent recovery/security verification; hosted Auth recovery is excluded.
+
 ## Staging release reconciliation — 15 October 2026
 
 - [x] Push security-patched release `ea004d3` and verify CI `38530390876`: all five jobs passed.
@@ -11,7 +84,7 @@
 - [x] Push test-only tab-sequencing fix `cf21b75`; deployed runtime stays `ea004d3`.
 - [x] Test-fix CI `38688688960`: all five jobs passed, including macOS WebKit; staging alias independently rechecked.
 - [x] Reconcile two Windows-only inert-test failures: serial rerun of both files passed 12/12; retain original failure and rerun evidence. No live database retry.
-- [ ] Fresh encrypted 006–060 backup and isolated managed recovery evidence, after separate approval; previous 006–058 recovery does not satisfy this gate.
+- [x] Fresh encrypted 006–060 backup and authorized isolated database/Storage recovery evidence; see 16 October reconciliation and its hosted Auth limitation.
 - Production unchanged. This milestone does not authorize production cutover, provider delivery, schedulers or recovery mutations.
 
 ## Approved release dependency follow-up — 14 October 2026

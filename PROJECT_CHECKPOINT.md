@@ -1,5 +1,210 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Rollback preflight and dependency refresh — 16 October 2026
+
+- Read-only Vercel metadata at `2026-10-16T09:07:15.343Z` confirms staging still
+  points to Ready Preview `dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y`, runtime `ea004d3`.
+  Initial 403 resolved through the installed CLI's existing-session refresh.
+- Retained Preview `dpl_HW2ismrCKo8tw1trEbcdXtcUtxKH` is Ready at `319fb20`, but
+  source comparison shows missing waived/cancelled payment display and advance-
+  payment features. It also predates the sharp/source-map-js dependency patches.
+  It is not approved as a current safe fallback; no alias switch was attempted.
+- Fresh npm production audit: zero vulnerabilities. Full-tree policy passes only
+  with the existing dev-only exception, expiring 19 October 2026 11:09:49 UTC.
+  Registry latest braces remains 3.0.3; no package or exception was changed.
+- Receipt: `operations/rollback-preflight-20261016.json`. Next rehearsal needs a
+  compatible patched fallback or the currently verified deployment retained as
+  known-good for a reviewed newer candidate. Ready status alone is insufficient.
+- No application/database endpoint, production, delivery, scheduler, or disposable
+  request. Recovery and local verification receipts remain separate evidence.
+
+## Restored-account Auth recovery — passed, 16 October 2026
+
+- Completed the fresh bounded readiness run on disposable `lzkpibxeqxytewbwgklj`
+  only: 8/8 probes passed, followed by exact baseline/security/Storage checks.
+- Member 0101, Admin 0002 and Super Admin 0001 each passed password login, server
+  identity verification, refresh, local logout and refresh denial after logout.
+  No password resets, messages or other-project contact.
+- Strict configuration comparison passed; original disabled Auth configuration was
+  restored exactly, and effective service disablement was observed. Application
+  data, catalog/security and six logo hashes unchanged. Only approved Auth-user
+  login timestamps changed; zero sessions and refresh tokens remained.
+- Independent offline comparison repeated those snapshot/config/account assertions.
+  Independent management inspection at `2026-10-16T09:01:46.8994836Z` confirmed
+  INACTIVE, Auth disabled, SMTP absent and zero functions/secrets. Owner-only ACLs
+  verified for all 306 protected evidence files.
+- Receipt: `operations/recovery-060-auth-success-20261016.json`. This closes the
+  restored-account login gate; historical failed attempts below remain preserved.
+  It does not authorize production or replace physical Safari, application rollback,
+  current provider/scheduler/monitoring evidence or the production cutover gates.
+
+## Local release recheck — 16 October 2026
+
+- Under the request to continue autonomously, completed typecheck, lint, the full
+  Node test suite, 202 focused release-gate tests and 20 workspace recovery guards.
+- Isolated production-mode build passed. Local synthetic WebKit acceptance passed
+  210/210 across desktop, tablet and mobile in 2.1 minutes. This is not physical
+  Safari or fresh live-staging acceptance.
+- Initial sandbox runs failed synthetic Windows credential/ACL setup and Turbopack
+  junction creation. Full suite/build passed with the required local permissions.
+  Browser skip-build refused a missing provenance marker; the normal runner rebuilt
+  and passed. Failures were not masked by changing application or security logic.
+- Corrected four current launch runbooks from 006–056 to 006–060 and added a ledger-
+  range regression test. Historical receipts and unrelated CLI metadata preserved.
+- Local receipt: `operations/local-release-recheck-20261016.json`. Remaining launch
+  checklist: `operations/PRODUCTION_NEXT_ACTIONS_20261016.md`. No application runtime
+  change, migration, commit, push, deployment or production request in these checks.
+
+## Disposable read-only stability diagnostic — verified 16 October 2026
+
+- Completed the separately approved bounded diagnostic on `lzkpibxeqxytewbwgklj`
+  only. Eight of eight read-only SQL probes passed over 233.884 seconds with
+  verified TLS and one unchanged server-start value. The last five samples met
+  the two-minute stability requirement. Four local diagnostic-guard tests passed.
+- Two bounded target-only log queries succeeded (23 prior-window and 21 current-
+  window matching records). Logs show fast shutdown/start/readiness cycles and
+  57P01 connection terminations around startup. This supports startup interruption,
+  but does not identify its initiator or uniquely link a log event to the failed
+  client connection. Original failed-attempt evidence is preserved.
+- No Auth enablement, login, password reset, configuration patch, import, messages
+  or other-project contact. Independent inspection at
+  `2026-10-16T04:52:03.1927255Z` confirms INACTIVE, Auth disabled, SMTP absent,
+  zero functions/secrets. All 255 protected evidence files passed owner-only ACLs.
+- Receipt: `operations/recovery-060-stability-20261016.json`. No commit, push or
+  deployment. Historical evidence and unrelated Supabase CLI metadata preserved.
+- Next requires a separately approved three-account Auth run with fresh bounded
+  stable-readiness verification after resume, strict current-config comparisons,
+  protected snapshots, and disable/pause cleanup. This diagnostic is not a login
+  pass or a guarantee of future startup stability.
+
+## Disposable Auth retry 1 — database readiness blocked, 16 October 2026
+
+- Explicitly approved one retry on `lzkpibxeqxytewbwgklj` only. Prepared separate
+  runner/wrapper and journals, pinned the original attempt hashes, and retained
+  strict config equality with full protected before/after captures and two stable
+  current-baseline reads. No setting is ignored and no provider limit is patched.
+  All 39 local Auth guard tests passed; Node syntax and PowerShell parsing passed.
+- Local password preflight again matched all three saved credentials. After
+  resume, the read-only database readiness connection was closed by the server:
+  psql exit 2, SQLSTATE `57P01`. No password-authentication failure was reported.
+  Exact server-side cause is not proven. Stopped before the Auth runner, config
+  enablement or any account login; accounts passed remain 0/3.
+- Cleanup paused the target. Independent inspection at
+  `2026-10-16T04:35:23.0560178Z` confirmed INACTIVE, Auth disabled, no SMTP,
+  zero Edge Functions/secrets. All 199 protected evidence files passed owner-only
+  ACL verification. No password reset, messages, other-project contact or restore.
+- Receipt: `operations/recovery-060-auth-retry1-20261016.json`. This approval was
+  consumed by the guarded retry; do not rerun its wrapper merely because it stopped
+  before the child Auth-attempt journal was created. Preserve both failures and
+  original successful database/Storage evidence. New config-capture logic has not
+  yet been exercised live; login/refresh/logout and complete postflight remain open.
+- Earlier read-only diagnosis recovered the exact first-attempt pre-enable config:
+  the saved historical JSON reproduces its SHA-256 exactly. Current disabled config
+  differs only in `custom_oauth_max_providers` (32767 to 3); immediate post-enable
+  response was not retained, so causality remains unproven. The readiness failure
+  is separate from that configuration mismatch.
+
+## Disposable 006–060 Auth acceptance — blocked safely, 16 October 2026
+
+- Under explicit target-only approval, resumed `lzkpibxeqxytewbwgklj` and verified
+  database stability, the pinned restored-data verifier, catalog/data baseline,
+  no scheduled jobs, six logo hashes and the three restored test identities.
+  All three protected passwords match the restored hashes; no password reset.
+- One temporary password-provider enablement was attempted. The strict full-Auth
+  configuration equality check stopped with `Other Auth config changed` BEFORE
+  any password grant, refresh or logout test. Accounts passed: 0/3, not a pass.
+- Cleanup disabled the provider and paused the project. Independent management
+  inspection at `2026-10-16T04:23:24.5088975Z` verified INACTIVE, Auth disabled,
+  SMTP absent and zero Edge Functions/secrets; a second read confirmed those facts.
+  The runner itself did not verify exact full-config restoration, effective service
+  disablement or complete database postflight. Preserve those limitations.
+- Read-only historical post-isolation comparison found only
+  `custom_oauth_max_providers` different. Exact pre-enable configuration was saved
+  only as a hash, so this is a diagnostic lead, not a proven enablement delta.
+  No automatic retry, configuration exception, account change or other-project contact.
+- New target-bound workspace runner/guards: 35 local Auth safeguard tests passed;
+  192 protected files passed owner-only ACL verification. Historical runners,
+  original backup and successful database/Storage restore evidence preserved.
+  Receipt: `operations/recovery-060-auth-attempt-20261016.json`.
+- Next: resolve the exact configuration comparison discrepancy before a separately
+  approved diagnostic/retry. Login/refresh/logout recovery remains outstanding.
+
+## Managed 006–060 recovery rehearsal — completed 15 October, reconciled 16 October 2026
+
+- Approved new free Singapore target `lzkpibxeqxytewbwgklj`, named
+  `js-recovery-060-20261015`, created in the existing free organization.
+  Both historical recovery projects and all original backups are preserved.
+  Only management inventory and the new target were contacted; no source staging,
+  production, retired-project or delivery-provider request.
+- New protected evidence directory:
+  `C:\protected\jwg-database-access-5ff37a1e79bc48d78f8ffb6a5179a77d`.
+  Auth/signup/hooks/notifications disabled, no SMTP, no Edge Functions/secrets;
+  initial public/Auth/ledger/Storage baseline empty and no cron/webhooks.
+- Source authenticated against the 15 October archive. The target's 44 Auth
+  columns match source types/generated flags. Reviewed restore excludes platform
+  definitions, active sessions/refresh tokens and cron/net/vault contents.
+- Rollback rehearsal `rollback-rehearsal-1792046416078` passed exact equality
+  across 70 tables / 407 rows, 15 catalog comparisons, six sequence values,
+  55-row 006–060 ledger and database security assertions. Independent before/after
+  baseline hashes both equal
+  `6a58f9f1ee956f0756b1b1a5bf37b6b9c481cd2c5ea04980ace1786c0934aee4`.
+  Zero residue verified; target paused afterward.
+- One committed database restore `persistent-restore-1792046891528` acknowledged
+  successfully and passed independent persisted verification: same data/ledger,
+  15 catalog comparisons, six sequences and 18 managed-catalog datasets unchanged.
+  Auth remained disabled; INACTIVE confirmed at `2026-10-15T06:52:47.4536569Z`.
+- A local pin-helper source-hash error stopped before persistent import; corrected
+  to the independently authenticated new dump hash. No database import replay.
+  28 local recovery/helper tests pass, and 130 protected files passed owner-only
+  ACL checks after the database phase.
+- User separately approved a 50 MiB limit ONLY for this disposable target's empty
+  private video bucket; the captured source limit is 2 GiB and remains unchanged.
+  Storage restore `storage-restore-1792047377812` completed: two buckets and six
+  logos (3,412,943 bytes), no overwrites, verified private/public hashes and
+  access controls. Database lint, Member/Admin/Super Admin role boundaries and
+  independent persisted checks before/after Storage and after roles all passed.
+- Independent read-only reconciliation at `2026-10-16T03:54:53.4935412Z`
+  confirmed INACTIVE, Auth disabled, SMTP absent and zero functions/secrets.
+  All 175 protected evidence files passed current-user-only ACL checks; original
+  archive authentication and hashes were reverified locally without source access.
+  Restore scratch remains quarantined in the protected evidence directory.
+- The prior Storage wrapper session/final wrapper receipt is unavailable; phase
+  result files establish acceptance success, while the independent 16 October
+  inspection establishes the final paused state. No restore was retried.
+- Sanitized receipt: `operations/recovery-060-acceptance-20261016.json`.
+  Hosted password login is excluded because Auth must remain disabled. Hosted
+  Auth/provider configuration recovery remains unverified. This completes the
+  authorized database/Storage rehearsal, not complete production readiness.
+
+## Encrypted staging 006–060 backup — 15 October 2026
+
+- Created a new read-only backup of staging `eomubndonbetszdbhsrj` at
+  `C:\protected\jingwuguan-recovery-source-20261015-ec34faf8` without overwriting
+  any previous backup. Capture: `2026-10-15T06:24:15.783Z`; authenticated archive
+  verification finished `2026-10-15T06:24:37.906Z`.
+- A shared repeatable-read snapshot covers the database dump and source catalog:
+  exact full 55-row ledger 006–060, 67 public tables, 57 Auth users/identities,
+  and 4,160 catalog entries. Global roles were captured separately, without
+  database-role passwords. Both Storage buckets and all six object files were
+  captured (3,412,943 object bytes); source object/bucket metadata and ledger
+  remained unchanged across capture.
+- AES-256-GCM archive: 7,742,464 bytes. Encryption key is stored in a separate
+  current-user-only directory, referenced by protected `encryption.json`.
+  Owner-only ACL checks passed for the archive directory/files and separate key.
+  Temporary plaintext generated by this run was removed after verified encryption;
+  no old backup or source evidence was deleted.
+- Independent local-only verification decrypted into a hashing sink (no plaintext
+  output), verified the authentication tag and both byte counts/SHA-256 digests,
+  checked the 006–060 contract, and confirmed no plaintext remains in the package
+  directory. Seven migration-contract tests passed before the live capture.
+- Sanitized receipt: `operations/staging-backup-060-20261015.json`.
+  No database changes, restore, account reset, messages, scheduler action,
+  production, retired-project, or disposable-project contact.
+- This is backup evidence, NOT a successful restore or complete recovery gate.
+  Hosted Auth provider configuration and provider secrets are not in this archive.
+  Subsequent authorized database/Storage restore is recorded above; hosted Auth
+  configuration and password-login recovery remain outside that completed scope.
+
 ## Staging release reconciliation — 15 October 2026
 
 - Deployed runtime is `ea004d36d8fd9e65bda981b6e131f6b739392690` after the

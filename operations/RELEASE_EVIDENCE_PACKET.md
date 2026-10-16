@@ -48,7 +48,7 @@ commit/deployment identities and rollback decision deadline from the protected
 release-window record. Hash-correct but semantically invalid or independently misbound
 rollback JSON cannot pass. It separately reruns the production-cutover semantic
 validator against the independently supplied production project, release commit and
-deployment, and cross-checks its origin, exact 006–056 ledger and policy against the
+deployment, and cross-checks its origin, exact 006–060 ledger and policy against the
 release-window record. Hash-correct cutover placeholders or self-bound identities
 cannot pass. The remaining child gates must still be run individually before packet
 assembly.
