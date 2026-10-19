@@ -1,7 +1,8 @@
-// Owner approved on 2026-10-05. This accepts a known risk; it is not a patch.
+// Owner renewed on 2026-10-20 (Sydney) for seven days, exact dev chain only.
+// This accepts a known risk; it is not a patch. Prior approval evidence is retained.
 export const ADVISORY = 'https://github.com/advisories/GHSA-vfj7-8cjw-p6xm';
-export const APPROVED_AT = '2026-10-05T11:09:49Z';
-export const EXPIRES_AT = '2026-10-19T11:09:49Z';
+export const APPROVED_AT = '2026-10-19T18:38:42Z';
+export const EXPIRES_AT = '2026-10-26T18:38:42Z';
 const chain = Object.freeze({
   'eslint-config-next': { version: '16.3.8', via: '@next/eslint-plugin-next' },
   '@next/eslint-plugin-next': { version: '16.3.8', via: 'fast-glob' },

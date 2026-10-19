@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatTrainingSessionRecency } from "@/lib/format-date";
 import ClassEnrollmentPanel from "@/components/class-enrollment-panel";
+import { imageUploadExtension } from "@/lib/image-upload";
 
 type Profile = {
   id: string;
@@ -514,9 +515,9 @@ export default function ProfilePage() {
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (!imageUploadExtension(file.type)) {
       setMessage(
-        "Please select an image file."
+        "Please select a JPEG, PNG, or WebP image."
       );
       setMessageType("error");
       return;
@@ -573,11 +574,13 @@ export default function ProfilePage() {
       return;
     }
 
-    const extension =
-      avatarFile.name
-        .split(".")
-        .pop()
-        ?.toLowerCase() || "jpg";
+    const extension = imageUploadExtension(avatarFile.type);
+    if (!extension || avatarFile.size > 5 * 1024 * 1024) {
+      setMessage("Choose a JPEG, PNG, or WebP image up to 5 MB.");
+      setMessageType("error");
+      setUploadingAvatar(false);
+      return;
+    }
 
     const filePath =
       `${user.id}/avatar.${extension}`;

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
 import { exportToExcel } from "@/lib/exportExcel";
+import { imageUploadExtension } from "@/lib/image-upload";
 
 type TitleSystem =
   | "japanese"
@@ -629,12 +630,10 @@ export default function ClassManagementPage() {
     setMessageType("");
 
     try {
-      const extension =
-        file.name
-          .split(".")
-          .pop()
-          ?.toLowerCase() ||
-        "png";
+      const extension = imageUploadExtension(file.type);
+      if (!extension || file.size > 5 * 1024 * 1024) {
+        throw new Error("Choose a JPEG, PNG, or WebP image up to 5 MB.");
+      }
 
       const filePath =
         `${classRecord.id}/logo.${extension}`;

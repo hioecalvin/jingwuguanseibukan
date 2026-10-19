@@ -1,5 +1,31 @@
 # Jingwuguan Seibukan production progress
 
+## Production continuation — 20 October 2026
+
+- [x] Rollback-only 061 schema/backfill rehearsal and independent 78/15/55 baseline.
+- [x] Create/verify only production avatar/logo image buckets with restricted formats/size.
+- [x] Pass 531 synthetic Storage authorization checks; stop/preserve local cluster.
+- [x] Align image UI filenames with MIME; focused tests/typecheck pass.
+- [x] Apply explicitly approved seven-day dev-only exception; strict runtime audit clear.
+- [x] Rehearse/install/independently verify six production Storage policies and helper.
+- [x] Pass 917 units, lint/typecheck, isolated build and 486 Chromium/WebKit cases.
+- [ ] Hosted image-upload acceptance, exact-commit remote CI and provider/owner gates.
+- [ ] Complete full current-code tests/build/browser/CI, 061 semantics and application.
+- [ ] Verify owner access and providers; promote exact accepted candidate only afterward.
+- New UI/policy changes are not deployed; no public cutover or staging changes.
+
+## Production build staged, not publicly promoted — 19 October 2026
+
+- [x] Commit reviewed candidate and exclude local backend linkage/env upload inputs.
+- [x] Deploy exact 5dd11ca to existing Production target with --skip-domain.
+- [x] Independently confirm Ready and pass all 11 anonymous host/security probes.
+- [x] Confirm public domain remains on the previous September 25 deployment.
+- [ ] Final CI/Firefox; full migration 061 acceptance (history remains disabled).
+- [ ] Production Storage/provider acceptance and Faisal verification/password setup.
+- [ ] Enable verified production access, complete role acceptance, then public cutover.
+- Calvin retains Super Admin until verified handover; Excel import stays deferred.
+- Deployment: dpl_6nHBoQFExnWXTfpcisoM4kWAoMT6. No push, messages or scheduler runs.
+
 ## Production candidate preparation — 19 October 2026
 
 - [x] Restore authenticated Vercel access and verify the existing project binding.

@@ -1,5 +1,63 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Production implementation continuation — 20 October 2026
+
+- Production 061 schema/backfill rehearsal passed inside rollback; independent
+  original-baseline comparison passed across 78 data fingerprints, 15 catalog
+  fingerprints and exact 55-row ledger. No migration was installed or history enabled.
+  Reviewed executor pins project/TLS/SQL/baseline and rejects unreviewed event
+  triggers and result rewrite rules. Eight local executor/package guards pass.
+- Created only production avatars and class-logos buckets via Storage API, each
+  public, JPEG/PNG/WebP only, 5 MiB; independently verified. No objects uploaded.
+  Six reviewed browser-write policies and their scoped helper were subsequently
+  rehearsed, installed and independently verified. Original 78 data fingerprints
+  and 55-row ledger unchanged; only expected catalog additions. Staging untouched.
+- Offline proposed Storage policies pass 531 synthetic PG17 assertions; cluster
+  stopped/preserved. This is not hosted Storage HTTP or browser acceptance.
+- Updated avatar/logo UI to canonical MIME-derived paths and explicit format/size
+  validation. Three new regression tests, lint, TypeScript and 917/917 full unit
+  tests pass; isolated production build and 486/486 Chromium/WebKit cases pass.
+- User renewed the exact development-only dependency exception for seven days,
+  expiring 27 October 2026 05:38:42 AEDT. Thirteen policy tests and policy audit
+  pass; separate production dependency audit reports zero vulnerabilities. Not a patch.
+- Latest read-only production audit still shows Auth/signup disabled, owner setup
+  pending and no memberships or delivery queues. No accounts recreated/demoted,
+  messages sent, Excel imported, schedulers enabled or public domain reassigned.
+- Existing staged candidate remains 5dd11ca; today's code is not deployed yet.
+  Full CI/Firefox, hosted Storage, provider delivery/playback, migration semantics
+  and verified Faisal access remain release gates.
+- Parallel agents later stopped on usage/revoked-network limits. Main agent
+  obtained renewed network permission and completed the guarded Storage executor.
+  Fresh post-bucket baseline used; previous pre-bucket baseline preserved.
+  Private install evidence ends 89145fbc7fcf4ddab2507e5814221e50.
+
+## Production-configured candidate staged — 19 October 2026, 16:23 Sydney
+
+- Committed only reviewed candidate files as c2edd74, followed by upload exclusions
+  in 5dd11cab0cdd4a9f1609c7a533de0a2c71022874. Neither commit was pushed. Staging
+  branch deployments/aliases were not changed; deferred work remains uncommitted.
+- Exported that exact commit to a clean release artifact (not a new app/project).
+  Source ZIP SHA256: 984b8365cba44d337c0862f28a8e6f64c85312844abdfbee18f435cc96b5b85d.
+  Dry-run upload inspection excluded env files, backend temporary linkage and
+  deferred import prototypes. Existing .vercel project binding was verified.
+- Created Production-target deployment dpl_6nHBoQFExnWXTfpcisoM4kWAoMT6 using
+  --prod --skip-domain. Vercel independently reports Ready; build took 1m 7s.
+  URL: https://jingwuguanseibukan-e2a2co7pb-js1-ccd7.vercel.app
+- All 11 anonymous GET probes passed through authenticated Vercel protection:
+  public routes/assets, protected redirects, worker 405s, security headers and
+  production-only Supabase CSP binding. No app login or outbound delivery tested.
+- Earlier probe-harness failures were CLI flag forwarding and empty-body parsing;
+  preserved both failed receipts, corrected the harness, and reran all 11.
+  Final receipt: workspace staging-readiness/production-candidate-host-53d5fd38c7f140038fdbe8586b019213.json.
+- Independent Vercel resolution confirms jingwuguanseibukan.com still maps to
+  dpl_HyTjK8Bodp3YPWjPxCGS6ssjtmWu (September 25). No public cutover performed.
+- Pending 061 remains unapplied and assessment history disabled. Production
+  email login/signup remain disabled; Storage is empty. No messages, scheduler
+  enablement, account recreation, Calvin demotion or Excel import occurred.
+- Browser access failed again after working earlier; CLI remains authenticated.
+  Final CI/Firefox, migration acceptance, Storage/provider acceptance and genuine
+  Faisal setup remain launch gates. Ready deployment is not a completed launch.
+
 ## Production candidate preparation — 19 October 2026, 16:15 Sydney
 
 - Authenticated Vercel CLI now resolves the existing JS/jingwuguanseibukan project.

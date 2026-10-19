@@ -14,9 +14,9 @@ function fixture() {
   const lock = {lockfileVersion:3,packages:Object.fromEntries(names.map(name=>[`node_modules/${name}`,{dev:true,version:versions[name]}]))};
   return {report,lock};
 }
-test('exact development advisory and propagated chain accepted only within fourteen days',()=>{
+test('exact development advisory and propagated chain accepted only within seven days',()=>{
   const {report,lock}=fixture();
-  assert.equal(Date.parse(EXPIRES_AT)-Date.parse(APPROVED_AT),14*24*60*60*1000);
+  assert.equal(Date.parse(EXPIRES_AT)-Date.parse(APPROVED_AT),7*24*60*60*1000);
   assert.equal(evaluateAudit(report,lock,now).excepted.length,5);
   for(const time of [Date.parse(APPROVED_AT)-1,Date.parse(EXPIRES_AT),Date.parse(EXPIRES_AT)+1]) {
     assert.equal(evaluateAudit(report,lock,time).ready,false);
