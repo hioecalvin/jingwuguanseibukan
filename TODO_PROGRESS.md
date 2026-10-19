@@ -1,5 +1,220 @@
 # Jingwuguan Seibukan production progress
 
+## Production candidate preparation — 19 October 2026
+
+- [x] Restore authenticated Vercel access and verify the existing project binding.
+- [x] Production-only read-only ledger/setup/Auth audit; private config comparison.
+- [x] Fix recyclable-PID test assertion; 13 focused and 914 full unit tests pass.
+- [x] Lint passes; preserve original failed test evidence and all unrelated changes.
+- [ ] Stage exact production candidate with no domain assignment, then verify it.
+- [ ] Complete migration 061 acceptance, Firefox CI, Storage/provider and owner gates.
+- No production login enablement or Calvin demotion; Excel import remains deferred.
+
+## Fresh parallel local run — 19 October 2026, 06:03 Sydney
+
+- [x] Lint/typecheck/build, 486 browser cases, 27 uploader tests and five workspace guards.
+- [x] Both synthetic PG17 suites passed; independently verify stopped clusters.
+- [x] Preserve full-run failure and unmodified focused witness retry (6/6 passed).
+- [ ] Resolve intermittent process-exit assertion: full unit run was 912/913.
+- [ ] Firefox/Linux CI and full-schema/live release acceptance remain pending.
+- Evidence: workspace staging-readiness/local-all-20261019-060303/README.md.
+- Production/staging, Excel, credentials and test assertions unchanged.
+
+## Production follow-through — 19 October 2026
+
+- [x] Prepare guarded 061 acceptance plan without executing live fixtures.
+- [x] Verify full-schema local prerequisite gap (Supabase Vault); preserve snapshot.
+- [x] Pass 26 focused guards, uploader build/27 tests, fresh runtime audits.
+- [ ] Restore authenticated deployment access (browser currently disabled).
+- [ ] Add reviewed PG17 CI provisioning; run fresh remote release CI including Firefox.
+- [ ] Complete full-schema 061 acceptance before feature enablement.
+- [ ] Verify Faisal login before Calvin demotion; finish production build/target/provider gates.
+- User requests production implementation; no live mutation or deployment has occurred.
+
+## YYYY-XXXX requirement — 19 October 2026
+
+- [x] Replace two-digit years with full-year assessment references, e.g. 2026-0001.
+- [x] Preserve one annual sequence across classes, Pass/Fail and reassessment.
+- [x] Restore global reference uniqueness; preserve certificate/QR identities.
+- [x] Update UI examples and browser assertions; reject shortened displayed references.
+- [x] Pass synthetic PG17 workflow/concurrency/backfill/role tests; stop test cluster.
+- [x] Pass offline saved-schema compatibility and focused numbering/guard tests.
+- [x] Final YYYY revision: 913 unit checks, lint/typecheck and isolated build pass;
+  486 Chromium/WebKit browser checks across desktop/tablet/mobile pass.
+- [ ] Separately accept pending 061 before enabling history or deploying this feature.
+- No remote data, accounts, deployment, commit or push changed.
+
+## Parallel local safeguards — 19 October 2026
+
+- [x] Fix supported-century assessment reference collision; preserve full-year uniqueness.
+- [x] Correct real cross-class fixtures; test century, invalid dates and immutable records.
+- [x] Pass synthetic PG17 tests and independently confirm cluster stopped.
+- [x] Check saved schema compatibility offline; no live acceptance inferred.
+- [x] Add default-off server route/navigation gate for assessment history before 061.
+- [x] Gate tests, lint/typecheck, six numbering contracts and 66 release-guard tests.
+- [x] Pre-YYYY gated revision passed 913 unit and 486 six-profile browser checks.
+- [ ] Resolve Firefox/Linux CI and unpatched development dependency release holds.
+- [ ] Accept 061 separately before enabling ASSESSMENT_HISTORY_ENABLED=true.
+- No deployment or live settings/data changes; prior passing results remain historical.
+
+## Local-first fixes and verification — 18 October 2026
+
+- [x] Make JS Member ID login case-insensitive without bypassing account security.
+- [x] Make assessment history fail safely and recover by explicit retry.
+- [x] Add login and history error/loading/empty-state regressions.
+- [x] Clean lint/typecheck, 907 unit tests, 28 focused contracts, 27 uploader tests.
+- [x] Final fresh-build browser run: 450/450 across six Chromium/WebKit size profiles.
+- [x] Synthetic local numbering/role/concurrency checks; stop and retain cluster.
+- [x] Verify zero runtime vulnerabilities in web and uploader dependency trees.
+- [ ] Obtain a supported fix for web dev advisory; exception expiry unchanged.
+- [ ] Review uploader's moderate build-tool dependency findings without forced downgrades.
+- [ ] Run Firefox/Linux CI for the final release candidate; unavailable on this host.
+- [ ] Accept pending 061 against the full schema before shipping assessment history.
+- [ ] Complete genuine Super Admin handover and production gates only after local review.
+- Final browser results and preserved failed-run evidence: LOCAL_RELEASE_REVIEW_20261018.md.
+- No production/staging changes, deployment, commit or push in this local-only pass.
+
+## Super Admin handover — 18 October 2026
+
+- [x] Provision Faisal Qiu's individual production account with JS ID `SUPERADMIN`.
+- [x] Independently verify identity/role and preservation of Calvin, ledger, queues and Auth settings.
+- [x] Save initial credential privately; require password change; send no messages.
+- [ ] Complete genuine email verification/password setup and verify Faisal's sign-in.
+- [ ] Then remove Calvin `JS-0103`'s Super Admin privilege while preserving his account.
+- Production login remains disabled; handover and launch are not complete.
+
+## Class Admin removal / production continuation — 18 October 2026
+
+- [x] Remove the proposed Class Admin role only; preserve existing Dojo Admin.
+- [x] Restore Super Admin-only assessment preparation and grade promotions.
+- [x] Preserve numbered assessment history independently in pending numbering-only 061.
+- [x] Preserve 26 pre-removal files outside checkout; leave deferred Excel/Mux/backups intact.
+- [x] Type-check/lint, 904 regression checks, 56-page build, 142 mobile browser checks.
+- [x] Synthetic PG17 numbering, reassessment, access boundaries and counter concurrency.
+- [x] Fresh read-only production audit confirms 006–060 and owner setup still pending.
+- [x] Exact production rebuild approval received for verified ea004d3; no domain switch before checks.
+- [ ] Obtain supported authenticated deployment control that can withhold domain assignment.
+- [ ] Rebuild verified V1 with production config; verify target, host/TLS and owner setup.
+- [ ] Complete live provider/Storage/operations acceptance; no passing evidence inferred.
+- [ ] Review and accept new numbering-only 061 separately before deploying its history UI.
+- Class Admin implementation/matrix tasks below are cancelled; historical evidence retained.
+- No live mutation, deployment or commit this turn.
+
+## Class Admin / assessment numbering candidate — 18 October 2026
+
+- [x] Local Super Admin grant/revoke UI with reasons and appointment audit history.
+- [x] Local class-scoped assessment workflow and revoked/foreign-class denial.
+- [x] Per-member shared annual YY-XXXX numbers for Pass, Fail and reassessment.
+- [x] Compact numbered history; existing certificate numbers/QR references preserved.
+- [x] Synthetic PG17 workflow, historical ordering, year/reset/rollback/overflow and concurrent allocation tests.
+- [x] Type-check/lint; 899 existing unit tests + 5 new contract checks; 57-page isolated build.
+- [x] Corrected Chromium/WebKit mobile run: all 144 tests passed.
+- [ ] Complete broader Class Admin management permission matrix and UI integration.
+- [ ] Full-schema reconciliation and guarded staging acceptance for pending 061/062.
+- [ ] Historical import/numbering preview and audited corrections, when separately developed.
+- [ ] Promote accepted SQL/update release evidence, then deploy in the combined update.
+- No live migration, role appointment, provider delivery, import, commit/push or deployment.
+
+## Combined-update preparation — 18 October 2026
+
+- [x] Verify production Resend TLS/SMTP AUTH without sending a message.
+- [x] Verify Mux production token identity and Video-only read/write permissions.
+- [x] Preserve failed signing-management probe; avoid unnecessary System access.
+- [x] Pass 108 offline setup/provider/release/rollback guard tests and syntax checks.
+- [x] Recheck production dependencies (zero vulnerabilities); full audit policy passes.
+- [x] Confirm existing RLS excludes disabled classes; preserve Aikido-only scope.
+- [ ] Re-evaluate development advisory before 2026-10-19T11:09:49Z exception expiry.
+- [ ] Hold deployment for one combined update; restore authorized Vercel connection.
+- [ ] Complete release-bound domain/TLS, owner verification, roles, delivery,
+  signed-playback, Storage and operations acceptance; no live success inferred.
+- No application/package changes, deployments, messages, assets or database writes
+  this turn. See workspace PRODUCTION_COMBINED_UPDATE_20261018.md for the sequence.
+
+## Aikido-only setup milestone — 18 October 2026
+
+- [x] User chose Aikido-only initial availability; four other classes disabled.
+- [x] Prepare configuration-only seed without fees, source sharing settings or member data.
+- [x] Seven local setup guard tests; all five class assets verified 1024×1024 PNG.
+- [x] Production rollback rehearsal and independent 78-relation zero-residue baseline.
+- [x] Apply configuration and independently verify exact rows, unchanged unrelated data and database security.
+- [x] Preserve Calvin JS-0103, full ledger, six sequences; delivery queues empty.
+- [ ] Restore browser access for the existing Vercel deployment workflow; current inventory reports disabled.
+- [ ] Deploy pinned release, verify live domain/roles/providers and complete genuine owner setup.
+- [ ] Configure other four classes and approved fees/sharing later; Excel import remains deferred.
+- Auth/signup still disabled. No deployment, provider message or staging modification occurred.
+
+## Production Auth reconciliation and setup review — 18 October 2026
+
+- [x] Save production Site URL, exact confirmation redirect, template and SMTP settings.
+- [x] Read-only verify non-secret settings and unchanged Auth isolation; no PATCH retry.
+- [x] Independent exact-version/empty-queue baseline; preserve existing JS-0103 account.
+- [x] Offline review four setup tables from the authenticated backup, without import.
+- [x] Nine synthetic Auth checks and 38 release-guard tests pass.
+- [x] Confirm Aikido-only initial availability; applied in the newer setup milestone.
+- [ ] Review organizational/financial setup; do not copy unconfirmed revenue-sharing settings.
+- [ ] Verify SMTP credential usability and actual delivery; transformed readback is not proof.
+- [ ] Deploy pinned runtime, complete genuine owner setup and live domain/provider/role checks.
+- No messages, member import, deployment, staging change or account recreation occurred.
+
+## Production configuration and preflight — 18 October 2026
+
+- [x] Save fresh production Resend/Mux credentials securely; exclude deleted/exposed capture.
+- [x] Save and verify all 19 Production-only Vercel application settings.
+- [x] Preserve all 18 release-branch Preview settings; replace four legacy shared public entries with explicit approval.
+- [x] Restore owner-only production credential-directory ACL with original ACL evidence preserved.
+- [x] Read-only confirmation: one Calvin JS-0103 owner; exactly 55 versions 006–060; empty delivery queues.
+- [x] Configure production Site URL, exact confirmation redirect and Resend SMTP; see newer reconciliation above. Live delivery remains unverified.
+- [x] Load reviewed Aikido class/dojo/rank/tier configuration; static logo paths verified. Storage remains empty; see newer setup milestone.
+- [ ] Complete genuine owner email verification and mandatory password setup; do not recreate the owner.
+- [ ] Deploy the pinned tested runtime, then complete domain, provider and role acceptance.
+- No deployment, provider delivery, member import, account recreation, commit or push in this milestone.
+
+## Local release recheck — 17 October 2026
+
+- [x] TypeScript and lint; 899/899 local tests after approved Windows fixture retry.
+- [x] Five schema-bootstrap guards; synthetic production-mode build, 55 pages.
+- [x] Production dependency audit: zero vulnerabilities; full audit policy passes.
+- [ ] Resolve development-only advisory before its 19 October 11:09:49 UTC exception expiry; no patch claimed.
+- [x] Reconcile recorded first-owner provisioning: Calvin JS-0103 already exists; do not recreate.
+- [x] Resume fresh production Resend/Mux custody; deleted/exposed capture remains excluded. Live delivery/playback remains pending.
+- [ ] Complete production setup/deployment and live provider/domain/role/device/operations gates.
+- No live project changes or browser tests in this milestone; staging, backups and deferred Excel work preserved.
+
+## Production-first launch setup — 17 October 2026
+
+- [x] Record launch-first decision; defer Excel/offline-member import/prototypes.
+- [x] Create separate Free-plan Singapore production `nzoratpwvhhxfdyilkrp`.
+- [x] Protect new database credentials; isolate Auth/signup during setup.
+- [x] Prepare schema-only baseline without test/member/business data; 5 guard tests.
+- [x] Pass rollback-contained bootstrap rehearsal after reconciling failed transports.
+- [x] Commit verified clean schema and exact 006–060 ledger (55 migrations).
+- [x] Independently verify 15 catalog comparisons, ledger, security and zero data.
+- [x] Generate separate runtime secrets and privately save production Supabase keys.
+- [ ] Complete production Resend/Mux configuration and approved real admin profile.
+- [ ] Complete reviewed class/dojo/rank/logo setup, preserving deferred Excel scope.
+- [ ] Deploy tested runtime with production-only configuration; domain/role acceptance.
+- [ ] Complete remaining provider/rollback/device/operations release evidence.
+
+## Offline members — local implementation foundation, 16 October 2026
+
+- [x] Record grade/status holds, unknown dates and blank-termination interpretation.
+- [x] Pure non-executable import planner passes 25 unit tests; creates no accounts.
+- [x] Prototype verified linking/cancellation/reissue with protected history and audit.
+- [x] Synthetic SQL role, verification, replay, preservation and two-connection race tests pass.
+- [x] Full npm test passes 896/896; three newer inventory tests pass separately; lint/typecheck pass.
+- [x] Build definition-bound integration inventory; no auto-approval or replacement generation.
+- [ ] Review and integrate complete identity dependency inventory; prototype evidence alone is insufficient.
+
+- [x] Record approval: no-email members retain records without online access.
+- [x] Prototype an explicit Auth link and same-ID guard outside the active chain.
+- [x] Execute synthetic PostgreSQL 17.11 identity/ACL/isolation/replay tests; stop cluster.
+- [x] Detect existing normalizer backfill risk; require atomic exact-field preservation.
+- [x] Test saved normalizer/signup definitions with synthetic rows, including failed-backfill rollback and unverified signup.
+- [ ] Verify candidate against complete recovered baseline and existing triggers/grants.
+- [ ] Migrate identity consumers/RLS, support unknown legacy fields, implement secure linking.
+- [ ] Resolve member-source ambiguities and perform a non-sending import dry run.
+- [ ] Obtain scoped live migration approval after full local regression acceptance.
+
 ## Rollback preflight and audit refresh — 16 October 2026
 
 - [x] Reverify staging alias and both exact Ready Preview identities read-only.

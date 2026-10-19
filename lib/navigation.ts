@@ -11,6 +11,7 @@ export type NavigationItem = {
   roles: AppRole[];
 
   requiresRepositoryUpload?: boolean;
+  requiresAssessmentHistory?: boolean;
 
   section:
     | "main"
@@ -22,6 +23,9 @@ export type NavigationItem = {
 
 export const navigationItems:
   NavigationItem[] = [
+  { label: "Assessment History", href: "/assessment-history",
+    roles: ["member", "admin", "super_admin"], section: "management",
+    requiresAssessmentHistory: true },
 
   /*
    * =====================================================
@@ -507,11 +511,13 @@ export function getNavigationForRole(
   role: AppRole,
   capabilities?: {
     repositoryUpload?: boolean;
+    assessmentHistory?: boolean;
   },
 ) {
   return navigationItems.filter(
     (item) =>
       item.roles.includes(role) &&
-      (!item.requiresRepositoryUpload || capabilities?.repositoryUpload === true)
+      (!item.requiresRepositoryUpload || capabilities?.repositoryUpload === true) &&
+      (!item.requiresAssessmentHistory || capabilities?.assessmentHistory === true)
   );
 }

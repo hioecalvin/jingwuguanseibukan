@@ -22,6 +22,7 @@ type MobileNavProps = {
   role: AppRole;
   memberName?: string | null;
   hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 
@@ -29,6 +30,7 @@ export default function MobileNav({
   role,
   memberName,
   hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: MobileNavProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -85,7 +87,7 @@ export default function MobileNav({
   const items =
     getNavigationForRole(
       role,
-      { repositoryUpload: hasRepositoryUpload },
+      { repositoryUpload: hasRepositoryUpload, assessmentHistory: assessmentHistoryEnabled },
     );
 
 

@@ -20,6 +20,7 @@ type AppShellProps = {
   memberId?: string | null;
 
   hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 export default function AppShell({
@@ -28,6 +29,7 @@ export default function AppShell({
   memberName,
   memberId,
   hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: AppShellProps) {
   return (
     <div className="app-compact min-h-screen bg-neutral-950 text-neutral-100">
@@ -36,6 +38,7 @@ export default function AppShell({
         role={role}
         memberName={memberName}
         hasRepositoryUpload={hasRepositoryUpload}
+        assessmentHistoryEnabled={assessmentHistoryEnabled}
       />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1800px]">
@@ -43,6 +46,7 @@ export default function AppShell({
           role={role}
           memberName={memberName}
           hasRepositoryUpload={hasRepositoryUpload}
+          assessmentHistoryEnabled={assessmentHistoryEnabled}
         />
 
         <div className="min-w-0 flex-1">

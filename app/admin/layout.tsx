@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import AppShell from "@/components/app-shell";
+import { assessmentHistoryEnabled } from "@/lib/features/assessment-history";
 
 import {
   getCurrentAppUser,
@@ -49,6 +50,7 @@ export default async function AdminLayout({
       memberName={currentUser.fullName}
       memberId={currentUser.memberId}
       hasRepositoryUpload={currentUser.hasRepositoryUpload}
+      assessmentHistoryEnabled={assessmentHistoryEnabled()}
     >
       {children}
     </AppShell>

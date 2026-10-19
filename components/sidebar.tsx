@@ -13,6 +13,7 @@ type SidebarProps = {
   role: AppRole;
   memberName?: string | null;
   hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 
@@ -28,6 +29,7 @@ export default function Sidebar({
   role,
   memberName,
   hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: SidebarProps) {
   const pathname =
     usePathname();
@@ -35,7 +37,7 @@ export default function Sidebar({
   const items =
     getNavigationForRole(
       role,
-      { repositoryUpload: hasRepositoryUpload },
+      { repositoryUpload: hasRepositoryUpload, assessmentHistory: assessmentHistoryEnabled },
     );
 
 

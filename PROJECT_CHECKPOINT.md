@@ -1,5 +1,419 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Production candidate preparation — 19 October 2026, 16:15 Sydney
+
+- Authenticated Vercel CLI now resolves the existing JS/jingwuguanseibukan project.
+  Production remains on the September 25 deployment; no domain has been moved.
+- Fresh production-only read-only audit: exact 006–060 version sequence (55 rows),
+  configured Site URL/confirmation redirect/SMTP, zero memberships and queues,
+  zero Storage buckets/objects. Email login/signup remain disabled.
+- Private Vercel readback matches all nine expected public/configuration fields;
+  assessment history is disabled. Secret values were not printed.
+- Fixed test-only witness exit verification to identify the exact fixture executable
+  rather than recyclable PIDs; added a live-child rejection regression. Focused
+  witness/pooler tests 13/13; full local unit/typecheck run 914/914; lint passes.
+  Existing 486-browser build evidence remains applicable: runtime was unchanged.
+- Parallel reviewers hit account usage limits; unfinished reviews are not passing
+  evidence. The new workspace production-061 package is an unfinished draft only.
+- Do not run prepared-certificate workflows on production as zero-residue tests:
+  their PostgreSQL nextval sequence increments survive transaction rollback.
+- Pending 061, full-schema/Firefox CI, Storage/provider acceptance and Faisal's
+  verified sign-in remain open. Calvin stays Super Admin; Excel import stays deferred.
+- Evidence: workspace staging-readiness/production-unit-20261019.log and
+  witness-exact-path-focused-20261019.log. No live migration/account mutation,
+  delivery, scheduler enablement or cutover in this preparation step.
+
+## Fresh parallel local verification — 19 October 2026, 06:03 Sydney
+
+- User requested all local tests; no remote service calls or production changes.
+- Lint/typecheck, isolated production build, 486/486 six-profile Chromium/WebKit
+  checks, 27/27 uploader tests, five workspace guards and both synthetic PG17
+  suites passed. Deferred identity tests did not import Excel or real records.
+- Full web unit run: 912/913 passed; synthetic witness process-exit assertion
+  failed once. Unmodified focused file rerun passed 6/6. Root cause unproven;
+  retain as intermittent test concern, not a resolved defect or clean full run.
+  Read-only follow-up found zero witness-inert.exe processes remaining.
+- Both synthetic database clusters independently confirmed stopped and retained.
+- Firefox still fails local launch (spawn UNKNOWN); Linux CI remains required.
+  Saved-schema static compatibility passed, not full-schema restore acceptance.
+- Runtime/migration hashes unchanged. Original failure and retry logs preserved in
+  workspace staging-readiness/local-all-20261019-060303. No source fixes or deployments.
+
+## Production continuation requested — 19 October 2026
+
+- User requested implementing the completed changes for production; no live
+  action has occurred in this continuation. Class Admin/Excel remain excluded.
+- Added release/staging-061-verification-plan.md with explicit transaction,
+  fixture/JWT, backfill, target and independent residue requirements.
+- 26 focused release guards and uploader build/typecheck/27 tests passed.
+  Fresh web/uploader runtime audits clear; existing dev exception/tooling findings
+  remain unchanged. Prior 913-unit/486-browser results remain the runtime baseline.
+- Full saved-schema execution blocked by unavailable local supabase_vault support;
+  static inventory is not restore acceptance. Proposed PG17 CI job not implemented:
+  stock Ubuntu24 runner lists PG16, so explicit reviewed PG17 provisioning is needed.
+- Parallel agents stopped on usage/network limits. Network restored, but browser
+  access remains disabled and installed Vercel plugin exposes no deployment tools.
+  Requested browser access. No account, migration, deployment, commit/push or domain change.
+
+## Four-digit assessment years — 19 October 2026
+
+- Latest user requirement supersedes all earlier YY-XXXX references: use
+  `YYYY-XXXX`, for example `2026-0001`, shared across all classes, reset annually.
+- Pending 061 now uses full years in backfill, allocation and consistency checks;
+  global reference uniqueness and full-year/sequence uniqueness both apply.
+  Each Pass/Fail/reassessment is separate; retry idempotency and certificate IDs remain.
+- UI fixtures and assertions use full years and reject shortened two-digit references.
+- Synthetic PG17 backfill, role boundaries, concurrency, rollback, century separation,
+  annual reset and immutable-record checks passed. Cluster js-assessment-wgeXjO
+  independently confirmed stopped and retained. Offline saved-schema check passed.
+- Pending migration SHA256: 28e16904ed31c1ad29191bcf23fe4390a46b6038e7ffc2ce22582d021e9ca37b.
+- Final integrated results are recorded in LOCAL_RELEASE_REVIEW_20261018.md.
+  History remains default-off pending migration acceptance; no live changes.
+- Final YYYY revision: 913/913 unit tests, 486/486 Chromium/WebKit browser tests
+  across six size/engine profiles, lint, typecheck and isolated production build pass.
+  Firefox/Linux CI and prior dependency/live acceptance holds remain unresolved.
+
+## Parallel local release safeguards — 19 October 2026
+
+- Kept all work local; no production/staging calls, migration application,
+  account changes, provider messages, deployment, commit or push.
+- The earlier candidate used UUID/full-year sequence identity without global YY-XXXX
+  uniqueness. This approach is superseded by full-year references above.
+  Cross-class fixtures use actual Aikido/Karate batches with consistency checks;
+  added century, invalid-year and immutable-date regressions.
+- Synthetic PG17 tests passed; cluster js-assessment-w5IydZ stopped and retained,
+  independently confirmed. Six numbering source contracts and five workspace
+  offline schema/provisioning guards passed; 66 production-readiness unit guards passed.
+- Added server-only, default-off ASSESSMENT_HISTORY_ENABLED release gate. Only
+  exact `true` enables the history route and navigation. Keep unset/false until
+  exact-target migration 061 acceptance; it is not authorization or a schema probe.
+  Direct route returns notFound while disabled; account/RPC permissions unchanged.
+- New gate tests pass; lint/typecheck pass. Final integrated suite results follow
+  in LOCAL_RELEASE_REVIEW_20261018.md and workspace LOCAL_PARALLEL_REVIEW_20261019.md.
+- Saved 006–060 schema static compatibility check passes against pinned source;
+  this does not claim complete-schema execution or live acceptance.
+- Firefox/Linux CI and dependency findings remain open. No safe supported patch
+  was identified; exception expiry 2026-10-19T11:09:49Z is unchanged. No unsafe
+  major overrides, optional-dependency omissions or forced downgrades applied.
+
+## Local-only release repair — 18 October 2026
+
+- User requested local fixes before any further production implementation.
+- Fixed case-sensitive JS ID login: normalize uppercase then use exact equality;
+  preserve passwords, leading zeroes, rate limits and account/confirmation checks.
+- Hardened pending assessment-history loading against RPC/transport errors,
+  overlapping refresh and stale/unmounted responses; preserve search on retry.
+- Added three login tests and four history browser scenarios per profile.
+- Lint/typecheck clean; 907 unit tests passed with synthetic Windows ACL fixture
+  permissions; focused final login/numbering 28/28; uploader build/tests 27/27.
+- Synthetic PG17 numbering/permissions/backfill/concurrency pass; retained cluster
+  js-assessment-wEYlHE independently confirmed stopped. No remote DB calls.
+- Runtime npm audits are clear for web/uploader. Web dev advisory remains unpatched
+  with unchanged 2026-10-19 expiry; uploader has eight moderate build-tool findings.
+- Final expanded browser run: 450/450 passed across Chromium/WebKit desktop,
+  tablet and mobile after a fresh isolated build. Full receipt and release holds
+  are tracked in LOCAL_RELEASE_REVIEW_20261018.md.
+  Firefox preflight cannot launch on Windows; Linux CI is still needed.
+- Pending 061 is not applied. Faisal verification/login, Calvin demotion and all
+  deployment/provider/Storage/domain gates remain pending. No accounts changed,
+  emails, uploads, commit/push, deployment or production/staging access this turn.
+
+## Replacement Super Admin provisioned — 18 October 2026
+
+- Created exactly one production account for Faisal Qiu with registration ID
+  `SUPERADMIN` on `nzoratpwvhhxfdyilkrp`, using the user-supplied contact details
+  and date of birth. No staging or other project data was changed.
+- Independent read-only verification at 2026-10-18T10:40:54Z passed: exact identity,
+  Super Admin flag and mandatory password change; existing account digests,
+  migration ledger, membership/queue counts and Auth configuration unchanged.
+- Initial random password stored only as a protected Windows-encrypted credential.
+  Email remains unverified; password setup and real sign-in verification are pending.
+  Auth login/signup remain disabled. No messages sent or deployment performed.
+- Calvin `JS-0103` remains Super Admin until Faisal's usable access is verified;
+  requested Calvin demotion is pending, not completed. Preserve Calvin's member record.
+- Guarded helper and private receipts are retained under staging-readiness and
+  the existing protected production evidence directory; secrets are not in Git.
+
+## Class Admin withdrawn; production rebuild prepared — 18 October 2026
+
+- User removed the proposed Class Admin role; existing Dojo Admin remains.
+- Removed the un-deployed Class Admin page, grant/revoke SQL and runtime capability
+  plumbing. Authentication, dashboard, assessment gate and shared shells restored
+  to their existing release behavior; assessment grade changes remain Super Admin-only.
+- Preserved assessment numbers/history separately. Unapplied numbering SQL is now
+  `supabase/pending/061_individual_assessment_numbers.sql`, directly after 060,
+  with no Class Admin dependency. It is NOT applied to staging or production.
+- Local type-check/lint pass; full regression suite 904/904; isolated build 56
+  pages and Chromium/WebKit mobile 142/142 pass. Synthetic PG17 validates numbering,
+  backfill, Pass/Fail/reassessment, Dojo Admin denial, history scope, rollback and
+  concurrent allocation without Class Admin objects. Cluster stopped/retained.
+- Exact pre-removal copies of 26 files are retained outside the repository at
+  workspace staging-readiness/class-admin-withdrawal-20261018. Prior feature
+  milestone below is historical and superseded, not an active role requirement.
+- Fresh production-only READ ONLY audit at 2026-10-18T10:04:23Z confirms exact
+  006–060 versions, 5 classes/4 dojos/9 grades/15 tiers, zero memberships/queues/
+  Storage objects/buckets, and JS-0103 still awaiting genuine verified setup.
+  Login/signup remain disabled; production Site URL/redirect and SMTP are set.
+- Vercel is accessible. Current production domain still points to the September 25
+  deployment HyTjK8Bodp3YPWjPxCGS6ssjtmWu; verified Preview is 7MyaSqrhiQCMXNyfm5SwKVjpHM7y
+  at ea004d36d8fd9e65bda981b6e131f6b739392690. HEAD 00c42c4 has identical app runtime.
+- User explicitly approved rebuilding that verified V1 in Production while leaving
+  staging untouched and withholding domain assignment until target checks pass.
+  New assessment numbering remains pending and is excluded from that rebuild.
+- Browser redeploy action initially required exact approval; after approval the
+  Production form showed immediate custom-domain assignment, with no skip option.
+  No Redeploy submission or domain switch occurred. Vercel integration suggested
+  to obtain supported deployment controls; its connection is not yet confirmed.
+- Production dependencies report zero vulnerabilities; full audit passes under
+  the existing development-only exception expiring 2026-10-19T11:09:49Z (unpatched).
+- No live migration, account/role change, message, commit, push or deployment.
+
+## Class Admin assessment / annual result numbers — local candidate, 18 October 2026
+
+- Added Super Admin-only grant/revoke screen and private appointment/audit tables;
+  class-scoped assessment preparation, printing, finalization and history readers.
+- Each submitted member Pass/Fail gets a shared annual YY-XXXX number; retries
+  reuse it and reassessments get a new number. Certificate/QR IDs remain unchanged.
+- Pending migrations 061/062 compile and pass synthetic PG17 workflow, permission,
+  history/backfill, year reset, counter rollback/overflow and concurrency tests.
+- Type-check/lint pass; 899 existing unit tests + 5 new contract checks pass.
+  Isolated production build (57 pages) and corrected complete Chromium/WebKit
+  mobile run pass 144/144. First browser run's six fixture failures were preserved.
+- Broader class-scoped management outside assessments still needs a full permission
+  matrix review. No historical import or correction UI is claimed complete.
+- SQL remains in supabase/pending; active ledger/recovery contract stays 006–060.
+  UI must not deploy before migration acceptance. No live changes or deployment.
+- Full evidence/limitations: CLASS_ADMIN_ASSESSMENT_CHECKPOINT.md.
+
+## Combined-update preparation — 18 October 2026
+
+- User requested remaining preparation now and one combined deployment later;
+  deployment is held. Existing Calvin JS-0103 and Aikido-only scope preserved.
+- Production Resend SMTP TLS/AUTH accepted (235), with no envelope or mail sent.
+- Mux read-only identity verifies production environment/org and Video-only
+  read/write permissions; asset-list GET succeeded. Signing-key management 401
+  reflects missing System scope, not an invalid Video token. No scope expanded.
+- Local RSA check passes; provider key pairing, actual signed playback and email
+  delivery still require live acceptance. Failed/partial probe evidence retained.
+- 108 offline guard tests pass (17 workspace setup/token + 91 repository release
+  guards); corrected probe syntax passes. No repeat live probe claimed.
+- Production dependencies: zero reported vulnerabilities. Full audit policy passes
+  under existing dev-only exception, expires 2026-10-19T11:09:49Z; no extension.
+- Existing class SELECT RLS hides disabled classes; no application patch needed.
+- HEAD 00c42c4 unchanged; no deployment, commit/push, database changes, messages or
+  assets created this turn. Staging, backups and unrelated changes preserved.
+- Consolidated pending launch sequence and receipt references:
+  staging-readiness/PRODUCTION_COMBINED_UPDATE_20261018.md in the task workspace.
+
+## Aikido-only production setup applied — 18 October 2026
+
+- User approved Aikido-only launch; other four classes configured but disabled.
+- Production nzoratpwvhhxfdyilkrp now has 5 classes (only Aikido enabled), 4
+  Aikido dojos, 9 grades and 15 tiers. Class logos use existing static PNG paths.
+- No fees or staging revenue-sharing configuration copied; dojo sharing is
+  explicitly disabled/zero. No memberships, test records or Excel rows imported.
+- Seven local seed guards passed. Production rollback rehearsal passed, followed
+  by independent complete zero-residue reconciliation across 78 relations.
+- Applied at 2026-10-18T05:21:04Z; independent READ ONLY exact-setup, unrelated
+  baseline and repository security verification passed at 05:21:14Z.
+- Calvin JS-0103/Auth account, all other public tables, full migration ledger and
+  six sequence states preserved. Fresh audit confirms versions 006–060 and empty
+  delivery queues. Auth/signup remain disabled, owner verification pending.
+- No deployment/domain switch/provider messages/staging access. Browser inventory
+  for deployment returned Local browser use is disabled in Work settings.
+- Workspace receipt: staging-readiness/PRODUCTION_AIKIDO_SETUP_20261018.md.
+
+## Production Auth reconciled; setup review pending — 18 October 2026
+
+- Production Site URL, exact /auth/confirm redirect, confirmation subject/template
+  and Resend SMTP settings are now saved. This supersedes the earlier unset state.
+- After a local verifier failure, fresh read-only reconciliation confirmed all
+  non-secret values and no unrelated Auth drift. No PATCH retry was performed.
+  The two custom-content map changes are expected boolean confirmation flags.
+- SMTP password is present but its transformed readback cannot be matched to the
+  protected key. Exact credential readback and live delivery remain unverified.
+- Signup, login providers and delivery hooks remain disabled. Fresh baseline:
+  exact 55 migration versions 006–060, empty delivery queues; Calvin JS-0103
+  remains the existing owner awaiting verified setup. No account was recreated.
+- Offline authenticated-backup review found five classes, but only four Aikido
+  dojos, nine Aikido grades and fifteen Aikido tiers. Chushin revenue sharing is
+  not confirmed for production. No setup/test/member data was imported.
+- Asked whether initial launch should enable Aikido only or wait for all five
+  class configurations. Excel import stays deferred; no missing grades invented.
+- Passed 9 synthetic Auth-verifier checks and 38 existing release-guard tests.
+  These are not live SMTP/provider/browser acceptance. No deployment/domain switch.
+- Detailed workspace receipt: staging-readiness/PRODUCTION_AUTH_RECONCILIATION_20261018.md.
+
+## Production credentials and read-only launch audit — 18 October 2026
+
+- Existing Vercel project now has all 19 approved Production-only application
+  settings. Independently verified names/scopes and all 18 preserved release-
+  branch Preview entries. Four new public Config values privately read back and
+  matched the protected source; secret values were not printed.
+- User explicitly approved deleting the four obsolete shared public entries;
+  their defaults for other Preview branches were removed. Release-branch Preview
+  values were untouched. No Supabase keys were deleted and no deployment occurred.
+- Reconciled local production credential-directory ACL: preserved prior ACL,
+  restored owner-only access using a DACL-only operation, and passed the existing
+  safety assertion. No credential values changed. Initial Windows PowerShell
+  compile and Set-Acl privilege failures are not counted as successes.
+- Fresh production-only read-only audit of `nzoratpwvhhxfdyilkrp` confirms one
+  designated owner Auth account/profile, one JS-0103 match, and one Super Admin.
+  Owner creation was not repeated. Email verification/password setup still pending.
+- Current schema has 67 public tables, 230 routines and exactly 55 migration
+  versions 006–060. This fresh version-sequence check does not replace the prior
+  full ledger-statement/catalog/security comparisons.
+- Classes, dojos, ranks, tiers, memberships, Storage buckets and Storage objects
+  are all empty. Email and notification outboxes are empty. Signup/email/phone
+  Auth remain disabled. Production Site URL, exact confirmation redirect and SMTP
+  are not configured. No messages, data import or domain switch occurred.
+- Git HEAD remains 00c42c4; application/package files are unchanged from tested
+  staging ea004d3. Newer commits concern tests/evidence/docs. Deferred Excel and
+  offline-identity working-tree changes were preserved; no commit or push.
+- Next: configure production Auth/email and approved class/dojo/rank/logo setup;
+  then deployment, genuine owner verification and live acceptance. Provider
+  delivery, signed playback and domain/role checks are not claimed complete.
+- Workspace receipts: staging-readiness/PRODUCTION_VERCEL_CONFIGURATION_20261018.md
+  and PRODUCTION_PREFLIGHT_20261018.md. Protected live audit receipts retain the
+  exact target and timestamp; no raw secrets are in this checkpoint.
+
+## Local release recheck; provider setup deferred — 17 October 2026
+
+- At user request, skipped blocked provider credential setup and ran local checks
+  on release branch HEAD `00c42c4` plus preserved existing working-tree changes.
+- TypeScript and ESLint passed. Initial sandbox test run was blocked by Windows
+  PowerShell execution policy in synthetic credential/ACL fixtures; approved
+  unsandboxed retry passed 899/899 tests with no skips. No execution policy changed.
+- Five schema-bootstrap guard tests passed. Synthetic, localhost-only production-mode
+  build passed with 55 generated pages; static assets contain no live project refs.
+- Production npm audit found zero vulnerabilities. Full audit policy passed under
+  the existing development-only exception expiring 19 October 2026 11:09:49 UTC;
+  that advisory remains unpatched. No dependency or application code changed.
+- Owner-state correction: the workspace production scope record documents Calvin
+  `JS-0103` already created and independently verified; do not recreate the owner.
+  No fresh remote owner check was performed during this local test milestone.
+- Exposed Resend replacement deletion is user/screenshot-confirmed; its saved
+  capture stays excluded. Fresh production Resend/Mux setup and deployment remain
+  pending. No live project, provider delivery, browser, scheduler, commit/push or
+  deployment occurred. Excel import/prototypes remain deferred.
+- Detailed receipt and TAP log are under the task workspace `staging-readiness`:
+  `LOCAL_RELEASE_RECHECK_20261017.md` and `local-tests-20261017-resume.tap`.
+  These local results do not close production provider/domain/role/device gates.
+
+## Production-first setup and verified clean schema — 17 October 2026
+
+- User authorized launching the existing tested web V1 first, deferring Excel
+  import and offline-member prototypes, and supplied the real first Super Admin
+  email (retained privately). Routine launch work may proceed without repeated
+  confirmation; missing credentials/profile details must not be invented.
+- Created dedicated Free-plan Singapore production project
+  `nzoratpwvhhxfdyilkrp` (`jingwuguanseibukan-production`, `ap-southeast-1`).
+  Existing staging, retired and recovery projects were preserved.
+- Database password is Windows-DPAPI encrypted in current-user-only storage.
+  Production Supabase API keys and freshly generated worker, push, rate-limit and
+  matching VAPID secrets are stored privately; no staging credentials were reused.
+- Initial read-only inventory proved zero app tables/routines, Auth users and
+  identities, Storage buckets/objects, subscriptions/foreign servers, migration
+  schema and cron. Auth/signup remain disabled during setup.
+- Prepared schema-only bootstrap from the authenticated 006–060 backup. Five
+  selection-guard tests pass; 1,270 selected schema entries exclude business/Auth
+  rows and previous sequence values. No staging/retired project references found.
+- API rehearsal was rejected with HTTP 413; a per-statement PostgreSQL attempt
+  timed out. Independent read-only checks after each confirmed the target empty.
+  Both attempt journals were preserved. A corrected single-batch, TLS-verified
+  PostgreSQL rehearsal passed, rolled back, and was independently reconciled.
+- Installed the rehearsed clean schema and exact 55-row 006–060 migration ledger
+  in one transaction. All 15 public catalog comparisons, exact ledger content,
+  zero Auth/business-data assertions and repository database-security verifier
+  passed. A separate READ ONLY transaction independently repeated these checks
+  successfully after commit. No members, test accounts or business records copied.
+- Protected evidence root:
+  `C:\protected\jwg-database-access-6c6abd58d84f4519abfa01a016209104`.
+  Successful rehearsal receipt: `direct-rehearsal-d6082778fae142458d4ac4abd0cd00ce`;
+  committed bootstrap: `direct-rehearsal-1e49c08fca7644129356f3dca0bf8c20`;
+  independent verification: `direct-rehearsal-fecedfc25d7e44c39d52263404a07c6b`.
+- Not launched: no Vercel production deployment, domain switch, account creation,
+  Storage/config seed import, provider message, or scheduler activation occurred.
+  Production Resend sender/key and four Mux values remain unavailable; browser
+  control reported disabled. The initial account still needs real required profile
+  details/private registration. Provider, account, browser/domain and remaining
+  release gates are not claimed passed by this schema milestone.
+
+## Offline import and verified-link transaction prototypes — 16 October 2026
+
+- User decisions recorded: hold unlisted grades for correction; unknown dates
+  remain unknown; blank termination flags mean not terminated; blank membership
+  statuses remain held. Issued JS IDs remain unchanged, with no invented emails.
+- Added a pure NON-EXECUTABLE import preflight: holds ambiguous/duplicate identity,
+  unknown rank/status, invalid dates, dojo/class mismatch and privilege fields;
+  never grants verification/login, even when an email exists. 25 unit tests pass.
+- Added a non-deployable verified-link SQL transaction prototype. Requests,
+  completion and cancellation require an active mapped Super Admin. Completion
+  requires a matching confirmed/non-banned/non-deleted Auth identity, retains
+  member/history IDs, rejects merging, preserves unrelated fields and records
+  approval/completion. No provider delivery or Auth provisioning is implemented.
+- Actual synthetic PostgreSQL 17.11 tests pass, including two concurrent
+  completion connections (one success, one replay denial), cancellation/reissue,
+  revoked-admin/already-linked denial, uniqueness checks, rollback preservation
+  and earlier foundation cases. Final cluster stopped; evidence retained at
+  `C:\Users\hioec\AppData\Local\Temp\jwg-offline-identity-K2wEQm`.
+- Full local npm test passed 896/896 after retry outside the sandbox; sandbox
+  failures in existing inert credential/ACL fixtures were not counted as passes.
+  Three subsequently added dependency-review tests also pass separately. Typecheck
+  and full ESLint pass; final SQL-only amendments have their own PostgreSQL pass.
+- Added definition-bound review inventory, covering 230 public routines, 70
+  policies, 31 triggers, 98 profile/Auth constraints, 4 views and 115 runtime files.
+  All 548 entries remain unreviewed by this gate; candidate counts are NOT proof
+  of required changes, security failures or completed integration. No mechanical
+  auth.uid replacement or live schema migration generated.
+- Full offline functionality is NOT ready: complete RLS/application conversion,
+  no-duplicate signup/link provisioning, offline creation, null-safe date handling,
+  complete-baseline acceptance and source correction still remain. Active 006–060
+  chain/runtime/deployment unchanged. No live service, import, emails, push or commit.
+
+## Offline identity backfill preservation — 16 October 2026
+
+- Saved 006–060 catalog inspection found an unconditional profile UPDATE
+  normalizer. Identity backfill can therefore reformat unrelated profile fields.
+- Hardened the local-only candidate with a locked, transaction-local profile
+  baseline and exact comparison excluding only the new auth_user_id column.
+  Any original-field change aborts the entire candidate; no trigger is disabled.
+- Pinned saved-catalog SHA-256 before extracting only the already-inspected
+  normalize_profile_fields and handle_new_user definitions into synthetic PG17.
+  No source member rows, secrets or real Auth users loaded into the test cluster.
+- Passed: deliberately noncanonical fixture triggers rollback with original rows
+  and schema restored; canonical fixture backfill preserves all original fields;
+  saved signup trigger remains compatible and does not verify an unverified email;
+  previous identity/ACL/row-isolation/replay cases still pass. ESLint and diff
+  whitespace checks pass. Temporary PostgreSQL cluster stopped.
+- Receipt: `C:\Users\hioec\AppData\Local\Temp\jwg-offline-identity-3CObFY`.
+  Initial function-extraction separator failure is retained separately, not passed.
+- This tests two saved function definitions on synthetic data, NOT a complete
+  recovered-schema rehearsal or live acceptance. Offline creation stays disabled;
+  active 006–060 migration chain and application runtime remain unchanged.
+
+## Offline-member foundation — local prototype, 16 October 2026
+
+- User approved retaining members without email without online access until a
+  genuine email is supplied and verified. No source workbook copied into Git.
+- Added a non-deployable SQL candidate under `supabase/design`, outside the
+  006–060 chain: explicit Auth link, same-ID/immutable identity guard and a
+  no-argument active-member resolver. Existing runtime consumers are unchanged.
+- Fresh synthetic PostgreSQL 17.11 execution passed backfill, old signup shape,
+  offline-create denial, active/disabled/deceased/unlinked/missing caller cases,
+  existing row isolation, identity substitution/unlink/paired-rewrite denial,
+  function ACL, baseline preservation and replay rejection. Cluster stopped.
+- Test evidence: `C:\Users\hioec\AppData\Local\Temp\jwg-offline-identity-fNTgSz`.
+  Initial sandbox initdb failure and Windows pg_ctl pipe timeout were not passes;
+  the latter cluster was stopped, and file-backed control logs fixed the harness.
+- Existing focused member-ID/API-route tests passed 24/24; harness ESLint and
+  whitespace validation passed. No full application or live acceptance claim.
+- This is NOT full offline-member support or exact-baseline migration acceptance.
+  Remaining: complete RLS/consumer transition, missing-data behavior, controlled
+  account linking, import reconciliation and approved staging migration tests.
+- No live service contacted, production change, member import, invitation,
+  application deployment, commit or push in this milestone.
+
 ## Rollback preflight and dependency refresh — 16 October 2026
 
 - Read-only Vercel metadata at `2026-10-16T09:07:15.343Z` confirms staging still

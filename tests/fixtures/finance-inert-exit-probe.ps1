@@ -3,7 +3,7 @@ param([Parameter(Mandatory)][string]$ClientPath)
 $ErrorActionPreference='Stop'
 try {
  $full=[IO.Path]::GetFullPath($ClientPath)
- if([IO.Path]::GetFileName($full) -cnotin @('protected-inert.exe','baseline-inert.exe') -or
+ if([IO.Path]::GetFileName($full) -cnotin @('protected-inert.exe','baseline-inert.exe','witness-inert.exe') -or
     [IO.Path]::GetFileName([IO.Path]::GetDirectoryName($full)) -notlike 'finance-acl-test-*') { throw 'Synthetic client required' }
  foreach($process in [Diagnostics.Process]::GetProcessesByName([IO.Path]::GetFileNameWithoutExtension($full))) {
   try {

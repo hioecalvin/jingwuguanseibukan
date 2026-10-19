@@ -232,6 +232,8 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // Browser RPCs added after the destructive migration-018 reset must be
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
+    // Pending numbering-only migration: do not deploy history before acceptance.
+    "get_assessment_result_history",
     "adjust_unpaid_subscription_charge", // Applied and accepted 060 on staging.
     // Migration 059 explicitly grants these; staged UI still needs deployment acceptance.
     "quote_advance_subscription_payment",

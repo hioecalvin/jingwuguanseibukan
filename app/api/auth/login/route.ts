@@ -60,7 +60,9 @@ export async function POST(request: Request) {
     const password = body.password;
     if (!identifier || identifier.length > 254 || /[\u0000-\u001f\u007f]/.test(identifier) || !password || password.length > 1024) return deny(400);
     const isEmail = identifier.includes("@");
-    const normalized = isEmail ? identifier.toLowerCase() : identifier;
+    // Registration IDs are canonical uppercase in the database. Keep the
+    // lookup exact (not ILIKE) so user input never becomes a wildcard pattern.
+    const normalized = isEmail ? identifier.toLowerCase() : identifier.toUpperCase();
     if (!(await consumeDurableRateLimit({ bucket: "login-identifier", subject: normalized.toLowerCase(), limit: 10, windowSeconds: 600 })).allowed) return deny(429);
 
     const admin = createAdminClient();

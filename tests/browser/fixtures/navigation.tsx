@@ -9,7 +9,8 @@ const role: AppRole = requestedRole === 'admin' || requestedRole === 'super_admi
 function NavigationFixture() {
   const [activated, setActivated] = useState(false);
   return (
-  <AppShell role={role} memberName="Fixture Member" memberId="FIXTURE-001">
+  <AppShell role={role} memberName="Fixture Member" memberId="FIXTURE-001"
+    assessmentHistoryEnabled={new URLSearchParams(window.location.search).get('history') === 'enabled'}>
     {/* Exercise account-menu hit testing above positioned page content. */}
     <div className="relative z-10 min-h-64">
     <h1 className="text-2xl font-semibold">Navigation component fixture</h1>

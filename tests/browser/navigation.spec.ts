@@ -2,6 +2,20 @@ import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
 
+for (const role of ['member', 'admin', 'super_admin']) {
+  for (const enabled of [false, true]) {
+    test(`${role} history link is ${enabled ? 'explicitly enabled' : 'hidden by default'} in desktop and mobile navigation`, async ({ page }) => {
+      await page.goto(`${NAV_ORIGIN}/profile?role=${role}${enabled ? '&history=enabled' : ''}`);
+      await expect(page.getByRole('heading', { name: 'Navigation component fixture' })).toBeVisible();
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await expect(page.getByRole('navigation', { name: 'Desktop primary' }).getByRole('link', { name: 'Assessment History', exact: true })).toHaveCount(enabled ? 1 : 0);
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.getByRole('button', { name: 'Menu', exact: true }).click();
+      await expect(page.getByRole('navigation', { name: 'Mobile primary' }).getByRole('link', { name: 'Assessment History', exact: true })).toHaveCount(enabled ? 1 : 0);
+    });
+  }
+}
+
 test('shared shell skip link moves keyboard focus to content', async ({ page, browserName }, testInfo) => {
   await page.goto(`${NAV_ORIGIN}/profile`);
   await expect(page.getByRole('heading', { name: 'Navigation component fixture' })).toBeVisible();

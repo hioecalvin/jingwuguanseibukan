@@ -29,6 +29,7 @@ export function smokeEnvironment(inherited = process.env) {
       NODE_EXTRA_CA_CERTS: tls.ca,
     } : {}),
     BROWSER_SMOKE_MODE: 'isolated-local',
+    ASSESSMENT_HISTORY_ENABLED: 'false',
     NODE_ENV: 'production', NEXT_TELEMETRY_DISABLED: '1',
     NEXT_PUBLIC_SITE_URL: APP_ORIGIN,
     NEXT_PUBLIC_SUPABASE_URL: MOCK_BACKEND_ORIGIN,
@@ -50,6 +51,7 @@ export function assertSmokeEnvironment(env = process.env) {
     throw new Error('Refusing modified TLS verification or unapproved Node trust input.');
   }
   if (env.BROWSER_SMOKE_MODE !== 'isolated-local' ||
+      env.ASSESSMENT_HISTORY_ENABLED !== 'false' ||
       env.NEXT_PUBLIC_SITE_URL !== APP_ORIGIN ||
       env.NEXT_PUBLIC_SUPABASE_URL !== MOCK_BACKEND_ORIGIN ||
       env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY !== MOCK_PUBLIC_KEY ||

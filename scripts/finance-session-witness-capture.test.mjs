@@ -5,7 +5,8 @@ import {readFile,writeFile,mkdtemp,rm,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {spawnSync} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
+import {setTimeout as delay} from 'node:timers/promises';
 import {buildFinanceSessionWitnessSql} from './finance-session-witness.mjs';
 import {verifyFinanceSessionWitnessCapture} from './finance-session-witness-capture.mjs';
 const hash=x=>createHash('sha256').update(x).digest('hex');
@@ -30,8 +31,37 @@ async function setup(t,mode='ok'){
 async function assertStopped(root,count){
   const pids=(await readFile(path.join(root,'started.txt'),'utf8')).trim().split('\n').map(Number);
   assert.equal(pids.length,count);
-  for(const pid of pids)assert.throws(()=>process.kill(pid,0),{code:'ESRCH'},'Every inert child must exit');
+  assert.ok(pids.every(pid=>Number.isInteger(pid)&&pid>0));
+  // PIDs can be recycled by unrelated concurrent tests. Verify the exact unique
+  // fixture executable instead; the capture still requires its own handles exited.
+  const probe=run(file('../tests/fixtures/finance-inert-exit-probe.ps1'),['-ClientPath',path.join(root,'witness-inert.exe')]);
+  assert.equal(probe.status,0,probe.stderr);assert.equal(probe.stdout,'EXACT_INERT_CLIENT_EXITED');
 }
+
+test('witness exit probe rejects its live child but ignores another fixture path',{skip:!windows},async t=>{
+  const {root}=await setup(t),unrelated=await setup(t);
+  const clientPath=path.join(root,'witness-inert.exe');
+  const child=spawn(clientPath,['-X','-w','-qAt','-v','ON_ERROR_STOP=1','-v','VERBOSITY=terse',
+    '-h','aws-0-ap-southeast-2.pooler.supabase.com','-p','5432','-U','postgres.eomubndonbetszdbhsrj','-d','postgres'],{
+    windowsHide:true,stdio:['pipe','ignore','ignore'],env:{SystemRoot:process.env.SystemRoot,WINDIR:process.env.SystemRoot,
+      PGPASSWORD:'SYNTHETIC-NOT-A-LIVE-PASSWORD',PGSSLMODE:'verify-full',PGOPTIONS:'-c default_transaction_read_only=on'}});
+  // This compiled fixture contains no networking and waits for stdin indefinitely.
+  const closed=new Promise(resolve=>{child.once('error',resolve);child.once('close',resolve);});
+  try{
+    await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});
+    let ready=false;
+    for(let attempt=0;attempt<100;attempt++){
+      try{await stat(path.join(root,'started.txt'));ready=true;break;}catch(error){if(error.code!=='ENOENT')throw error;}
+      await delay(20);
+    }
+    assert.equal(ready,true,'Inert witness must report startup');
+    const live=run(file('../tests/fixtures/finance-inert-exit-probe.ps1'),['-ClientPath',clientPath]);
+    assert.equal(live.status,1);assert.equal(live.stderr,'INERT_EXIT_NOT_VERIFIED');
+    const other=run(file('../tests/fixtures/finance-inert-exit-probe.ps1'),['-ClientPath',path.join(unrelated.root,'witness-inert.exe')]);
+    assert.equal(other.status,0,other.stderr);assert.equal(other.stdout,'EXACT_INERT_CLIENT_EXITED');
+  }finally{if(child.exitCode===null)child.kill();await closed;}
+  await assertStopped(root,1);
+});
 function envelope(){
   const nonce='a'.repeat(32),stamp=new Date().toISOString();
   const primary={nonce,capturedAt:stamp,database:'postgres',sessionUser:'postgres',address:'192.0.2.1',port:5432,

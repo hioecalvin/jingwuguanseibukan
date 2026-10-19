@@ -73,6 +73,34 @@ test("exact JS ID preserves zeros and uses Auth email; response reveals only suc
   assert.equal(result.headers.get("cache-control"), "no-store");
 });
 
+test("JS ID login uses canonical uppercase without changing passwords or role checks", async () => {
+  for (const identifier of ["SuperAdmin", "superadmin", "SUPERADMIN", " SuperAdmin ", "js-0103"]) {
+    const h = harness();
+    assert.equal((await h.POST(request({ identifier, password: " Mixed Password " }))).status, 200);
+    assert.equal(h.calls.queries[0].value, identifier.trim().toUpperCase());
+    assert.equal(h.calls.queries[0].column, "registration_number");
+    assert.equal(h.calls.passwords[0].password, " Mixed Password ");
+    assert.equal(h.calls.limits[2].subject, identifier.trim().toLowerCase());
+    assert.equal(h.calls.queries[1].columns, "id,account_status,date_of_passing");
+  }
+});
+
+test("SuperAdmin identifier cannot bypass confirmation or disabled/deceased account checks", async () => {
+  for (const config of [{ user: { email_confirmed_at: null } }, { profile: { account_status: "disabled" } }, { profile: { date_of_passing: "2026-01-01" } }]) {
+    const h = harness(config);
+    assert.equal((await h.POST(request({ identifier: "SuperAdmin", password: "pass" }))).status, 401);
+    assert.equal(h.calls.cookies.length, 0);
+    assert.equal(h.calls.revoked, 1);
+  }
+});
+
+test("ID wildcard characters remain literal exact-match values", async () => {
+  const h = harness({ matches: [] });
+  assert.equal((await h.POST(request({ identifier: "super%_", password: "pass" }))).status, 401);
+  assert.equal(h.calls.queries[0].value, "SUPER%_");
+  assert.equal(h.calls.passwords.length, 0);
+});
+
 test("email login normalizes email and allows active pending profile without memberships", async () => {
   const h = harness();
   assert.equal((await h.POST(request({ identifier: " Person@Example.test ", password: "pass" }))).status, 200);
