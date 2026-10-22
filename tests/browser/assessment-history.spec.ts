@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
+import { installRequestGate, releaseRequestGate } from './request-gate';
 for(const scenario of ['throw-once','error-once']){
  test(`history recovers from ${scenario} without leaking errors or losing the filter`,async({page})=>{
   await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=${scenario}`);
@@ -17,8 +18,10 @@ test('empty history is distinct from a failed request',async({page})=>{
  await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
 });
 test('history refresh is disabled until the request finishes',async({page})=>{
+ await installRequestGate(page,'assessment-history');
  await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=slow`);
  await expect(page.getByRole('button',{name:'Loading…',exact:true})).toBeDisabled();
+ await releaseRequestGate(page,'assessment-history');
  await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
 });
 test('history keeps fail and pass separate with unique numbers and expandable details',async({page})=>{

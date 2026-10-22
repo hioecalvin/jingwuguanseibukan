@@ -14,6 +14,33 @@ test('interactive writes flush explicitly while draining both bounded operations
   assert.ok(source.indexOf('FlushAsync')>source.indexOf('$write.GetAwaiter().GetResult()'));
   assert.doesNotMatch(source,/\.Close\(|\.Kill\(|ProcessStartInfo|PGPASSWORD|Invoke-FinanceProtectedPoolerProcess/);
 });
+
+test('completed pipe reads drain in bounded fair batches and retain output limits',
+  {skip:process.platform!=='win32',timeout:15000},()=>{
+  const root=mkdtempSync(path.join(tmpdir(),'jwg-channel-batch-'));
+  const script=path.join(root,'probe.ps1');
+  const quote=s=>"'"+s.replaceAll("'","''")+"'";
+  writeFileSync(script,`$ErrorActionPreference='Stop'
+. ${quote(channel)}
+$first=New-FinanceWitnessChannel ([IO.StringReader]::new(('x'*50000))) 1048576
+$second=New-FinanceWitnessChannel ([IO.StringReader]::new('stderr-marker'))
+Update-FinanceWitnessChannels @($first,$second)
+if($first.Text.Length -ne 16384 -or $first.Ended){throw 'Batch bound violated'}
+if($second.Text.ToString() -ne 'stderr-marker' -or -not $second.Ended){throw 'Second channel starved'}
+for($i=0;$i -lt 3;$i++){Update-FinanceWitnessChannels @($first,$second)}
+if($first.Text.Length -ne 50000 -or -not $first.Ended){throw 'EOF/data mismatch'}
+$limited=New-FinanceWitnessChannel ([IO.StringReader]::new(('x'*1024))) 1000
+$rejected=$false
+try{Update-FinanceWitnessChannels @($limited)}
+catch{if($_.Exception.Message -ne 'Bounded witness output exceeded'){throw};$rejected=$true}
+if(-not $rejected -or $limited.Text.Length -ne 0){throw 'Output limit was bypassed'}
+'BOUNDED_FAIR_DRAIN_VERIFIED'
+`);
+  const r=spawnSync('C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe',
+    ['-NoProfile','-NonInteractive','-File',script],{encoding:'utf8',windowsHide:true,timeout:12000});
+  assert.equal(r.status,0,r.stderr||r.error?.message);
+  assert.match(r.stdout,/BOUNDED_FAIR_DRAIN_VERIFIED/);
+});
 test('Windows interactive small/large writes reach an inert child without EOF or pipe deadlock',
   {skip:process.platform!=='win32',timeout:45000},()=>{
   const root=mkdtempSync(path.join(tmpdir(),'jwg-interactive-input-'));

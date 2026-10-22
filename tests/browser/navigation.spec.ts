@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from './fixtures';
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
+import { installRequestGate, releaseRequestGate } from './request-gate';
 
 for (const role of ['member', 'admin', 'super_admin']) {
   for (const enabled of [false, true]) {
@@ -60,6 +61,7 @@ test('mobile modal contains focus, closes with Escape and restores focus', async
 
 for (const role of ['member', 'admin', 'super_admin']) {
   test(`${role} mobile sign out stays visible on a short screen and reports failures`, async ({ page }) => {
+    await installRequestGate(page, 'sign-out');
     await page.setViewportSize({ width: 390, height: 568 });
     await page.goto(`${NAV_ORIGIN}/profile?role=${role}`);
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
@@ -69,6 +71,7 @@ for (const role of ['member', 'admin', 'super_admin']) {
     expect((await signOut.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await signOut.click();
     await expect(dialog.getByRole('button', { name: 'Signing out...', exact: true })).toBeDisabled();
+    await releaseRequestGate(page, 'sign-out');
     await expect(dialog.getByRole('alert')).toHaveText('Unable to sign out. Please try again.');
     await expect(signOut).toBeEnabled();
     await expect(signOut).toBeInViewport({ ratio: 1 });
@@ -116,6 +119,7 @@ test('reduced-motion preference removes long transitions', async ({ page }) => {
 });
 
 test('account disclosure supports keyboard dismissal and shows sign-out failure without claiming success', async ({ page }) => {
+  await installRequestGate(page, 'sign-out');
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(`${NAV_ORIGIN}/profile`);
   const trigger = page.getByRole('button', { name: 'Account menu', exact: true });
@@ -129,6 +133,7 @@ test('account disclosure supports keyboard dismissal and shows sign-out failure 
   await trigger.press('Enter');
   await menu.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(menu.getByRole('button', { name: 'Signing out...', exact: true })).toBeDisabled();
+  await releaseRequestGate(page, 'sign-out');
   await expect(menu.getByRole('alert')).toHaveText('Unable to sign out. Please try again.');
   await expect(menu.getByRole('button', { name: 'Sign out', exact: true })).toBeEnabled();
   await expect(page).toHaveURL(`${NAV_ORIGIN}/profile`);

@@ -1,5 +1,30 @@
 # Jingwuguan Seibukan production progress
 
+## Reconciled release fixes — 22 October 2026
+
+- [x] Recover 923/923 unit, lint/typecheck and 486 Chromium/WebKit passes.
+- [x] Diagnose all 81 local Firefox failures as host launch errors, not app results.
+- [x] Recheck eight focused regressions; retain timeouts and all browser assertions.
+- [ ] Commit scoped fixes and obtain fresh exact-commit remote CI acceptance.
+- [ ] Finish exact-schema 061, hosted acceptance, owner setup and public cutover.
+- No production/account/domain changes are implied by these test results.
+
+## Production CI follow-up — 20 October 2026
+
+- [x] Push 45566d4 only to production release branch; preserve staging branch.
+- [x] Ready production candidate dpl_6R1hrJfnBCf54Eh4UWHsL8LXEPR9; 11/11 host probes.
+- [x] Preserve macOS CI failure (241/243); other four jobs passed.
+- [x] Replace transient fixture timers with explicit request gates; incorporate
+      independent review's bounded request-start wait without weakening assertions.
+- [ ] Complete corrected full local and exact-commit remote CI acceptance.
+- [ ] Resolve Windows interactive pipe timeout; isolated pass alone is insufficient.
+- [x] Review bounded 16-read drain; pass eight focused pipe/request-gate tests.
+- [x] Fresh read-only production 78/15/55 baseline and existing Faisal reconciliation.
+- [ ] Exact-schema 061 semantics and guarded application; history stays disabled.
+- [ ] Hosted image/provider acceptance, genuine Faisal setup and final cutover.
+- User confirms Faisal is available. Calvin unchanged; no emails, login enablement,
+  domain switch, scheduler enablement or Excel import in this follow-up.
+
 ## Production continuation — 20 October 2026
 
 - [x] Rollback-only 061 schema/backfill rehearsal and independent 78/15/55 baseline.

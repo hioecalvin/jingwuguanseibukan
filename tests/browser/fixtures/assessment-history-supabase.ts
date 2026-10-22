@@ -1,7 +1,9 @@
+import { waitForFixtureRequest } from './request-gate';
+
 export function createClient(){let calls=0;return {rpc:async(name:string)=>{
  const scenario=new URLSearchParams(window.location.search).get('scenario');
  const attempt=++calls;
- await new Promise(r=>setTimeout(r,scenario==='slow'?500:10));
+ if(scenario==='slow')await waitForFixtureRequest('assessment-history',true);
  if(scenario==='throw-once'&&attempt===1)throw new Error('Private synthetic transport failure');
  if(scenario==='error-once'&&attempt===1)return {data:null,error:new Error('Private RPC failure')};
  if(scenario==='empty')return {data:[],error:null};

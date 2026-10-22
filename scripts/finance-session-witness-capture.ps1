@@ -34,9 +34,12 @@ function New-FinanceWitnessChannel($Reader,[int]$Limit=65536){
 }
 function Update-FinanceWitnessChannels($Channels){
  foreach($channel in $Channels){
-  if(-not $channel.Ended -and $channel.Task.IsCompleted){
+  # Drain a bounded batch of completed reads before sleeping. One 1 KiB read
+  # per 10 ms poll throttles a backpressured pipe enough to consume the timeout.
+  # The bound preserves fairness for stderr and outer deadline/health checks.
+  for($drained=0;$drained -lt 16 -and -not $channel.Ended -and $channel.Task.IsCompleted;$drained++){
    $count=$channel.Task.GetAwaiter().GetResult()
-   if($count -eq 0){$channel.Ended=$true;continue}
+   if($count -eq 0){$channel.Ended=$true;break}
    if($channel.Text.Length+$count -gt $channel.Limit){throw 'Bounded witness output exceeded'}
    [void]$channel.Text.Append($channel.Buffer,0,$count)
    $channel.Task=$channel.Reader.ReadAsync($channel.Buffer,0,$channel.Buffer.Length)

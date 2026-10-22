@@ -1,5 +1,57 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Release-fix reconciliation — 22 October 2026
+
+- Recovered the completed 20 October local results: 923/923 unit tests and
+  typecheck/lint passed. Browser evidence reports 486 passed Chromium/WebKit
+  cases and 81 Firefox launch failures (`spawn UNKNOWN` on Windows), not a
+  complete all-engine pass. Exact-commit Linux Firefox/macOS CI remains required.
+- All eight focused pipe/request-gate regressions passed again on 22 October.
+  The bounded pipe drain retains existing limits and cleanup; browser gates keep
+  all original pending, recovery and accessibility assertions.
+- Only these reviewed fixes and checkpoint documentation are being prepared for
+  the production release branch. Unrelated import/design/linkage files stay out.
+- Owner setup must use the configured application origin; the protected candidate
+  URL alone cannot complete login/confirmation. The workspace handover plan keeps
+  genuine Faisal verification/password setup ahead of Calvin privilege removal.
+- Migration 061, hosted provider/image acceptance, owner handover and custom-domain
+  cutover are not completed by these local checks. Staging remains preserved.
+
+## Production candidate and CI follow-up — 20 October 2026
+
+- Follow-up pipe fix drains at most 16 already-completed reads per channel per
+  poll, preserving timeout, output bounds, EOF and cleanup checks. Independent
+  review approved it; all eight focused pipe/request-gate tests pass. The real
+  backpressure case took about 3.1 seconds. Fresh full suites are still running.
+- Commit 45566d4839e2e1d6066f767f07321b31f8c8d31e was pushed only to
+  release/production-20261020. The staging release branch was preserved.
+- Production-target deployment dpl_6R1hrJfnBCf54Eh4UWHsL8LXEPR9 is Ready at
+  https://jingwuguanseibukan-1hdmjxh96-js1-ccd7.vercel.app, created with
+  --skip-domain. All 11 anonymous host/header probes passed. No custom-domain
+  cutover or authenticated production-browser acceptance is claimed.
+- CI 39306046146 passed common checks and Linux Chromium/Firefox/WebKit, but
+  macOS WebKit failed two pending-state assertions: 241/243 passed. Evidence is
+  preserved in that run and workspace production-ci-macos-118244050539.log.
+- Test-only correction replaces 300/500 ms fixture timers with explicit request
+  gates. Independent review identified an initial-effect race; the release helper
+  now waits (bounded) for the synthetic request to start before resolving it.
+  All original disabled/recovery/accessibility assertions remain.
+- Before that final bounded-start correction, local browser tests passed 486/486,
+  lint/typecheck passed, and units passed 920/921. One unchanged Windows pipe test
+  timed out. Isolated host-permitted rerun passed 2/2 in 11.3 seconds, close to
+  its unchanged 12-second bound; this is not yet a resolved full-suite failure.
+- Read-only baseline at 2026-10-20T06:16:47Z: 78 data/15 catalog fingerprints,
+  exact 55-row 006–060 ledger. Private evidence ends 159b814a5ec844338e87194acea0f7f9.
+- Existing Faisal SUPERADMIN reconciled unchanged at 06:16:54Z: email unverified,
+  password setup required, login disabled. User confirms Faisal is available for
+  genuine setup once the verified page is ready. No message or Calvin demotion.
+- 061 remains pending/history disabled. Full workflow rollback on production is
+  unsafe as zero-residue evidence: prepared certificates use nontransactional
+  nextval. Exact-schema assessment-subsystem acceptance must precede application.
+- Staging, backups, deferred Excel and unrelated working files remain preserved.
+  Corrected exact-commit CI, hosted image/provider acceptance and genuine owner
+  setup remain open. Earlier progress entries below are historical.
+
 ## Production implementation continuation — 20 October 2026
 
 - Production 061 schema/backfill rehearsal passed inside rollback; independent
