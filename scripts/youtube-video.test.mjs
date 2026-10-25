@@ -43,9 +43,8 @@ test("embed URLs use the privacy-enhanced origin and only validated IDs", () => 
   assert.equal(youtube.getYouTubeEmbedUrl("bad/id"), null);
 });
 
-test("member and admin YouTube frames use the hardened embed contract", () => {
+test("legacy member YouTube playback uses the hardened embed contract", () => {
   for (const relativePath of [
-    "../app/admin/content/page.tsx",
     "../app/(member)/repository/[classId]/[rankId]/[tierId]/page.tsx",
   ]) {
     const source = fs.readFileSync(

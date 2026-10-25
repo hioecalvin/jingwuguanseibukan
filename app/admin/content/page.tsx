@@ -7,9 +7,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
-  extractYouTubeVideoId,
-  getYouTubeEmbedUrl,
-} from "@/lib/video/youtube";
+  isLegacyRepositoryVideo,
+  repositoryAuthoringVideo,
+} from "@/lib/video/repository-authoring";
 
 type ClassItem = {
   id: string;
@@ -64,8 +64,6 @@ export default function AdminContentPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const [videoInput, setVideoInput] = useState("");
-  const [editingVideoProvider, setEditingVideoProvider] = useState<string | null>(null);
 
   const [status, setStatus] = useState("draft");
   const [sortOrder, setSortOrder] = useState(1);
@@ -260,38 +258,12 @@ export default function AdminContentPage() {
     );
   }, [selectedRankId, tiers]);
 
-  function getVideoId() {
-    if (
-      !videoInput.trim()
-    ) {
-      return "";
-    }
-
-    return extractYouTubeVideoId(videoInput) ?? "";
-  }
-
-  const parsedVideoId =
-    getVideoId();
-
-  function getPreviewUrl() {
-    if (!parsedVideoId) {
-      return null;
-    }
-
-    return getYouTubeEmbedUrl(parsedVideoId);
-  }
-
-  const previewUrl =
-    getPreviewUrl();
-
   function resetForm() {
     setEditingId(null);
 
     setTitle("");
     setDescription("");
 
-    setVideoInput("");
-    setEditingVideoProvider(null);
 
     setStatus("draft");
     setSortOrder(1);
@@ -319,19 +291,20 @@ export default function AdminContentPage() {
       return;
     }
 
-    if (
-      editingVideoProvider !== "mux" &&
-      videoInput.trim() &&
-      !parsedVideoId
-    ) {
-      setMessage(
-        "The YouTube URL or video ID is invalid."
-      );
-
-      setMessageType(
-        "error"
-      );
-
+    const existing = editingId
+      ? content.find((item) => item.id === editingId)
+      : undefined;
+    if (editingId && !existing) {
+      setMessage("This record is no longer available. Reload before editing.");
+      setMessageType("error");
+      return;
+    }
+    let video;
+    try {
+      video = repositoryAuthoringVideo(existing);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Video editing is unavailable.");
+      setMessageType("error");
       return;
     }
 
@@ -354,17 +327,8 @@ export default function AdminContentPage() {
           content_description:
             description.trim(),
 
-          provider:
-            editingVideoProvider === "mux"
-              ? "mux"
-              : videoInput.trim()
-                ? "youtube"
-                : "",
-
-          provider_video_id:
-            editingVideoProvider === "mux"
-              ? videoInput
-              : parsedVideoId,
+          provider: video.provider,
+          provider_video_id: video.provider_video_id,
 
           content_status:
             status,
@@ -415,13 +379,8 @@ export default function AdminContentPage() {
           content_description:
             description.trim(),
 
-          provider:
-            videoInput.trim()
-              ? "youtube"
-              : "",
-
-          provider_video_id:
-            parsedVideoId,
+          provider: "",
+          provider_video_id: "",
 
           content_status:
             status,
@@ -463,6 +422,11 @@ export default function AdminContentPage() {
   function editContent(
     item: ContentItem
   ) {
+    if (isLegacyRepositoryVideo(item)) {
+      setMessage("Legacy video records are read-only. Use JS Video Uploader for new Mux videos.");
+      setMessageType("error");
+      return;
+    }
     setSelectedClassId(
       item.class_id
     );
@@ -487,13 +451,6 @@ export default function AdminContentPage() {
       item.description ?? ""
     );
 
-    setVideoInput(
-      item.video_id ?? ""
-    );
-    setEditingVideoProvider(
-      item.video_provider
-    );
-
     setStatus(
       item.status
     );
@@ -511,6 +468,11 @@ export default function AdminContentPage() {
   async function deleteContent(
     item: ContentItem
   ) {
+    if (isLegacyRepositoryVideo(item)) {
+      setMessage("Legacy video records are read-only.");
+      setMessageType("error");
+      return;
+    }
     const confirmed =
       window.confirm(
         `Delete "${item.title}"?`
@@ -914,105 +876,18 @@ export default function AdminContentPage() {
             </div>
 
 
-            {/* VIDEO */}
-
-            <div className="grid gap-4 md:grid-cols-2">
-
-              <div>
-
-                <label className="mb-2 block text-sm font-medium">
-                  Video Provider
-                </label>
-
-                <div className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white">
-                  {editingVideoProvider === "mux"
-                    ? "Mux (Signed Playback)"
-                    : "YouTube (Legacy)"}
-                </div>
-
-              </div>
-
-
-              <div>
-
-                <label className="mb-2 block text-sm font-medium">
-                  Video URL or ID
-                </label>
-
-                <input
-                  value={
-                    videoInput
-                  }
-                  onChange={(e) =>
-                    setVideoInput(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Paste an unlisted YouTube URL or video ID"
-                  disabled={editingVideoProvider === "mux"}
-                  className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-                />
-
-                {editingVideoProvider === "mux" ? (
-                  <p className="mt-2 text-xs text-neutral-400">
-                    Mux identifiers are managed by JS Video Uploader and cannot be replaced here.
-                  </p>
-                ) : videoInput.trim() && (
-
-                  <p
-                    className={`mt-2 text-xs ${
-                      parsedVideoId
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {parsedVideoId
-                      ? `Detected ID: ${parsedVideoId}`
-                      : "Could not detect a valid video ID."}
-                  </p>
-
-                )}
-
-              </div>
-
-            </div>
-
-
-            {/* VIDEO PREVIEW */}
-
-            {previewUrl && (
-
-              <div>
-
-                <p className="mb-2 text-sm font-medium">
-                  Video Preview
+            <div className="rounded-lg border border-neutral-700 bg-neutral-800 p-3">
+              <p className="text-sm font-medium">Video upload: Mux</p>
+              <p className="mt-2 text-sm text-neutral-400">
+                Use JS Video Uploader to upload videos with signed playback.
+                You can create training notes here and edit the details of an existing Mux video.
+              </p>
+              {editingId && content.find((item) => item.id === editingId)?.video_provider === "mux" && (
+                <p className="mt-2 text-xs text-neutral-400">
+                  The attached Mux video is preserved when saving these details.
                 </p>
-
-                <div className="overflow-hidden rounded-xl border border-neutral-800 bg-black">
-
-                  <div className="aspect-video">
-
-                    <iframe
-                      src={
-                        previewUrl
-                      }
-                      title="Video Preview"
-                      className="h-full w-full"
-                      loading="lazy"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            )}
-
+              )}
+            </div>
 
             {/* STATUS / SORT */}
 
@@ -1221,6 +1096,9 @@ export default function AdminContentPage() {
                       </div>
 
 
+                      {isLegacyRepositoryVideo(item) ? (
+                        <p className="text-sm text-neutral-400">Legacy video · Read-only</p>
+                      ) : (
                       <div className="flex flex-wrap items-start gap-3">
 
                         <button
@@ -1255,6 +1133,7 @@ export default function AdminContentPage() {
                         </button>
 
                       </div>
+                      )}
 
                     </div>
 
