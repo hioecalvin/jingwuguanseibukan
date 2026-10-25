@@ -4,7 +4,7 @@ import ts from 'typescript';
 
 // Execute the actual handler with explicit dependency fakes and no network or
 // inherited environment. These are handler unit tests, not Next/Supabase E2E.
-export function loadRoute(relativePath, dependencies, env = {}) {
+export function loadRoute(relativePath, dependencies, env = {}, globals = {}) {
   const filename = new URL(`../${relativePath}`, import.meta.url);
   const { outputText } = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
     fileName: filename.pathname,
@@ -21,6 +21,7 @@ export function loadRoute(relativePath, dependencies, env = {}) {
     },
     process: { env: { ...env } },
     console: { error: (...args) => logs.push(args) },
+    ...globals,
     Buffer,
     Error,
     URL,

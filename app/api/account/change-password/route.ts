@@ -441,35 +441,36 @@ export async function POST(
      * than letting the browser perform the operation.
      */
 
-    const {
-      error:
-        updatePasswordError,
-    } =
-      await authenticatedClient
-        .auth
-        .updateUser({
-          password:
-            newPassword,
-        });
-
-
-    if (
-      updatePasswordError
-    ) {
-      console.error(
-        "Supabase Auth password change error:",
-        updatePasswordError
-      );
-
-
+    // The validated bearer token does not populate this client's Auth session.
+    // updateUser() would fail locally with AuthSessionMissingError. Use the
+    // user-scoped endpoint with the same token, preserving Auth security checks.
+    const passwordResponse = await fetch(
+      new URL("/auth/v1/user", process.env.NEXT_PUBLIC_SUPABASE_URL!),
+      {
+        method: "PUT",
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: newPassword }),
+        cache: "no-store",
+        redirect: "error",
+        signal: AbortSignal.timeout(15_000),
+      },
+    );
+    const passwordResult = await passwordResponse.json().catch(() => null);
+    if (!passwordResponse.ok || passwordResult?.id !== user.id) {
       return NextResponse.json(
         {
           error:
-            updatePasswordError.message ||
-            "Unable to change password.",
+            passwordResult?.code === "same_password"
+              ? "Choose a password different from your current password."
+              : "Unable to change password. Please sign in again and retry.",
         },
         {
-          status: 400,
+          status: passwordResponse.status === 401 ? 401 : 400,
         }
       );
     }
