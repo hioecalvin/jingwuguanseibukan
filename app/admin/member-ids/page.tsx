@@ -6,13 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { filterMemberProfiles } from "@/lib/member-contact-view";
 
 type Profile = {
   id: string;
   registration_number: string | null;
   full_name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   is_super_admin: boolean;
 };
 
@@ -84,20 +85,7 @@ export default function MemberIdManagementPage() {
     loadPage();
   }, [router, supabase]);
 
-  const filteredProfiles = profiles.filter((profile) => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) return true;
-
-    return (
-      profile.full_name.toLowerCase().includes(query) ||
-      profile.email.toLowerCase().includes(query) ||
-      profile.phone.toLowerCase().includes(query) ||
-      (profile.registration_number ?? "")
-        .toLowerCase()
-        .includes(query)
-    );
-  });
+  const filteredProfiles = filterMemberProfiles(profiles, search);
 
   async function setMemberId(profile: Profile) {
     const newId = window.prompt(
@@ -269,14 +257,14 @@ export default function MemberIdManagementPage() {
                         <span className="text-neutral-500">
                           Email:
                         </span>{" "}
-                        {profile.email}
+                        {profile.email || "Not recorded"}
                       </p>
 
                       <p>
                         <span className="text-neutral-500">
                           Phone:
                         </span>{" "}
-                        {profile.phone}
+                        {profile.phone || "Not recorded"}
                       </p>
                     </div>
                   </div>

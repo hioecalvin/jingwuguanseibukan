@@ -15,17 +15,21 @@ import { createClient } from "@/lib/supabase/client";
 import { formatTrainingSessionRecency } from "@/lib/format-date";
 import ClassEnrollmentPanel from "@/components/class-enrollment-panel";
 import { imageUploadExtension } from "@/lib/image-upload";
+import {
+  createContactEditorState,
+  type ContactBaseline,
+} from "@/lib/member-contact-view";
 
 type Profile = {
   id: string;
   registration_number: string | null;
   aikikai_registration_number: string | null;
   full_name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   whatsapp_number: string | null;
   instagram_username: string | null;
-  date_of_birth: string;
+  date_of_birth: string | null;
   avatar_url: string | null;
 };
 
@@ -199,10 +203,7 @@ export default function ProfilePage() {
     useState("");
 
   const [contactBaseline, setContactBaseline] =
-    useState<{
-      phone: string;
-      instagramUsername: string | null;
-    } | null>(null);
+    useState<ContactBaseline | null>(null);
 
   const [newEmailInput, setNewEmailInput] =
     useState("");
@@ -816,30 +817,25 @@ export default function ProfilePage() {
         .single();
 
       if (!refreshError && currentContact) {
-        const refreshedPhone =
-          currentContact.phone ?? "";
-        const refreshedInstagram =
-          currentContact.instagram_username ?? null;
+        const refreshed = createContactEditorState({
+          phone: currentContact.phone ?? null,
+          instagram_username:
+            currentContact.instagram_username ?? null,
+        });
 
         setProfile((current) =>
           current
             ? {
                 ...current,
-                phone: refreshedPhone,
+                phone: refreshed.baseline.phone,
                 instagram_username:
-                  refreshedInstagram,
+                  refreshed.baseline.instagramUsername,
               }
             : current
         );
-        setPhoneInput(refreshedPhone);
-        setInstagramInput(
-          refreshedInstagram ?? ""
-        );
-        setContactBaseline({
-          phone: refreshedPhone,
-          instagramUsername:
-            refreshedInstagram,
-        });
+        setPhoneInput(refreshed.phoneInput);
+        setInstagramInput(refreshed.instagramInput);
+        setContactBaseline(refreshed.baseline);
       }
 
       setMessage(
@@ -1676,17 +1672,10 @@ export default function ProfilePage() {
                   return;
                 }
 
-                setPhoneInput(
-                  profile.phone ?? ""
-                );
-                setInstagramInput(
-                  profile.instagram_username ?? ""
-                );
-                setContactBaseline({
-                  phone: profile.phone ?? "",
-                  instagramUsername:
-                    profile.instagram_username,
-                });
+                const editor = createContactEditorState(profile);
+                setPhoneInput(editor.phoneInput);
+                setInstagramInput(editor.instagramInput);
+                setContactBaseline(editor.baseline);
                 setEditingContact(true);
               }}
               className="self-start rounded-lg border border-sky-800 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-950/40"

@@ -76,8 +76,8 @@ export type OfficialRecord = {
 
     full_name: string;
 
-    email: string;
-    phone: string;
+    email: string | null;
+    phone: string | null;
 
     whatsapp_number: string | null;
 

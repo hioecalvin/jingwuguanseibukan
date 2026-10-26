@@ -152,6 +152,24 @@ export function renderEmail(
      * ===============================================
      */
 
+    case "member_claim_setup": {
+      const url = safeWebUrl(data.setup_url);
+      return layout("Set your member account password", `
+        <p>Your Dojo Admin has approved your member identity claim.</p>
+        ${url ? `<p><a href="${url}">Set your password</a></p>` : "<p>Please contact your Dojo Admin for a new setup link.</p>"}
+        <p>This link expires after 24 hours. Choose your own password; never send it to an administrator.</p>
+        <p>If you did not request access, contact your Dojo Admin.</p>
+      `);
+    }
+    case "member_claim_verification": {
+      const url = safeWebUrl(data.verification_url);
+      return layout("Verify your member claim", `
+        <p>Confirm this email address to request access to your existing Jingwuguan Seibukan member record.</p>
+        ${url ? `<p><a href="${url}">Verify email address</a></p>` : "<p>Please request a new verification link.</p>"}
+        <p>This link expires after 24 hours. Your Dojo Admin must check and approve your identity before you can access the account.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      `);
+    }
     case "member_approved": {
 
       const memberName =

@@ -52,8 +52,8 @@ type Member = {
 
   full_name: string;
 
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
 
   whatsapp_number: string | null;
   avatar_url: string | null;
@@ -5406,7 +5406,7 @@ export default function MemberManagementPage() {
                                 Email:
                               </span>{" "}
                               {
-                                member.email
+                                member.email || "Not recorded"
                               }
                             </p>
 
@@ -5416,7 +5416,7 @@ export default function MemberManagementPage() {
                                 Phone:
                               </span>{" "}
                               {
-                                member.phone
+                                member.phone || "Not recorded"
                               }
                             </p>
 
