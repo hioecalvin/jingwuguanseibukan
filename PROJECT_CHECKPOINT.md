@@ -1,5 +1,306 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Offline-member web release and verified import package — 26 October 2026
+
+- Production web commit `7160987098f5814fc63110660cdb504ac9428c53` is live on apex only; deployment `dpl_Dt3uPtvbDr6wx6SrUvGUqnbk3s3P`, assigned at 11:06:34Z. Nullable contact/date views are deployed. Claim request/verification/setup pages explicitly show unavailable; no claim forms enabled. Existing accounts were not changed.
+- Security dependency update: Next.js 16.4.3 and resolved Zod 4.6.7. Dependency-policy audit passed; production dependency audit reported zero vulnerabilities. All 981 tests/typecheck passed after updates; isolated production build passed, followed by the real Vercel build. Targeted ESLint passed. Fourteen local mocked Chromium claim checks passed (not live Auth acceptance).
+- Fourteen candidate and fourteen public anonymous GET checks passed; correct production Supabase binding/security headers verified. Apex/www/MX/SPF/DKIM checks passed. Independently confirmed www deployment and staging deployment unchanged. No Git push or staging deployment.
+- Packaged candidate 064 combines nine reviewed design artifacts, pins baseline routine/policy definitions, and requires explicit owner installation context. SHA-256 `6d0b8c3b2a870a4505a6ebb4d7e03869df4d185c5be4d6ba71922d5e24470597`. Complete exported-schema run passed: 527 harness checks, 33 behavioral assertions, 20 conversion assertions, plus claim email-change acceptance; all rollback table hashes preserved, cluster stopped.
+- Production source mapping is now bound inside SQL to the original typed source row and private approved class/dojo/grade mappings. Known ranks must have explicit categories; the old fallback for a known rank with missing category is removed. User-approved mapping: Chuyi–Chusan lower, Zhongyi–Gaosan higher, all Kungfu Kids lower; Kyu lower/Dan higher; Unranked null grade/lower.
+- Actual protected Excel payload rehearsal passed locally: 229 preserved source rows; 147 eligible members/179 memberships; 80 held, one existing owner, one orphan excluded. Adds one inactive class, six class-specific dojos, 39 grades. Missing dates/contacts stay null; no financial or assessment history invented. Existing financial configuration retained; new dojo sharing disabled/unconfigured. No login accounts or messages created.
+- Actual-payload rollback restored every original table hash; independent committed-local checks confirmed all unrelated tables unchanged, role/privacy boundaries, grade categories, and repeat conversion without duplicates. Protected local cluster stopped. Latest evidence: `C:/protected/jwg-database-access-6c6abd58d84f4519abfa01a016209104/jwg-database-access-755d95767d984eff87c5da497c2b28e2/result.json`. Do not print source payloads or copy them to Git.
+- Fresh encrypted production backup completed at 10:47:03Z; round-trip/archive checks passed, prior backups preserved. Private evidence directory ends `6fc73ee59fc34d7680fab3eed85622b2`. Schema/data archive includes public/Auth/Storage metadata/ledger/private intake; it is not a new full managed-service restore proof.
+- Fresh read-only production capture at 11:06:41Z confirms exact 006–063 ledger (58), two profiles/two Auth users/two Super Admins, zero memberships, intact 229-row private intake. Original profiles, Auth users, configuration and source hashes match prepared baseline. **064 and the operational import have NOT been applied.**
+- Automatic approval review rejected a production rollback rehearsal as production mutation during testing. It then rejected replacing that prerequisite in the apply runner. Both actions were blocked before execution; the original runner remains unchanged. A specific user approval request is pending to substitute the successful protected local rehearsal while retaining backup/hash/ledger/owner guards, then apply once. Do not replay the rejected rehearsal or fabricate its receipt.
+- Hosted Auth custom-UUID provisioning and end-to-end live account claims remain unverified. Keep `MEMBER_CLAIMS_ENABLED` off. No passwords reset, messages sent, bulk invitations, owner demotions, or held-row imports in this milestone.
+- Workspace evidence: `staging-readiness/production-offline-7160987`, `offline-apex-public-probes-20261026.json`, `operational-payload-local-result.json`, and `production-offline-members-preflight.json`.
+
+## Guarded operational member conversion — 26 October 2026
+
+- Added local owner-only conversion candidate `supabase/design/offline_member_conversion.sql` and pure reviewed-source mapper `scripts/offline-conversion-plan.mjs`. No public RPC or service-role conversion grant. New private conversion receipts bind source hash/row/hash, reviewed values, created member UUID and membership UUIDs.
+- Converter accepts only eligible pending source rows with matching byte hashes. Held, orphan and existing-owner rows are rejected. Existing JS IDs/emails are never merged or overwritten; JS-0103 and SUPERADMIN cannot be recreated. Serializes conversions and Auth/profile writes; each profile, reservation, membership set and receipt is atomic.
+- Repeating the same plan returns its original member UUID and preserves later edits; changing a previously converted plan fails. Original private intake bytes and dispositions remain unchanged. The receipt preserves historical inactive-since values without inventing transition dates.
+- Unknown contacts/birth/join dates stay null; Unranked maps to null grade. Membership role is user; stored rank classification is retained where available, otherwise the existing mudansha default applies. No tier/title, assessment, certificate, charge or payment history is invented. Existing name/contact normalization is applied while retaining original reviewed values in the private receipt.
+- 35 preflight/conversion-mapping tests passed. Complete-schema local run passed: 525 harness/catalog assertions, 33 claim/access assertions, 18 conversion assertions, and explicit rejection probes for wrong hashes, changed plans, held/owner/orphan rows, collisions, privileges, duplicate memberships, ambiguous Break status, cross-class dojos and service-role access.
+- Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-full-schema-kqfa2A/result.json`. Full public/Auth/Storage/private table counts and hashes matched after each acceptance rollback; cluster stopped. All test records synthetic. Node syntax checks passed.
+- NOT a live import or deployment. Latest verified source review remains 147 eligible new members / 179 memberships, 80 held, one preserved owner and one orphan. The actual eligible-source conversion payload and missing all-class/dojo/rank definitions still need preparation and reconciliation before use. Hosted Auth acceptance, migration packaging and deployment remain pending. No live provider/database contacted, no emails sent, no production/staging/account changes. Keep MEMBER_CLAIMS_ENABLED off; production stays web 8f7bad0 / DB006–063.
+
+## Complete-schema claim integration — 26 October 2026
+
+- Extracted only schema definitions from the existing verified encrypted pre-063 backup into a new protected directory. Temporary plaintext archive removed; original encrypted backup/key/evidence preserved. No database or provider contacted, no real member rows restored.
+- Restored the complete exported public/Auth/Storage/private schema in fresh loopback PostgreSQL 17 clusters, then applied exact 063 locally. All 234 public routine definitions and all public policy definitions match the later captured 006–063 catalog before candidate installation.
+- Combined the same-ID foundation, claim scope/provisioning/API/setup, access and delivery candidates against that complete schema. Installation rollback preserved original profiles; committed backfill preserved every existing profile field.
+- Added local `supabase/design/offline_catalog_consumers.sql`: event recipient filters require a linked Auth identity; the worker cancels unclaimed-recipient queued mail and excludes recovered stale messages; explicit nonmember verification/setup emails remain eligible. Super Admin/Dojo Admin helpers require the same-ID link. Existing function grants are retained by CREATE OR REPLACE.
+- Acceptance passed with actual captured RLS, signup/confirmation triggers, event and email-worker functions: scoped Admin privacy, offline access denial, unknown-date preservation, status/audit history without email, event recipient counts, stale email exclusion, private-schema/API denial, verified-email claim approval and same-UUID setup without duplicate enrollment or elevated roles.
+- Final evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-full-schema-2dz5vl/result.json`: 523 harness/catalog assertions, 33 behavioral assertions plus two explicit privilege-denial probes. Independent complete-table counts/hashes match before/after acceptance rollback across public/Auth/Storage/ledger/private schemas. Cluster stopped. Earlier successful runs retained.
+- Scope limitation: managed Auth/Storage HTTP services were not restored; object owners map to local postgres while original grants/policies remain. This proves SQL integration, not hosted Auth custom-UUID provisioning, actual email delivery or live browser acceptance.
+- Still pending: reviewed production migration packaging, hosted Auth acceptance, conversion of eligible private source rows into operational members/class configuration, final browser/deployment checks. Keep MEMBER_CLAIMS_ENABLED off. Production remains web 8f7bad0 / DB006–063; no account changes, live messages, member import, commit/push or deployment in this milestone.
+
+## Claim password setup — 26 October 2026
+
+- Added disabled-by-default `/claim-id/setup` form and `/api/member-claims/setup` handler. Password stays in the request to the Auth provider; it is not stored in claim rows, email templates, logs or browser persistence. Form clears after confirmed completion; setup requires explicit submission.
+- Approval now atomically generates a database-only setup token and queues a 24-hour setup email to the previously verified address. Admin does not choose or receive the token. A queue failure rolls back approval. Existing request site origin is captured server-side.
+- Added local service-only setup preparation/completion SQL: verifies private setup hash/expiry, rechecks approver scope, binds only the original UUID/email, prevents concurrent attempts, permits retry only after the old provisioning ticket expires with no Auth account, and reconciles already-completed claims without changing a password. No account deletion/reset recovery path exists.
+- Setup handler performs exactly one Supabase createUser call with database-returned UUID/email and a server-generated ticket. It reconciles persisted claim/profile/Auth confirmation after normal or ambiguous provider response. Already-complete claims skip account creation. New accounts receive no requested roles or membership metadata from the browser.
+- 114 isolated PostgreSQL checks passed, cluster stopped: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-claim-provision-NfulA0/result.json`. Covers setup ACLs/expiry/approval revocation, atomic email/approval rollback, wait/retry, confirmation and completion without repeated Auth writes.
+- 18 handler tests, 2 installed-Supabase-SDK serialization/reconciliation tests using intercepted fetch, and 6 email-rendering tests passed. Typecheck and targeted ESLint passed. Fourteen local Chromium component checks passed with mocked APIs, zero external requests/page errors: `C:/Users/hioec/AppData/Local/Temp/jwg-claim-ui-iM7wWk/result.json`.
+- Isolated Next production build passed from source copy with fictional providers/no source env files: task workspace `work/claim-ui-build-5WoO0y/result.json`. Only subsequent source change is the approval success message clarifying that setup email is queued; handler suite rerun passed.
+- NOT live verification: actual hosted Auth custom-UUID creation is still unproven; full catalog/RLS/event/worker integration and conversion are pending. No migration number allocated, provider contacted, live email sent, account changed, source imported, commit/push or deployment. Production remains 006–063 / web 8f7bad0. Keep MEMBER_CLAIMS_ENABLED off until complete migration and acceptance.
+
+## Member-claim request and review UI — 26 October 2026
+
+- Added local `/claim-id` request and `/claim-id/verify` screens, `/admin/member-claims` scoped review screen, and POST handlers for request, verification and review. New server-only `MEMBER_CLAIMS_ENABLED` switch defaults off; no environment variables or navigation links enabled in production.
+- Requests use origin/content-type checks, bounded 4 KiB bodies, durable global/client/member/email limits, server-generated 256-bit proof, generic eligibility response and a timing floor. Verification proof travels in an email URL fragment, is removed from browser history and is submitted only by explicit button action. No tokens/provider errors are logged.
+- Added local SQL API wrappers: service-only request/verification, JWT-derived authenticated review actor, Dojo-scoped claim list, private state, expired request replacement and atomic verification-email queuing. Admin cannot provide a different actor through the browser. Approval does not yet provision an account or send setup mail.
+- Added escaped HTTPS verification email template. Imported member target is not used as an ordinary notification recipient; this is an explicitly requested verification to the proposed email.
+- Verification: 92 local SQL integration checks (including API ACLs, review scope and queue failure rollback), 12 executable handler tests, 4 email-rendering tests, typecheck and targeted ESLint passed. SQL evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-claim-provision-Zmsdes/result.json` (stopped).
+- 10 Chromium component-interaction checks passed at mobile viewport with mocked APIs, no page errors and zero external requests. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-claim-ui-iyAQbu/result.json`. This is component acceptance, not full Next/Supabase browser acceptance.
+- Isolated Next production build passed with claim flag enabled only in a copied source tree, fictional provider values and no source .env files. Evidence: task workspace `work/claim-ui-build-el2uRr/result.json` and `build.log`. Source production/staging environments unchanged. Earlier failed harness attempts retained.
+- Remaining: claimant password/setup completion and actual Auth provider verification, full database integration/migration, real-data conversion, full role/browser acceptance, then deployment activation. No production/staging mutation, mail sent, member import, commit/push or deployment in this milestone.
+
+## Verified-email claim transaction integration — 26 October 2026
+
+- Added local owner-only claim request, hashed email proof, approval, cancellation/reissue, short-lived provisioning ticket and audit history. Assigned Dojo Admin scope is rechecked at approval, provisioning preparation and Auth insertion. All browser-facing RPCs remain closed.
+- Integrated the captured production signup/confirmation routines with the same-ID foundation. A valid private ticket is consumed before Auth INSERT and removed from stored app metadata. The existing profile is attached in the same transaction; immutable identity/history/contact fields are preserved except the verified claim email and Auth link. User-editable signup metadata cannot authorize binding or create duplicate imported enrollments.
+- Added a default-deny foundation hook. Only an exact private transaction-bound claim permits a link; late profile/identity rewrites fail. Ordinary signup retains the captured original behavior.
+- 74 PostgreSQL 17 checks passed: wrong/expired/replayed proof and tickets; out-of-dojo/revoked approval; private ACLs; zero-row-residue failures; late trigger rewrites; unchanged member/history; post-INSERT email confirmation; ordinary signup; cancel/reissue; concurrent duplicate Auth creation and cancellation. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-claim-provision-oLLPY0/result.json`. Cluster stopped.
+- Foundation recheck without claim integration passed with captured normalizers: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-same-id-DhCvUn/result.json`, stopped. Earlier 64-check first pass retained as `jwg-offline-claim-provision-E053SP`.
+- LOCAL ONLY: files remain design candidates. No production migration, imported operational members, Auth account changes, messages, provider calls or deployment. Real Supabase Admin API provisioning, protected server endpoints/rate limits, complete schema/RLS integration, UI, import conversion and live acceptance remain unverified. Production stays 006–063 / web 8f7bad0.
+
+## Offline member integration — 26 October 2026
+
+Local work only; no member import or deployment in this milestone.
+
+- Reconciled the prototype with the captured production catalog: ordinary membership role is `user`, not `member`. Offline profiles cannot acquire `is_grading_assessor`, Super Admin, Dojo Admin, or Repository Uploader privileges. Late-trigger mutation and consumed-reservation rollback cases pass.
+- Same-ID foundation passed isolated PostgreSQL 17 acceptance with the exact captured production normalization functions/triggers. Missing contacts and dates remain null, current profiles/history stay intact, and concurrent reservation/appointment boundaries pass. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-same-id-yZvrBU/result.json`.
+- Dojo Admin claim scope: 40 local checks passed, including assessor rejection and concurrent revocation. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-claim-scope-GjFRMx/result.json`.
+- Reproduced actual legacy email failure for null-email offline members, and unwanted queuing for source-email offline members. Local queue/bridge guards now allow status/history changes with no email, preserve online/nonmember queuing and dedupe, and preserve online failure atomicity. Candidate rollback and acceptance zero residue pass. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-delivery-9YGqRT/result.json`.
+- Active-user helper/own-profile RLS candidate: 17 local checks passed. Matching UUID alone no longer permits unbound profile self-access; active online access and service-role caller rules remain. Full policy set not yet tested. Evidence: `C:/Users/hioec/AppData/Local/Temp/jwg-offline-app-access-wHFOeO/result.json`.
+- All successful local clusters stopped. Catalog SHA-256: `560b93a53c3097262c5d8f4338d4b625be497c48a71ac9ecaff0c0acbc7f97b2`. Test records synthetic; no providers/messages. Failed sandbox init attempts retained; no remote writes.
+- Still required: integrate exact schema, event recipient counts/worker eligibility, remaining RLS/role helpers, controlled verified-email claim provisioning, all-class conversion, browser acceptance and reviewed migration. No new migration number allocated. Production remains 006–063 and web 8f7bad0; 229 private source rows are not yet operational member profiles.
+
+## Mux-only production release — 26 October 2026
+
+- Live commit8f7bad0; production deployment dpl_BRb8vYJHofX16j1qSNrA4kpgGm2K. Web YouTube authoring removed; Mux remains the upload provider. Existing legacy playback retained.
+-063 applied only to production nzoratpwvhhxfdyilkrp; exact006–063 ledger58rows verified. Blocks new/replaced YouTube videos and publication of legacy drafts. Zero content/account changes;229private Excel intake rows preserved.
+-49localSQL checks, typecheck/targetedlint,10authoring+legacy tests,11candidate and11publichost probes passed. Fresh encryptedbackup verified. Apex switched;www/staging/emailDNS unchanged. NoGitpush.
+-Browser access disabled; authenticated editor visual check/liveMuxupload not performed. Report: task-workspace staging-readiness/PRODUCTION_MUX_ONLY_20261026.md. Current ledger verifier production063-release-contract.mjs supersedes062 for new captures.
+-Parallel nullable-contact UI fixes and same-ID offline-member/DojoAdmin claim candidates remain local, NOT deployed.23contact tests,37claimscope checks and syntheticfoundation suite passed; fullcatalog/provisioning integration still pending. Source intake is not operational member import.
+
+## Production private Excel intake062 — 25 October 2026
+
+- User requested all Excel data in production and chose assigned Dojo Admin approval after email verification for JS-ID claims.
+-062 committed only to production nzoratpwvhhxfdyilkrp. One restricted source batch,229 typed rows (228members+1orphan), per-row and aggregate hashes verified.147pending conversion,80held,1Calvin source preserved,1orphan held. No active profiles, Auth accounts, memberships or invitations created; these rows do NOT appear in member lists yet.
+-Private schema denied to anon/authenticated/service_role, forced RLS/no policies. Local PG17 tests, rollback-contained source rehearsal/independent zero residue, persisted ACL/data check and complete006–062 ledger verification passed. Ledger now57rows; staging stays006–060. Original source, owners and backups preserved.
+-Production062 contract is staging-readiness/production062-release-contract.mjs; do not keep expecting061 as current production head. Historical061 evidence unchanged. Future backups must include member_import_private.
+-Remaining: operational offline profiles/null dates; all-class setup; source corrections; verified email/Dojo Admin claim approval/provisioning and security/UI tests. Existing identity prototypes are not deployable.
+-Evidence: task-workspace staging-readiness/PRODUCTION_MEMBER_SOURCE_INTAKE_20261025.md. Private package protected under jwg-database-access-82a5e6b186d84967a10133e5c6a22d17.
+
+## Excel import resumed for all classes — 25 October 2026
+
+- User explicitly requested importing the existing Excel and selected all classes. Prior Excel deferral/Aikido-only import scope superseded. Preserve current Calvin/Faisal accounts and existing source decisions; no bulk messages authorized.
+- Source hash unchanged: 228 identified records; Calvin row115 excluded from creation. Of227 others,147 pass workbook-source checks (179 memberships),80 held; orphan row238 held separately. Source eligibility is NOT live import readiness. 195 missing emails/phones and34 missing DOBs retained; no joining dates invented.
+- Fresh read-only production catalog verifies original Auth/profile FK and mandatory contact/DOB/joining fields still present. Ledger56;2profiles/2Auth users. Offline identity prototypes remain undeployed and cannot yet store these source records correctly.
+- Prepared all-six-class configuration plan: reuse5classes/4dojos/8grades; add inactiveBagua and6class-specific dojo entries; preserve existing extra ranks. Unranked/tier semantics and complete offline identity integration remain to review. No financial settings inferred.
+-28 import/review tests pass. Source workbook unmodified, raw rows not copied into Git. No database writes/accounts/invitations/import claimed. Evidence: task-workspace staging-readiness/MEMBER_IMPORT_RESUMED_20261025.md and member-import-{preflight,class-plan,held-rows}-20261025 artifacts.
+
+## Production password-change session fix — 25 October 2026
+
+- Fixed the reported `Auth session missing` error in commit a53db9ca3a68fc6f4eb8179de1bf05123c96f011. The server had validated the user's bearer token but then called SDK updateUser on a client without a stored session. The route now calls the user-scoped Auth PUT /user with the same validated token and publishable key; no admin password bypass.
+- Existing password validation, user/profile checks, durable rate limiting and completion RPC remain. Provider errors are sanitized; mismatched user responses cannot mark completion. Regression test reproduces the original error using the actual installed Supabase SDK.
+- Type-check and targeted ESLint passed. All 935 offline tests passed outside the Windows sandbox with process-only script execution allowance. The initial sandbox run failed Windows child-process/ACL/junction fixtures; that evidence is preserved.
+- Exact three-file commit archived independently of unrelated edits. Vercel Production build dpl_CUABu5SVgLxnQX9aD6Zga1xPdhb9 is READY. Candidate 11 host probes passed; assigned only jingwuguanseibukan.com at 08:20:55Z (19:20 Sydney). WWW and staging deployment identities independently unchanged. No Git push or staging deployment.
+- All 11 public host probes and DNS/email-record checks passed after release; unauthenticated password-change POST returns 401. Actual Calvin password completion still requires him to sign in and choose his password. No additional account mutation or email in the fix/deployment step; the latest emailed temporary password is unchanged.
+- Evidence in task-workspace staging-readiness: production-password-fix-a53db9c/, password-fix-apex-public-probes-20261025.json, password-fix-tests-unrestricted-20261025.log. Source archive SHA256 8BF76B223B55A309B08530A8FDFC051F7F7BCA02AF22F0E5E31A85AADFCB5AB5. Existing c484291 deployment retained for rollback.
+
+## Independent launch checks — 25 October 2026
+
+- Non-sending production provider preflight passed: SMTP TLS/authentication 235,
+  Mux exact production identity/video-only token permissions and local RSA signing.
+  No additional emails or assets; live playback remains unverified.
+- All ten public PNG logos return 200, match accepted c484291 source SHA-256s and
+  measure 1024 × 1024. No uploads required. Five database class-logo paths match
+  these local assets; only Aikido enabled as agreed.
+- Read-only operational capture: avatars/class-logos public image buckets, 5 MiB
+  limits, JPEG/PNG/WebP restrictions; Storage RLS plus six authenticated policies.
+  Storage object count and email/notification outbox counts are zero; ledger count56.
+  Metadata inventory is not authenticated upload/role acceptance.
+- No pg_cron, pg_net or plpgsql_check installed. External production scheduler and
+  monitoring still need evidence; no scheduler, monitor or delivery was triggered.
+- Completed interrupted offline Mux timeout hardening; 16 simulated tests pass.
+  Intent claims, injected sleeps and journals have bounded waits; live helper stays
+  blocked. This does not establish real provider cancellation or signed playback.
+- DEPLOYMENT_RUNBOOK.md now has a current superseding section; historical instructions
+  retained. Windows installer remains deferred for web-only scope, not a web blocker.
+- Evidence: task-workspace staging-readiness/PRODUCTION_OTHER_CHECKS_20261025.md.
+
+## Approved owner email setup initiated — 25 October 2026
+
+- User specifically approved production email login and one Faisal confirmation.
+  At 03:20:22Z only external_email_enabled changed false to true. Independent full
+  Auth comparator passed; signup, other providers/hooks, URLs and SMTP unchanged.
+- One existing-user signup-confirmation request for Faisal accepted at 03:21:24Z;
+  independent Auth read showed confirmation_sent_at advanced. Delivery/inbox access
+  and completed setup are not yet confirmed. Durable one-attempt journal blocks replay.
+- Read-only postflight at 03:21:37Z passed; comparison with the pre-setup v2 snapshot
+  found every captured baseline field unchanged, including account/membership/outbox
+  counts and unrelated/outgoing fingerprints. Calvin remains Super Admin.
+- Faisal must open his confirmation email, choose his password using the same browser
+  session, then sign out and freshly sign in. No password or privilege was changed by
+  the agent. Owner setup and conditional Calvin demotion remain pending.
+- Protected evidence includes production-owner-email-enabled-20261025.json and
+  faisal-confirmation-result-20261025.json; workspace postflight receipt is
+  staging-readiness/production-owner-confirmation-postflight-20261025.json.
+
+## Fresh production owner baseline — 25 October 2026
+
+- Read-only schema v2 before-setup check passed at 03:16:13Z; approved Faisal
+  identity/email bindings match and Calvin remains Super Admin. TLS and ROLLBACK
+  completion verified; private baseline preserved for future drift comparisons.
+- Fresh Auth readback passed canonical configuration/isolation checks. Email login
+  is still disabled, SMTP credential present, delivery not tested. No account changes.
+- Nine local owner tests and 42 Auth-transition cases passed. Specific approval
+  requested to enable only production email login and send one Faisal confirmation,
+  because the latest routing instruction explicitly preserved login settings.
+- Human verification/password/fresh login still required before Calvin demotion.
+  Evidence: task workspace staging-readiness/PRODUCTION_OWNER_BASELINE_V2_20261025.md.
+
+## Apex production routing verified — 25 October 2026
+
+- Explicitly approved two apex A records added: 216.198.79.1 and 64.29.17.1,
+  DNS only / Auto. Public DNS and Vercel both confirm the correct addresses.
+- Removed only the apex-to-www redirect. Apex now independently resolves in
+  Vercel to accepted production deployment dpl_3NAc31bybMSUfbygGGRDetQzNDHQ
+  (c4842913161026c897b43791443ac8f8eb94e1dd). Successful readback at 03:13:08Z.
+- All 11 anonymous public HTTPS GET probes passed at 03:13:19Z, without
+  deployment-protection bypass or redirect following. Login CSP binds production
+  nzoratpwvhhxfdyilkrp; protected pages redirect to login; GET-only worker/send
+  endpoints return 405; assets and required security headers pass.
+- WWW and staging deployment IDs unchanged. Public WWW, MX, SPF and DKIM match
+  the original DNS baseline. No login settings, accounts or delivery changed.
+- First alias attempt failed during certificate issuance before DNS existed;
+  retained its evidence. After DNS validation, one journalled retry succeeded.
+- Browser access became disabled after the second Save; public DNS independently
+  proves both records. A new post-change dashboard screenshot was unavailable.
+- This completes domain routing, not authenticated launch acceptance. Faisal's
+  verification/password/fresh login, conditional Calvin demotion, production Mux
+  acceptance and previously documented operational holds remain pending.
+- Evidence in task workspace staging-readiness: production-apex-routing-after-dns-20261025,
+  production-apex-public-probes-20261025.json and PRODUCTION_APEX_CONNECTED_20261025.md.
+  Earlier routing hold below is historical and superseded by this entry.
+
+## Production routing / owner setup hold — 24 October 2026
+
+- Separate production 061 release contract matched the full 56-row ledger;
+  existing staging/historical contracts unchanged. Owner before-setup read-only
+  assertions passed; Faisal still needs verification/password setup, Calvin retains
+  Super Admin. Fourteen local owner/ledger tests and 42 Auth-transition tests passed.
+- Apex-only alias assignment was not acknowledged. Independent mapping remains
+  old deployment dpl_HyTjK8Bodp3YPWjPxCGS6ssjtmWu, not accepted c484291 candidate.
+  Preserved attempt/result; no automatic retry. Exact CLI rejection reason was not
+  captured. Vercel reports no apex A/CNAME and misconfigured DNS; public DNS has
+  no apex A/AAAA answer. Apex also retains a 308 redirect to old WWW routing.
+- Cloudflare requires user sign-in before exact-zone reconciliation. Auth remains
+  disabled; no setup email, account mutation, staging change or launch claimed.
+- Mux acceptance helper failed independent execution-readiness review and remains
+  offline only. Details: staging-readiness/PRODUCTION_ROUTING_AND_OWNER_HOLD_20261024.md
+  in the task workspace. Deferred Excel and existing backups preserved.
+- Follow-up offline hardening: 11 simulated Mux cases pass, live default blocked;
+  no provider calls. Auth comparator also passes against a saved protected snapshot
+  using a memory-only proposed change. Total focused tests: 67 passing. Secure Mux
+  executor, authentic isolation/fixture evidence and live acceptance remain pending.
+
+## Production migration 061 installed — 24 October 2026, 21:27 Sydney
+
+- Exact SHA 28e16904ed31c1ad29191bcf23fe4390a46b6038e7ffc2ce22582d021e9ca37b
+  applied only to nzoratpwvhhxfdyilkrp after encrypted backup and complete installer
+  rollback rehearsal. Commit acknowledged; independent persisted checks passed,
+  followed by another successful read-only verification at 10:27:22Z.
+- Exact ledger 006–061 (56 entries), original 78 data fingerprints and unrelated
+  catalog projection preserved. Intended function/source/trigger/RLS/ACL checks
+  passed; no assessment fixtures created. Staging remains unchanged at 006–060.
+- Assessment numbering now uses YYYY-XXXX across classes. History UI remains
+  disabled. No account, provider, domain, scheduler or Excel-import changes.
+- Fifteen package/executor tests and actual local PG17 installer-shape/ACL rejection
+  plus workflow/concurrency checks passed. Local cluster stopped. Final independent
+  package review was interrupted by agent usage limits; no review pass invented.
+- Production lacks plpgsql_check; read-only capability check confirmed it. Database
+  lint was not run and no extension installed. Old LaunchAudit/recovery contract
+  remains 060-only; reconcile a production-specific 061 contract before activation.
+- Private apply evidence ends 338c99bf60b140ad8e08d9b708fdce2a; separate fresh
+  verifier ends a9aa57e0011d44c69115b6517c710000. Workspace report:
+  staging-readiness/PRODUCTION_061_INSTALLED_20261024.md. Earlier pending-061
+  statements below are historical. No full production-launch claim.
+
+## Production pre-migration backup completed — 24 October 2026
+
+- After the scoped approval question and user's continuation, one encrypted,
+  read-only production backup completed at 06:31:38Z. TLS verified; captured public,
+  auth, storage metadata and supabase_migrations (1,473,860 bytes). Archive listing
+  and authenticated encryption/decryption/hash verification passed.
+- Ciphertext evidence directory ends 03c6ec8452e644a0931280970de301dc; separate
+  DPAPI-protected key directory ends 438fd79d36994827b6f6ebdb524b385b under the
+  existing C:\protected production root. No secret or member data printed.
+- Only this new temporary plaintext dump was removed after encryption verification;
+  existing backups preserved. This is not proof of a full managed restore and does
+  not include hosted Storage object bytes or provider configuration.
+- Independent local readback verified owner-only ACLs, exact ciphertext hash,
+  six backup files plus one separate key file, and no remaining plaintext dump.
+- Backup approval hold below is superseded. Migration 061 remains unapplied;
+  no account, domain, provider, staging or scheduler changes were made.
+
+## Assessment acceptance and production rehearsal — 24 October 2026
+
+- Checkout remains c484291. Nonempty historical backfill, multi-candidate ordering
+  and independent concurrent allocation passed in fresh local PG17 subsystem runs.
+  Independent review confirmed evidence; this is not full managed restore or live
+  authenticated concurrent acceptance. Earlier failures remain preserved.
+- Fixed local teardown reporting to fail on stop/status exceptions. Six regression
+  tests and corrected run-14ZrHL pass; its cluster is independently stopped.
+- Fresh production read-only capture passed exact 006–060 provenance, 78 data and
+  15 catalog fingerprints. Rollback-only 061 schema/backfill rehearsal passed at
+  05:37:14Z, followed by independent exact original-baseline reconciliation.
+  Private evidence ends 1db17c524e1b46eca1b0765f6184338c. Migration NOT installed.
+- Prepared encrypted read-only production backup script; four static guards,
+  PowerShell parsing and synthetic AES-GCM roundtrip pass. Execution was rejected
+  before process creation: explicit approval is required to export sensitive
+  production data to protected local storage. No new backup was created; do not
+  bypass this restriction. Existing backups and staging remain unchanged.
+- Pending: approved backup, reviewed committed 061 application/persisted checks,
+  hosted media/provider acceptance, genuine Faisal setup and fresh login before
+  Calvin demotion, controlled domain cutover and final operational verification.
+- No accounts recreated, messages sent, history enabled, public domain changed or
+  Excel imported. Full sanitized continuation report is in the task workspace at
+  staging-readiness/PRODUCTION_CONTINUATION_20261024.md. No new commit/deployment.
+
+## Verified candidate milestone — 22 October 2026
+
+- Commit c4842913161026c897b43791443ac8f8eb94e1dd contains only the 11 reviewed
+  regression/documentation files. Pushed only release/production-20261020;
+  remote staging branch remains d5785c6813424b1289e2d4478d05a2fcf051bd17.
+- Exact-commit CI 39727772249 succeeded: common checks, Chromium/Linux,
+  Firefox/Linux, WebKit/Linux and WebKit/macOS. Earlier failed runs preserved.
+- Clean-archive production candidate dpl_3NAc31bybMSUfbygGGRDetQzNDHQ is Ready:
+  https://jingwuguanseibukan-owda8u16d-js1-ccd7.vercel.app. Deployed with
+  --skip-domain. All 11 anonymous host/security probes passed at 05:59:53Z.
+  Custom domain independently still resolves to dpl_HyTjK8Bodp3YPWjPxCGS6ssjtmWu.
+  Vercel lists its default project alias on the new candidate; no claim that all
+  platform aliases remained unchanged. No application login was attempted.
+- Fresh read-only production audit: 55 ledger versions 006–060, zero memberships,
+  empty delivery queues, two empty image buckets; email Auth/signup still disabled.
+  Resend SMTP authentication and production Mux identity/local signing passed;
+  this does not establish actual delivery, provider key matching or playback.
+- Offline exact saved-schema assessment subsystem run-MUqJyS passed existing
+  workflow/reassessment/history/year/cross-class/overflow tests plus internal ACL,
+  other-dojo, missing-JWT and disabled/deceased boundaries. PG17 cluster stopped.
+  This is a synthetic subsystem, not full managed restore or live acceptance.
+  Earlier seed/quoting/identity setup failures are preserved, not erased.
+- 061 remains unapplied. Nonempty historical backfill, multi-candidate ordering
+  and concurrency evidence remain incomplete. Hosted image/provider acceptance,
+  genuine Faisal setup, conditional Calvin demotion and public cutover remain open.
+- Excel import, staging and backups preserved. No emails, real media assets,
+  account changes, scheduler enablement or public custom-domain switch performed.
+
 ## Release-fix reconciliation — 22 October 2026
 
 - Recovered the completed 20 October local results: 923/923 unit tests and

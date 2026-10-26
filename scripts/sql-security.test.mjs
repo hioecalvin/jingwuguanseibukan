@@ -232,6 +232,9 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // Browser RPCs added after the destructive migration-018 reset must be
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
+    // Claim routes remain disabled until the explicit 064 ACLs are applied.
+    "get_reviewable_member_claims",
+    "review_member_claim",
     // Pending numbering-only migration: do not deploy history before acceptance.
     "get_assessment_result_history",
     "adjust_unpaid_subscription_charge", // Applied and accepted 060 on staging.
@@ -274,6 +277,10 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_settlement_eligible_payment_details",
   ]);
   const serverOnly = new Set([
+    "request_member_claim",
+    "verify_member_claim",
+    "prepare_member_claim_setup",
+    "member_claim_setup_complete",
     "activate_repository_video_asset",
     "claim_next_email",
     "consume_api_rate_limit",
