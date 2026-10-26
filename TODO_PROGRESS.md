@@ -1,5 +1,14 @@
 # Jingwuguan Seibukan production progress
 
+## Production import completed — 27 October 2026, 05:18 Sydney
+
+- DONE: explicit local-rehearsal substitution approved; fresh encrypted backup verified; migration 064 and eligible import committed once to production only. Exact ledger 006–064 (59).
+- DONE: 147 imported profiles / 179 memberships; two original profiles and Auth accounts preserved. No login creation, password changes, messages, financial history or held-row conversion.
+- DONE: independent source/receipt reconciliation, unchanged-table hashes, RPC/private-schema ACLs, RLS and unclaimed-identity denial. All checks passed. Post-import public login/disabled-claim checks passed.
+- KEEP: 80 source rows and one orphan held for correction; original owner excluded. Do not replay the import or the one-attempt runner.
+- NEXT: verify hosted member-claim provisioning and password login before enabling claims. Current web 7160987; claims disabled. Full evidence in the newest PROJECT_CHECKPOINT.md section.
+- The prior approval hold below is resolved; its original rejection/evidence history remains preserved.
+
 ## Production checkpoint — 26 October 2026, 11:07Z
 
 - DONE: web commit 7160987 deployed to apex; Next.js security patch and nullable-member views. Claim forms remain disabled. Fourteen candidate and fourteen public host checks passed; staging/www/email DNS unchanged.
