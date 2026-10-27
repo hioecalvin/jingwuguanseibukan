@@ -1,5 +1,14 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Parallel claim-readiness review — 27 October 2026
+
+- Fixed a local claim-review usability defect: the shared client limit previously blocked an Admin after roughly five decisions plus list refreshes. Review traffic now has a separate 120-request/10-minute client allowance; the existing 60-request/10-minute authenticated actor limit and 100/minute global limit remain. Public claim request/verification/setup client allowances remain 10/10 minutes.
+- Twenty-two focused route/installed-SDK tests, typecheck and targeted ESLint passed. New behavioral tests exercise ten sequential decisions with refreshes, preserve the actor limit, and verify public client limits remain enforced. This fix is local, not deployed; production remains web 7160987 and claims off.
+- Independent review found no approval-scope bypass. The hosted Auth custom-UUID/identity/password sequence still needs actual managed-service acceptance; local mocks and SQL trigger tests do not prove it.
+- Read-only inspection confirmed disposable lzkpibxeqxytewbwgklj is INACTIVE, Auth disabled, SMTP absent, and has no functions or secrets. It was not resumed or modified. A concrete disposable-only synthetic-account test plan is prepared; user approval is pending for resume/schema preparation/temporary password Auth/test/cleanup and pause. No messages or real-member copies are planned.
+- Held-source review confirms 80 people with 87 overlapping reason occurrences: 72 grade corrections, 11 missing statuses across 10 people, two identity-review entries, one missing enrollment, one class/dojo mismatch; a separate orphan adds one review entry. No holds cleared or source data altered.
+- Workspace artifacts: staging-readiness/HOSTED_CLAIM_ACCEPTANCE_PLAN_20261027.md and HELD_MEMBER_CORRECTIONS_20261027.md. Production import completed below remains unchanged: 147 imported members/179 memberships, exact006–064.
+
 ## Production operational import completed — 27 October 2026
 
 - User explicitly approved replacing the production rollback-test prerequisite with the successful protected local rehearsal, retaining fresh backup/hash/ledger/account-preservation guards and applying once. No production rollback test was run and no rehearsal receipt was fabricated.

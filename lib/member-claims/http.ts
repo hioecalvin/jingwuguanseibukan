@@ -19,9 +19,12 @@ export async function claimRequestGuard(request: Request, action: string) {
   }
   const forwarded = process.env.VERCEL === "1" ? request.headers.get("x-vercel-forwarded-for")?.trim() : undefined;
   const client = forwarded && isIP(forwarded) ? forwarded : "shared";
+  // Reviews send a list refresh after every decision and may share a dojo IP.
+  // The authenticated route additionally enforces its per-actor allowance.
+  const clientLimit = action === "review" ? 120 : 10;
   for (const options of [
     { bucket: `claim-${action}-global`, subject: "all", limit: 100, windowSeconds: 60 },
-    { bucket: `claim-${action}-client`, subject: client, limit: 10, windowSeconds: 600 },
+    { bucket: `claim-${action}-client`, subject: client, limit: clientLimit, windowSeconds: 600 },
   ]) if (!(await consumeDurableRateLimit(options)).allowed) return reply({ error: "Please wait before trying again." }, 429);
   return null;
 }

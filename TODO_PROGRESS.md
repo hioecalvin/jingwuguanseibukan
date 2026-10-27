@@ -1,5 +1,13 @@
 # Jingwuguan Seibukan production progress
 
+## Claim activation preparation — 27 October 2026
+
+- DONE locally: fix Admin review client throttling while preserving per-actor/global/public limits; 22 focused tests, typecheck and lint passed. Not deployed; claims remain off.
+- DONE: parallel approval-scope review and aggregate held-source correction checklist. No held records changed.
+- DONE read-only: disposable lzkpibxeqxytewbwgklj remains paused and isolated.
+- PENDING explicit approval: resume that disposable only, prepare schema, exercise one synthetic hosted identity without emails, preserve recovery evidence, disable Auth and pause afterward. Prepared plan is in staging-readiness/HOSTED_CLAIM_ACCEPTANCE_PLAN_20261027.md.
+- Production import already completed; do not rerun migration064 or the member converter.
+
 ## Production import completed — 27 October 2026, 05:18 Sydney
 
 - DONE: explicit local-rehearsal substitution approved; fresh encrypted backup verified; migration 064 and eligible import committed once to production only. Exact ledger 006–064 (59).

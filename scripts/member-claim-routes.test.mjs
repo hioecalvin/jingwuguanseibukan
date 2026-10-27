@@ -8,7 +8,10 @@ const proof='a'.repeat(64);
 function setup(options={}){
  const state={enabled:true, rpcError:null, rpcData:null, completed:true, createThrows:false, user:{id:'actor-from-session',email_confirmed_at:'2026-01-01'},denyRate:null, ...options};
  const calls=[];
- const rate=async value=>{calls.push({rate:value}); if(state.rateThrows)throw Error('private-rate-detail'); return {allowed:state.denyRate!==value.bucket};};
+ const rateCounts=new Map();
+ const rate=async value=>{calls.push({rate:value}); if(state.rateThrows)throw Error('private-rate-detail');
+  const key=value.bucket+'|'+value.subject;const count=(rateCounts.get(key)??0)+1;rateCounts.set(key,count);
+  return {allowed:state.denyRate!==value.bucket&&(!state.enforceRates||count<=value.limit)};};
  const http=loadRoute('lib/member-claims/http.ts',{
   'server-only':{},'node:net':{isIP},'next/server':nextServer,
   '@/lib/application-origin':{configuredApplicationOrigin:()=>origin},
@@ -85,6 +88,29 @@ test('review list and rejection call their scoped database contracts',async()=>{
  const s=setup({rpcData:[]});const list=await s.request('review',{action:'list'});assert.deepEqual(await list.json(),{claims:[]});
  assert.equal((await s.request('review',{action:'reject',claimId})).status,200);
  assert.equal(s.calls.filter(c=>c.rpc).at(-1).args.approve,false);
+});
+
+test('admin can review a queue with refreshes while the actor limit still applies',async()=>{
+ const s=setup({rpcData:[],enforceRates:true});
+ assert.equal((await s.request('review',{action:'list'})).status,200);
+ for(let i=0;i<10;i++){
+  assert.equal((await s.request('review',{action:i%2?'reject':'approve',claimId})).status,200);
+  assert.equal((await s.request('review',{action:'list'})).status,200);
+ }
+ for(let i=21;i<60;i++)assert.equal((await s.request('review',{action:'list'})).status,200);
+ const before=s.calls.filter(c=>c.rpc).length;
+ assert.equal((await s.request('review',{action:'approve',claimId})).status,429);
+ assert.equal(s.calls.filter(c=>c.rpc).length,before);
+ assert.equal(s.calls.at(-1).rate.bucket,'claim-review-actor');
+});
+
+test('admin allowance does not relax public claim client limits',async()=>{
+ const s=setup({enforceRates:true});
+ for(let i=0;i<10;i++)assert.equal((await s.request('verify',{claimId:`11111111-1111-4111-8111-${String(i).padStart(12,'0')}`,token:proof})).status,200);
+ const before=s.calls.filter(c=>c.rpc).length;
+ assert.equal((await s.request('verify',{claimId,token:proof})).status,429);
+ assert.equal(s.calls.filter(c=>c.rpc).length,before);
+ assert.equal(s.calls.at(-1).rate.bucket,'claim-verify-client');
 });
 
 const setupBody={claimId,token:proof,password:'LongSyntheticPassword123'};
