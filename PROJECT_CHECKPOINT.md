@@ -1,5 +1,15 @@
 # Jingwuguan Seibukan Super App — verified checkpoint
 
+## Hosted claim compatibility verified — 28 October 2026
+
+- Pending migration 065 fixes managed Auth ordering: the provider inserts the account before applying trusted app metadata. Private transaction-bound proof now requires the verified ticket, linked identity, confirmed email and password hash before commit. Migration 064 remains unchanged.
+- Exact packaged065 local rehearsal passed 536 harness checks plus 33 claim/access and 20 conversion assertions; rollback hashes, missing/wrong proof, user metadata, early constraints, missing identity/confirmation/password, replay and ordinary signup checked. Local cluster stopped. Evidence: Temp/jwg-offline-full-schema-y9zVhN/result.json.
+- Disposable lzkpibxeqxytewbwgklj received065 only after encrypted backup and exact ledger guards. Hosted creation using the original synthetic member UUID, password login, member-ID resolution login, refresh, logout and rejection of revoked refresh all passed. Stored metadata/JWT contain no ticket. The server-only provider response was sanitized; application setup discards it.
+- Independent read-only reconciliation verified seven expected audit entries including provisioning_retry; all belong to the synthetic claim and approved actor. All 57 original recovered accounts/records preserved, no active synthetic sessions, transient proof empty, two synthetic outbox entries remain unsent. The first failed attempt and original backups remain preserved.
+- Disposable independently confirmed INACTIVE with Auth disabled and SMTP absent at 2026-10-28T06:16:34Z. No real data copied and no emails sent. The initial overall runner failed on an audit-count expectation of six; subsequent independent reconciliation proves the actual seven-event retry sequence. Original failed receipts were not rewritten.
+- Production preflight: exact006-064/59,149profiles,179memberships,two original Auth accounts. Production065 and new web deployment are still pending. Claims remain off until rollout/delivery prerequisites are verified. No account resets, owner demotions, held-source releases or scheduler enablement in this milestone.
+- Release checks:983/983 tests and typecheck passed; targeted lint passed; current dependency policy passes without an exception, production dependency audit zero vulnerabilities. Expired development exception was not renewed.
+
 ## Parallel claim-readiness review — 27 October 2026
 
 - Fixed a local claim-review usability defect: the shared client limit previously blocked an Admin after roughly five decisions plus list refreshes. Review traffic now has a separate 120-request/10-minute client allowance; the existing 60-request/10-minute authenticated actor limit and 100/minute global limit remain. Public claim request/verification/setup client allowances remain 10/10 minutes.
