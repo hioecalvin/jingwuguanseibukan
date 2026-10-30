@@ -190,6 +190,29 @@ function authorised(
 }
 
 
+export async function GET(
+  request: NextRequest,
+) {
+  if (!authorised(request)) {
+    return NextResponse.json(
+      { error: "Not authorised." },
+      {
+        status: 401,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
+  }
+
+  return NextResponse.json(
+    { code: "authentication_only" },
+    {
+      status: 200,
+      headers: { "Cache-Control": "no-store" },
+    },
+  );
+}
+
+
 export async function POST(
   request: NextRequest
 ) {
