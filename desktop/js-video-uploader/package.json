@@ -27,7 +27,7 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "electron": "44.4.5",
+    "electron": "44.10.0",
     "electron-builder": "26.15.3",
     "esbuild": "0.28.2",
     "playwright-core": "1.62.1",
