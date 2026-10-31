@@ -1,6 +1,7 @@
 "use client";
 
 import CompactRecord from "@/components/compact-record";
+import { adminAccessErrorMessage } from "@/lib/admin-access-error";
 import MemberSubscriptionHistory from "@/components/member-subscription-history";
 
 import {
@@ -1604,9 +1605,7 @@ export default function MemberManagementPage() {
       error: unknown
     ) {
       showError(
-        error instanceof Error
-          ? error.message
-          : "Failed to load Administrative Access."
+        adminAccessErrorMessage(error, "Failed to load Administrative Access.")
       );
     } finally {
       setLoadingAdminAccess(
@@ -1765,9 +1764,7 @@ export default function MemberManagementPage() {
       error: unknown
     ) {
       showError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update Administrative Access."
+        adminAccessErrorMessage(error, "Failed to update Administrative Access.")
       );
     } finally {
       setAdminAccessProcessing(
