@@ -247,6 +247,7 @@ test("unknown fields and sensitive values are rejected without echoing them", ()
 });
 
 test("protected input enforcement rejects repository files and review digest mode is operator-usable", async t => {
+  t.mock.timers.enable({ apis: ["Date"], now: NOW });
   const repositoryResult = await readProtectedRollbackManifest(resolve("release/rollback-evidence.template.json"));
   assert.match(repositoryResult.error, /outside the repository/);
 
