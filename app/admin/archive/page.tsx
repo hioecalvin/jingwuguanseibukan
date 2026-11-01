@@ -1,6 +1,9 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -200,6 +203,90 @@ export default function DocumentArchivePage() {
       DocumentArchiveRow | null
     >(null);
 
+  const loadArchive = useCallback(async (
+    showRefreshing =
+      true
+  ) => {
+    if (
+      showRefreshing
+    ) {
+      setRefreshing(
+        true
+      );
+    }
+
+
+    setMessage("");
+    setMessageType("");
+
+
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "search_document_archive",
+        {
+          search_text:
+            null,
+
+          requested_document_group:
+            "all",
+
+          requested_document_type:
+            "all",
+
+          requested_class_id:
+            null,
+
+          requested_dojo_id:
+            null,
+
+          requested_status:
+            "all",
+
+          requested_date_from:
+            null,
+
+          requested_date_to:
+            null,
+        }
+      );
+
+
+    if (
+      error
+    ) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      setRefreshing(
+        false
+      );
+
+      return;
+    }
+
+
+    setDocuments(
+      (
+        data ??
+        []
+      ) as
+        DocumentArchiveRow[]
+    );
+
+
+    setRefreshing(
+      false
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -281,94 +368,10 @@ export default function DocumentArchivePage() {
 
     loadPage();
   }, [
+    loadArchive,
     router,
     supabase,
   ]);
-
-
-  async function loadArchive(
-    showRefreshing =
-      true
-  ) {
-    if (
-      showRefreshing
-    ) {
-      setRefreshing(
-        true
-      );
-    }
-
-
-    setMessage("");
-    setMessageType("");
-
-
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "search_document_archive",
-        {
-          search_text:
-            null,
-
-          requested_document_group:
-            "all",
-
-          requested_document_type:
-            "all",
-
-          requested_class_id:
-            null,
-
-          requested_dojo_id:
-            null,
-
-          requested_status:
-            "all",
-
-          requested_date_from:
-            null,
-
-          requested_date_to:
-            null,
-        }
-      );
-
-
-    if (
-      error
-    ) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      setRefreshing(
-        false
-      );
-
-      return;
-    }
-
-
-    setDocuments(
-      (
-        data ??
-        []
-      ) as
-        DocumentArchiveRow[]
-    );
-
-
-    setRefreshing(
-      false
-    );
-  }
 
 
   const classes =
@@ -792,7 +795,7 @@ export default function DocumentArchivePage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -1209,7 +1212,11 @@ export default function DocumentArchivePage() {
                 document
               ) => (
 
-                <article
+                <CompactRecord summary={<>{document.member_name ??
+                          document.document_subject ??
+                          labelFromValue(
+                            document.document_type
+                          )}</>}
                   key={
                     `${document.document_type}:${document.archive_id}`
                   }
@@ -1413,7 +1420,7 @@ export default function DocumentArchivePage() {
 
                   )}
 
-                </article>
+                </CompactRecord>
 
               )
             )
@@ -1426,6 +1433,9 @@ export default function DocumentArchivePage() {
         {selectedDocument && (
 
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="archive-record-title"
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(e) => {
               if (
@@ -1450,7 +1460,7 @@ export default function DocumentArchivePage() {
                   </p>
 
 
-                  <h2 className="mt-1 text-2xl font-bold">
+                  <h2 id="archive-record-title" className="mt-1 text-2xl font-bold">
                     {selectedDocument.document_reference}
                   </h2>
 

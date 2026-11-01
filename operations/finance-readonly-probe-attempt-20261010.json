@@ -1,0 +1,27 @@
+{
+  "dateSydney": "2026-10-10",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "approved fixed read-only TLS/login/ledger probe",
+  "attemptCount": 1,
+  "exitCode": 1,
+  "reportedError": "FINANCE_PREFLIGHT_FAILED: preserve evidence; no automatic retry. Raw details suppressed.",
+  "result": "failed-unverified",
+  "failureStage": "unknown",
+  "connectionAttemptAuthorized": true,
+  "serverConnectionEstablished": null,
+  "tlsVerified": false,
+  "loginVerified": false,
+  "serverReadOnlyVerified": false,
+  "ledgerVersionsVerified": false,
+  "writesPermittedByProbe": false,
+  "migrationAttempted": false,
+  "productionContact": false,
+  "retried": false,
+  "notes": [
+    "Pre-update probe emitted only a generic failure; raw client error was not persisted and cannot be reconstructed.",
+    "Do not infer authentication failure, DNS failure, TLS failure or server availability from this receipt.",
+    "Prepared fixed safe diagnostic categories afterward; only synthetic/local tests ran after this attempt.",
+    "The revised probe has not been run against staging. Request approval for one diagnostic read-only retry.",
+    "No migrations, password resets, routing fallback, messages, deployment or remote configuration changes."
+  ]
+}

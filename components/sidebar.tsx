@@ -12,6 +12,8 @@ import {
 type SidebarProps = {
   role: AppRole;
   memberName?: string | null;
+  hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 
@@ -26,13 +28,16 @@ const sectionLabels = {
 export default function Sidebar({
   role,
   memberName,
+  hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: SidebarProps) {
   const pathname =
     usePathname();
 
   const items =
     getNavigationForRole(
-      role
+      role,
+      { repositoryUpload: hasRepositoryUpload, assessmentHistory: assessmentHistoryEnabled },
     );
 
 
@@ -87,7 +92,7 @@ export default function Sidebar({
             className="
               mt-1
               text-sm
-              text-neutral-500
+              text-neutral-400
             "
           >
             Member Management
@@ -97,6 +102,7 @@ export default function Sidebar({
 
 
       <nav
+        aria-label="Desktop primary"
         className="
           flex-1
           overflow-y-auto
@@ -142,7 +148,7 @@ export default function Sidebar({
                     font-semibold
                     uppercase
                     tracking-wider
-                    text-neutral-600
+                    text-neutral-400
                   "
                 >
                   {
@@ -174,7 +180,8 @@ export default function Sidebar({
 
 
                       return (
-                        <Link
+                  <Link
+                    aria-current={active ? "page" : undefined}
                           key={
                             item.href
                           }
@@ -246,7 +253,7 @@ export default function Sidebar({
             mt-1
             text-xs
             capitalize
-            text-neutral-500
+            text-neutral-400
           "
         >
           {role.replace(

@@ -1,0 +1,83 @@
+{
+  "dateSydney": "2026-10-14",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "state": "applied-final-verification-incomplete",
+  "migrationsAppliedInOrder": ["059", "060"],
+  "applicationAttempts": 1,
+  "applicationRetried": false,
+  "claimedAtUtc": "2026-10-13T21:44:49.255Z",
+  "applicationBundleSha256": "5423ca6c22423e087e02395eabeefe722d1f7fd11ecff228d2cb3b8f81b0bb6e",
+  "applicationPsqlExitCode": 0,
+  "commitAcknowledged": true,
+  "observedTransactionStatus": "committed",
+  "ledger": {"firstVersion": "006", "lastVersion": "060", "migrationCount": 55, "exactNamesAndStatementsMatch": true},
+  "backup": {
+    "directory": "C:\\protected\\jingwuguan-recovery-source-20261014-ac02b357",
+    "verifiedAtUtc": "2026-10-13T21:31:58.273Z",
+    "encryptedSha256": "f1e91592be7443192feacf4579bf6d31f4bbafb0aeaba20039b39d31046b8ea7",
+    "authenticatedDecryptAndByteComparisonPassed": true,
+    "consistentDatabaseSnapshot": true,
+    "storageObjects": 6,
+    "previousBackupsPreserved": true,
+    "plaintextRemovedAfterVerification": true
+  },
+  "inTransactionAcceptance": {
+    "passedBeforeCommit": true,
+    "savepointRolledBackBeforeCommit": true,
+    "testAccounts": ["Member 0101", "Admin 0002", "Super Admin 0001"],
+    "coverage": ["first-month waiver", "skipped debt unchanged", "two selected months pending until receipt", "scoped receiver confirmation", "Member/Admin/Super Admin RLS", "missing-claim and direct-write denial", "exact audit and transactional in-app alerts", "original records and outbox preserved"]
+  },
+  "completedPostCommitCaptures": {
+    "publicTables": 67,
+    "sequences": 6,
+    "preexistingDataUnchanged": true,
+    "acceptedCatalogMatches": true,
+    "actorDigestsUnchanged": true,
+    "exactLedgerAndLedgerCatalogMatch": true,
+    "independentBackendRequirementPassed": false,
+    "reason": "Pooler reused the mutation backend for every sequential observer, including actor captures. Content equality is not accepted as independent verification."
+  },
+  "independentReadOnlyReconciliation": {
+    "directory": "C:\\protected\\jwg-finance-059-060-application-reconciliation-01",
+    "captureSha256": "147e24ccbacf8bcb2b019168cfd1674510f0a3e3032451d0ab24f231015d6e15",
+    "connections": 2,
+    "readOnly": true,
+    "completeJsonRows": 2,
+    "distinctObserverReportedCommitted": true,
+    "matchingOriginalSessions": 0,
+    "fullComparisonCompleted": false,
+    "captureStalled": true,
+    "onlyCapturedReadOnlyClientTerminated": true,
+    "observerExitCode": -1,
+    "clientsClosed": true,
+    "evidencePreserved": true,
+    "boundedAsyncInputCorrectionPreparedLocally": true,
+    "correctedCaptureExecuted": false
+  },
+  "privateApplicationJournal": "C:\\protected\\jwg-finance-059-060-staging-application",
+  "originalOutcomePreserved": "unverified-stop-no-retry",
+  "postCommitRollbackAcceptanceExecuted": false,
+  "localVerification": {
+    "typecheckPassed": true,
+    "fullSuitePassedBeforeApplication": 852,
+    "fullSuiteFailures": 0,
+    "fullSuiteSkipped": 0,
+    "syntheticPostgresqlFinanceAndConcurrencyPassed": true,
+    "syntheticClusterStopped": true,
+    "lateReconciliationEvidenceTestsPassed": 3,
+    "targetedEslintPassed": true
+  },
+  "remaining": [
+    "One corrected read-only independent reconciliation in a new owner-only evidence directory; never overwrite or reuse the consumed application journal.",
+    "Guarded post-commit rollback acceptance using fresh 006-060 evidence and independent post-test closure/data/ledger/actor verification.",
+    "Synchronize the active repository migration/recovery contract after verification. Pinned 059-060 source bytes remain in pending for historical evidence; do not reapply them.",
+    "Staging UI deployment and production release remain separate; neither performed."
+  ],
+  "productionContacted": false,
+  "retiredOrDisposableContacted": false,
+  "deliveryProvidersContacted": false,
+  "emailsOrPushSent": false,
+  "schedulersEnabled": false,
+  "authPasswordsChanged": false,
+  "commitPushDeployPerformed": false
+}

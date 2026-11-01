@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "environment": "production",
+  "applicationOrigin": "https://jingwuguanseibukan.com",
+  "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+  "policy": "jingwuguan-provider-delivery-v1",
+  "fingerprintPolicy": "keyed-hmac-sha256-v1",
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID"
+  },
+  "dedicatedInbox": {
+    "policy": "dedicated-non-role-inbox",
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "mailboxFingerprintSha256": "REPLACE_WITH_64_CHARACTER_MAILBOX_FINGERPRINT",
+    "deliverable": false,
+    "ownedByReleaseTeam": false,
+    "notRoleAccount": false,
+    "notSenderMailbox": false,
+    "notSecurityTestIdentity": false,
+    "notReservedDomain": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "resend": {
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "senderDomainVerified": false,
+    "dnsVerified": false,
+    "senderIdentityVerified": false,
+    "customSmtpVerified": false,
+    "leastPrivilegeCredentialVerified": false,
+    "deliveryLogsReviewed": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "authDelivery": {
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "emailConfirmationDelivered": false,
+    "confirmationLinkOrigin": "https://jingwuguanseibukan.com/auth/confirm",
+    "passwordResetDelivered": false,
+    "passwordResetLinkOrigin": "https://jingwuguanseibukan.com",
+    "recipientMailboxFingerprintSha256": "REPLACE_WITH_64_CHARACTER_MAILBOX_FINGERPRINT",
+    "recipientMatchedDedicatedInboxFingerprint": false,
+    "providerStatusDelivered": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "applicationDelivery": {
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "memberAnnouncementDelivered": false,
+    "eventNotificationDelivered": false,
+    "emailWorkerDeliveryObserved": false,
+    "recipientMailboxFingerprintSha256": "REPLACE_WITH_64_CHARACTER_MAILBOX_FINGERPRINT",
+    "recipientMatchedDedicatedInboxFingerprint": false,
+    "providerStatusDelivered": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "emailWorker": {
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "transientFailureObserved": false,
+    "retryBackoffObserved": false,
+    "eventualRetryDelivered": false,
+    "exhaustionObserved": false,
+    "exhaustedMessageNotRetried": false,
+    "failureTelemetryObserved": false,
+    "queueBaselineRestored": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "mux": {
+    "disposition": "staging-release-evidence",
+    "capturedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "sourceEnvironment": "staging",
+    "sourceProjectRef": "eomubndonbetszdbhsrj",
+    "sourceDeploymentId": "REPLACE_WITH_EXACT_STAGING_DEPLOYMENT_ID",
+    "muxEnvironmentFingerprintSha256": "REPLACE_WITH_64_CHARACTER_MUX_ENVIRONMENT_FINGERPRINT",
+    "releaseCommitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "directUploadCompleted": false,
+    "signedPlaybackPassed": false,
+    "unsignedPlaybackDenied": false,
+    "assetDeleted": false,
+    "repositoryDraftDeleted": false,
+    "zeroResidueVerified": false,
+    "evidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256"
+  },
+  "safety": {
+    "noTestIdentityCreated": false,
+    "noRoleIdentityUsedAsInbox": false,
+    "noProductionMutation": false,
+    "noProductionMemberDataChanged": false,
+    "noProductionContentPublished": false,
+    "noProviderAssetResidue": false,
+    "protectedEvidenceContainsNoSecretsOrPii": false,
+    "diagnosticsSanitized": false
+  },
+  "independentReview": {
+    "reviewedAt": "REPLACE_WITH_UTC_TIMESTAMP",
+    "reviewerRole": "independent-release-reviewer",
+    "reviewerFingerprintSha256": "REPLACE_WITH_64_CHARACTER_REVIEWER_FINGERPRINT",
+    "result": "REPLACE_WITH_APPROVED",
+    "projectRef": "REPLACE_WITH_PRODUCTION_PROJECT_REF",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_PRODUCTION_DEPLOYMENT_ID",
+    "dedicatedInboxEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "resendEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "authDeliveryEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "applicationDeliveryEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "emailWorkerEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "muxEvidenceSha256": "REPLACE_WITH_64_CHARACTER_PROTECTED_EVIDENCE_SHA256",
+    "attestationSha256": "REPLACE_WITH_64_CHARACTER_CANONICAL_ATTESTATION_SHA256"
+  }
+}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import AppShell from "@/components/app-shell";
+import { assessmentHistoryEnabled } from "@/lib/features/assessment-history";
 
 import {
   getCurrentAppUser,
@@ -41,6 +42,24 @@ export default async function MemberLayout({
   }
 
   /*
+   * A verified account remains outside the protected
+   * Member application until an Admin approves at least
+   * one class membership. Admins retain access to their
+   * management scope even when they do not train in a
+   * class themselves.
+   */
+
+  if (
+    currentUser.role ===
+      "member" &&
+    !currentUser.hasApprovedMembership
+  ) {
+    redirect(
+      "/pending-approval"
+    );
+  }
+
+  /*
    * Member/Admin/Super Admin all use
    * the same application shell.
    */
@@ -50,6 +69,8 @@ export default async function MemberLayout({
       role={currentUser.role}
       memberName={currentUser.fullName}
       memberId={currentUser.memberId}
+      hasRepositoryUpload={currentUser.hasRepositoryUpload}
+      assessmentHistoryEnabled={assessmentHistoryEnabled()}
     >
       {children}
     </AppShell>

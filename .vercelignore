@@ -1,0 +1,7 @@
+# Desktop sources and Windows artifacts are not part of the web deployment.
+desktop/
+
+# Local backend linkage and environment files must never enter a deployment.
+supabase/.temp/
+.vercel/
+.env*

@@ -1,0 +1,73 @@
+{
+  "scope": "Authorized disposable-only 006-060 database and Storage recovery",
+  "target": "lzkpibxeqxytewbwgklj",
+  "targetName": "js-recovery-060-20261015",
+  "region": "ap-southeast-1",
+  "plan": "free",
+  "acceptanceCompletedAt": "2026-10-15T07:01:07.353Z",
+  "independentStateVerifiedAt": "2026-10-16T03:54:53.4935412Z",
+  "evidenceDirectory": "C:\\protected\\jwg-database-access-5ff37a1e79bc48d78f8ffb6a5179a77d",
+  "source": {
+    "ciphertextSha256": "86454fa13757b12da6a5e455d0b05cf2f48a5011f31105fac07a7e75dee621bb",
+    "payloadSha256": "18d623129b82f76924f3e05e8b013819e62f15f13e1bdaf222118acee38fd972",
+    "dumpSha256": "cc4b4b748540bc08e7843a4d270a7ab741372cd80311612085082cd0ce4f85be",
+    "ledgerSha256": "a6ce602ef8cf6f49308f5bedaa060df848e0ecbe1f3e186e2aad99bcfdd2d90c",
+    "originalBackupPreserved": true,
+    "authenticatedLocallyAgainOn": "2026-10-16"
+  },
+  "database": {
+    "tables": 70,
+    "rows": 407,
+    "migrationCount": 55,
+    "migrationRange": "006-060",
+    "catalogComparisons": 15,
+    "sequenceComparisons": 6,
+    "managedCatalogDatasetsUnchanged": 18,
+    "rollbackRehearsal": "rollback-rehearsal-1792046416078",
+    "rollbackResultSha256": "8218bc73354e1f6aab43e5c95017fcf5a6a718396c4b5c65e45daee17862ce8e",
+    "equalBeforeAfterBaselineSha256": "6a58f9f1ee956f0756b1b1a5bf37b6b9c481cd2c5ea04980ace1786c0934aee4",
+    "zeroResidueVerified": true,
+    "persistentRestore": "persistent-restore-1792046891528",
+    "persistentResultSha256": "7a315b9dcac16abb46f43b07d4313b6d605d4d66a5343ffe02e2484aca6338f6",
+    "commitOutcomeSha256": "7556ab457cf3491d220f894cedd6948608bf562d347630a0d2cdb0345a5da11e",
+    "committedAttempts": 1,
+    "independentPersistedVerificationPassed": true
+  },
+  "storageAndSecurity": {
+    "phase": "storage-restore-1792047377812",
+    "resultSha256": "951c7a7f731bb706294da3709b1b252513fce25ebfce01dcc9d0934e1242da15",
+    "buckets": 2,
+    "logoObjects": 6,
+    "objectBytes": 3412943,
+    "overwrites": 0,
+    "hashesAndOwnershipPassed": true,
+    "anonymousAccessBoundariesPassed": true,
+    "databaseLintPassed": true,
+    "lintResultSha256": "340d0fccde9fa63d611f3e2226850089e0c29d8e5f0237f46235693d77ded525",
+    "accessResultSha256": "0e74b41f230c22f53acb8a531c0f75dc53440e180ea49748398c738be2c6c78f",
+    "memberAdminSuperAdminRoleChecksPassed": true,
+    "roleStdoutSha256": "1bbb3730d30ec85e9536b1d8bf8692f2a1a81513878b28bcfeb9c9db96868fc0",
+    "independentDatabaseChecksBeforeAfterStorageAndAfterRolesPassed": true,
+    "approvedDeviation": "Only the disposable empty private video bucket uses 50 MiB; original source backup remains 2 GiB."
+  },
+  "finalIsolation": {
+    "status": "INACTIVE",
+    "authDisabledVerified": true,
+    "smtpAbsent": true,
+    "edgeFunctions": 0,
+    "edgeSecrets": 0,
+    "inspectionFile": "state-inspection-00fb2a1d0b3a4b6b9dd1d3323a005786.json",
+    "inspectionSha256": "217c73c7edf3933037ad5c7e49c66b63742089539a01649407d82b17f62927dd",
+    "ownerOnlyEvidenceFilesVerified": 175,
+    "scratch": "Retained and quarantined in owner-only protected evidence directory",
+    "stagingProductionRetiredAndDeliveryProvidersContactedDuringRestore": false,
+    "existingProjectsAndBackupsPreserved": true
+  },
+  "localHelperTestsPassed": 28,
+  "limitations": [
+    "Hosted password-login acceptance was not run because Auth remained disabled as authorized.",
+    "Hosted Auth provider configuration and provider secrets were not captured in the source archive.",
+    "The original Storage wrapper session and final wrapper receipt are unavailable. Phase result files establish acceptance success; the independent 16 October inspection establishes final pause. No restore was retried.",
+    "This receipt completes the authorized database/Storage rehearsal, not production readiness or production cutover approval."
+  ]
+}

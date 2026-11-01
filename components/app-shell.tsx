@@ -18,6 +18,9 @@ type AppShellProps = {
   memberName?: string | null;
 
   memberId?: string | null;
+
+  hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 export default function AppShell({
@@ -25,23 +28,32 @@ export default function AppShell({
   role,
   memberName,
   memberId,
+  hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="app-compact min-h-screen bg-neutral-950 text-neutral-100">
+      <a href="#main-content" tabIndex={0} className="skip-link">Skip to content</a>
       <MobileNav
         role={role}
         memberName={memberName}
+        hasRepositoryUpload={hasRepositoryUpload}
+        assessmentHistoryEnabled={assessmentHistoryEnabled}
       />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1800px]">
         <Sidebar
           role={role}
           memberName={memberName}
+          hasRepositoryUpload={hasRepositoryUpload}
+          assessmentHistoryEnabled={assessmentHistoryEnabled}
         />
 
         <div className="min-w-0 flex-1">
           <header
             className="
+              relative
+              z-30
               hidden
               h-16
               items-center
@@ -62,6 +74,8 @@ export default function AppShell({
           </header>
 
           <main
+            id="main-content"
+            tabIndex={-1}
             className="
               min-w-0
               px-4

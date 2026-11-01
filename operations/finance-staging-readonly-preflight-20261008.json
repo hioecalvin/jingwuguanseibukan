@@ -1,0 +1,415 @@
+{
+  "kind": "staging-finance-readonly-catalog-preflight",
+  "recordedAt": "2026-10-08T11:29:28.988Z",
+  "capturedAt": "2026-10-08T11:26:27.5495986Z",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "readOnlyCaptureVerified": true,
+  "catalogPrerequisitesPassed": true,
+  "readyToApply": false,
+  "ledger": {
+    "firstVersion": "006",
+    "lastVersion": "058",
+    "migrationCount": 53,
+    "ledgerSha256": "9d341d30c586cfe85fd8c328e05ef97d008f26623f7dc9506b615f89cbd6c4d1"
+  },
+  "repositoryMigrationContractMatches": true,
+  "statementChecks": [
+    {
+      "version": "006",
+      "passed": true
+    },
+    {
+      "version": "007",
+      "passed": true
+    },
+    {
+      "version": "008",
+      "passed": true
+    },
+    {
+      "version": "009",
+      "passed": true
+    },
+    {
+      "version": "010",
+      "passed": true
+    },
+    {
+      "version": "011",
+      "passed": true
+    },
+    {
+      "version": "012",
+      "passed": true
+    },
+    {
+      "version": "013",
+      "passed": true
+    },
+    {
+      "version": "014",
+      "passed": true
+    },
+    {
+      "version": "015",
+      "passed": true
+    },
+    {
+      "version": "016",
+      "passed": true
+    },
+    {
+      "version": "017",
+      "passed": true
+    },
+    {
+      "version": "018",
+      "passed": true
+    },
+    {
+      "version": "019",
+      "passed": true
+    },
+    {
+      "version": "020",
+      "passed": true
+    },
+    {
+      "version": "021",
+      "passed": true
+    },
+    {
+      "version": "022",
+      "passed": true
+    },
+    {
+      "version": "023",
+      "passed": true
+    },
+    {
+      "version": "024",
+      "passed": true
+    },
+    {
+      "version": "025",
+      "passed": true
+    },
+    {
+      "version": "026",
+      "passed": true
+    },
+    {
+      "version": "027",
+      "passed": true
+    },
+    {
+      "version": "028",
+      "passed": true
+    },
+    {
+      "version": "029",
+      "passed": true
+    },
+    {
+      "version": "030",
+      "passed": true
+    },
+    {
+      "version": "031",
+      "passed": true
+    },
+    {
+      "version": "032",
+      "passed": true
+    },
+    {
+      "version": "033",
+      "passed": true
+    },
+    {
+      "version": "034",
+      "passed": true
+    },
+    {
+      "version": "035",
+      "passed": true
+    },
+    {
+      "version": "036",
+      "passed": true
+    },
+    {
+      "version": "037",
+      "passed": true
+    },
+    {
+      "version": "038",
+      "passed": true
+    },
+    {
+      "version": "039",
+      "passed": true
+    },
+    {
+      "version": "040",
+      "passed": true
+    },
+    {
+      "version": "041",
+      "passed": true
+    },
+    {
+      "version": "042",
+      "passed": true
+    },
+    {
+      "version": "043",
+      "passed": true
+    },
+    {
+      "version": "044",
+      "passed": true
+    },
+    {
+      "version": "045",
+      "passed": true
+    },
+    {
+      "version": "046",
+      "passed": true
+    },
+    {
+      "version": "047",
+      "passed": true
+    },
+    {
+      "version": "048",
+      "passed": true
+    },
+    {
+      "version": "049",
+      "passed": true
+    },
+    {
+      "version": "050",
+      "passed": true
+    },
+    {
+      "version": "051",
+      "passed": true
+    },
+    {
+      "version": "052",
+      "passed": true
+    },
+    {
+      "version": "053",
+      "passed": true
+    },
+    {
+      "version": "054",
+      "passed": true
+    },
+    {
+      "version": "055",
+      "passed": true
+    },
+    {
+      "version": "056",
+      "passed": true
+    },
+    {
+      "version": "057",
+      "passed": true
+    },
+    {
+      "version": "058",
+      "passed": true
+    }
+  ],
+  "replacements": [
+    {
+      "name": "monthly notification replacement",
+      "passed": true
+    },
+    {
+      "name": "member report wording replacement",
+      "passed": true
+    },
+    {
+      "name": "apply_membership_fee_adjustment",
+      "passed": true
+    },
+    {
+      "name": "adjust_current_membership_fee",
+      "passed": true
+    },
+    {
+      "name": "generate_dojo_monthly_subscription_charges",
+      "passed": true
+    },
+    {
+      "name": "system_generate_monthly_subscriptions",
+      "passed": true
+    }
+  ],
+  "newPolicyAbsent": true,
+  "groupColumnAbsent": true,
+  "candidates": [
+    {
+      "file": "059_advance_subscription_payment_records.sql",
+      "sha256": "29221922c65519fe6ff5d29ba5fbb13f8e99d843db8cf6f37875b84a7a90c5af"
+    },
+    {
+      "file": "060_selected_month_fee_adjustment.sql",
+      "sha256": "7121c44cc6ad3386a5aec768e5d6e7c274be59f703d8e7349aaace239d1fbb47"
+    }
+  ],
+  "financeHelperConsumers": [
+    {
+      "name": "adjust_current_membership_fee",
+      "arguments": "target_membership_id uuid, new_amount numeric, adjustment_reason text"
+    },
+    {
+      "name": "apply_membership_fee_adjustment",
+      "arguments": "target_membership_id uuid, new_amount numeric, adjustment_mode text, adjustment_reason text"
+    },
+    {
+      "name": "cancel_dojo_settlement",
+      "arguments": "target_settlement_id uuid"
+    },
+    {
+      "name": "create_dojo_settlement",
+      "arguments": "target_dojo_id uuid, target_month date, payment_ids uuid[], settlement_notes text"
+    },
+    {
+      "name": "generate_and_notify_monthly_subscriptions",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "generate_dojo_monthly_subscription_charges",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "get_admin_member_subscription_summary",
+      "arguments": "target_membership_id uuid"
+    },
+    {
+      "name": "get_dojo_admin_settlements",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_dojo_financial_report",
+      "arguments": "target_dojo_id uuid, report_month date"
+    },
+    {
+      "name": "get_dojo_monthly_payment_summary",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "get_dojo_payment_confirmations",
+      "arguments": "target_dojo_id uuid, requested_status text"
+    },
+    {
+      "name": "get_dojo_receiving_account",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_dojo_settlement_items",
+      "arguments": "target_settlement_id uuid"
+    },
+    {
+      "name": "get_my_dojo_settlement_config",
+      "arguments": "target_dojo_id uuid"
+    },
+    {
+      "name": "get_settlement_eligible_payments",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "notify_monthly_subscription_charges",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "notify_unpaid_subscription_reminders",
+      "arguments": "target_dojo_id uuid, target_month date"
+    },
+    {
+      "name": "record_membership_payment",
+      "arguments": "target_charge_id uuid, payment_amount numeric, payment_method_value text, payment_reference_value text, payment_date_value date, payment_notes text"
+    },
+    {
+      "name": "remove_member_subscription_rate",
+      "arguments": "target_membership_id uuid"
+    },
+    {
+      "name": "review_membership_payment_confirmation",
+      "arguments": "target_confirmation_id uuid, decision text, rejection_note text"
+    },
+    {
+      "name": "set_dojo_receiving_account",
+      "arguments": "target_dojo_id uuid, new_bank_name text, new_account_holder_name text, new_account_number text, new_instructions text"
+    },
+    {
+      "name": "set_dojo_settlement_transfer",
+      "arguments": "target_settlement_id uuid, new_transfer_date date, new_transfer_method text, new_transfer_note text"
+    },
+    {
+      "name": "set_dojo_subscription_rate",
+      "arguments": "target_dojo_id uuid, new_fee numeric, rate_effective_from date, new_currency text"
+    },
+    {
+      "name": "set_member_subscription_rate",
+      "arguments": "target_membership_id uuid, new_fee numeric, rate_effective_from date, rate_effective_until date, rate_reason text, new_currency text"
+    },
+    {
+      "name": "submit_dojo_settlement",
+      "arguments": "target_settlement_id uuid"
+    }
+  ],
+  "financeHelperPolicies": [
+    {
+      "table": "dojo_settlement_items",
+      "name": "read dojo settlement items",
+      "command": "SELECT"
+    },
+    {
+      "table": "dojo_settlements",
+      "name": "read dojo settlements",
+      "command": "SELECT"
+    },
+    {
+      "table": "dojo_subscription_settings",
+      "name": "read dojo subscription settings",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_fee_adjustment_history",
+      "name": "finance admin read fee adjustment history",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_payments",
+      "name": "read membership payments",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_subscription_charges",
+      "name": "read membership subscription charges",
+      "command": "SELECT"
+    },
+    {
+      "table": "membership_subscription_overrides",
+      "name": "read member subscription overrides",
+      "command": "SELECT"
+    }
+  ],
+  "browserMutationGrants": [],
+  "catalogBlockers": [],
+  "limitations": [
+    "Catalog metadata is not behavioural role-security acceptance.",
+    "Complete-schema rollback-contained rehearsal, independent ledger/residue checks and explicit application approval still required.",
+    "No migration, application function, scheduler or delivery worker was executed.",
+    "Only staging eomubndonbetszdbhsrj was contacted by the capture; this verifier is offline."
+  ]
+}

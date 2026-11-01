@@ -1,5 +1,10 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+import AdvancePaymentForm from "@/components/advance-payment-form";
+import AdvancePaymentReviews from "@/components/admin/advance-payment-reviews";
+import ChargeFeeAdjustment from "@/components/admin/charge-fee-adjustment";
+
 import {
   useEffect,
   useMemo,
@@ -269,8 +274,6 @@ type MonthlyPaymentSummary = {
 
   pending_confirmation_members: number;
 
-  partially_paid_members: number;
-
   unpaid_members: number;
 
   special_rate_members: number;
@@ -300,7 +303,6 @@ type PaymentStatusFilter =
   | "all"
   | "paid"
   | "pending"
-  | "partial"
   | "unpaid"
   | "special";
 
@@ -329,15 +331,6 @@ export default function SubscriptionPage() {
     useState<
       Profile | null
     >(null);
-
-
-  const [
-    assignments,
-    setAssignments,
-  ] =
-    useState<
-      AdminAssignment[]
-    >([]);
 
 
   const [
@@ -606,13 +599,6 @@ export default function SubscriptionPage() {
 
 
   const [
-    paymentAmount,
-    setPaymentAmount,
-  ] =
-    useState("");
-
-
-  const [
     paymentMethod,
     setPaymentMethod,
   ] =
@@ -849,14 +835,78 @@ export default function SubscriptionPage() {
     membershipId:
       string
   ) {
-    return overrides.find(
-      (
-        override
-      ) =>
-        override.membership_id ===
-          membershipId &&
-        override.active
-    );
+    const today =
+      todayString();
+
+
+    return overrides
+      .filter(
+        (
+          override
+        ) =>
+          override.membership_id ===
+            membershipId &&
+          override.active &&
+          (
+            (
+              override.effective_from <=
+                today &&
+              (
+                override.effective_until ===
+                  null ||
+                override.effective_until >=
+                  today
+              )
+            ) ||
+            override.effective_from >
+              today
+          )
+      )
+      .sort(
+        (
+          left,
+          right
+        ) => {
+          const leftIsCurrent =
+            left.effective_from <=
+              today;
+
+          const rightIsCurrent =
+            right.effective_from <=
+              today;
+
+
+          if (
+            leftIsCurrent !==
+            rightIsCurrent
+          ) {
+            return leftIsCurrent
+              ? -1
+              : 1;
+          }
+
+
+          const dateOrder =
+            left.effective_from.localeCompare(
+              right.effective_from
+            );
+
+
+          if (
+            dateOrder !==
+            0
+          ) {
+            return leftIsCurrent
+              ? -dateOrder
+              : dateOrder;
+          }
+
+
+          return left.id.localeCompare(
+            right.id
+          );
+        }
+      )[0];
   }
 
 
@@ -991,6 +1041,15 @@ export default function SubscriptionPage() {
           Profile
       );
 
+      if (profileData.is_super_admin) {
+        const { data: allDojos, error: dojoError } = await supabase.from("dojos").select("id").order("name");
+        if (dojoError) { showError(dojoError.message); setLoading(false); return; }
+        const allIds = (allDojos ?? []).map(dojo => dojo.id as string);
+        await Promise.all([loadDojos(allIds), loadMembers(allIds)]);
+        setBillingMonth(monthString()); setDojoFeeDate(todayString()); setPaymentDate(todayString());
+        setLoading(false); return;
+      }
+
 
       const {
         data:
@@ -1039,11 +1098,6 @@ export default function SubscriptionPage() {
           []
         ) as
           AdminAssignment[];
-
-
-      setAssignments(
-        loadedAssignments
-      );
 
 
       if (
@@ -1099,6 +1153,9 @@ export default function SubscriptionPage() {
 
 
     loadPage();
+    // The loader declarations close over the stable client and state setters;
+    // including their per-render identities would turn this into a load loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     router,
     supabase,
@@ -1291,6 +1348,9 @@ export default function SubscriptionPage() {
 
 
     loadSelectedDojo();
+    // Each loader intentionally reads this render's selected dojo/month data.
+    // Their declaration identities are not triggers for refreshing the panel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedDojoId,
     billingMonth,
@@ -1762,12 +1822,6 @@ export default function SubscriptionPage() {
       pending_confirmation_members:
         Number(
           row.pending_confirmation_members ??
-            0
-        ),
-
-      partially_paid_members:
-        Number(
-          row.partially_paid_members ??
             0
         ),
 
@@ -2329,7 +2383,7 @@ export default function SubscriptionPage() {
   ) {
     const confirmed =
       window.confirm(
-        `Remove the special rate for ${member.full_name}?\n\nThe member will return to the dojo default rate.`
+        `End or cancel the special rate for ${member.full_name}?\n\nA rate already in effect remains valid through today. Scheduled future rates will be cancelled, and the dojo default rate applies from tomorrow.`
       );
 
 
@@ -2381,7 +2435,7 @@ export default function SubscriptionPage() {
 
 
     showSuccess(
-      `${member.full_name}'s special rate was removed.`
+      `${member.full_name}'s current special rate now ends today, and scheduled future rates were cancelled.`
     );
 
 
@@ -2647,31 +2701,8 @@ export default function SubscriptionPage() {
     charge:
       SubscriptionCharge
   ) {
-    const paid =
-      totalPaidForCharge(
-        charge.id
-      );
-
-
-    const remaining =
-      Math.max(
-        Number(
-          charge.amount
-        ) -
-          paid,
-        0
-      );
-
-
     setPayingChargeId(
       charge.id
-    );
-
-
-    setPaymentAmount(
-      String(
-        remaining
-      )
     );
 
 
@@ -2701,7 +2732,6 @@ export default function SubscriptionPage() {
       null
     );
 
-    setPaymentAmount("");
     setPaymentReference("");
     setPaymentNotes("");
   }
@@ -2711,10 +2741,10 @@ export default function SubscriptionPage() {
     charge:
       SubscriptionCharge
   ) {
-    const amount =
-      Number(
-        paymentAmount
-      );
+    const amount = Math.max(
+      Number(charge.amount) - totalPaidForCharge(charge.id),
+      0
+    );
 
 
     if (
@@ -2725,7 +2755,7 @@ export default function SubscriptionPage() {
         0
     ) {
       showError(
-        "Enter a valid payment amount."
+        "This charge has no outstanding balance."
       );
 
       return;
@@ -3023,6 +3053,8 @@ export default function SubscriptionPage() {
         confirmationFilter
       );
     }
+    // loadConfirmations is intentionally driven by these filter inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -3039,6 +3071,8 @@ export default function SubscriptionPage() {
     ) {
       loadReport();
     }
+    // loadReport is intentionally driven by these report inputs only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeTab,
     selectedDojoId,
@@ -3186,7 +3220,7 @@ export default function SubscriptionPage() {
           paymentStatusFilter ===
           "paid"
         ) {
-          return outstanding <=
+          return charge.status !== "waived" && charge.status !== "cancelled" && outstanding <=
             0;
         }
 
@@ -3199,20 +3233,6 @@ export default function SubscriptionPage() {
             outstanding >
               0 &&
             pending
-          );
-        }
-
-
-        if (
-          paymentStatusFilter ===
-          "partial"
-        ) {
-          return (
-            paid >
-              0 &&
-            outstanding >
-              0 &&
-            !pending
           );
         }
 
@@ -3329,7 +3349,7 @@ export default function SubscriptionPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -3379,7 +3399,7 @@ export default function SubscriptionPage() {
         <section className="mt-6 rounded-xl border border-emerald-900 bg-emerald-950/10 p-4">
 
           <p className="text-sm text-emerald-200">
-            Financial access is based on your Dojo Admin assignment. Super Admin status alone does not grant access to this page.
+            {profile?.is_super_admin ? "Super Admin financial oversight covers all dojos." : "Financial access is limited to your assigned dojos."}
           </p>
 
 
@@ -3387,7 +3407,7 @@ export default function SubscriptionPage() {
             ?.is_super_admin && (
 
             <p className="mt-2 text-xs text-neutral-500">
-              This account is also a Super Admin, but you are viewing this finance area through your Dojo Admin assignment.
+              Select a dojo to review its fees, payments and receipt confirmations. Every financial action is checked by the server.
             </p>
 
           )}
@@ -3603,26 +3623,6 @@ export default function SubscriptionPage() {
 
 
                 <DashboardStat
-                  label="Partially Paid"
-                  value={
-                    String(
-                      monthlySummary.partially_paid_members
-                    )
-                  }
-                  tone="amber"
-                  active={
-                    paymentStatusFilter ===
-                    "partial"
-                  }
-                  onClick={() =>
-                    setPaymentStatusFilter(
-                      "partial"
-                    )
-                  }
-                />
-
-
-                <DashboardStat
                   label="Unpaid"
                   value={
                     String(
@@ -3777,7 +3777,10 @@ export default function SubscriptionPage() {
 
           <section className="mt-6 space-y-6">
 
-            <article className="rounded-2xl border border-purple-900 bg-purple-950/10 p-6">
+            <CompactRecord summary={<>{selectedDojo
+                  ?.name ??
+                  "Dojo"}{" "}
+                Subscription Fee</>} className="rounded-2xl border border-purple-900 bg-purple-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                 Regular Rate
@@ -3889,10 +3892,10 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Member Special Rates</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -4066,7 +4069,7 @@ export default function SubscriptionPage() {
                                   }
                                   className="rounded-lg border border-red-900 px-4 py-2 text-sm text-red-300 hover:bg-red-950/30 disabled:opacity-50"
                                 >
-                                  Remove
+                                  End / Cancel
                                 </button>
 
                               )}
@@ -4214,7 +4217,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -4230,7 +4233,7 @@ export default function SubscriptionPage() {
 
           <section className="mt-6 space-y-5">
 
-            <article className="rounded-2xl border border-sky-900 bg-sky-950/10 p-6">
+            <CompactRecord summary={<>Member Transfer Destination</>} className="rounded-2xl border border-sky-900 bg-sky-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                 Receiving Account
@@ -4355,10 +4358,12 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-green-900 bg-green-950/10 p-6">
+            <CompactRecord summary={<>{formatMonth(
+                  billingMonth
+                )} Charges</>} className="rounded-2xl border border-green-900 bg-green-950/10 p-6">
 
               <p className="text-xs font-semibold uppercase tracking-wider text-green-400">
                 Monthly Billing
@@ -4422,10 +4427,15 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Member Payments</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+
+              <AdvancePaymentForm key={selectedDojoId} mode="admin"
+                memberships={members.filter(m => m.dojo_id === selectedDojoId).map(m => ({ id: m.membership_id,
+                  label: `${m.registration_number ?? ""} ${m.full_name} — ${m.class_name}` }))}
+                onComplete={async () => { await Promise.all([loadCharges(), loadPayments(), loadMonthlySummary()]); }} />
 
               <h2 className="text-2xl font-bold">
                 Member Payments
@@ -4433,7 +4443,9 @@ export default function SubscriptionPage() {
 
 
               <p className="mt-2 text-sm text-neutral-400">
-                Record full or partial payments against each monthly charge.
+                Mark the full outstanding charge paid without waiting for a Member
+                confirmation request. Your Admin account is retained in the payment
+                audit record.
               </p>
 
 
@@ -4457,8 +4469,6 @@ export default function SubscriptionPage() {
                   <span className="rounded-full border border-neutral-700 bg-neutral-950 px-3 py-1 text-xs font-semibold uppercase text-neutral-300">
                     {paymentStatusFilter === "all"
                       ? "ALL"
-                      : paymentStatusFilter === "partial"
-                      ? "PARTIALLY PAID"
                       : paymentStatusFilter === "special"
                       ? "SPECIAL RATE"
                       : paymentStatusFilter.toUpperCase()}
@@ -4554,13 +4564,7 @@ export default function SubscriptionPage() {
 
                               <StatusBadge
                                 status={
-                                  outstanding <=
-                                  0
-                                    ? "paid"
-                                    : paid >
-                                      0
-                                    ? "partial"
-                                    : "unpaid"
+                                  charge.status === "waived" || charge.status === "cancelled" ? charge.status : outstanding <= 0 ? "paid" : "unpaid"
                                 }
                               />
 
@@ -4606,7 +4610,7 @@ export default function SubscriptionPage() {
                           <button
                             type="button"
                             disabled={
-                              outstanding <=
+                              charge.status === "waived" || charge.status === "cancelled" || outstanding <=
                               0
                             }
                             onClick={() =>
@@ -4616,33 +4620,24 @@ export default function SubscriptionPage() {
                             }
                             className="rounded-lg border border-green-800 px-4 py-2 text-sm font-semibold text-green-300 hover:bg-green-950/30 disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            Record Payment
+                            Mark Full Payment
                           </button>
 
                         </div>
 
 
+                        {charge.status === "unpaid" && paid === 0 && !hasPendingConfirmation(charge.id) &&
+                          <ChargeFeeAdjustment key={`${charge.id}:${charge.amount}`} charge={charge}
+                            onComplete={async () => { await Promise.all([loadCharges(), loadMonthlySummary()]); }} />}
+
                         {paying && (
 
                           <div className="mt-5 grid gap-4 border-t border-neutral-800 pt-5 md:grid-cols-2">
 
-                            <Field
-                              label="Amount"
-                            >
-                              <input
-                                type="number"
-                                min="0"
-                                value={
-                                  paymentAmount
-                                }
-                                onChange={(e) =>
-                                  setPaymentAmount(
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-3"
-                              />
-                            </Field>
+                            <MoneyBlock
+                              label="Full Payment Amount"
+                              value={formatCurrency(outstanding, charge.currency)}
+                            />
 
 
                             <Field
@@ -4738,7 +4733,7 @@ export default function SubscriptionPage() {
                                 {processing ===
                                 key
                                   ? "Saving..."
-                                  : "Save Payment"}
+                                  : "Confirm Direct Payment"}
                               </button>
 
 
@@ -4784,7 +4779,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -4800,7 +4795,10 @@ export default function SubscriptionPage() {
 
           <section className="mt-6">
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>Payment Confirmations</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+
+              <AdvancePaymentReviews key={selectedDojoId} dojoId={selectedDojoId}
+                onComplete={async () => { await Promise.all([loadConfirmations(), loadCharges(), loadPayments(), loadMonthlySummary()]); }} />
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
@@ -5060,7 +5058,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -5112,7 +5110,9 @@ export default function SubscriptionPage() {
             </div>
 
 
-            <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <CompactRecord summary={<>{selectedDojo
+                      ?.name ??
+                      "Dojo"}</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 
@@ -5295,16 +5295,8 @@ export default function SubscriptionPage() {
                           <td className="px-4 py-4">
                             <StatusBadge
                               status={
-                                Number(
-                                  row.outstanding_amount
-                                ) <=
-                                0
+                                row.payment_status === "waived" || row.payment_status === "cancelled" ? row.payment_status : Number(row.outstanding_amount) <= 0
                                   ? "paid"
-                                  : Number(
-                                      row.paid_amount
-                                    ) >
-                                    0
-                                  ? "partial"
                                   : "unpaid"
                               }
                             />
@@ -5331,7 +5323,7 @@ export default function SubscriptionPage() {
 
               </div>
 
-            </article>
+            </CompactRecord>
 
           </section>
 
@@ -5600,16 +5592,14 @@ function StatusBadge({
 }: {
   status:
     | "paid"
-    | "partial"
-    | "unpaid";
+    | "unpaid"
+    | "waived"
+    | "cancelled";
 }) {
   const style =
     status ===
     "paid"
       ? "border-green-800 bg-green-950/30 text-green-300"
-      : status ===
-        "partial"
-      ? "border-amber-800 bg-amber-950/30 text-amber-300"
       : "border-red-800 bg-red-950/30 text-red-300";
 
 
@@ -5617,10 +5607,7 @@ function StatusBadge({
     status ===
     "paid"
       ? "PAID"
-      : status ===
-        "partial"
-      ? "PARTIAL"
-      : "UNPAID";
+      : status.toUpperCase();
 
 
   return (

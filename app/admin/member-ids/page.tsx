@@ -1,16 +1,19 @@
 "use client";
 
+import CompactRecord from "@/components/compact-record";
+
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { filterMemberProfiles } from "@/lib/member-contact-view";
 
 type Profile = {
   id: string;
   registration_number: string | null;
   full_name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   is_super_admin: boolean;
 };
 
@@ -82,20 +85,7 @@ export default function MemberIdManagementPage() {
     loadPage();
   }, [router, supabase]);
 
-  const filteredProfiles = profiles.filter((profile) => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) return true;
-
-    return (
-      profile.full_name.toLowerCase().includes(query) ||
-      profile.email.toLowerCase().includes(query) ||
-      profile.phone.toLowerCase().includes(query) ||
-      (profile.registration_number ?? "")
-        .toLowerCase()
-        .includes(query)
-    );
-  });
+  const filteredProfiles = filterMemberProfiles(profiles, search);
 
   async function setMemberId(profile: Profile) {
     const newId = window.prompt(
@@ -169,7 +159,7 @@ export default function MemberIdManagementPage() {
         <header className="flex flex-col gap-5 border-b border-neutral-800 pb-7 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -186,7 +176,7 @@ export default function MemberIdManagementPage() {
               </h1>
 
               <p className="mt-1 text-sm text-neutral-400">
-                Assign and manage member identification numbers.
+                Assign and manage Member identification numbers.
               </p>
             </div>
           </div>
@@ -225,7 +215,7 @@ export default function MemberIdManagementPage() {
           />
 
           <p className="mt-3 text-sm text-neutral-500">
-            Showing {filteredProfiles.length} of {profiles.length} users
+            Showing {filteredProfiles.length} of {profiles.length} Members
           </p>
         </section>
 
@@ -234,7 +224,7 @@ export default function MemberIdManagementPage() {
             const processing = processingId === profile.id;
 
             return (
-              <article
+              <CompactRecord summary={<>{profile.full_name}</>}
                 key={profile.id}
                 className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6"
               >
@@ -267,14 +257,14 @@ export default function MemberIdManagementPage() {
                         <span className="text-neutral-500">
                           Email:
                         </span>{" "}
-                        {profile.email}
+                        {profile.email || "Not recorded"}
                       </p>
 
                       <p>
                         <span className="text-neutral-500">
                           Phone:
                         </span>{" "}
-                        {profile.phone}
+                        {profile.phone || "Not recorded"}
                       </p>
                     </div>
                   </div>
@@ -292,7 +282,7 @@ export default function MemberIdManagementPage() {
                       : "Assign Member ID"}
                   </button>
                 </div>
-              </article>
+              </CompactRecord>
             );
           })}
         </section>
