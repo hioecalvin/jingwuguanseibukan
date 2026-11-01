@@ -18,7 +18,7 @@ export default function ClaimReviews() {
     finally { setBusy(false); }
   }, []);
   useEffect(() => { void load(); }, [load]);
-  async function review(claimId: string, action: "approve" | "reject") {
+  async function review(claimId: string, action: "approve" | "reject" | "retry_setup") {
     if (busy) return;
     setBusy(true); setMessage("");
     try { const result = await request({ claimId, action }); setMessage(result.message); await load(); }
@@ -35,6 +35,7 @@ export default function ClaimReviews() {
       <p className="mt-1 text-sm">{claim.state === "approved" ? "Approved — account setup pending" : "Awaiting identity approval"}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {claim.state === "verified" && <button disabled={busy} onClick={() => review(claim.claim_id, "approve")} className="min-h-11 rounded bg-cyan-300 px-3 py-2 text-black disabled:opacity-50">Approve identity</button>}
+        {claim.state === "approved" && <button disabled={busy} onClick={() => review(claim.claim_id, "retry_setup")} className="min-h-11 rounded border border-neutral-600 px-3 py-2 disabled:opacity-50">Retry setup email</button>}
         <button disabled={busy} onClick={() => review(claim.claim_id, "reject")} className="min-h-11 rounded border border-neutral-600 px-3 py-2 disabled:opacity-50">{claim.state === "approved" ? "Revoke approval" : "Reject claim"}</button>
       </div>
     </article>)}

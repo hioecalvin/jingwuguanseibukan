@@ -92,6 +92,41 @@ test('review list and rejection call their scoped database contracts',async()=>{
  assert.equal(s.calls.filter(c=>c.rpc).at(-1).args.approve,false);
 });
 
+test('review list never schedules delivery even with approved claims',async()=>{
+ const s=setup({rpcData:[{claim_id:claimId,state:'approved'}]});
+ assert.equal((await s.request('review',{action:'list'})).status,200);
+ assert.equal(s.calls.filter(c=>c.after||c.delivery).length,0);
+});
+
+test('setup retry selects the requested third approved claim instead of older sent claims',async()=>{
+ const third='33333333-3333-4333-8333-333333333333';
+ // The first two approved claims have already-sent email in the delivery store.
+ // List results intentionally do not expose delivery state or proof data.
+ const s=setup({rpcData:[{claim_id:claimId,state:'approved'},
+  {claim_id:'22222222-2222-4222-8222-222222222222',state:'approved'},
+  {claim_id:third,state:'approved'}]});
+ const response=await s.request('review',{action:'retry_setup',claimId:third,actor:'forged',email:'attacker@example.invalid'});
+ assert.equal(response.status,202);
+ assert.deepEqual(s.calls.filter(c=>c.rpc).map(c=>c.rpc),['get_reviewable_member_claims']);
+ const deferred=s.calls.filter(c=>c.after);assert.equal(deferred.length,1);
+ assert.equal(s.calls.filter(c=>c.delivery).length,0);
+ await deferred[0].after();
+ assert.deepEqual(s.calls.filter(c=>c.delivery).map(c=>JSON.parse(JSON.stringify(c.delivery))),[{claimId:third}]);
+ assert.equal(s.calls.filter(c=>c.create).length,0);
+});
+
+test('setup retry rejects missing scope, unapproved claims and database refusal without delivery',async()=>{
+ for(const options of [{rpcData:[]},{rpcData:[{claim_id:claimId,state:'verified'}]},
+  {rpcData:[{claim_id:'22222222-2222-4222-8222-222222222222',state:'approved'}]},
+  {rpcData:[{claim_id:claimId,state:'approved'}],rpcError:{code:'42501'}},{rpcData:null}]){
+  const s=setup(options);assert.equal((await s.request('review',{action:'retry_setup',claimId})).status,403);
+  assert.equal(s.calls.filter(c=>c.after||c.delivery||c.create).length,0);
+  assert.equal(s.calls.filter(c=>c.rpc==='review_member_claim').length,0);
+ }
+ const s=setup();assert.equal((await s.request('review',{action:'retry_setup',claimId:'invalid'})).status,400);
+ assert.equal(s.calls.filter(c=>c.rpc||c.after||c.delivery).length,0);
+});
+
 test('admin can review a queue with refreshes while the actor limit still applies',async()=>{
  const s=setup({rpcData:[],enforceRates:true});
  assert.equal((await s.request('review',{action:'list'})).status,200);

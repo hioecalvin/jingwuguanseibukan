@@ -21,15 +21,21 @@ export async function POST(request: Request) {
     if (body.action === "list") {
       const { data, error } = await client.rpc("get_reviewable_member_claims");
       if (error) return reply({ error: "Unable to load claim reviews." }, 403);
-      // Refresh can retry a due setup email, scoped by the authenticated queue.
-      const approved = (data ?? []).filter((claim: { state: string }) => claim.state === "approved").slice(0, 2);
-      if (approved.length) after(async () => {
-        for (const claim of approved) await deliverMemberClaimEmail({ claimId: claim.claim_id });
-      });
       return reply({ claims: data ?? [] });
     }
-    if (!["approve", "reject"].includes(String(body.action)) || typeof body.claimId !== "string" || !claimIdPattern.test(body.claimId)) {
+    if (!["approve", "reject", "retry_setup"].includes(String(body.action)) || typeof body.claimId !== "string" || !claimIdPattern.test(body.claimId)) {
       return reply({ error: "Invalid review decision." }, 400);
+    }
+    if (body.action === "retry_setup") {
+      // Authorize the exact selected claim using the current authenticated actor.
+      // Delivery independently rechecks the original approver and queue eligibility.
+      const { data, error } = await client.rpc("get_reviewable_member_claims");
+      if (error || !Array.isArray(data) || !data.some((claim: { claim_id: string; state: string }) =>
+        claim.claim_id === body.claimId && claim.state === "approved")) {
+        return reply({ error: "This claim is unavailable or outside your current Dojo authority." }, 403);
+      }
+      after(() => deliverMemberClaimEmail({ claimId: body.claimId as string }));
+      return reply({ message: "A setup-email retry was requested. Already-sent emails, expired claims and retry limits remain unchanged." }, 202);
     }
     // Actor identity comes from the verified JWT inside the database wrapper.
     // No actor/member/email supplied by the browser is trusted for authorization.

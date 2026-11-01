@@ -30,6 +30,10 @@ test('login keyboard order, visible focus, responsive layout and automated acces
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Log In', exact: true })).toBeFocused();
   await page.keyboard.press('Tab');
+  const claimLink = page.getByRole('link', { name: 'Already a member? Claim your account', exact: true });
+  await expect(claimLink).toBeFocused();
+  await expect(claimLink).toHaveAttribute('href', '/claim-id');
+  await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Create account' })).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

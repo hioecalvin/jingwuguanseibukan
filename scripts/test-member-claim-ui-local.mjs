@@ -24,6 +24,7 @@ const server=createServer((request,response)=>{
 await new Promise(resolveListen=>server.listen(0,'127.0.0.1',resolveListen));
 const origin=`http://127.0.0.1:${server.address().port}`;
 let browser,passed=false,checks=0;
+let reviewState='verified';
 const calls=[],external=[],errors=[];
 const claimId='11111111-1111-4111-8111-111111111111',token='a'.repeat(64);
 try {
@@ -34,8 +35,9 @@ try {
   if(url.origin!==origin){external.push(url.origin);return route.abort();}
   if(url.pathname.startsWith('/api/')){
    const data=route.request().postDataJSON();calls.push({path:url.pathname,data});
+   if(url.pathname==='/api/admin/member-claims' && data.action==='approve')reviewState='approved';
    const body=url.pathname==='/api/admin/member-claims'?
-    data.action==='list'?{claims:[{claim_id:claimId,member_id:'JS-0103',full_name:'Synthetic Member',claimed_email:'member@example.invalid',state:'verified'}]}:{message:'Identity claim approved.'}:
+    data.action==='list'?{claims:[{claim_id:claimId,member_id:'JS-0103',full_name:'Synthetic Member',claimed_email:'member@example.invalid',state:reviewState}]}:{message:data.action==='retry_setup'?'A setup-email retry was requested.':'Identity claim approved.'}:
     url.pathname.endsWith('/setup')?{message:'Your account is ready. Sign in now.'}:url.pathname.endsWith('/verify')?{message:'Email verified. Awaiting Dojo Admin.'}:{message:'If eligible, a verification link will be sent.'};
    return route.fulfill({status:url.pathname.endsWith('/request')?202:200,contentType:'application/json',body:JSON.stringify(body)});
   }
@@ -59,9 +61,13 @@ try {
  await page.goto(origin+'/verify');await page.getByRole('button',{name:'Verify email address'}).click();
  await page.getByRole('status').filter({hasText:'Open the complete'}).waitFor();checks++;
  await page.goto(origin+'/reviews');await page.getByRole('heading',{name:'JS-0103 · Synthetic Member'}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Retry setup email'}).count(),0);checks++;
  await page.getByRole('button',{name:'Approve identity'}).click();
  await page.getByRole('status').filter({hasText:'Identity claim approved'}).waitFor();
  assert.deepEqual(calls.find(call=>call.data.action==='approve').data,{claimId,action:'approve'});checks++;
+ await page.getByRole('button',{name:'Retry setup email'}).click();
+ await page.getByRole('status').filter({hasText:'setup-email retry was requested'}).waitFor();
+ assert.deepEqual(calls.find(call=>call.data.action==='retry_setup').data,{claimId,action:'retry_setup'});checks++;
  const beforeSetup=calls.length;
  await page.goto(origin+`/setup#claim=${claimId}&token=${token}`);await page.waitForFunction(()=>location.hash==='');
  assert.equal(calls.length,beforeSetup);checks++;
