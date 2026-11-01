@@ -23,6 +23,8 @@ export type NavigationItem = {
 
 export const navigationItems:
   NavigationItem[] = [
+  { label: "Account Claims", href: "/admin/member-claims",
+    roles: ["admin", "super_admin"], section: "management" },
   { label: "Assessment History", href: "/assessment-history",
     roles: ["member", "admin", "super_admin"], section: "management",
     requiresAssessmentHistory: true },

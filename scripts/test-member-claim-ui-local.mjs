@@ -43,10 +43,10 @@ try {
  });
  const page=await context.newPage();page.setDefaultTimeout(10000);page.on('pageerror',error=>errors.push(error.message));
  await page.goto(origin+'/request');
- await page.getByLabel('JS Member ID').fill('JS-0103');await page.getByLabel('Your email address').fill('member@example.invalid');
+ await page.getByLabel('Registered email address').fill('member@example.invalid');await page.getByLabel('Registered date of birth').fill('1996-11-14');
  await page.getByRole('button',{name:'Send verification link'}).click();
  await page.getByRole('status').filter({hasText:'If eligible'}).waitFor();checks++;
- assert.deepEqual(calls.at(-1).data,{memberId:'JS-0103',email:'member@example.invalid'});checks++;
+ assert.deepEqual(calls.at(-1).data,{email:'member@example.invalid',dateOfBirth:'1996-11-14'});checks++;
  const before=calls.length;
  await page.goto(origin+`/verify#claim=${claimId}&token=${token}`);
  await page.waitForFunction(()=>location.hash==='');

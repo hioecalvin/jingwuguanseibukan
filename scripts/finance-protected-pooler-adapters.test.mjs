@@ -25,7 +25,8 @@ async function setup(t,variant='ok'){
     [fixture('finance-protected-pooler-probe.ps1'),['-Mode','setup','-Directory',directory]]]){
     const r=ps(file,args);assert.equal(r.status,0,r.stderr);
   }
-  const target=financeReadOnlyStagingTarget(),nonce='a'.repeat(32),at=n=>new Date(Date.now()+n).toISOString();
+  const fixtureNow=Date.now(); // Keep equal fixture instants equal across clock ticks.
+  const target=financeReadOnlyStagingTarget(),nonce='a'.repeat(32),at=n=>new Date(fixtureNow+n).toISOString();
   const bundle=Buffer.from('-- SYNTHETIC POOLER INTEGRATION ONLY\n');
   const base={capturedAt:at(-5000),database:'postgres',sessionUser:'postgres',readOnly:'on',ssl:true,
     address:'192.0.2.1',port:5432,clusterId:'12345',backendPid:90,inventory:[{name:'profiles',kind:'r'}]};

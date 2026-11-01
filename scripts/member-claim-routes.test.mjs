@@ -22,6 +22,8 @@ function setup(options={}){
  const routes={};
  for(const [action,path] of [['request','app/api/member-claims/request/route.ts'],['verify','app/api/member-claims/verify/route.ts'],['setup','app/api/member-claims/setup/route.ts'],['review','app/api/admin/member-claims/route.ts']]){
   routes[action]=loadRoute(path,{
+   'next/server':{after:callback=>{calls.push({after:callback});}},
+   '@/lib/member-claims/delivery':{deliverMemberClaimEmail:async scope=>{calls.push({delivery:scope});}},
    'node:crypto':{randomBytes:n=>{assert.equal(n,32);return Buffer.from(proof,'hex');}},
    'node:timers/promises':{setTimeout:async()=>{}},
    '@/lib/application-origin':{configuredApplicationOrigin:()=>origin},
@@ -45,15 +47,15 @@ test('invalid or oversized streamed bodies never reach claim persistence',async(
  const s=setup();for(const body of [[],{email:'bad',memberId:'JS-0103'},{email:'a@b.test',memberId:'*'},{extra:'x'.repeat(5000)}])assert.equal((await s.request('request',body)).status,400);
  assert.equal(s.calls.filter(c=>c.rpc).length,0);
 });
-test('request normalizes identifiers, generates a server proof and returns no existence details',async()=>{
- const s=setup();const result=await s.request('request',{memberId:' js-0103 ',email:' MEMBER@Example.Invalid ',actor:'forged',token:'forged'});
+test('request normalizes email and checks registered birth date, generates a server proof and returns no existence details',async()=>{
+ const s=setup();const result=await s.request('request',{dateOfBirth:'1996-11-14',memberId:'forged-ignored',email:' MEMBER@Example.Invalid ',actor:'forged',token:'forged'});
  assert.equal(result.status,202);const first=await result.text();assert.ok(!first.includes(proof));assert.ok(!first.includes('member@example.invalid'));
- const call=s.calls.find(c=>c.rpc);assert.equal(call.rpc,'request_member_claim');
- assert.equal(JSON.stringify(call.args),JSON.stringify({target_registration_number:'JS-0103',proposed_email:'member@example.invalid',proof_token:proof,site_origin:origin}));
- s.state.rpcData={private:'ignored'};assert.equal(await (await s.request('request',{memberId:'JS-9999',email:'nobody@example.invalid'})).text(),first);
+ const call=s.calls.find(c=>c.rpc);assert.equal(call.rpc,'request_registered_member_claim');
+ assert.equal(JSON.stringify(call.args),JSON.stringify({registered_email:'member@example.invalid',registered_date_of_birth:'1996-11-14',proof_token:proof,site_origin:origin}));
+ s.state.rpcData={private:'ignored'};assert.equal(await (await s.request('request',{dateOfBirth:'1990-01-01',email:'nobody@example.invalid'})).text(),first);
 });
-test('request limits both JS ID and email and fails closed on limiter failure',async()=>{
- const s=setup({denyRate:'claim-request-email'});assert.equal((await s.request('request',{memberId:'JS-0103',email:'m@e.invalid'})).status,429);assert.equal(s.calls.filter(c=>c.rpc).length,0);
+test('request limits email and fails closed on limiter failure',async()=>{
+ const s=setup({denyRate:'claim-request-email'});assert.equal((await s.request('request',{dateOfBirth:'1996-11-14',email:'m@e.invalid'})).status,429);assert.equal(s.calls.filter(c=>c.rpc).length,0);
  s.state.denyRate=null;s.state.rateThrows=true;assert.equal((await s.request('request',{})).status,503);
 });
 test('client identity accepts only the trusted Vercel header and valid IP',async()=>{
@@ -68,7 +70,7 @@ test('verification requires complete claim UUID and secret in the JSON body',asy
 });
 test('expired proofs give a generic error; internal errors never reach clients or logs',async()=>{
  const s=setup({rpcError:{code:'42501',message:proof}});assert.equal((await s.request('verify',{claimId,token:proof})).status,400);
- s.state.rpcError={code:'XX000',message:'private-db-secret'};const result=await s.request('request',{memberId:'JS-0103',email:'m@e.invalid'});
+ s.state.rpcError={code:'XX000',message:'private-db-secret'};const result=await s.request('request',{dateOfBirth:'1996-11-14',email:'m@e.invalid'});
  assert.equal(result.status,503);assert.ok(!(await result.text()).includes('private-db-secret'));
  assert.equal(s.routes.request.logs.length,0);
 });
@@ -144,4 +146,13 @@ test('setup rejects busy, expired or malformed server state without provider cal
  s.state.rpcError={code:'42501'};assert.equal((await s.request('setup',setupBody)).status,400);
  s.state.rpcError=null;s.state.rpcData=[{...prepared[0],member_uuid:'bad'}];assert.equal((await s.request('setup',setupBody)).status,503);
  assert.equal(s.calls.filter(c=>c.create).length,0);
+});
+
+test('request rejects impossible, future and missing birth dates before matching records',async()=>{
+ for(const dateOfBirth of [undefined,null,'','0000-01-01','1996-2-3','2023-02-29','2000-02-30','1996-13-01','2999-01-01','14/11/1996',123,{}]){
+  const s=setup();assert.equal((await s.request('request',{email:'member@example.invalid',dateOfBirth})).status,400);
+  assert.equal(s.calls.filter(c=>c.rpc).length,0);
+ }
+ const s=setup();assert.equal((await s.request('request',{email:'member@example.invalid',dateOfBirth:'2000-02-29'})).status,202);
+ assert.equal(s.calls.find(c=>c.rpc).args.registered_date_of_birth,'2000-02-29');
 });

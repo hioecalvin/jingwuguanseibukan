@@ -1,8 +1,11 @@
+import { after } from "next/server";
+import { deliverMemberClaimEmail } from "@/lib/member-claims/delivery";
 import { claimIdPattern, claimRequestGuard, readClaimBody, reply } from "@/lib/member-claims/http";
 import { consumeDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
 export async function POST(request: Request) {
   try {
     const blocked = await claimRequestGuard(request, "review");
@@ -18,6 +21,11 @@ export async function POST(request: Request) {
     if (body.action === "list") {
       const { data, error } = await client.rpc("get_reviewable_member_claims");
       if (error) return reply({ error: "Unable to load claim reviews." }, 403);
+      // Refresh can retry a due setup email, scoped by the authenticated queue.
+      const approved = (data ?? []).filter((claim: { state: string }) => claim.state === "approved").slice(0, 2);
+      if (approved.length) after(async () => {
+        for (const claim of approved) await deliverMemberClaimEmail({ claimId: claim.claim_id });
+      });
       return reply({ claims: data ?? [] });
     }
     if (!["approve", "reject"].includes(String(body.action)) || typeof body.claimId !== "string" || !claimIdPattern.test(body.claimId)) {
@@ -27,6 +35,7 @@ export async function POST(request: Request) {
     // No actor/member/email supplied by the browser is trusted for authorization.
     const { error } = await client.rpc("review_member_claim", { claim_id: body.claimId, approve: body.action === "approve" });
     if (error) return reply({ error: "This claim is unavailable or outside your current Dojo authority." }, 403);
+    if (body.action === "approve") after(() => deliverMemberClaimEmail({ claimId: body.claimId as string }));
     return reply({ message: body.action === "approve" ? "Identity claim approved. A password-setup email has been queued for the member." : "Identity claim rejected." });
   } catch {
     return reply({ error: "Claim review is temporarily unavailable." }, 503);

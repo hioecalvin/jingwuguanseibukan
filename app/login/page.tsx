@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -135,6 +136,9 @@ className="w-full rounded-lg bg-sky-700 py-3 font-semibold text-white transition
         </form>
 
         <div className="mt-6 text-center text-sm">
+          <Link href="/claim-id" className="mb-4 block font-medium text-sky-400 hover:text-sky-300">
+            Already a member? Claim your account
+          </Link>
             <a href="/register" tabIndex={0} className="font-medium text-sky-400 hover:text-sky-300">
              Create account
             </a>

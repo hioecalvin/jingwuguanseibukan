@@ -278,6 +278,8 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   ]);
   const serverOnly = new Set([
     "request_member_claim",
+    "request_registered_member_claim",
+    "claim_member_account_email",
     "verify_member_claim",
     "prepare_member_claim_setup",
     "member_claim_setup_complete",
