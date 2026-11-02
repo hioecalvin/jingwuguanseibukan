@@ -136,7 +136,7 @@ className="w-full rounded-lg bg-sky-700 py-3 font-semibold text-white transition
         </form>
 
         <div className="mt-6 text-center text-sm">
-          <Link href="/claim-id" className="mb-4 block font-medium text-sky-400 hover:text-sky-300">
+          <Link href="/claim-id" tabIndex={0} className="mb-4 block font-medium text-sky-400 hover:text-sky-300">
             Already a member? Claim your account
           </Link>
             <a href="/register" tabIndex={0} className="font-medium text-sky-400 hover:text-sky-300">
