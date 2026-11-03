@@ -6,6 +6,7 @@ export function createClient(){let calls=0;return {rpc:async(name:string)=>{
  if(scenario==='slow')await waitForFixtureRequest('assessment-history',true);
  if(scenario==='throw-once'&&attempt===1)throw new Error('Private synthetic transport failure');
  if(scenario==='error-once'&&attempt===1)return {data:null,error:new Error('Private RPC failure')};
+ if(scenario==='historical')return {data:['lost_record','skipped_rank','recorded_grade'].map((outcome,index)=>({result_id:'h'+index,assessment_number:null,member_id:'JS-0103',member_name:'Historical Member',assessment_date:null,class_name:'Aikido',dojo_name:null,rank_before:null,rank_assessed:'Kyu-6',outcome,assessor_name:null,notes:'Source value: '+['X','>','2003'][index]})),error:null};
  if(scenario==='empty')return {data:[],error:null};
  if(name==='get_assessment_result_history')return {data:[
   {result_id:'r1',assessment_number:'2026-0001',member_id:'JS-0103',member_name:'Fixture Member',assessment_date:'2026-10-01',class_name:'Fixture Aikido',dojo_name:'Fixture Dojo',rank_before:'5th Kyu',rank_assessed:'4th Kyu',outcome:'fail',assessor_name:'Fixture Assessor',notes:'Reassess later'},

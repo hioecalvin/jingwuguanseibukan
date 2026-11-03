@@ -14,7 +14,7 @@ for(const scenario of ['throw-once','error-once']){
 }
 test('empty history is distinct from a failed request',async({page})=>{
  await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=empty`);
- await expect(page.getByRole('status')).toHaveText('No submitted assessments yet.');
+ await expect(page.getByRole('status')).toHaveText('No assessment records yet.');
  await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
 });
 test('history refresh is disabled until the request finishes',async({page})=>{
@@ -37,4 +37,20 @@ test('history keeps fail and pass separate with unique numbers and expandable de
  await expect(page.getByText('2026-0001',{exact:true})).toHaveCount(0);
  await expect(page.getByText('2026-0042',{exact:true})).toBeVisible();
  await expect(page.getByText('Pass',{exact:true})).toBeVisible();
+});
+
+test('historical lost, skipped and partial dates are not failed exams',async({page})=>{
+ await page.goto(NAV_ORIGIN+'/assessment-history-fixture?scenario=historical');
+ await expect(page.locator('summary')).toHaveCount(3);
+ await expect(page.getByText('Record lost',{exact:true})).toBeVisible();
+ await expect(page.getByText('Rank skipped',{exact:true})).toBeVisible();
+ await expect(page.getByText('Historical grade',{exact:true})).toBeVisible();
+ await expect(page.getByText('Fail',{exact:true})).toHaveCount(0);
+ await expect(page.locator('summary .font-mono')).toHaveText(['Not numbered','Not numbered','Not numbered']);
+ await page.locator('summary').first().click();
+ await expect(page.getByText('Source value: X',{exact:true})).toBeVisible();
+ await page.getByLabel('Find a record').fill('Unknown Number');
+ await expect(page.locator('summary')).toHaveCount(0);
+ await page.getByLabel('Find a record').fill('Historical Member');
+ await expect(page.locator('summary')).toHaveCount(3);
 });
