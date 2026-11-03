@@ -85,6 +85,7 @@ type PreparedCandidate = Candidate & {
   assessment_date: string;
   member_assessor_id: string | null;
   external_assessor_name: string | null;
+  assessor_name_snapshot: string | null;
   member_id: string | null;
   aikikai_registration_number: string | null;
   class_logo_url: string | null;
@@ -170,7 +171,9 @@ export default function BulkAssessmentsPage() {
 
     const scopes = (scopeResponse.data ?? []) as ScopeRow[];
     setScopeRows(scopes);
-    setAssessors((assessorResponse.data ?? []) as GradingAssessor[]);
+    const activeAssessors = (assessorResponse.data ?? []) as GradingAssessor[];
+    setAssessors(activeAssessors);
+    if (activeAssessors.length === 1) setAssessorMemberId((current) => current || activeAssessors[0].member_id);
     setPreparedAssessments(
       (preparedResponse.data ?? []) as PreparedAssessmentSummary[],
     );
@@ -212,12 +215,7 @@ export default function BulkAssessmentsPage() {
     (candidate) => decisions[candidate.membership_id]?.outcome === "pass",
   ).length;
   const failedCount = includedCandidates.length - passedCount;
-  const requiresMemberAssessor = includedCandidates.some(
-    (candidate) => candidate.level_to === "mudansha",
-  );
-  const requiresExternalAssessor = includedCandidates.some(
-    (candidate) => candidate.level_to === "yudansha",
-  );
+  const requiresMemberAssessor = includedCandidates.length > 0;
   const preparedCertificateCandidates = preparedRows.filter(
     (candidate) =>
       candidate.certificate_id &&
@@ -237,6 +235,7 @@ export default function BulkAssessmentsPage() {
   function clearPreparedAssessment() {
     setPreparedAssessmentId("");
     setPreparedRows([]);
+    setExternalAssessorName("");
     resetSubmissionState();
   }
 
@@ -367,7 +366,7 @@ export default function BulkAssessmentsPage() {
         target_class_id: classId,
         assessment_date: assessmentDate,
         assessor_member_id: assessorMemberId || null,
-        external_assessor_name: externalAssessorName.trim() || null,
+        external_assessor_name: null,
         target_dojo_id: dojoId || null,
         selected_candidates: selectedCandidates,
       },
@@ -394,11 +393,11 @@ export default function BulkAssessmentsPage() {
       return false;
     }
     if (requiresMemberAssessor && !assessorMemberId) {
-      setError("Select an internal Member assessor for Mudansha candidates.");
+      setError("Select an active appointed grading assessor for all candidates.");
       return false;
     }
-    if (requiresExternalAssessor && !externalAssessorName.trim()) {
-      setError("Enter the external assessor for Yudansha candidates.");
+    if (externalAssessorName.trim()) {
+      setError("This legacy prepared roster uses an external assessor. Prepare a new roster with the appointed Member assessor.");
       return false;
     }
     if (!submissionKey) {
@@ -494,9 +493,9 @@ export default function BulkAssessmentsPage() {
           effective_date: candidate.assessment_date,
           promoted_by: null,
           promoted_by_name: null,
-          assessor_type: candidate.level_to === "yudansha" ? "external" : "member",
-          assessor_member_id: candidate.level_to === "mudansha" ? candidate.member_assessor_id : null,
-          assessor_name: candidate.level_to === "yudansha"
+          assessor_type: candidate.external_assessor_name && candidate.level_to === "yudansha" ? "external" : "member",
+          assessor_member_id: candidate.external_assessor_name && candidate.level_to === "yudansha" ? null : candidate.member_assessor_id,
+          assessor_name: candidate.status === "submitted" ? candidate.assessor_name_snapshot : candidate.external_assessor_name && candidate.level_to === "yudansha"
             ? candidate.external_assessor_name
             : assessors.find((item) => item.member_id === candidate.member_assessor_id)?.full_name ?? null,
         };
@@ -712,11 +711,11 @@ export default function BulkAssessmentsPage() {
           2. Assessors
         </h2>
         <p className="mt-1 text-sm text-neutral-400">
-          Mudansha rows use the internal Member assessor. Yudansha rows use the external assessor.
+          All grades use an active appointed Member assessor. Existing assessment records keep their original attribution.
         </p>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <label className="text-sm text-neutral-300">
-            <span className="mb-2 block font-medium">Internal Member assessor</span>
+            <span className="mb-2 block font-medium">Appointed grading assessor</span>
             <select
               value={assessorMemberId}
               disabled={submitting || Boolean(preparedAssessmentId)}
@@ -732,21 +731,7 @@ export default function BulkAssessmentsPage() {
               ))}
             </select>
           </label>
-          <label className="text-sm text-neutral-300">
-            <span className="mb-2 block font-medium">External assessor</span>
-            <input
-              type="text"
-              value={externalAssessorName}
-              maxLength={200}
-              disabled={submitting || Boolean(preparedAssessmentId)}
-              onChange={(event) => {
-                setExternalAssessorName(event.target.value);
-                clearPreparedAssessment();
-              }}
-              placeholder="Full name for Yudansha grading"
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2.5 text-white placeholder:text-neutral-600"
-            />
-          </label>
+          {externalAssessorName && <p className="text-sm text-amber-300">Historical external assessor: {externalAssessorName}. This attribution is preserved; new assessments use the appointed Member assessor.</p>}
         </div>
       </section>
 

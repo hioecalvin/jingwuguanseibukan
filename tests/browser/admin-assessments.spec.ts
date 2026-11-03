@@ -16,7 +16,7 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
   await page.getByRole('button', { name: 'Include all' }).click();
   const assessors = page.getByRole('region', { name: '2. Assessors' });
   await assessors.getByRole('combobox').selectOption('fixture-assessor');
-  await assessors.getByRole('textbox').fill('External Shihan');
+  await expect(assessors.getByRole('textbox')).toHaveCount(0);
   await page.getByRole('button', { name: 'Prepare roster and pending certificates' }).click();
 
   await expect(page.getByRole('status')).toContainText('Prepared assessment opened with 3 candidates and 3 certificates.');

@@ -57,10 +57,11 @@ test("the prepared roster is immutable and every candidate is submitted together
   assert.match(page, /Prepare and print the pending certificates before submitting results/);
 });
 
-test("both assessor modes and scope controls are available", () => {
+test("appointed assessor applies to every grade and scope controls remain available", () => {
   assert.match(page, /get_active_grading_assessors/);
-  assert.match(page, /Internal Member assessor/);
-  assert.match(page, /External assessor/);
+  assert.match(page, /Appointed grading assessor/);
+  assert.match(page, /All grades use an active appointed Member assessor/);
+  assert.doesNotMatch(page, /placeholder="Full name for Yudansha grading"/);
   assert.match(page, /Dojo \(optional\)/);
   assert.match(page, /type="date"/);
 });

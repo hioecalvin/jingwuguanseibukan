@@ -75,14 +75,14 @@ export function createClient() {
       }
       if (name === 'prepare_bulk_assessment') {
         const selected = Array.isArray(args.selected_candidates) ? args.selected_candidates as Array<Record<string, unknown>> : [];
-        if (selected.length !== candidates.length || args.assessor_member_id !== assessor.member_id || args.external_assessor_name !== 'External Shihan') {
-          return { data: null, error: new Error('The complete roster and both required assessors must be prepared together.') };
+        if (selected.length !== candidates.length || args.assessor_member_id !== assessor.member_id || args.external_assessor_name !== null) {
+          return { data: null, error: new Error('The complete roster and appointed assessor must be prepared together.') };
         }
         const assessmentDate = String(args.assessment_date);
         preparedRows = candidates.map((candidate, index) => ({
           ...candidate,
           prepared_assessment_id: 'prepared-fixture', status: 'pending', assessment_date: assessmentDate,
-          member_assessor_id: assessor.member_id, external_assessor_name: 'External Shihan',
+          member_assessor_id: assessor.member_id, external_assessor_name: null, assessor_name_snapshot: null,
           member_id: `JS-${100 + index}`, aikikai_registration_number: null, class_logo_url: '/fixture-class-logo.png',
           certificate_id: `certificate-${index + 1}`, certificate_number: `JSG-${index + 1}`,
           certificate_status: 'pending', outcome: null, notes: null, instructor_name: null,
@@ -113,7 +113,7 @@ export function createClient() {
           const passed = decision?.outcome === 'pass';
           return {
             ...row,
-            status: 'submitted', outcome: decision?.outcome, notes: decision?.notes,
+            status: 'submitted', outcome: decision?.outcome, notes: decision?.notes, assessor_name_snapshot: assessor.full_name,
             instructor_name: decision?.instructor_name,
             certificate_status: passed ? 'issued' : 'voided',
           };

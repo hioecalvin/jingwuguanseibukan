@@ -315,13 +315,7 @@ export default function MemberManagementPage() {
     >({});
 
 
-  const [
-    externalAssessorNames,
-    setExternalAssessorNames,
-  ] =
-    useState<
-      Record<string, string>
-    >({});
+
 
 
   const [
@@ -2700,63 +2694,12 @@ export default function MemberManagementPage() {
     }
 
 
-    const isYudanshaGrading =
-      next.next_level ===
-      "yudansha";
-
-
-    const selectedAssessorId =
-      selectedAssessors[
-        member.membership_id
-      ] ?? "";
-
-
-    const externalAssessorName =
-      (
-        externalAssessorNames[
-          member.membership_id
-        ] ??
-        ""
-      ).trim();
-
-
-    if (
-      isYudanshaGrading
-    ) {
-      if (
-        !externalAssessorName
-      ) {
-        showError(
-          `Enter the external assessor name for ${member.full_name}'s Yudansha grading.`
-        );
-
-        return;
-      }
-    } else {
-      if (
-        !selectedAssessorId
-      ) {
-        showError(
-          `Select a grading assessor for ${member.full_name}.`
-        );
-
-        return;
-      }
+    const selectedAssessorId = selectedAssessors[member.membership_id] ?? "";
+    if (!selectedAssessorId) {
+      showError(`Select an appointed grading assessor for ${member.full_name}.`);
+      return;
     }
-
-
-    const assessorName =
-      isYudanshaGrading
-        ? externalAssessorName
-        : gradingAssessors.find(
-            (
-              assessor
-            ) =>
-              assessor.member_id ===
-              selectedAssessorId
-          )?.full_name ??
-          "Selected Assessor";
-
+    const assessorName = gradingAssessors.find((assessor) => assessor.member_id === selectedAssessorId)?.full_name ?? "Selected Assessor";
 
     const confirmed =
       window.confirm(
@@ -2790,15 +2733,9 @@ export default function MemberManagementPage() {
           promotion_effective_date:
             date,
 
-          assessor_member_id:
-            isYudanshaGrading
-              ? null
-              : selectedAssessorId,
+          assessor_member_id: selectedAssessorId,
 
-          external_assessor_name:
-            isYudanshaGrading
-              ? externalAssessorName
-              : null,
+          external_assessor_name: null,
         }
       );
 
@@ -2831,18 +2768,6 @@ export default function MemberManagementPage() {
 
 
     setSelectedAssessors(
-      (
-        current
-      ) => ({
-        ...current,
-
-        [member.membership_id]:
-          "",
-      })
-    );
-
-
-    setExternalAssessorNames(
       (
         current
       ) => ({
@@ -5127,48 +5052,7 @@ export default function MemberManagementPage() {
                           </div>
 
 
-                          {next.next_level ===
-                          "yudansha" ? (
 
-                            <div>
-
-                              <label className="mb-2 block text-sm font-medium">
-                                External Assessor
-                              </label>
-
-
-                              <input
-                                type="text"
-                                value={
-                                  externalAssessorNames[
-                                    member.membership_id
-                                  ] ??
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  setExternalAssessorNames(
-                                    (
-                                      current
-                                    ) => ({
-                                      ...current,
-
-                                      [member.membership_id]:
-                                        e.target.value,
-                                    })
-                                  )
-                                }
-                                placeholder="Enter assessor's full name"
-                                className="w-full rounded-lg border border-purple-800 bg-neutral-800 px-3 py-2 text-white placeholder:text-neutral-600"
-                              />
-
-
-                              <p className="mt-2 text-xs text-purple-300/70">
-                                Yudansha grading uses an external assessor name.
-                              </p>
-
-                            </div>
-
-                          ) : (
 
                             <div>
 
@@ -5239,19 +5123,11 @@ export default function MemberManagementPage() {
 
                             </div>
 
-                          )}
-
-
                           <button
                             type="button"
                             disabled={
                               processing ||
-                              (
-                                next.next_level ===
-                                  "mudansha" &&
-                                gradingAssessors.length ===
-                                  0
-                              )
+                              gradingAssessors.length === 0
                             }
                             onClick={() =>
                               promoteMember(
