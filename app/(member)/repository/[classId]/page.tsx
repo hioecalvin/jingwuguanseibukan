@@ -331,8 +331,8 @@ export default function RepositoryClassPage() {
        * LOAD ALL RANKS
        *
        * IMPORTANT:
-       * Member rank does NOT control
-       * repository access.
+       * Published material is limited to eligible ranks.
+       * Tiers organize content within each rank.
        */
 
       const {
@@ -650,14 +650,7 @@ export default function RepositoryClassPage() {
         ) ?? null
       : null;
 
-  const currentTier =
-    membership?.sub_rank_id
-      ? tiers.find(
-          (tier) =>
-            tier.id ===
-            membership.sub_rank_id
-        ) ?? null
-      : null;
+
 
   /*
    * ==========================================================
@@ -665,8 +658,14 @@ export default function RepositoryClassPage() {
    * ==========================================================
    */
 
+  // Keep folder navigation aligned with rank-scoped content RLS. Legacy member
+  // tier metadata does not restrict any tier inside an eligible rank.
+  const eligibleRanks = currentRank
+    ? ranks.filter((rank) => rank.sort_order <= currentRank.sort_order)
+    : [];
+
   const filteredRanks =
-    ranks.filter(
+    eligibleRanks.filter(
       (rank) => {
         /*
          * GRADE FILTER
@@ -1062,8 +1061,7 @@ export default function RepositoryClassPage() {
                     text-neutral-300
                   "
                 >
-                  {currentTier?.name ??
-                    "Tier not assigned"}
+                  All repository tiers within this rank
                 </p>
               </div>
 
@@ -1097,9 +1095,7 @@ export default function RepositoryClassPage() {
                   text-neutral-400
                 "
               >
-                You can still access the
-                complete repository for
-                this class.
+                Contact your Dojo Admin to confirm your rank before opening ranked materials.
               </p>
             </div>
           )}
@@ -1121,10 +1117,7 @@ export default function RepositoryClassPage() {
               text-neutral-500
             "
           >
-            Your current grade is shown
-            for reference only. It does
-            not restrict repository
-            access.
+            Members can open published materials at their current rank and lower ranks in this class. All tiers within those ranks are included.
           </p>
         </div>
       </section>
@@ -1184,7 +1177,7 @@ export default function RepositoryClassPage() {
             "
           >
             {filteredRanks.length} of{" "}
-            {ranks.length} ranks
+            {eligibleRanks.length} ranks
           </p>
         </div>
 
@@ -1398,7 +1391,7 @@ export default function RepositoryClassPage() {
                 font-bold
               "
             >
-              All Ranks & Tiers
+              Available Ranks & Tiers
             </h2>
 
             <p
@@ -1421,10 +1414,10 @@ export default function RepositoryClassPage() {
          * NO RANKS
          */}
 
-        {ranks.length === 0 ? (
+        {eligibleRanks.length === 0 ? (
           <EmptyState
-            title="No ranks configured"
-            description="There are currently no ranks configured for this class."
+            title="No ranks available"
+            description="No ranks are currently available to this account for this class. Contact your Dojo Admin if your recorded rank needs updating."
           />
         ) : filteredRanks.length ===
           0 ? (
@@ -1720,10 +1713,7 @@ export default function RepositoryClassPage() {
                               (
                                 tier
                               ) => {
-                                const isCurrentTier =
-                                  isCurrentRank &&
-                                  currentTier?.id ===
-                                    tier.id;
+                                const belongsToCurrentRank = isCurrentRank;
 
                                 return (
                                   <button
@@ -1745,7 +1735,7 @@ export default function RepositoryClassPage() {
                                       text-left
                                       transition
                                       ${
-                                        isCurrentTier
+                                        belongsToCurrentRank
                                           ? `
                                               border-sky-700
                                               bg-sky-950/30
@@ -1790,7 +1780,7 @@ export default function RepositoryClassPage() {
                                         </p>
                                       </div>
 
-                                      {isCurrentTier ? (
+                                      {belongsToCurrentRank ? (
                                         <span
                                           className="
                                             rounded-full
@@ -1804,7 +1794,7 @@ export default function RepositoryClassPage() {
                                             text-sky-300
                                           "
                                         >
-                                          Current
+                                          Current rank
                                         </span>
                                       ) : (
                                         <span
@@ -1856,13 +1846,7 @@ export default function RepositoryClassPage() {
             text-neutral-500
           "
         >
-          Repository access is based on
-          your class membership. Your
-          current rank and tier are
-          displayed for reference and do
-          not restrict which published
-          training materials you can
-          view.
+          Repository access follows your class membership and eligible ranks. Tiers organize training materials within a rank; they are not member grades.
         </p>
       </section>
     </main>

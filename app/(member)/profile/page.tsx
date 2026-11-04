@@ -2059,17 +2059,7 @@ export default function ProfilePage() {
                             </p>
                           )}
 
-                        {membership
-                          .sub_ranks
-                          ?.name && (
-                          <p className="mt-1 text-neutral-400">
-                            {
-                              membership
-                                .sub_ranks
-                                .name
-                            }
-                          </p>
-                        )}
+
 
                         {title && (
                           <div className="mt-3">
@@ -2138,15 +2128,7 @@ export default function ProfilePage() {
                         }
                       />
 
-                      <MembershipSummary
-                        label="Tier"
-                        value={
-                          membership
-                            .sub_ranks
-                            ?.name ??
-                          "Not assigned"
-                        }
-                      />
+
                     </div>
 
                     <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

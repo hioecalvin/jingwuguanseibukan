@@ -13,6 +13,8 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
   await page.getByRole('button', { name: 'Load eligible roster' }).click();
 
   await expect(page.getByText('Included 0 of 3 eligible candidates.')).toBeVisible();
+  await expect(page.getByText('Legacy member tier', { exact: false })).toHaveCount(0);
+  await expect(page.getByText('1st Kyu', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Include all' }).click();
   const assessors = page.getByRole('region', { name: '2. Assessors' });
   await assessors.getByRole('combobox').selectOption('fixture-assessor');

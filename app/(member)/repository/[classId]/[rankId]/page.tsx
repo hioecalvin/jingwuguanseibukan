@@ -1070,11 +1070,7 @@ export default function RankRepositoryPage() {
             text-neutral-500
           "
         >
-          Repository access is based
-          on your class membership.
-          Your current grade does not
-          restrict access to published
-          tiers in this class.
+          Members can open all tiers within their current rank and lower ranks in this class. Tiers organize the published training materials.
         </p>
       </section>
     </main>

@@ -1,5 +1,6 @@
 "use client";
 
+import { groupVisibleMembers, sortMemberGroups, type MemberSort } from "@/lib/group-visible-members";
 import CompactRecord from "@/components/compact-record";
 import { adminAccessErrorMessage } from "@/lib/admin-access-error";
 import MemberSubscriptionHistory from "@/components/member-subscription-history";
@@ -149,12 +150,6 @@ type NextPromotion = {
 };
 
 
-type GradingAssessor = {
-  member_id: string;
-  full_name: string;
-};
-
-
 type TitleHistoryItem = {
   history_id: string;
   membership_id: string;
@@ -274,7 +269,9 @@ export default function MemberManagementPage() {
     useState<Member[]>([]);
 
 
-  const [memberViews, setMemberViews] = useState<Record<string, "details" | "promote" | undefined>>({});
+  const [memberSort, setMemberSort] = useState<MemberSort>("name-asc");
+  const [selectedMemberships, setSelectedMemberships] = useState<Record<string, string>>({});
+  const [memberViews, setMemberViews] = useState<Record<string, "details" | undefined>>({});
 
   const [
     nextPromotions,
@@ -286,36 +283,6 @@ export default function MemberManagementPage() {
         NextPromotion | null
       >
     >({});
-
-
-  const [
-    promotionDates,
-    setPromotionDates,
-  ] =
-    useState<
-      Record<string, string>
-    >({});
-
-
-  const [
-    gradingAssessors,
-    setGradingAssessors,
-  ] =
-    useState<
-      GradingAssessor[]
-    >([]);
-
-
-  const [
-    selectedAssessors,
-    setSelectedAssessors,
-  ] =
-    useState<
-      Record<string, string>
-    >({});
-
-
-
 
 
   const [
@@ -766,7 +733,6 @@ export default function MemberManagementPage() {
 
       await Promise.all([
         loadMembers(),
-        loadActiveGradingAssessors(),
       ]);
 
 
@@ -945,37 +911,6 @@ export default function MemberManagementPage() {
    * ACTIVE GRADING ASSESSORS
    * =====================================================
    */
-
-  async function loadActiveGradingAssessors() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_active_grading_assessors"
-      );
-
-
-    if (
-      error
-    ) {
-      console.error(
-        "Failed to load grading assessors:",
-        error
-      );
-
-      return;
-    }
-
-
-    setGradingAssessors(
-      (
-        data ??
-        []
-      ) as GradingAssessor[]
-    );
-  }
-
 
   /*
    * =====================================================
@@ -2652,161 +2587,6 @@ export default function MemberManagementPage() {
    * =====================================================
    */
 
-  async function promoteMember(
-    member: Member
-  ) {
-    const date =
-      promotionDates[
-        member.membership_id
-      ] ?? "";
-
-
-    const next =
-      nextPromotions[
-        member.membership_id
-      ];
-
-
-    if (
-      !next
-    ) {
-      showError(
-        "No further promotion is configured."
-      );
-
-      return;
-    }
-
-    if (next.is_rank_promotion || next.next_rank_id !== member.rank_id) {
-      showError("Rank promotion requires a Super Admin assessment.");
-      return;
-    }
-
-
-    if (
-      !date
-    ) {
-      showError(
-        `Enter the promotion date for ${member.full_name}.`
-      );
-
-      return;
-    }
-
-
-    const selectedAssessorId = selectedAssessors[member.membership_id] ?? "";
-    if (!selectedAssessorId) {
-      showError(`Select an appointed grading assessor for ${member.full_name}.`);
-      return;
-    }
-    const assessorName = gradingAssessors.find((assessor) => assessor.member_id === selectedAssessorId)?.full_name ?? "Selected Assessor";
-
-    const confirmed =
-      window.confirm(
-        `Promote ${member.full_name} to ${next.next_rank_name} · ${next.next_sub_rank_name} effective ${date}?\n\nAssessor: ${assessorName}`
-      );
-
-
-    if (
-      !confirmed
-    ) {
-      return;
-    }
-
-
-    setProcessingId(
-      member.membership_id
-    );
-
-    clearMessage();
-
-
-    const {
-      error,
-    } =
-      await supabase.rpc(
-        "promote_membership",
-        {
-          target_membership_id:
-            member.membership_id,
-
-          promotion_effective_date:
-            date,
-
-          assessor_member_id: selectedAssessorId,
-
-          external_assessor_name: null,
-        }
-      );
-
-
-    if (
-      error
-    ) {
-      showError(
-        error.message
-      );
-
-      setProcessingId(
-        null
-      );
-
-      return;
-    }
-
-
-    setPromotionDates(
-      (
-        current
-      ) => ({
-        ...current,
-
-        [member.membership_id]:
-          "",
-      })
-    );
-
-
-    setSelectedAssessors(
-      (
-        current
-      ) => ({
-        ...current,
-
-        [member.membership_id]:
-          "",
-      })
-    );
-
-
-    await Promise.all([
-      loadMembers(),
-      loadActiveGradingAssessors(),
-    ]);
-
-
-    if (
-      openHistory[
-        member.membership_id
-      ]
-    ) {
-      await loadGradeHistory(
-        member.membership_id
-      );
-    }
-
-
-    showSuccess(
-      `${member.full_name} promoted to ${next.next_rank_name} · ${next.next_sub_rank_name}. Assessor: ${assessorName}.`
-    );
-
-
-    setProcessingId(
-      null
-    );
-  }
-
-
   /*
    * =====================================================
    * UNDO PROMOTION
@@ -4026,6 +3806,9 @@ export default function MemberManagementPage() {
    * =====================================================
    */
 
+  const memberGroups = sortMemberGroups(groupVisibleMembers(members, filteredMembers), memberSort);
+  const totalMemberCount = new Set(members.map(member => member.user_id)).size;
+
   function exportMembersExcel() {
     if (
       filteredMembers.length ===
@@ -4269,14 +4052,6 @@ export default function MemberManagementPage() {
 
           key:
             "rank_name",
-        },
-
-        {
-          header:
-            "Sub Rank",
-
-          key:
-            "sub_rank_name",
         },
 
         {
@@ -4712,7 +4487,15 @@ export default function MemberManagementPage() {
           </div>
 
 
-          <div className="mt-4 max-w-sm">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm text-neutral-300">Sort members
+              <select value={memberSort} onChange={event => setMemberSort(event.target.value as MemberSort)} className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white">
+                <option value="name-asc">Name: A–Z</option>
+                <option value="name-desc">Name: Z–A</option>
+                <option value="id-asc">JS ID: Low–High</option>
+                <option value="id-desc">JS ID: High–Low</option>
+              </select>
+            </label>
 
             <select
               aria-label="Dojo filter"
@@ -4763,10 +4546,10 @@ export default function MemberManagementPage() {
 
   <p className="text-sm text-neutral-400">
     Showing{" "}
-    {filteredMembers.length}{" "}
+    {memberGroups.length}{" "}
     of{" "}
-    {members.length}{" "}
-    memberships
+    {totalMemberCount}{" "}
+    members
   </p>
 
 
@@ -4806,10 +4589,11 @@ export default function MemberManagementPage() {
 
           ) : (
 
-            filteredMembers.map(
+            memberGroups.map(
               (
-                member
+                group
               ) => {
+                const member = group.memberships.find(item => item.membership_id === selectedMemberships[group.userId]) ?? group.preferredMembership;
 
                 const next =
                   nextPromotions[
@@ -4961,8 +4745,8 @@ export default function MemberManagementPage() {
 
 
                 return (
-                  <article key={member.membership_id} className="member-list-item rounded-xl border border-neutral-800 bg-neutral-900">
-                    <div className="member-list-row">
+                  <article key={group.userId} data-member-id={group.userId} className="member-list-item rounded-xl border border-neutral-800 bg-neutral-900">
+                    <div className="member-list-row" style={{ gridTemplateColumns: "2.5rem minmax(0, 6rem) minmax(0, 1fr)" }}>
                       <div className="member-list-photo">
                         {member.avatar_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -4970,23 +4754,38 @@ export default function MemberManagementPage() {
                         ) : <span aria-hidden="true">{member.full_name.charAt(0).toUpperCase()}</span>}
                       </div>
                       <div className="member-list-id"><span className="member-list-label">Member ID</span>
-                        <button type="button" aria-label={`Member ID ${member.registration_number ?? "not assigned"}: ${member.full_name}`} aria-expanded={memberViews[member.membership_id] === "details"} aria-controls={`member-details-${member.membership_id}`}
+                        <button type="button" aria-label={`Member ID ${member.registration_number ?? "not assigned"}: ${member.full_name}`} aria-expanded={memberViews[member.membership_id] === "details"} aria-controls={`member-details-${group.userId}`}
                           onClick={() => {
                             const opening = memberViews[member.membership_id] !== "details";
                             setMemberViews(current => ({ ...current, [member.membership_id]: opening ? "details" : undefined }));
                             if (opening) { setOpenHistory(current => ({ ...current, [member.membership_id]: true })); void loadGradeHistory(member.membership_id); }
                           }} className="member-id-button">{member.registration_number ?? "Not assigned"}</button>
                       </div>
-                      <div className="member-list-name"><span className="member-list-label">Name</span><h2 className="font-semibold">{member.full_name}</h2><span className="text-xs text-neutral-400">{member.class_name}</span></div>
-                      <div><span className="member-list-label">Rank</span><span>{member.rank_name ?? "Unranked"}</span>{member.sub_rank_name && <span className="block text-xs text-neutral-400">{member.sub_rank_name}</span>}</div>
-                      <div><span className="member-list-label">Dojo</span><span>{member.dojo_name ?? "Not recorded"}</span></div>
-                      <div><span className="member-list-label">Last Training Session</span><span>{formatTrainingSessionRecency(member.last_training_session_date, member.last_training_days_ago)}</span></div>
+                      <div className="member-list-name"><span className="member-list-label">Name</span><h2 className="font-semibold">{member.full_name}</h2><span className="text-xs text-neutral-400">{group.memberships.length} {group.memberships.length === 1 ? "membership" : "memberships"}</span></div>
+
+                    </div>
+                    <div className="border-t border-neutral-800 px-3 py-3">
+                      <div className="space-y-2" role="group" aria-label={"Classes enrolled for " + member.full_name}>
+                        {group.memberships.map(enrollment => <div key={enrollment.membership_id} className="grid grid-cols-2 items-center gap-2 rounded-lg border border-neutral-700 p-2 text-sm sm:grid-cols-5">
+                          <div><span className="member-list-label">Class</span>{enrollment.class_name}</div>
+                          <div><span className="member-list-label">Dojo</span>{enrollment.dojo_name ?? "Not recorded"}</div>
+                          <div><span className="member-list-label">Rank</span>{enrollment.rank_name ?? "Unranked"}</div>
+                          <div><span className="member-list-label">Status</span>{statusLabel(enrollment.membership_status, enrollment.date_of_passing)}</div>
+                          <button type="button" aria-label={"View Details: " + enrollment.class_name + " at " + (enrollment.dojo_name ?? "unknown dojo") + " for " + member.full_name}
+                            aria-expanded={enrollment.membership_id === member.membership_id && memberViews[member.membership_id] === "details"}
+                            aria-controls={"member-details-" + group.userId}
+                            onClick={() => {
+                              setSelectedMemberships(current => ({ ...current, [group.userId]: enrollment.membership_id }));
+                              setMemberViews(current => ({ ...current, [member.membership_id]: undefined, [enrollment.membership_id]: enrollment.membership_id === member.membership_id && current[member.membership_id] === "details" ? undefined : "details" }));
+                              setOpenHistory(current => ({ ...current, [enrollment.membership_id]: true })); void loadGradeHistory(enrollment.membership_id);
+                            }} className="rounded-lg border border-sky-700 px-3 py-2 text-sky-300">View Details</button>
+                        </div>)}
+                      </div>
+                    </div>
+                    <div id={`member-details-${group.userId}`} hidden={memberViews[member.membership_id] !== "details"} className="member-expanded-panel">
+                      <p className="mb-3 font-semibold">{member.class_name} · {member.dojo_name ?? "Not recorded"}</p>
                       <div className="member-list-actions">
-                        <button type="button" disabled={!next || next.is_rank_promotion || next.next_rank_id !== member.rank_id || processing || Boolean(member.date_of_passing) || member.membership_status !== "active"}
-                          aria-expanded={memberViews[member.membership_id] === "promote"} aria-controls={`member-promote-${member.membership_id}`}
-                          onClick={() => setMemberViews(current => ({ ...current, [member.membership_id]: current[member.membership_id] === "promote" ? undefined : "promote" }))}
-                          className="rounded-lg border border-sky-700 px-3 py-2 text-sm text-sky-300 disabled:opacity-40">Promote Tier</button>
-                        {next?.is_rank_promotion && <span className="text-xs text-amber-300">Assessment required for next rank</span>}
+                        <p className="text-sm text-neutral-300">Rank promotion is recorded through assessment.</p>
                         <label className="text-xs text-neutral-400">Status
                           <select aria-label={`Status for ${member.full_name}`} value={member.membership_status} disabled={processing || Boolean(member.date_of_passing)}
                             onChange={event => {
@@ -5003,156 +4802,9 @@ export default function MemberManagementPage() {
                           </select>
                         </label>
                       </div>
-                    </div>
-                    <section id={`member-promote-${member.membership_id}`} hidden={memberViews[member.membership_id] !== "promote" || !next || next.is_rank_promotion || next.next_rank_id !== member.rank_id || Boolean(member.date_of_passing) || member.membership_status !== "active"} aria-label={`Promote ${member.full_name}`} className="member-expanded-panel">
-                      {next && (<>
-
-                        <p className="font-semibold">
-                          Promote Tier
-                        </p>
-
-
-                        <p className="mt-1 text-sm text-neutral-400">
-                          Advance to the next tier within the same rank. Rank changes require a Super Admin assessment. The assessor is retained in the audit history.
-                        </p>
-
-
-                        <div className="mt-4 grid gap-4 lg:grid-cols-3 lg:items-end">
-
-                          <div>
-
-                            <label className="mb-2 block text-sm font-medium">
-                              Promotion Effective Date
-                            </label>
-
-
-                            <input
-                              type="date"
-                              value={
-                                promotionDates[
-                                  member.membership_id
-                                ] ??
-                                ""
-                              }
-                              onChange={(e) =>
-                                setPromotionDates(
-                                  (
-                                    current
-                                  ) => ({
-                                    ...current,
-
-                                    [member.membership_id]:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-                            />
-
-                          </div>
-
-
-
-
-                            <div>
-
-                              <label className="mb-2 block text-sm font-medium">
-                                Grading Assessor
-                              </label>
-
-
-                              <select
-                                value={
-                                  selectedAssessors[
-                                    member.membership_id
-                                  ] ??
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  setSelectedAssessors(
-                                    (
-                                      current
-                                    ) => ({
-                                      ...current,
-
-                                      [member.membership_id]:
-                                        e.target.value,
-                                    })
-                                  )
-                                }
-                                className="w-full rounded-lg border border-green-800 bg-neutral-800 px-3 py-2 text-white"
-                              >
-
-                                <option value="">
-                                  Select active assessor
-                                </option>
-
-
-                                {gradingAssessors.map(
-                                  (
-                                    assessor
-                                  ) => (
-
-                                    <option
-                                      key={
-                                        assessor.member_id
-                                      }
-                                      value={
-                                        assessor.member_id
-                                      }
-                                    >
-                                      {
-                                        assessor.full_name
-                                      }
-                                    </option>
-
-                                  )
-                                )}
-
-                              </select>
-
-
-                              {gradingAssessors.length ===
-                              0 && (
-
-                                <p className="mt-2 text-xs text-amber-400">
-                                  No active grading assessors are configured. Super Admin must enable at least one Member as a Grading Assessor.
-                                </p>
-
-                              )}
-
-                            </div>
-
-                          <button
-                            type="button"
-                            disabled={
-                              processing ||
-                              gradingAssessors.length === 0
-                            }
-                            onClick={() =>
-                              promoteMember(
-                                member
-                              )
-                            }
-                            className="rounded-lg bg-sky-500 px-5 py-2 font-semibold hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {processing
-                              ? "Processing..."
-                              : `Promote to ${next.next_rank_name} · ${next.next_sub_rank_name}`}
-                          </button>
-
-                        </div>
-
-                      </>)}
-                    </section>
-
-
-
-
-                    <div id={`member-details-${member.membership_id}`} hidden={memberViews[member.membership_id] !== "details"} className="member-expanded-panel">
                       <dl className="member-overview mt-4" aria-label="Member overview">
                       <div><dt>Date Joined</dt><dd>{member.joined_date ? formatDate(member.joined_date) : "Not recorded"}</dd></div>
-                      <div><dt>Rank Now</dt><dd>{member.rank_name ?? "Unranked"}{member.sub_rank_name && <span className="block text-xs font-normal text-neutral-300">{member.sub_rank_name}</span>}</dd></div>
+                      <div><dt>Rank Now</dt><dd>{member.rank_name ?? "Unranked"}</dd></div>
                       <div><dt>Last Training Session</dt><dd>{formatTrainingSessionRecency(member.last_training_session_date, member.last_training_days_ago)}</dd></div>
                     </dl>
                       <div className="member-detail-sections mt-4">
@@ -6328,10 +5980,10 @@ export default function MemberManagementPage() {
                       </CompactRecord>
 
                     )}{/* OFFICIAL RECORDS */}{/* CURRENT / NEXT */}<>
-                      <CompactRecord as="section" alwaysCollapsible summary="Next Promotion" detail="" className="mt-3 rounded-xl border border-neutral-800">
+                      <CompactRecord as="section" alwaysCollapsible summary="Next Assessment Grade" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
-                          Next Promotion
+                          Next Assessment Grade
                         </p>
 
 
@@ -6341,13 +5993,6 @@ export default function MemberManagementPage() {
                             <p className="mt-2 text-xl font-bold">
                               {
                                 next.next_rank_name
-                              }
-                            </p>
-
-
-                            <p className="mt-1 text-neutral-300">
-                              {
-                                next.next_sub_rank_name
                               }
                             </p>
 

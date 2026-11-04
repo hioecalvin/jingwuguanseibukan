@@ -1379,12 +1379,7 @@ export default function RepositorySearchPage() {
               text-neutral-500
             "
           >
-            Search only returns
-            published training content
-            for this class. Repository
-            access remains based on your
-            class membership rather than
-            your current rank.
+            Search returns published training content available to your account in this class. Members can access their current rank and lower ranks, including every tier within those ranks.
           </p>
         </section>
       )}

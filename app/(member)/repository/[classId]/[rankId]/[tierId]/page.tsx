@@ -1764,12 +1764,7 @@ export default function RepositoryTierPage() {
             text-neutral-500
           "
         >
-          Training materials shown
-          here are published references
-          for your class. Your current
-          grade does not restrict access
-          to published repository
-          content.
+          Training materials shown here are published references for an eligible rank in your class. All tiers within eligible ranks are included.
         </p>
       </section>
     </main>

@@ -72,7 +72,7 @@ const memberships = [
     level: 'mudansha',
     role: 'user',
     rank_id: 'fixture-rank-aikido',
-    sub_rank_id: null,
+    sub_rank_id: 'legacy-member-tier',
     title_level: null,
     classes: {
       id: 'fixture-class-aikido',
@@ -87,7 +87,7 @@ const memberships = [
       id: 'fixture-rank-aikido',
       name: '5th Kyu',
     },
-    sub_ranks: null,
+    sub_ranks: { name: 'Legacy member tier' },
   },
   {
     id: 'fixture-membership-karate',

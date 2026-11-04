@@ -19,6 +19,8 @@ test('Member updates only contact fields and requests a verified email replaceme
   await page.goto(`${NAV_ORIGIN}/profile-contact`);
   await expect(page).toHaveTitle('Contact self-service fixture');
   await expect(page.getByRole('heading', { name: 'My Profile' })).toBeVisible();
+  await expect(page.getByText('Legacy member tier', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Tier', { exact: true })).toHaveCount(0);
 
   const contact = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Phone & Instagram' }) });
   await contact.getByRole('button', { name: 'Edit' }).click();

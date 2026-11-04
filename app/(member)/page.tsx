@@ -1131,23 +1131,7 @@ export default function HomePage() {
                             "Rank not assigned"}
                         </h3>
 
-                        {membership
-                          .sub_ranks
-                          ?.name && (
-                          <p
-                            className="
-                              mt-1
-                              text-sm
-                              text-neutral-400
-                            "
-                          >
-                            {
-                              membership
-                                .sub_ranks
-                                .name
-                            }
-                          </p>
-                        )}
+
                       </div>
 
                       <span

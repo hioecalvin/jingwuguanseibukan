@@ -19,11 +19,12 @@ test("grading keeps assessor requirements and serialized progression wired toget
     "supabase/migrations/029_serialize_membership_promotions.sql",
   );
 
-  assert.doesNotMatch(members, /Enter the external assessor name/);
-  assert.match(members, /Select an appointed grading assessor/);
-  assert.match(members, /"promote_membership"/);
-  assert.match(members, /assessor_member_id:\s*selectedAssessorId/);
-  assert.match(members, /external_assessor_name:\s*null/);
+  const assessments = source("app/admin/assessments/page.tsx");
+  assert.doesNotMatch(members, /"promote_membership"|Promote Tier/);
+  assert.match(members, /Rank promotion is recorded through assessment/);
+  assert.match(assessments, /prepare_bulk_assessment/);
+  assert.match(assessments, /finalize_prepared_bulk_assessment/);
+  assert.match(assessments, /assessor_member_id:/);
   const gradingBody = gradingMigration.match(
     /create or replace function public\.promote_membership[\s\S]*?as \$function\$([\s\S]*?)\$function\$;/i,
   )?.[1];

@@ -67,10 +67,19 @@ const member = {
   is_grading_assessor: false,
 };
 
+const multi = new URLSearchParams(window.location.search).has('multiple');
+const fixtureMembers = multi ? [
+ member,
+ {...member,membership_id:'fixture-karate',class_id:'fixture-karate-class',class_name:'Karate',dojo_id:'fixture-other-dojo',dojo_name:'Second Dojo',rank_name:'4th Kyu',membership_status:'inactive'},
+ {...member,membership_id:'fixture-amy',user_id:'fixture-amy-user',registration_number:'JS-0010',full_name:'Amy Member'},
+ {...member,membership_id:'fixture-zara',user_id:'fixture-zara-user',registration_number:'JS-0002',full_name:'Zara Member'},
+] : [member];
+
 function resultFor(table: string, filters: Record<string, unknown> = {}, rangeStart = 0) {
   if (table === 'membership_subscription_charges' || table === 'membership_payments') {
     fixtureState.historyQueries.push({ table, filters });
-    if (filters.membership_id !== 'fixture-membership') throw new Error('Missing member-specific history boundary');
+    if (!fixtureMembers.some(row => row.membership_id === filters.membership_id)) throw new Error('Missing member-specific history boundary');
+    if (filters.membership_id !== member.membership_id) return {data:[],error:null};
     if (fixtureState.failNextHistory) { fixtureState.failNextHistory = false; return { data: null, error: new Error('Fixture read rejected') }; }
     if (table === 'membership_subscription_charges') {
       const rows = Array.from({ length: 13 }, (_, index) => ({ id: `charge-${index}`, billing_month: `${2026 - Math.floor(index / 12)}-${String(12 - index % 12).padStart(2, '0')}-01`, amount: 100000, currency: 'IDR', status: index === 0 ? 'paid' : 'unpaid' }));
@@ -83,7 +92,7 @@ function resultFor(table: string, filters: Record<string, unknown> = {}, rangeSt
     return { data: { is_super_admin: true }, error: null };
   }
   if (table === 'admin_visible_members') {
-    return { data: [{ ...member }], error: null };
+    return { data: fixtureMembers.map(row => ({...row})), error: null };
   }
   return { data: [], error: null };
 }
@@ -112,7 +121,8 @@ export function createClient() {
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args: RpcArguments = {}) => {
       if (name === 'get_membership_grade_history_with_assessor') {
-        if (args.target_membership_id !== member.membership_id) throw new Error('Unexpected history member');
+        if (!fixtureMembers.some(row => row.membership_id === args.target_membership_id)) throw new Error('Unexpected history member');
+        if (args.target_membership_id !== member.membership_id) return {data:[],error:null};
         return { data: [{ id: 'grade-1', effective_date: '2026-01-15', created_at: '2026-01-15T00:00:00Z', rank_name: '5th Kyu', sub_rank_name: null, revoked_at: null, assessor_name_snapshot: 'Fixture Assessor' }], error: null };
       }
       if (['record_membership_break', 'return_membership_active', 'set_membership_inactive'].includes(name)) {

@@ -20,8 +20,7 @@ test('058 keeps privileged internals private and gates legacy assessment before 
  assert.match(sql,/Unexpected assessment submission definition/);
  assert.doesNotMatch(sql,/set_config\(|current_setting\(/); // no spoofable assessment context flag
 });
-test('direct promotion UI blocks rank changes even for a stale/open form',()=>{
- assert.match(page,/if \(next.is_rank_promotion \|\| next.next_rank_id !== member.rank_id\)/);
- assert.match(page,/Assessment required for next rank/);
- assert.match(page,/Promote Tier/);
+test('member UI no longer exposes direct tier promotions',()=>{
+ assert.doesNotMatch(page,/Promote Tier|async function promoteMember|"promote_membership"/);
+ assert.match(page,/Rank promotion is recorded through assessment/);
 });

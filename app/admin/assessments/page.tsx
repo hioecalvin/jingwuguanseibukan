@@ -804,7 +804,7 @@ export default function BulkAssessmentsPage() {
 
                 <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-3 text-sm">
                   <p className="text-neutral-500">Current grade</p>
-                  <p className="mt-1 font-medium text-neutral-200">{gradeLabel(candidate.rank_before_name, candidate.sub_rank_before_name)}</p>
+                  <p className="mt-1 font-medium text-neutral-200">{gradeLabel(candidate.rank_before_name, null)}</p>
                   <p className="mt-3 text-neutral-500">Target grade</p>
                     <p className="mt-1 font-semibold text-amber-300">{gradeLabel(candidate.rank_to_name, candidate.sub_rank_to_name)}</p>
                     {candidate.is_rank_promotion && (

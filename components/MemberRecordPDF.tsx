@@ -604,12 +604,7 @@ export default function MemberRecordPDF({
       .rank_name ??
     "Unranked";
 
-  const currentTier =
-    record.current_grade
-      .tier_name ??
-    "-";
-
-  return (
+return (
     <Document
       title={`Official Member Record - ${record.member.full_name}`}
       author="Jingwuguan Seibukan"
@@ -1256,14 +1251,6 @@ export default function MemberRecordPDF({
               }
             >
               {currentRank}
-            </Text>
-
-            <Text
-              style={
-                styles.gradeTier
-              }
-            >
-              Tier: {currentTier}
             </Text>
 
             <Text

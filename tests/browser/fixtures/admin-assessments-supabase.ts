@@ -15,8 +15,8 @@ const assessor = {
 const candidates = [
   {
     membership_id: 'membership-high', user_id: 'user-high', full_name: 'Akira Senior', avatar_url: null,
-    ...scope, rank_before_id: 'rank-1kyu', rank_before_name: '1st Kyu', sub_rank_before_id: null,
-    sub_rank_before_name: null, rank_to_id: 'rank-shodan', rank_to_name: 'Shodan', sub_rank_to_id: null,
+    ...scope, rank_before_id: 'rank-1kyu', rank_before_name: '1st Kyu', sub_rank_before_id: 'legacy-member-tier',
+    sub_rank_before_name: 'Legacy member tier', rank_to_id: 'rank-shodan', rank_to_name: 'Shodan', sub_rank_to_id: null,
     sub_rank_to_name: null, is_rank_promotion: true, level_to: 'yudansha',
   },
   {
