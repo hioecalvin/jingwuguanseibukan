@@ -4,6 +4,7 @@ import { groupVisibleMembers, sortMemberGroups, type MemberSort } from "@/lib/gr
 import CompactRecord from "@/components/compact-record";
 import { adminAccessErrorMessage } from "@/lib/admin-access-error";
 import MemberSubscriptionHistory from "@/components/member-subscription-history";
+import MemberExamHistory from "@/components/member-exam-history";
 
 import {
   useEffect,
@@ -4803,7 +4804,7 @@ export default function MemberManagementPage() {
                         </label>
                       </div>
                       <dl className="member-overview mt-4" aria-label="Member overview">
-                      <div><dt>Date Joined</dt><dd>{member.joined_date ? formatDate(member.joined_date) : "Not recorded"}</dd></div>
+                      <div><dt>Date Joined</dt><dd>{member.joined_date ? formatDate(member.joined_date) : "Unknown"}</dd></div>
                       <div><dt>Rank Now</dt><dd>{member.rank_name ?? "Unranked"}</dd></div>
                       <div><dt>Last Training Session</dt><dd>{formatTrainingSessionRecency(member.last_training_session_date, member.last_training_days_ago)}</dd></div>
                     </dl>
@@ -5035,6 +5036,7 @@ export default function MemberManagementPage() {
                       </span>
 
                     </CompactRecord>
+<MemberExamHistory key={`${member.user_id}:${member.class_id}`} memberId={member.user_id} classId={member.class_id} />
 <CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Rank History" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -5289,7 +5291,7 @@ export default function MemberManagementPage() {
                                 ? formatDate(
                                     member.joined_date
                                   )
-                                : "Not recorded"}
+                                : "Unknown"}
                             </p>
 
 

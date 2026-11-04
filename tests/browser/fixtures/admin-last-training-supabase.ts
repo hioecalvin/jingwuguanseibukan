@@ -6,6 +6,8 @@ type TrainingCall = {
 };
 
 type LastTrainingFixtureState = {
+  examQueries: RpcArguments[];
+  failNextExam: boolean;
   failNextTraining: boolean;
   failNextStatus: boolean;
   failNextHistory: boolean;
@@ -22,6 +24,8 @@ declare global {
 const user = { id: 'fixture-super-admin' };
 
 export const fixtureState: LastTrainingFixtureState = {
+  examQueries: [],
+  failNextExam: false,
   failNextTraining: false,
   failNextStatus: false,
   failNextHistory: false,
@@ -56,7 +60,7 @@ const member = {
   rank_name: '5th Kyu',
   sub_rank_id: null,
   sub_rank_name: null,
-  joined_date: '2025-01-01',
+  joined_date: new URLSearchParams(window.location.search).has('unknown-joined') ? null : '2025-01-01',
   last_grading_date: '2026-01-15',
   last_training_session_date: '2026-08-01',
   last_training_days_ago: 57,
@@ -120,6 +124,18 @@ export function createClient() {
     },
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args: RpcArguments = {}) => {
+      if (name === 'get_assessment_result_history') {
+        fixtureState.examQueries.push(args);
+        if (args.target_member_id !== 'fixture-member') return { data: [], error: null };
+        if (fixtureState.failNextExam) { fixtureState.failNextExam = false; return { data: null, error: new Error('Private exam failure') }; }
+        const base = { class_id: 'fixture-class', assessment_date: null, rank_before: null, assessor_name: null, dojo_name: null, assessment_number: null };
+        return { data: [
+          {...base, result_id: 'exam-one', rank_assessed: '5th Kyu', outcome: 'recorded_grade', assessment_number: '2019-0001', assessment_date: '2019-02-03', notes: 'Recorded value: 2019-02-03\nDate precision: date'},
+          {...base, result_id: 'exam-lost', rank_assessed: '4th Kyu', outcome: 'lost_record', notes: 'Recorded value: X'},
+          {...base, result_id: 'exam-skipped', rank_assessed: '3rd Kyu', outcome: 'skipped_rank', notes: 'Recorded value: >'},
+          {...base, result_id: 'exam-other', class_id: 'fixture-karate-class', rank_assessed: 'Other class exam', outcome: 'pass', notes: null},
+        ], error: null };
+      }
       if (name === 'get_membership_grade_history_with_assessor') {
         if (!fixtureMembers.some(row => row.membership_id === args.target_membership_id)) throw new Error('Unexpected history member');
         if (args.target_membership_id !== member.membership_id) return {data:[],error:null};
