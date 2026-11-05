@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { assessmentOutcomeLabel } from "@/lib/assessment-history-labels";
+import { assessmentNumberLabel, assessmentOutcomeLabel } from "@/lib/assessment-history-labels";
 type Result = { result_id: string; assessment_number: string | null; member_id: string | null;
   member_name: string; assessment_date: string | null; class_name: string; dojo_name: string | null;
   rank_before: string | null; rank_assessed: string; outcome: string; assessor_name: string | null; notes: string | null };
@@ -42,7 +42,7 @@ export default function AssessmentHistoryClient() {
     {status && <p role="status">{status}</p>}
     <button disabled={loading} onClick={() => void load()} className="rounded border border-neutral-700 px-3 py-1 disabled:opacity-50">{loading ? "Loading…" : "Refresh"}</button>
     {results.filter(r => [r.assessment_number,r.member_id,r.member_name,r.class_name].some(v => v?.toLowerCase().includes(filter.toLowerCase()))).map(r => <details key={r.result_id} className="rounded-xl border border-neutral-800 p-3">
-      <summary className="cursor-pointer text-sm"><span className="font-mono">{r.assessment_number ?? "Not numbered"}</span> · {r.member_id ?? "Unknown Member ID"} · {r.member_name} · {r.assessment_date ?? "Date incomplete — see details"} · <span className={r.outcome === "pass" ? "text-emerald-400" : "text-amber-400"}>{assessmentOutcomeLabel(r.outcome)}</span></summary>
+      <summary className="cursor-pointer text-sm"><span className="font-mono">{assessmentNumberLabel(r)}</span> · {r.member_id ?? "Unknown Member ID"} · {r.member_name} · {r.assessment_date ?? "Date incomplete — see details"} · <span className={r.outcome === "pass" ? "text-emerald-400" : "text-amber-400"}>{assessmentOutcomeLabel(r.outcome)}</span></summary>
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2"><div><dt>Class / dojo</dt><dd>{r.class_name} · {r.dojo_name ?? "Unknown"}</dd></div><div><dt>Grade before → assessed grade</dt><dd>{r.rank_before ?? "Unknown"} → {r.rank_assessed}</dd></div><div><dt>Assessor</dt><dd>{r.assessor_name ?? "Unknown"}</dd></div><div><dt>Notes</dt><dd className="whitespace-pre-wrap">{r.notes || "—"}</dd></div></dl>
     </details>)}
   </section>;

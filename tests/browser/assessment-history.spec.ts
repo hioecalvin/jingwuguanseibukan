@@ -46,7 +46,7 @@ test('historical lost, skipped and partial dates are not failed exams',async({pa
  await expect(page.getByText('Rank skipped',{exact:true})).toBeVisible();
  await expect(page.getByText('Historical grade',{exact:true})).toBeVisible();
  await expect(page.getByText('Fail',{exact:true})).toHaveCount(0);
- await expect(page.locator('summary .font-mono')).toHaveText(['Not numbered','Not numbered','Not numbered']);
+ await expect(page.locator('summary .font-mono')).toHaveText(['Not numbered — record lost','Not numbered — rank skipped','Not numbered — date incomplete']);
  await page.locator('summary').first().click();
  await expect(page.getByText('Source value: X',{exact:true})).toBeVisible();
  await page.getByLabel('Find a record').fill('Unknown Number');

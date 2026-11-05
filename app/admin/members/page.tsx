@@ -5,6 +5,7 @@ import CompactRecord from "@/components/compact-record";
 import { adminAccessErrorMessage } from "@/lib/admin-access-error";
 import MemberSubscriptionHistory from "@/components/member-subscription-history";
 import MemberExamHistory from "@/components/member-exam-history";
+import { prepareOfficialMemberHistory, type MemberExamRecord, type AdminTransferSource, type MemberTransferSource } from "@/lib/official-member-history";
 
 import {
   useEffect,
@@ -2920,6 +2921,27 @@ export default function MemberManagementPage() {
       }
 
 
+      if (!recordData) throw new Error("Unable to prepare official member record.");
+      const [examResult, adminTransferResult, memberTransferResult] = await Promise.all([
+        supabase.rpc("get_assessment_result_history", { target_member_id: member.user_id }),
+        supabase.rpc("get_admin_dojo_transfer_requests")
+          .eq("membership_id", member.membership_id).eq("class_id", member.class_id),
+        supabase.from("dojo_transfer_requests")
+          .select("id,user_id,class_id,created_at,status,from_dojo:dojos!dojo_transfer_requests_from_dojo_id_fkey(name),to_dojo:dojos!dojo_transfer_requests_to_dojo_id_fkey(name)")
+          .eq("user_id", member.user_id).eq("class_id", member.class_id),
+      ]);
+      for (const result of [examResult, adminTransferResult, memberTransferResult]) {
+        if (result.error || (result.data !== null && !Array.isArray(result.data))) {
+          throw new Error("Unable to load complete rank and transfer history. Please retry the report.");
+        }
+      }
+      const history = prepareOfficialMemberHistory(
+        { membershipId: member.membership_id, userId: member.user_id, classId: member.class_id },
+        (examResult.data ?? []) as MemberExamRecord[],
+        (adminTransferResult.data ?? []) as AdminTransferSource[],
+        (memberTransferResult.data ?? []) as unknown as MemberTransferSource[],
+      );
+
       const {
         data:
           auditData,
@@ -2961,7 +2983,7 @@ export default function MemberManagementPage() {
 
 
       const record =
-        recordData as OfficialRecord;
+        { ...(recordData as OfficialRecord), ...history };
 
 
       const audit =
@@ -5382,10 +5404,10 @@ export default function MemberManagementPage() {
                       </CompactRecord>
 
 
-                      <CompactRecord as="section" alwaysCollapsible summary="Last Grading" detail="" className="mt-3 rounded-xl border border-neutral-800">
+                      <CompactRecord as="section" alwaysCollapsible summary="Current Rank Date" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">
-                          Last Grading
+                          Current Rank Date
                         </p>
 
 
@@ -5394,12 +5416,12 @@ export default function MemberManagementPage() {
                             ? formatDate(
                                 member.last_grading_date
                               )
-                            : "Not graded yet"}
+                            : "Unknown"}
                         </p>
 
 
                         <p className="mt-2 text-xs text-neutral-400">
-                          Latest valid promotion date.
+                          Recorded promotion or matched historical exam date.
                         </p>
 
                       </CompactRecord>
