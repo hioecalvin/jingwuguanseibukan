@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -779,7 +780,7 @@ export default function AdminPaymentsPage() {
                         </div>
 
                         <p className="mt-1 text-sm text-neutral-400">
-                          Member ID: {item.member_id ?? "Not assigned"}
+                          Member ID: <MemberIdLink memberId={item.member_id} fallback={"Not assigned"} />
                         </p>
 
                         <p className="mt-1 text-sm text-neutral-400">
@@ -936,7 +937,7 @@ export default function AdminPaymentsPage() {
                       <td className="px-4 py-4">
                         <p className="font-semibold">{item.member_name}</p>
                         <p className="mt-1 text-xs text-neutral-400">
-                          {item.member_id ?? "No Member ID"}
+                          <MemberIdLink memberId={item.member_id} fallback={"No Member ID"} />
                         </p>
                       </td>
 

@@ -11,14 +11,15 @@ test('directory keeps namesakes separate, enrolments together and exposes only p
   await expect(zoe.getByRole('listitem')).toHaveCount(2);
   await expect(zoe).toContainText('Aikido · West Dojo · 2 Dan');
   await expect(zoe).toContainText('Karate · East Dojo · 1 Kyu');
-  await expect(page.getByRole('link')).toHaveCount(1);
-  await expect(page.getByRole('link')).toHaveAttribute('href', 'https://www.instagram.com/zoe.example/');
-  await expect(page.getByRole('link')).toHaveAttribute('rel', 'noopener noreferrer');
-  for (const row of await rows.all()) await expect(row).not.toContainText(/email|DOB|payment|attendance|Member ID/i);
+  await expect(page.getByRole('link', { name: /^View member profile/ })).toHaveCount(3);
+  await expect(page.getByRole('link', { name: 'View member profile JS-1111' })).toHaveAttribute('href', '/members/JS-1111');
+  await expect(page.getByRole('link', { name: /zoe.example/ })).toHaveAttribute('href', 'https://www.instagram.com/zoe.example/');
+  await expect(page.getByRole('link', { name: /zoe.example/ })).toHaveAttribute('rel', 'noopener noreferrer');
+  for (const row of await rows.all()) await expect(row).not.toContainText(/email|DOB|payment|attendance/i);
   for (const width of [320, 390, 820, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await expect(zoe.getByRole('link')).toBeVisible();
+    await expect(zoe.getByRole('link', { name: 'View member profile JS-1111' })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath(`directory-${width}.png`), fullPage: true });
   }
   const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -901,9 +902,8 @@ export default function DojoMigrationHistoryPage() {
 
                         Member ID:{" "}
 
-                        {migration
-                          .member_id ??
-                          "Not assigned"}
+                        <MemberIdLink memberId={migration
+                          .member_id} fallback={"Not assigned"} />
 
                       </p>
 

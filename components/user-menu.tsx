@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import { useEffect, useId, useRef, useState } from "react";
 import { useSignOut } from "@/components/use-sign-out";
 
@@ -194,7 +195,7 @@ export default function UserMenu({
                   "
                 >
                   Member ID:{" "}
-                  {memberId}
+                  <MemberIdLink memberId={memberId} />
                 </div>
               )}
 

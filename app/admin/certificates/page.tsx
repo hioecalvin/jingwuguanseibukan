@@ -1,4 +1,6 @@
 "use client";
+import MemberIdLink from "@/components/member-id-link";
+
 
 import CompactRecord from "@/components/compact-record";
 
@@ -1209,9 +1211,7 @@ export default function CertificateHistoryPage() {
                               Member ID:
                             </span>{" "}
 
-                            {formatMemberId(
-                              certificate
-                            )}
+                            <><MemberIdLink memberId={certificate.member_id} />{certificate.aikikai_registration_number ? ' / ' + certificate.aikikai_registration_number : ''}</>
                           </p>
 
 

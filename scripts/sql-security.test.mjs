@@ -232,6 +232,12 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // Browser RPCs added after the destructive migration-018 reset must be
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
+    "get_my_emergency_contact", "update_my_emergency_contact",
+    // Follow-up migrations 078–080 explicitly grant these authenticated entry points.
+    "get_training_session_roster", "save_training_session", "get_training_sessions",
+    "get_training_session_audit", "get_membership_training_totals",
+    "get_member_profile_by_js_id", "get_my_member_directory_v3", "get_verified_member_accounts",
+    "update_member_personal_details", "get_member_personal_details", "get_member_personal_detail_audit",
     // Claim routes remain disabled until the explicit 064 ACLs are applied.
     "get_reviewable_member_claims",
     "review_member_claim",
@@ -277,6 +283,7 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_settlement_eligible_payment_details",
   ]);
   const serverOnly = new Set([
+    "claim_admin_email_change", "finish_admin_email_change",
     "request_member_claim",
     "request_registered_member_claim",
     "claim_member_account_email",

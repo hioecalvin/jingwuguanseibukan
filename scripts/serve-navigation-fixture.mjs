@@ -24,6 +24,8 @@ async function bundleFixture(entry, supabaseFixture) {
     },
   });
 }
+const personalDetailsBundle = await bundleFixture('personal-details-fixture.tsx', 'personal-details-supabase.ts');
+const trainingSessionsBundle = await bundleFixture('training-sessions.tsx', 'training-sessions-supabase.ts');
 const navigationBundle = await bundleFixture('navigation.tsx', 'supabase.ts');
 const assessmentHistoryBundle = await bundleFixture('assessment-history.tsx', 'assessment-history-supabase.ts');
 const dashboardBundle = await bundleFixture('dashboard.tsx', 'dashboard-supabase.ts');
@@ -40,6 +42,8 @@ const adminSettlementsBundle = await bundleFixture('admin-settlements.tsx', 'adm
 const profileContactBundle = await bundleFixture('profile-contact.tsx', 'profile-contact-supabase.ts');
 const advancePaymentsBundle = await bundleFixture('advance-payments.tsx', 'advance-payments-supabase.ts');
 const assets = new Map([
+  ['/personal-details-fixture.js', { type: 'text/javascript', data: personalDetailsBundle.outputFiles[0].contents }],
+  ['/training-sessions-fixture.js', { type: 'text/javascript', data: trainingSessionsBundle.outputFiles[0].contents }],
   ['/assessment-history-fixture.js', { type: 'text/javascript', data: assessmentHistoryBundle.outputFiles[0].contents }],
   ['/advance-payments-fixture.js', { type: 'text/javascript', data: advancePaymentsBundle.outputFiles[0].contents }],
   ['/directory-fixture.js', { type: 'text/javascript', data: directoryBundle.outputFiles[0].contents }],
@@ -81,7 +85,7 @@ function fixtureHtml(pathname) {
   const profileContact = pathname === '/profile-contact';
   const adminExports = pathname.startsWith('/admin-') && !adminSchedules && !adminAssessments && !adminMemorial && !adminLastTraining && !adminDirectPayment && !adminPaymentReview && !adminSettlements;
   const title = enrollment ? 'Pending approval workflow fixture' : adminSchedules ? 'Schedule mutation workflow fixture' : adminAssessments ? 'Assessment mutation workflow fixture' : adminMemorial ? 'Memorial workflow fixture' : adminLastTraining ? 'Last training workflow fixture' : adminDirectPayment ? 'Direct payment workflow fixture' : adminPaymentReview ? 'Payment review workflow fixture' : adminSettlements ? 'Settlement workflow fixture' : profileContact ? 'Contact self-service fixture' : adminExports ? 'Admin export workflow fixture' : 'Navigation component fixture';
-  const script = enrollment ? '/enrollment-fixture.js' : adminSchedules ? '/admin-schedules-fixture.js' : adminAssessments ? '/admin-assessments-fixture.js' : adminMemorial ? '/admin-memorial-fixture.js' : adminLastTraining ? '/admin-last-training-fixture.js' : adminDirectPayment ? '/admin-direct-payment-fixture.js' : adminPaymentReview ? '/admin-payment-review-fixture.js' : adminSettlements ? '/admin-settlements-fixture.js' : profileContact ? '/profile-contact-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
+  const script = ['/personal-details','/claim-lists','/emergency-contact'].includes(pathname) ? '/personal-details-fixture.js' : pathname === '/training-sessions' ? '/training-sessions-fixture.js' : enrollment ? '/enrollment-fixture.js' : adminSchedules ? '/admin-schedules-fixture.js' : adminAssessments ? '/admin-assessments-fixture.js' : adminMemorial ? '/admin-memorial-fixture.js' : adminLastTraining ? '/admin-last-training-fixture.js' : adminDirectPayment ? '/admin-direct-payment-fixture.js' : adminPaymentReview ? '/admin-payment-review-fixture.js' : adminSettlements ? '/admin-settlements-fixture.js' : profileContact ? '/profile-contact-fixture.js' : adminExports ? '/admin-exports-fixture.js' : '/fixture.js';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="${script}"></script></body></html>`;
 }
 const handler = (req, res) => {

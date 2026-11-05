@@ -1,4 +1,5 @@
 "use client";
+import MemberIdLink from "@/components/member-id-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -135,6 +136,7 @@ export default function RepositoryUploadersPage() {
             </option>
           ))}
         </select>
+        <p className="mt-2 text-sm"><MemberIdLink memberId={candidates.find(candidate => candidate.user_id === selectedUserId)?.member_id} /></p>
 
         <div className="mt-6 divide-y divide-neutral-800 rounded-xl border border-neutral-800">
           {optionsLoading && (

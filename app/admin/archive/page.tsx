@@ -1,4 +1,5 @@
 "use client";
+import MemberIdLink from "@/components/member-id-link";
 
 import CompactRecord from "@/components/compact-record";
 
@@ -731,21 +732,6 @@ export default function DocumentArchivePage() {
   }
 
 
-  function formatIdentity(
-    item:
-      DocumentArchiveRow
-  ) {
-    if (
-      item.aikikai_registration_number
-    ) {
-      return `${item.member_id ?? "Not assigned"} / ${item.aikikai_registration_number}`;
-    }
-
-
-    return item.member_id ??
-      "Not assigned";
-  }
-
 
   function clearFilters() {
     setSearch("");
@@ -1275,9 +1261,7 @@ export default function DocumentArchivePage() {
                       {document.member_name && (
 
                         <p className="mt-1 text-sm text-neutral-500">
-                          {formatIdentity(
-                            document
-                          )}
+                          <><MemberIdLink memberId={document.member_id} />{document.aikikai_registration_number ? " / " + document.aikikai_registration_number : ""}</>
                         </p>
 
                       )}
@@ -1542,11 +1526,7 @@ export default function DocumentArchivePage() {
 
                   <Detail
                     label="Member ID / Aikikai"
-                    value={
-                      formatIdentity(
-                        selectedDocument
-                      )
-                    }
+                    value={<><MemberIdLink memberId={selectedDocument.member_id} />{selectedDocument.aikikai_registration_number ? " / " + selectedDocument.aikikai_registration_number : ""}</>}
                   />
 
                 )}
@@ -1935,7 +1915,7 @@ function Detail({
   value,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">

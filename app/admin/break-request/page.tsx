@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -768,8 +769,7 @@ export default function BreakRequestsPage() {
                       <p className="mt-1 text-sm text-neutral-400">
                         Member ID:{" "}
                         <span className="text-neutral-200">
-                          {request.member_id ??
-                            "-"}
+                          <MemberIdLink memberId={request.member_id} fallback={"-"} />
                         </span>
                       </p>
 

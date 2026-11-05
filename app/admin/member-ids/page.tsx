@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import { useEffect, useMemo, useState } from "react";
@@ -248,8 +249,7 @@ export default function MemberIdManagementPage() {
                           Member ID:
                         </span>{" "}
                         <span className="font-medium text-white">
-                          {profile.registration_number ||
-                            "Not assigned"}
+                          <MemberIdLink memberId={profile.registration_number} fallback={"Not assigned"} />
                         </span>
                       </p>
 

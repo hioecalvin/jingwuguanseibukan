@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -1040,8 +1041,7 @@ export default function EnrollmentRequestsPage() {
                         "
                       >
                         Member ID:{" "}
-                        {request.member_id ??
-                          "-"}
+                        <MemberIdLink memberId={request.member_id} fallback={"-"} />
                       </p>
 
 

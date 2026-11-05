@@ -1,8 +1,10 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sortMemberGroups, type MemberSort } from "@/lib/group-visible-members";
+import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
 import MemberExamHistory from "@/components/member-exam-history";
 
 type Profile = { id: string; registration_number: string | null; full_name: string; account_status: string };
@@ -53,7 +55,8 @@ export default function MembersWithoutEnrollment({ search, sort }: { search: str
     {state.loading ? <p role="status" className="mt-3">Loading member profiles…</p> : state.error ? <div className="mt-3"><p role="alert">Member profiles could not be loaded.</p><button type="button" onClick={() => setRetry(value => value + 1)} className="mt-2 rounded border border-neutral-600 px-3 py-2">Retry member profiles</button></div> : <>
       <p className="mt-3 text-sm text-neutral-400">Showing {rows.length} of {state.rows.length} profiles without enrollment</p>
       <div className="mt-3 space-y-2">{rows.map(person => <details key={person.id} className="rounded-lg border border-neutral-700 p-3">
-        <summary className="cursor-pointer break-words text-sm"><strong>{person.registration_number ?? "ID unavailable"}</strong> · {person.full_name}{person.account_status === "disabled" ? " · Account disabled" : ""}</summary>
+        <summary className="cursor-pointer break-words text-sm"><strong><MemberIdLink memberId={person.registration_number} fallback={"ID unavailable"} /></strong> · {person.full_name}{person.account_status === "disabled" ? " · Account disabled" : ""}</summary>
+        <MemberPersonalDetailsEditor memberId={person.id} />
         <MemberExamHistory memberId={person.id} />
       </details>)}</div>
     </>}

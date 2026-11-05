@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -2328,8 +2329,7 @@ export default function DojoManagementPage() {
 
                             <p className="mt-1 text-sm text-neutral-400">
                               Member ID:{" "}
-                              {member.registration_number ??
-                                "Not assigned"}
+                              <MemberIdLink memberId={member.registration_number} fallback={"Not assigned"} />
                             </p>
 
 

@@ -1,5 +1,9 @@
 "use client";
+import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
+import MemberTrainingSummary from "@/components/member-training-summary";
 
+
+import MemberIdLink from "@/components/member-id-link";
 import { groupVisibleMembers, sortMemberGroups, type MemberSort } from "@/lib/group-visible-members";
 import CompactRecord from "@/components/compact-record";
 import { adminAccessErrorMessage } from "@/lib/admin-access-error";
@@ -560,6 +564,11 @@ export default function MemberManagementPage() {
     setSearch,
   ] =
     useState("");
+
+  useEffect(() => {
+    const linkedId = new URLSearchParams(window.location.search).get("member");
+    if (linkedId) setSearch(linkedId);
+  }, []);
 
 
   const [
@@ -4786,7 +4795,8 @@ export default function MemberManagementPage() {
                             const opening = memberViews[member.membership_id] !== "details";
                             setMemberViews(current => ({ ...current, [member.membership_id]: opening ? "details" : undefined }));
                             if (opening) { setOpenHistory(current => ({ ...current, [member.membership_id]: true })); void loadGradeHistory(member.membership_id); }
-                          }} className="member-id-button">{member.registration_number ?? "Not assigned"}</button>
+                          }} className="member-id-button">View details</button>
+                        <MemberIdLink memberId={member.registration_number} />
                       </div>
                       <div className="member-list-name"><span className="member-list-label">Name</span><h2 className="font-semibold">{member.full_name}</h2><span className="text-xs text-neutral-400">{group.memberships.length} {group.memberships.length === 1 ? "membership" : "memberships"}</span></div>
 
@@ -4936,8 +4946,7 @@ export default function MemberManagementPage() {
                               : "Member ID:"}{" "}
 
                             <span className="font-medium text-neutral-300">
-                              {member.registration_number ??
-                                "Not assigned"}
+                              <MemberIdLink memberId={member.registration_number} fallback={"Not assigned"} />
 
                               {member.level ===
                                 "yudansha" && (
@@ -5062,6 +5071,8 @@ export default function MemberManagementPage() {
                       </span>
 
                     </CompactRecord>
+{isSuperAdmin && <MemberPersonalDetailsEditor memberId={member.user_id} />}
+<MemberTrainingSummary membershipId={member.membership_id} />
 <MemberExamHistory key={`${member.user_id}:${member.class_id}`} memberId={member.user_id} classId={member.class_id} />
 <CompactRecord as="section" alwaysCollapsible defaultExpanded summary="Rank History" detail="" className="mt-3 rounded-xl border border-neutral-800">
 

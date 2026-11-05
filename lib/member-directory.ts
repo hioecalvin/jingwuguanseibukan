@@ -5,6 +5,7 @@ export type DirectoryEnrollment = {
 };
 
 export type DirectoryMember = {
+  member_id?: string | null;
   full_name: string;
   avatar_url: string | null;
   enrollments: DirectoryEnrollment[];

@@ -56,7 +56,7 @@ test("directory is RPC-only and available to every signed-in application role", 
   assert.match(migration, /security definer[\s\S]*set search_path to public, pg_temp/i);
   assert.match(migration, /revoke all[\s\S]*get_my_member_directory\(\)[\s\S]*from public, anon, authenticated, service_role/i);
   assert.match(migration, /grant execute[\s\S]*get_my_member_directory\(\)[\s\S]*to authenticated, service_role/i);
-  assert.match(page, /\.rpc\(\s*"get_my_member_directory_v2"/);
+  assert.match(page, /\.rpc\(\s*"get_my_member_directory_v3"/);
   assert.match(navigation, /label: "Directory"[\s\S]*href: "\/directory"[\s\S]*"member"[\s\S]*"admin"[\s\S]*"super_admin"/);
 });
 

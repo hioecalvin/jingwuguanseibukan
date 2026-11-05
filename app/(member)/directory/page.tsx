@@ -1,4 +1,5 @@
 "use client";
+import MemberIdLink from "@/components/member-id-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -21,7 +22,7 @@ export default function MemberDirectoryPage() {
     setMembers([]);
     async function loadDirectory() {
       try {
-        const { data, error: directoryError } = await supabase.rpc("get_my_member_directory_v2");
+        const { data, error: directoryError } = await supabase.rpc("get_my_member_directory_v3");
         if (!active) return;
         if (directoryError) throw directoryError;
         setMembers((data ?? []) as DirectoryMember[]);
@@ -101,7 +102,7 @@ export default function MemberDirectoryPage() {
                       <img src={member.avatar_url} alt="" loading="lazy" className="h-full w-full object-cover" />
                     ) : <span aria-hidden="true" className="flex h-full items-center justify-center text-neutral-300">{member.full_name.charAt(0).toUpperCase()}</span>}
                   </div>
-                  <h2 className="min-w-0 break-words text-sm font-semibold text-white">{member.full_name}</h2>
+                  <div className="min-w-0"><h2 className="break-words text-sm font-semibold text-white">{member.full_name}</h2><MemberIdLink memberId={member.member_id} fallback="" className="text-xs" /></div>
                   <ul aria-label={`Classes and dojos for ${member.full_name}`} className="min-w-0 space-y-1 text-xs">
                     {enrollments.map((entry, enrollmentIndex) => <li key={enrollmentIndex} className="break-words">
                       <span className="font-medium text-sky-300">{entry.class_name}</span>

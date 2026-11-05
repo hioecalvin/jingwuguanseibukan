@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -2537,10 +2538,9 @@ export default function DojoTransferPage() {
 
                           <p className="mt-1 text-sm text-neutral-400">
                             Member ID:{" "}
-                            {transfer
+                            <MemberIdLink memberId={transfer
                               .profiles
-                              ?.registration_number ??
-                              "Not assigned"}
+                              ?.registration_number} fallback={"Not assigned"} />
                           </p>
 
                         </div>
@@ -3346,8 +3346,7 @@ export default function DojoTransferPage() {
 
 
                                       <p className="mt-1 text-xs text-neutral-500">
-                                        {row.member_id ??
-                                          "No Member ID"}
+                                        <MemberIdLink memberId={row.member_id} fallback={"No Member ID"} />
                                       </p>
 
                                     </div>
@@ -3749,8 +3748,7 @@ function TransferCard({
 
           <p className="mt-1 text-sm text-neutral-400">
             Member ID:{" "}
-            {row.member_id ??
-              "Not assigned"}
+            <MemberIdLink memberId={row.member_id} fallback={"Not assigned"} />
           </p>
 
 

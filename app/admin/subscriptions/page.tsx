@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 import AdvancePaymentForm from "@/components/advance-payment-form";
 import AdvancePaymentReviews from "@/components/admin/advance-payment-reviews";
@@ -3976,8 +3977,7 @@ export default function SubscriptionPage() {
 
                             <p className="mt-1 text-xs text-neutral-500">
                               Member ID:{" "}
-                              {member.registration_number ??
-                                "Not assigned"}
+                              <MemberIdLink memberId={member.registration_number} fallback={"Not assigned"} />
                             </p>
 
 
@@ -4555,8 +4555,7 @@ export default function SubscriptionPage() {
 
                             <p className="mt-1 text-xs text-neutral-500">
                               Member ID:{" "}
-                              {member?.registration_number ??
-                                "Not assigned"}
+                              <MemberIdLink memberId={member?.registration_number} fallback={"Not assigned"} />
                             </p>
 
 
@@ -4900,8 +4899,7 @@ export default function SubscriptionPage() {
 
                             <p className="mt-1 text-xs text-neutral-500">
                               Member ID:{" "}
-                              {confirmation.member_id ??
-                                "Not assigned"}
+                              <MemberIdLink memberId={confirmation.member_id} fallback={"Not assigned"} />
                             </p>
 
 
@@ -5235,8 +5233,7 @@ export default function SubscriptionPage() {
                             </p>
 
                             <p className="mt-1 text-xs text-neutral-500">
-                              {row.member_id ??
-                                "No Member ID"}
+                              <MemberIdLink memberId={row.member_id} fallback={"No Member ID"} />
                             </p>
 
                           </td>

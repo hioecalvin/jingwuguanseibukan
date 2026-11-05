@@ -1,5 +1,9 @@
 "use client";
+import MemberEmergencyContact from "@/components/member-emergency-contact";
+import MemberTrainingSummary from "@/components/member-training-summary";
 
+
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -1985,6 +1989,7 @@ export default function ProfilePage() {
         <h2 className="mt-1 text-2xl font-bold">
           My Classes
         </h2>
+<MemberEmergencyContact />
 <ClassEnrollmentPanel />
         {memberships.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
@@ -2048,9 +2053,8 @@ export default function ProfilePage() {
                             <p className="mt-2 text-sm text-neutral-500">
                               Member ID / Aikikai Registration Number:{" "}
                               <span className="font-medium text-neutral-300">
-                                {profile
-                                  ?.registration_number ??
-                                  "Not assigned"}{" "}
+                                <MemberIdLink memberId={profile
+                                  ?.registration_number} fallback={"Not assigned"} />{" "}
                                 /{" "}
                                 {profile
                                   ?.aikikai_registration_number ??
@@ -2183,6 +2187,8 @@ export default function ProfilePage() {
                         }
                       />
                     </div>
+
+                    <MemberTrainingSummary membershipId={membership.id} />
 
                     {/* BREAK MANAGEMENT */}
 

@@ -18,6 +18,13 @@ export async function POST(request: Request) {
     }
     let body;
     try { body = await readClaimBody(request); } catch { return reply({ error: "Invalid request." }, 400); }
+    if (body.action === "verified_accounts") {
+      const page = body.page ?? 1;
+      if (typeof page !== "number" || !Number.isSafeInteger(page) || page < 1 || page > 100000) return reply({ error: "Invalid page." }, 400);
+      const { data, error } = await client.rpc("get_verified_member_accounts", { page_number: page });
+      if (error) return reply({ error: "Unable to load verified accounts." }, 403);
+      return reply(data ?? { accounts: [], total: 0, page, page_size: 50 });
+    }
     if (body.action === "list") {
       const { data, error } = await client.rpc("get_reviewable_member_claims");
       if (error) return reply({ error: "Unable to load claim reviews." }, 403);

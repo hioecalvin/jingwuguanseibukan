@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -846,9 +847,8 @@ export default function HomePage() {
             "
           >
             Member ID:{" "}
-            {profile
-              ?.registration_number ??
-              "Not assigned"}
+            <MemberIdLink memberId={profile
+              ?.registration_number} fallback={"Not assigned"} />
           </span>
 
           {profile
@@ -1234,9 +1234,8 @@ export default function HomePage() {
                           text-neutral-200
                         "
                       >
-                        {profile
-                          ?.registration_number ??
-                          "Not assigned"}
+                        <MemberIdLink memberId={profile
+                          ?.registration_number} fallback={"Not assigned"} />
 
                         {isAikidoYudansha
                           ? ` / ${

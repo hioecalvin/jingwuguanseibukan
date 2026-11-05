@@ -17,7 +17,9 @@ export default function LoginPage() {
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
 
-    if (search.get("verified") === "true") {
+    if (search.get("email_change") === "true") {
+      setMessage("Email confirmation accepted. If verification was sent to both addresses, confirm both before using the new login email.");
+    } else if (search.get("verified") === "true") {
       setMessage("Email verified. Log in to check your membership approval status.");
       setMessageType("success");
     } else if (search.get("error") === "disabled") {

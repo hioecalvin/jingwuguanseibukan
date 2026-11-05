@@ -1,5 +1,6 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
 import {
@@ -673,8 +674,7 @@ export default function OfficialReportHistoryPage() {
                             Member ID:
                           </span>{" "}
 
-                          {report.member_id ??
-                            "-"}
+                          <MemberIdLink memberId={report.member_id} fallback={"-"} />
                         </p>
 
 

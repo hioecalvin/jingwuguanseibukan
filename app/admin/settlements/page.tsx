@@ -1,5 +1,7 @@
+
 // app/admin/settlements/page.tsx
 "use client";
+import MemberIdLink from "@/components/member-id-link";
 
 import CompactRecord from "@/components/compact-record";
 
@@ -794,7 +796,7 @@ export default function AdminSettlementsPage() {
                       />
                       <div className="min-w-0 flex-1">
                         <div className="font-medium">
-                          {p.member_name} · {p.member_id}
+                          {p.member_name} · <MemberIdLink memberId={p.member_id} />
                         </div>
                         <div className="text-sm text-zinc-400">
                           {monthLabel(p.billing_month)} subscription · Paid {dateOnly(p.payment_date)} ·{" "}
@@ -1302,7 +1304,7 @@ export default function AdminSettlementsPage() {
                                     <td className="p-3">
                                       <div>{item.member_name}</div>
                                       <div className="text-xs text-zinc-400">
-                                        {item.member_id}
+                                        <MemberIdLink memberId={item.member_id} />
                                       </div>
                                     </td>
                                     <td className="p-3">

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      redirectTo.searchParams.set("verified", "true");
+      redirectTo.searchParams.set(type === "email_change" ? "email_change" : "verified", "true");
       return NextResponse.redirect(redirectTo);
     }
   }
