@@ -93,8 +93,12 @@ function resultFor(table: string, filters: Record<string, unknown> = {}, rangeSt
     return { data: chargeIds.includes('charge-0') ? [{ id: 'payment-0', charge_id: 'charge-0', payment_date: '2026-12-02', amount: 100000, currency: 'IDR', payment_reference: 'FIXTURE-PAID' }] : [], error: null };
   }
   if (table === 'profiles') {
-    return { data: { is_super_admin: true }, error: null };
+    if (filters.id) return { data: { is_super_admin: !new URLSearchParams(window.location.search).has('dojo-admin') }, error: null };
+    const rows = [{ id: member.user_id, registration_number: member.registration_number, full_name: member.full_name, account_status: 'active' }];
+    if (new URLSearchParams(window.location.search).has('unenrolled')) rows.push({ id: 'fixture-unenrolled', registration_number: 'JS-0124A', full_name: 'Recovered Person', account_status: 'disabled' });
+    return { data: rows.slice(rangeStart, rangeStart + 500), error: null };
   }
+  if (table === 'class_memberships') return { data: fixtureMembers.map(row => ({ id: row.membership_id, user_id: row.user_id })).slice(rangeStart, rangeStart + 500), error: null };
   if (table === 'admin_visible_members') {
     return { data: fixtureMembers.map(row => ({...row})), error: null };
   }
@@ -126,6 +130,7 @@ export function createClient() {
     rpc: async (name: string, args: RpcArguments = {}) => {
       if (name === 'get_assessment_result_history') {
         fixtureState.examQueries.push(args);
+        if (args.target_member_id === 'fixture-unenrolled') return { data: [{ result_id: 'recovered-exam', class_id: 'fixture-class', class_name: 'Aikido', assessment_number: '2008-0001', assessment_date: '2008-01-01', rank_before: null, rank_assessed: '6th Kyu', outcome: 'recorded_grade', assessor_name: null, dojo_name: null, notes: 'Original historical evidence' }], error: null };
         if (args.target_member_id !== 'fixture-member') return { data: [], error: null };
         if (fixtureState.failNextExam) { fixtureState.failNextExam = false; return { data: null, error: new Error('Private exam failure') }; }
         const base = { class_id: 'fixture-class', assessment_date: null, rank_before: null, assessor_name: null, dojo_name: null, assessment_number: null };

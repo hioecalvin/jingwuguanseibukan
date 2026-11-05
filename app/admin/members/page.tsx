@@ -5,6 +5,7 @@ import CompactRecord from "@/components/compact-record";
 import { adminAccessErrorMessage } from "@/lib/admin-access-error";
 import MemberSubscriptionHistory from "@/components/member-subscription-history";
 import MemberExamHistory from "@/components/member-exam-history";
+import MembersWithoutEnrollment from "@/components/members-without-enrollment";
 import { prepareOfficialMemberHistory, type MemberExamRecord, type AdminTransferSource, type MemberTransferSource } from "@/lib/official-member-history";
 
 import {
@@ -3702,6 +3703,7 @@ export default function MemberManagementPage() {
 
         const searchMatch =
           !query ||
+          (member.registration_number ?? "").toLowerCase().replace(/[\s-]/g, "").includes(query.replace(/[\s-]/g, "")) ||
 
           member.full_name
             .toLowerCase()
@@ -4594,6 +4596,8 @@ export default function MemberManagementPage() {
 
         </section>
 
+
+        {isSuperAdmin && <MembersWithoutEnrollment search={search} sort={memberSort} />}
 
         {/* MEMBERS */}
 

@@ -38,3 +38,25 @@ test('missing joining dates remain Unknown and are not taken from exams', async 
   await expect(page.locator('summary').filter({ hasText: 'Historical grade' })).toBeVisible();
   await expect(page.locator('.member-overview')).toContainText('Date JoinedUnknown');
 });
+
+test('recovered profiles remain visible without inventing an enrollment', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-last-training?unenrolled=1');
+  const panel = page.getByRole('region', { name: 'Members awaiting enrollment review' });
+  await expect(panel).toContainText('Showing 1 of 1 profiles without enrollment');
+  await page.getByPlaceholder('Name / Member ID / Email / Phone / WhatsApp').fill('JS0124A');
+  await expect(panel).toContainText('Recovered Person');
+  await panel.locator('summary').filter({ hasText: 'JS-0124A' }).click();
+  await panel.locator('summary').filter({ hasText: /^Exam History$/ }).click();
+  await expect(panel.locator('summary').filter({ hasText: 'Aikido' })).toContainText('6th Kyu');
+  await panel.locator('summary').filter({ hasText: 'Aikido' }).click();
+  await expect(panel.getByText('2008-0001', { exact: true })).toBeVisible();
+  await expect(panel.getByText('Account disabled', { exact: false })).toBeVisible();
+  expect(await page.evaluate(() => window.__lastTrainingFixture.trainingCalls)).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('Dojo Admin does not receive the unassigned-profile administration panel', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-last-training?unenrolled=1&dojo-admin=1');
+  await expect(page.getByRole('heading', { name: 'Member Management', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Members awaiting enrollment review' })).toHaveCount(0);
+});
