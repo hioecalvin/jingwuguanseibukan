@@ -27,6 +27,15 @@ const certificates = [
   },
 ];
 
+// A member may belong to two classes while the legacy RPC returns their profile number on both rows.
+const karateCertificate = {
+  ...certificates[0],
+  certificate_id: 'certificate-2',
+  certificate_number: 'JS-KAR-2026-0001',
+  membership_id: 'membership-2',
+  class_name: 'Karate',
+};
+
 const reports = [
   {
     audit_id: 'report-1',
@@ -82,7 +91,7 @@ export function createClient() {
       getUser: async () => ({ data: { user }, error: null }),
     },
     rpc: async (name: string) => {
-      if (name === 'get_certificate_history') return { data: certificates, error: null };
+      if (name === 'get_certificate_history') return { data: [...certificates, karateCertificate], error: null };
       if (name === 'get_certificate_print_log') return { data: [], error: null };
       if (name === 'get_member_report_history') return { data: reports, error: null };
       if (name === 'search_document_archive') return { data: archive, error: null };

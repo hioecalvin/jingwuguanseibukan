@@ -22,7 +22,6 @@ export type CertificateRecord = {
   user_id: string;
 
   member_id: string | null;
-  aikikai_registration_number: string | null;
 
   full_name: string;
 

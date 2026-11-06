@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { isAikidoClass } from "@/lib/aikikai";
 import { configuredApplicationOrigin } from "@/lib/application-origin";
 import { createClient } from "@/lib/supabase/client";
 
@@ -86,8 +87,9 @@ export default function RegisterPage() {
     return () => { cancelled = true; };
   }, [selectedClassId, supabase, dojoRetry]);
 
-  const catalogReady = classStatus === "ready" &&
-    classes.some((item) => item.id === selectedClassId) &&
+  const selectedClass = classes.find((item) => item.id === selectedClassId);
+  const acceptsAikikai = isAikidoClass(selectedClass?.name);
+  const catalogReady = classStatus === "ready" && Boolean(selectedClass) &&
     dojoStatus === "ready" && loadedDojoClassId === selectedClassId;
 
   async function handleRegister(e: React.FormEvent) {
@@ -102,9 +104,9 @@ export default function RegisterPage() {
     }
 
     const normalizedName = fullName.trim().replace(/\s+/g, " ");
-    const normalizedAikikaiRegistrationNumber = aikikaiRegistrationNumber
-      .trim()
-      .replace(/\s+/g, " ");
+    const normalizedAikikaiRegistrationNumber = acceptsAikikai
+      ? aikikaiRegistrationNumber.trim().replace(/\s+/g, " ")
+      : null;
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPhone = phone.trim().replace(/\s+/g, " ");
 
@@ -136,10 +138,6 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-
-    const selectedClass = classes.find(
-      (item) => item.id === selectedClassId
-    );
 
     const selectedDojo = dojos.find(
       (item) => item.id === selectedDojoId
@@ -204,8 +202,7 @@ export default function RegisterPage() {
         </p>
 
         <p className="mt-3 text-center text-sm leading-6 text-neutral-400">
-          Add your Aikikai Registration Number if you have one. Your permanent JS
-          Member ID will be assigned automatically after approval.
+          Your permanent JS Member ID will be assigned automatically after approval.
         </p>
 
         <form onSubmit={handleRegister} aria-busy={loading} className="mt-8 space-y-5">
@@ -220,20 +217,6 @@ export default function RegisterPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="register-aikikai-registration-number" className="mb-1 block text-sm font-medium">
-              Aikikai Registration Number (optional)
-            </label>
-
-            <input
-              id="register-aikikai-registration-number"
-              maxLength={100}
-              value={aikikaiRegistrationNumber}
-              onChange={(e) => setAikikaiRegistrationNumber(e.target.value)}
               className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
             />
           </div>
@@ -299,6 +282,7 @@ export default function RegisterPage() {
               value={selectedClassId}
               onChange={(e) => {
                 setSelectedClassId(e.target.value);
+                setAikikaiRegistrationNumber("");
                 setSelectedDojoId("");
                 setDojos([]);
                 setLoadedDojoClassId("");
@@ -330,6 +314,21 @@ export default function RegisterPage() {
               }}>Retry classes</button>
             )}
           </div>
+
+          {acceptsAikikai && (
+            <div>
+              <label htmlFor="register-aikikai-registration-number" className="mb-1 block text-sm font-medium">
+                Aikikai Registration Number (optional)
+              </label>
+              <input
+                id="register-aikikai-registration-number"
+                maxLength={100}
+                value={aikikaiRegistrationNumber}
+                onChange={(e) => setAikikaiRegistrationNumber(e.target.value)}
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
+              />
+            </div>
+          )}
 
           {selectedClassId && (
             <div>

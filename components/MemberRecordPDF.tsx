@@ -1,4 +1,5 @@
 "use client";
+import { isAikidoClass } from "@/lib/aikikai";
 
 import { assessmentOutcomeLabel } from "@/lib/assessment-history-labels";
 import type { MemberExamRecord, MemberTransferRecord } from "@/lib/official-member-history";
@@ -834,7 +835,7 @@ return (
                   </View>
 
 
-                  {record.member.aikikai_registration_number && (
+                  {isAikidoClass(record.membership.class_name) && record.member.aikikai_registration_number && (
                     <View
                       style={
                         styles.infoRow

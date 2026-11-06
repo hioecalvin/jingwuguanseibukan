@@ -54,3 +54,12 @@ test('historical lost, skipped and partial dates are not failed exams',async({pa
  await page.getByLabel('Find a record').fill('Historical Member');
  await expect(page.locator('summary')).toHaveCount(3);
 });
+
+test('historical prior grades use the assessment ladder and explain the first grade',async({page})=>{
+ await page.goto(NAV_ORIGIN+'/assessment-history-fixture?scenario=derived');
+ await page.locator('summary').filter({hasText:'2010-0001'}).click();
+ await expect(page.getByText('Kyu-5 → Kyu-4',{exact:true})).toBeVisible();
+ await page.locator('summary').filter({hasText:'0000-0001'}).click();
+ await expect(page.getByText('Ungraded → Chu-yi',{exact:true})).toBeVisible();
+ await expect(page.getByText('Rank Before derived from the class grade order.',{exact:true})).toHaveCount(2);
+});

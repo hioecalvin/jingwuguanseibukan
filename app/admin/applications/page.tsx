@@ -5,6 +5,7 @@ import CompactRecord from "@/components/compact-record";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { exportToExcel } from "@/lib/exportExcel";
+import { aikikaiForClass, isAikidoClass } from "@/lib/aikikai";
 
 type MembershipLevel = "mudansha" | "yudansha";
 
@@ -247,11 +248,11 @@ export default function ApplicationsPage() {
           key: "phone",
           value: (row) => row.phone ?? "",
         },
-        {
+        ...(applications.some((row) => isAikidoClass(row.class_name)) ? [{
           header: "Aikikai Registration Number",
           key: "aikikai_registration_number",
-          value: (row) => row.aikikai_registration_number ?? "",
-        },
+          value: (row: Application) => aikikaiForClass(row.class_name, row.aikikai_registration_number) ?? "",
+        }] : []),
         {
           header: "Date of Birth",
           key: "date_of_birth",
@@ -579,10 +580,12 @@ export default function ApplicationsPage() {
                             value={application.phone}
                           />
 
-                          <Detail
-                            label="Aikikai Registration Number"
-                            value={application.aikikai_registration_number}
-                          />
+                          {isAikidoClass(application.class_name) && (
+                            <Detail
+                              label="Aikikai Registration Number"
+                              value={application.aikikai_registration_number}
+                            />
+                          )}
 
                           <Detail
                             label="Date of Birth"

@@ -4,6 +4,11 @@ import vm from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
 
+const aikikaiModule = { exports: {} };
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/aikikai.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText, { exports: aikikaiModule.exports }, { timeout: 1000 });
+
 // Execute the real TSX handlers/effects with a deterministic hook scheduler.
 // These are component-logic unit tests, NOT browser, React scheduling, or RLS tests.
 function componentHarness(relativePath, supabase, extras = {}) {
@@ -49,6 +54,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
     'next/navigation': { useRouter: () => ({ replace: href => redirects.push(href), refresh() {} }), usePathname: () => '/profile' },
     '@/lib/application-origin': { configuredApplicationOrigin: () => 'https://configured.example.test' },
     '@/lib/supabase/client': { createClient: () => supabase },
+    '@/lib/aikikai': aikikaiModule.exports,
     ...extras,
   };
   const signOutModule = { exports: {} };
@@ -113,7 +119,7 @@ const deferred = () => {
   return { promise, resolve };
 };
 
-function registrationFixture({ classes = [{ id: 'a', name: 'Class A' }, { id: 'b', name: 'Class B' }], classError = false, signup } = {}) {
+function registrationFixture({ classes = [{ id: 'a', name: 'Aikido' }, { id: 'b', name: 'Karate' }], classError = false, signup } = {}) {
   const queries = [];
   const signups = [];
   let failClasses = classError;
@@ -139,10 +145,9 @@ function registrationFixture({ classes = [{ id: 'a', name: 'Class A' }, { id: 'b
   return { ui, queries, signups, recoverClasses() { failClasses = false; } };
 }
 
-function fillRegistration(ui, { aikikaiNumber = ' AIKIKAI   123 ' } = {}) {
+function fillRegistration(ui) {
   for (const [id, value] of Object.entries({
     name: ' Test   Member ', 'birth-date': '2000-01-01',
-    'aikikai-registration-number': aikikaiNumber,
     email: ' FIXTURE@EXAMPLE.INVALID ', phone: ' 123   456 ',
     password: 'FixturePassword123', 'confirm-password': 'FixturePassword123',
   })) ui.change(`register-${id}`, value);
@@ -311,6 +316,7 @@ test('successful registration sends normalized metadata and selected catalog nam
   await ui.flush();
   fillRegistration(ui);
   ui.change('register-class', 'a');
+  ui.change('register-aikikai-registration-number', ' AIKIKAI   123 ');
   queries[0].resolve({ data: [{ id: 'a1', name: 'Local dojo', class_id: 'a' }], error: null });
   await ui.flush();
   ui.change('register-dojo', 'a1');
@@ -320,7 +326,7 @@ test('successful registration sends normalized metadata and selected catalog nam
   assert.equal(signups[0].options.data.full_name, 'Test Member');
   assert.equal(signups[0].options.data.aikikai_registration_number, 'AIKIKAI 123');
   assert.equal(signups[0].options.data.requested_dojo_id, 'a1');
-  assert.equal(signups[0].options.data.requested_class_name, 'Class A');
+  assert.equal(signups[0].options.data.requested_class_name, 'Aikido');
   assert.equal(signups[0].options.data.registration_number, undefined);
   assert.equal(signups[0].options.data.username, undefined);
   assert.equal(signups[0].options.emailRedirectTo, 'https://configured.example.test/auth/confirm');
@@ -330,8 +336,9 @@ test('successful registration sends normalized metadata and selected catalog nam
 test('registration accepts a blank optional Aikikai number without assigning a JS Member ID', async () => {
   const { ui, queries, signups } = registrationFixture();
   await ui.flush();
-  fillRegistration(ui, { aikikaiNumber: '' });
+  fillRegistration(ui);
   ui.change('register-class', 'a');
+  assert.equal(ui.field('register-aikikai-registration-number').props.value, '');
   queries[0].resolve({ data: [], error: null });
   await ui.flush();
   await ui.submit();
@@ -339,6 +346,31 @@ test('registration accepts a blank optional Aikikai number without assigning a J
   assert.equal(signups.length, 1);
   assert.equal(signups[0].options.data.aikikai_registration_number, null);
   assert.equal(signups[0].options.data.registration_number, undefined);
+});
+
+test('application details and Excel show the Aikikai number only on Aikido rows', async () => {
+  const karate = { request_id: 'k', class_name: 'Karate', aikikai_registration_number: 'hidden-number' };
+  const aikido = { request_id: 'a', class_name: 'Aikido', aikikai_registration_number: 'visible-number' };
+  for (const data of [[karate], [karate, aikido]]) {
+    let exported;
+    const client = { from: () => ({ select: () => ({ eq: async () => ({ data, error: null }) }) }) };
+    const ui = componentHarness('app/admin/applications/page.tsx', client, {
+      '@/components/compact-record': { default: 'compact-record' },
+      '@/lib/exportExcel': { exportToExcel(options) { exported = options; } },
+    });
+    ui.render();
+    await ui.flush();
+    const labels = ui.nodes().filter(node => node.props.label === 'Aikikai Registration Number');
+    assert.deepEqual(labels.map(node => node.props.value), data.includes(aikido) ? ['visible-number'] : []);
+    ui.find(node => node.type === 'button' && node.props.children === 'Export Excel').props.onClick();
+    const column = exported.columns.find(item => item.key === 'aikikai_registration_number');
+    if (data.includes(aikido)) {
+      assert.equal(column.value(karate), '');
+      assert.equal(column.value(aikido), 'visible-number');
+    } else {
+      assert.equal(column, undefined);
+    }
+  }
 });
 
 test('a successfully loaded empty dojo catalog retains the existing approval workflow', async () => {

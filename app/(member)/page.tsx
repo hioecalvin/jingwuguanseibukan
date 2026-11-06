@@ -1,4 +1,5 @@
 "use client";
+import { isAikidoYudansha } from "@/lib/aikikai";
 
 import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
@@ -1064,14 +1065,8 @@ export default function HomePage() {
                     membership
                   );
 
-                const isAikidoYudansha =
-                  membership
-                    .classes
-                    ?.name ===
-                    "Aikido" &&
-                  membership
-                    .level ===
-                    "yudansha";
+                const showAikikai =
+                  isAikidoYudansha(membership.classes?.name, membership.level);
 
                 return (
                   <CompactRecord summary={<>{membership
@@ -1220,7 +1215,7 @@ export default function HomePage() {
                           text-neutral-500
                         "
                       >
-                        {isAikidoYudansha
+                        {showAikikai
                           ? "Member ID / Aikikai Registration Number"
                           : "Member ID"}
                       </p>
@@ -1237,7 +1232,7 @@ export default function HomePage() {
                         <MemberIdLink memberId={profile
                           ?.registration_number} fallback={"Not assigned"} />
 
-                        {isAikidoYudansha
+                        {showAikikai
                           ? ` / ${
                               profile?.aikikai_registration_number ??
                               "Not assigned"

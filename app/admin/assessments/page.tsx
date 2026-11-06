@@ -87,7 +87,6 @@ type PreparedCandidate = Candidate & {
   external_assessor_name: string | null;
   assessor_name_snapshot: string | null;
   member_id: string | null;
-  aikikai_registration_number: string | null;
   class_logo_url: string | null;
   certificate_id: string | null;
   certificate_number: string | null;
@@ -482,7 +481,6 @@ export default function BulkAssessmentsPage() {
           membership_id: candidate.membership_id,
           user_id: candidate.user_id,
           member_id: candidate.member_id,
-          aikikai_registration_number: candidate.aikikai_registration_number,
           full_name: candidate.full_name,
           class_id: candidate.class_id,
           class_name: candidate.class_name,

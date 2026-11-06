@@ -1,4 +1,5 @@
 "use client";
+import { isAikidoClass, aikikaiForClass } from "@/lib/aikikai";
 import MemberIdLink from "@/components/member-id-link";
 
 import CompactRecord from "@/components/compact-record";
@@ -523,7 +524,7 @@ export default function DocumentArchivePage() {
             ) ||
 
           (
-            item.aikikai_registration_number ??
+            aikikaiForClass(item.class_name, item.aikikai_registration_number) ??
             ""
           )
             .toLowerCase()
@@ -954,7 +955,7 @@ export default function DocumentArchivePage() {
                   e.target.value
                 )
               }
-              placeholder="Document number, Member, Member ID, Aikikai, class, dojo, rank, title..."
+              placeholder="Search by document, member, class, dojo, rank or title"
               className="w-full rounded-xl border border-neutral-700 bg-neutral-800 px-4 py-4 text-base text-white"
             />
 
@@ -1261,7 +1262,7 @@ export default function DocumentArchivePage() {
                       {document.member_name && (
 
                         <p className="mt-1 text-sm text-neutral-500">
-                          <><MemberIdLink memberId={document.member_id} />{document.aikikai_registration_number ? " / " + document.aikikai_registration_number : ""}</>
+                          <><MemberIdLink memberId={document.member_id} />{aikikaiForClass(document.class_name, document.aikikai_registration_number) ? " / " + document.aikikai_registration_number : ""}</>
                         </p>
 
                       )}
@@ -1525,8 +1526,8 @@ export default function DocumentArchivePage() {
                 {selectedDocument.membership_id && (
 
                   <Detail
-                    label="Member ID / Aikikai"
-                    value={<><MemberIdLink memberId={selectedDocument.member_id} />{selectedDocument.aikikai_registration_number ? " / " + selectedDocument.aikikai_registration_number : ""}</>}
+                    label={isAikidoClass(selectedDocument.class_name) ? "Member ID / Aikikai" : "Member ID"}
+                    value={<><MemberIdLink memberId={selectedDocument.member_id} />{aikikaiForClass(selectedDocument.class_name, selectedDocument.aikikai_registration_number) ? " / " + selectedDocument.aikikai_registration_number : ""}</>}
                   />
 
                 )}

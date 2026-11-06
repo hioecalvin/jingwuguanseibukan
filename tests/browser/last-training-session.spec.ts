@@ -27,14 +27,14 @@ test('Admin marks today and then corrects the last training session date', async
 
   await member.getByRole('button', { name: 'Mark Fixture Member as trained today for Aikido' }).click();
   await expect(page.getByText('Fixture Member was marked as trained today.')).toBeVisible();
-  await expect(member.getByRole('status')).toHaveText('Training recorded for today.');
+  await expect(member.getByRole('region', { name: 'Training session update' }).getByRole('status')).toHaveText('Training recorded for today.');
   await expect(member).toContainText('Today');
   await expect(member.getByRole('button', { name: 'Trained Today' })).toBeDisabled();
 
   await member.getByLabel('Correct or backdate the session').fill('2026-09-10');
   await member.getByRole('button', { name: 'Save Date Correction' }).click();
   await expect(page.getByText("Fixture Member's last training session was corrected.")).toBeVisible();
-  await expect(member.getByRole('status')).toHaveText('Training date corrected.');
+  await expect(member.getByRole('region', { name: 'Training session update' }).getByRole('status')).toHaveText('Training date corrected.');
   await expect(member).toContainText('17 days ago');
 
   expect(await fixtureState(page)).toMatchObject({
@@ -74,7 +74,7 @@ test('Admin can retry a rejected training update without losing the correction d
   await expect(member.getByRole('button', { name: 'Save Date Correction' })).toBeEnabled();
 
   await member.getByRole('button', { name: 'Save Date Correction' }).click();
-  await expect(member.getByRole('status')).toHaveText('Training date corrected.');
+  await expect(member.getByRole('region', { name: 'Training session update' }).getByRole('status')).toHaveText('Training date corrected.');
   await expect(member).toContainText('17 days ago');
   expect((await fixtureState(page)).trainingCalls).toHaveLength(2);
 });

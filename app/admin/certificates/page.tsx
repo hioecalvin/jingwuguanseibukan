@@ -1,4 +1,5 @@
 "use client";
+import { isAikidoClass, aikikaiForClass } from "@/lib/aikikai";
 import MemberIdLink from "@/components/member-id-link";
 
 
@@ -348,8 +349,7 @@ export default function CertificateHistoryPage() {
             .includes(query) ||
 
           (
-            certificate
-              .aikikai_registration_number ??
+            aikikaiForClass(certificate.class_name, certificate.aikikai_registration_number) ??
             ""
           )
             .toLowerCase()
@@ -496,16 +496,9 @@ export default function CertificateHistoryPage() {
       certificate.member_id ??
       "-";
 
-    const aikikaiNumber =
-      certificate
-        .aikikai_registration_number;
+    const aikikaiNumber = aikikaiForClass(certificate.class_name, certificate.aikikai_registration_number);
 
-
-    if (
-      certificate.class_name ===
-        "Aikido" &&
-      aikikaiNumber
-    ) {
+    if (aikikaiNumber) {
       return `${memberId} / ${aikikaiNumber}`;
     }
 
@@ -588,24 +581,14 @@ export default function CertificateHistoryPage() {
             "",
         },
 
-        {
-          header:
-            "Aikikai Registration Number",
-
-          key:
-            "aikikai_registration_number",
-
-          value: (
-            row
-          ) =>
-            row
-              .aikikai_registration_number ??
-            "",
-        },
+        ...(filteredCertificates.some(row => isAikidoClass(row.class_name)) ? [{
+          header: "Aikikai Registration Number", key: "aikikai_registration_number",
+          value: (row: CertificateRow) => aikikaiForClass(row.class_name, row.aikikai_registration_number) ?? "",
+        }] : []),
 
         {
           header:
-            "Member ID / Aikikai Registration Number",
+            "Display Member ID",
 
           key:
             "display_member_id",
@@ -945,12 +928,13 @@ export default function CertificateHistoryPage() {
                   e.target.value
                 )
               }
-              placeholder="Certificate / Member / Aikikai / Rank / Dojo / Assessor"
+              placeholder="Search by certificate, member, rank, dojo or assessor"
               className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-white"
             />
 
 
             <select
+              aria-label="Filter by class"
               value={
                 classFilter
               }
@@ -1211,7 +1195,7 @@ export default function CertificateHistoryPage() {
                               Member ID:
                             </span>{" "}
 
-                            <><MemberIdLink memberId={certificate.member_id} />{certificate.aikikai_registration_number ? ' / ' + certificate.aikikai_registration_number : ''}</>
+                            <><MemberIdLink memberId={certificate.member_id} />{aikikaiForClass(certificate.class_name, certificate.aikikai_registration_number) ? ' / ' + certificate.aikikai_registration_number : ''}</>
                           </p>
 
 

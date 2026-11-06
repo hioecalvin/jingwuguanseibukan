@@ -1,4 +1,5 @@
 "use client";
+import { aikikaiForClass, isAikidoClass, isAikidoYudansha } from "@/lib/aikikai";
 import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
 import MemberTrainingSummary from "@/components/member-training-summary";
 
@@ -1372,7 +1373,7 @@ export default function MemberManagementPage() {
     member: Member
   ) {
     if (
-      !isSuperAdmin
+      !isSuperAdmin || !isAikidoYudansha(member.class_name, member.level)
     ) {
       return;
     }
@@ -1423,9 +1424,9 @@ export default function MemberManagementPage() {
   async function saveAikikaiRegistrationNumber(
     member: Member
   ) {
-    if (!isSuperAdmin) {
+    if (!isSuperAdmin || !isAikidoYudansha(member.class_name, member.level)) {
       showError(
-        "Only Super Admin can change the Aikikai Registration Number."
+        "Super Admin can update this number for Aikido Yudansha members."
       );
       return;
     }
@@ -1455,7 +1456,7 @@ export default function MemberManagementPage() {
 
       setMembers((current) =>
         current.map((item) =>
-          item.user_id === member.user_id
+          item.user_id === member.user_id && isAikidoClass(item.class_name)
             ? {
                 ...item,
                 aikikai_registration_number:
@@ -3757,7 +3758,7 @@ export default function MemberManagementPage() {
             ) ||
 
           (
-            member.aikikai_registration_number ??
+            aikikaiForClass(member.class_name, member.aikikai_registration_number) ??
             ""
           )
             .toLowerCase()
@@ -3907,13 +3908,10 @@ export default function MemberManagementPage() {
             "registration_number",
         },
 
-        {
-          header:
-            "Aikikai Registration Number",
-
-          key:
-            "aikikai_registration_number",
-        },
+        ...(filteredMembers.some(row => isAikidoClass(row.class_name)) ? [{
+          header: "Aikikai Registration Number", key: "aikikai_registration_number",
+          value: (row: Member) => aikikaiForClass(row.class_name, row.aikikai_registration_number) ?? "",
+        }] : []),
 
         {
           header:
@@ -4940,16 +4938,14 @@ export default function MemberManagementPage() {
 
 
                           <p className="mt-1 text-sm text-neutral-400">
-                            {member.level ===
-                            "yudansha"
+                            {isAikidoYudansha(member.class_name, member.level)
                               ? "Member ID / Aikikai Registration Number:"
                               : "Member ID:"}{" "}
 
                             <span className="font-medium text-neutral-300">
                               <MemberIdLink memberId={member.registration_number} fallback={"Not assigned"} />
 
-                              {member.level ===
-                                "yudansha" && (
+                              {isAikidoYudansha(member.class_name, member.level) && (
                                 <>
                                   {" / "}
                                   {member.aikikai_registration_number ??
@@ -5442,7 +5438,7 @@ export default function MemberManagementPage() {
                       </CompactRecord>
 
 
-                      <CompactRecord as="section" alwaysCollapsible summary="Update Training Session" detail="" className="mt-3 rounded-xl border border-neutral-800">
+                      <CompactRecord as="section" alwaysCollapsible aria-label="Training session update" summary="Update Training Session" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
                         <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
                           Last Training Session
@@ -5890,8 +5886,7 @@ export default function MemberManagementPage() {
                       </CompactRecord>
 
                     )}{/* AIKIKAI REGISTRATION NUMBER */}{isSuperAdmin &&
-                      member.level ===
-                        "yudansha" && (
+                      isAikidoYudansha(member.class_name, member.level) && (
 
                       <CompactRecord as="section" alwaysCollapsible summary="Aikikai Registration" detail="" className="mt-3 rounded-xl border border-neutral-800">
 
@@ -5914,7 +5909,7 @@ export default function MemberManagementPage() {
 
 
                                 <p className="mt-2 text-xs text-neutral-400">
-                                  Official Aikikai registration identifier for this Yudansha Member.
+                                  Aikikai registration number for this Aikido Yudansha member.
                                 </p>
                               </>
 

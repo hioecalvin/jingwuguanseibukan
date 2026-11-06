@@ -1,4 +1,5 @@
 "use client";
+import { isAikidoYudansha } from "@/lib/aikikai";
 import MemberEmergencyContact from "@/components/member-emergency-contact";
 import MemberTrainingSummary from "@/components/member-training-summary";
 
@@ -1594,10 +1595,7 @@ export default function ProfilePage() {
 
           {memberships.some(
             (membership) =>
-              membership.classes
-                ?.name === "Aikido" &&
-              membership.level ===
-                "yudansha"
+              isAikidoYudansha(membership.classes?.name, membership.level)
           ) && (
             <DetailItem
               label="Aikikai Registration Number"
@@ -2045,11 +2043,7 @@ export default function ProfilePage() {
                             "Rank not assigned"}
                         </h3>
 
-                        {membership.classes
-                          ?.name ===
-                          "Aikido" &&
-                          membership.level ===
-                            "yudansha" && (
+                        {isAikidoYudansha(membership.classes?.name, membership.level) && (
                             <p className="mt-2 text-sm text-neutral-500">
                               Member ID / Aikikai Registration Number:{" "}
                               <span className="font-medium text-neutral-300">

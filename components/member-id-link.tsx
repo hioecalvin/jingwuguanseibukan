@@ -11,6 +11,6 @@ export default function MemberIdLink({ memberId, fallback = "Not assigned", clas
   const value = memberId?.trim();
   if (!value || ["—", "-", "Not assigned", "Unknown", "No Member ID"].includes(value)) return <>{fallback}</>;
   return <Link href={`/members/${encodeURIComponent(value)}`} prefetch={false}
-    className={`rounded-sm text-sky-300 underline decoration-sky-600 underline-offset-2 hover:text-sky-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 ${className}`}
+    className={`inline-flex min-h-6 min-w-6 items-center rounded-sm text-sky-300 underline decoration-sky-600 underline-offset-2 hover:text-sky-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400 ${className}`}
     aria-label={`View member profile ${value}`}>{children ?? value}</Link>;
 }

@@ -58,7 +58,7 @@ export default function MemberExamHistory({ memberId, classId }: { memberId: str
         </summary>
         <dl className="mt-3 grid gap-3 sm:grid-cols-2">
           <div><dt className="text-neutral-400">Assessment number</dt><dd>{exam.assessment_number ?? "Not numbered"}</dd></div>
-          <div><dt className="text-neutral-400">Previous rank</dt><dd>{exam.rank_before ?? "Unknown"}</dd></div>
+          <div><dt className="text-neutral-400">Rank Before</dt><dd>{exam.rank_before ?? "Unknown"}</dd></div>
           <div><dt className="text-neutral-400">Assessor</dt><dd>{exam.assessor_name ?? "Unknown"}</dd></div>
           <div><dt className="text-neutral-400">Dojo at assessment</dt><dd>{exam.dojo_name ?? "Unknown"}</dd></div>
           {exam.notes && <div className="sm:col-span-2"><dt className="text-neutral-400">Record details</dt><dd className="whitespace-pre-wrap break-words">{exam.notes}</dd></div>}

@@ -9,7 +9,6 @@ async function typeText(page: Page, label: string, value: string) {
 }
 
 async function registrationFields(page: Page) {
-  await typeText(page, 'Aikikai Registration Number (optional)', ' AIKIKAI   100 ');
   await typeText(page, 'Full Name', ' Test   Member ');
   await page.getByLabel('Date of Birth', { exact: true }).fill('2000-01-01');
   await typeText(page, 'Email', 'fixture@example.invalid');
@@ -149,10 +148,12 @@ test('late dojo responses cannot replace the newly selected class', async ({ pag
 });
 
 test('password mismatch does not call Auth and matching fields send normalized metadata to the mock', async ({ page, backend }) => {
+  backend.classes[0].name = 'Aikido';
   backend.confirmSignup = true;
   await page.goto('/register');
   await registrationFields(page);
   await page.getByLabel('Class', { exact: true }).selectOption('fixture-a');
+  await typeText(page, 'Aikikai Registration Number (optional)', ' AIKIKAI   100 ');
   await page.getByLabel('Dojo', { exact: true }).selectOption('dojo-a');
   await page.getByLabel('Confirm Password', { exact: true }).click();
   await page.getByLabel('Confirm Password', { exact: true }).press('ControlOrMeta+A');
@@ -169,6 +170,25 @@ test('password mismatch does not call Auth and matching fields send normalized m
   expect(backend.signupPayload?.data.aikikai_registration_number).toBe('AIKIKAI 100');
   expect(backend.signupPayload?.data.registration_number).toBeUndefined();
   expect(backend.signupPayload?.data.requested_dojo_id).toBe('dojo-a');
+});
+
+test('switching from Aikido to Karate removes the Aikikai field and clears its signup value', async ({ page, backend }) => {
+  backend.classes[0].name = 'Aikido';
+  backend.classes[1].name = 'Karate';
+  backend.confirmSignup = true;
+  await page.goto('/register');
+  const aikikai = page.getByLabel('Aikikai Registration Number (optional)');
+  await expect(aikikai).toHaveCount(0);
+  await page.getByLabel('Class', { exact: true }).selectOption('fixture-a');
+  await aikikai.fill('AIK-123');
+  await page.getByLabel('Class', { exact: true }).selectOption('fixture-b');
+  await expect(aikikai).toHaveCount(0);
+  await registrationFields(page);
+  await page.getByLabel('Dojo', { exact: true }).selectOption('dojo-b');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByText('Registration successful. Please check your email to verify your account.')).toBeVisible();
+  expect(backend.signupPayload?.data.requested_class_name).toBe('Karate');
+  expect(backend.signupPayload?.data.aikikai_registration_number).toBeNull();
 });
 
 test('a loaded empty dojo catalog retains the approval explanation', async ({ page, backend }) => {

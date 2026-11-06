@@ -29,8 +29,8 @@ test('Certificates exports the visible audit history as a real Excel download', 
   expect(fs.statSync(downloadPath!).size).toBeGreaterThan(1_000);
 
   const rows = workbookRows(downloadPath!, 'Certificates');
-  expect(rows).toHaveLength(1);
-  expect(rows[0]).toMatchObject({
+  expect(rows).toHaveLength(2);
+  expect(rows.find(row => row.Class === 'Aikido')).toMatchObject({
     'Certificate Number': 'JS-AIK-2026-0001',
     'Member ID': 'JS0001',
     'Aikikai Registration Number': 'A12345',
@@ -39,6 +39,19 @@ test('Certificates exports the visible audit history as a real Excel download', 
     Status: 'Valid',
     'Total Prints': 1,
   });
+  const karateRow = rows.find(row => row.Class === 'Karate');
+  expect(karateRow).toMatchObject({ 'Member ID': 'JS0001', 'Aikikai Registration Number': '' });
+  expect(Object.values(karateRow!)).not.toContain('JS0001 / A12345');
+
+  await page.getByRole('combobox', { name: 'Filter by class' }).selectOption('Karate');
+  await expect(page.getByText('JS-AIK-2026-0001', { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/A12345/)).toHaveCount(0);
+  const filteredDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export Excel' }).click();
+  const filteredRows = workbookRows((await (await filteredDownload).path())!, 'Certificates');
+  expect(filteredRows).toHaveLength(1);
+  expect(filteredRows[0]).not.toHaveProperty('Aikikai Registration Number');
+  expect(filteredRows[0]).toMatchObject({ Class: 'Karate', 'Display Member ID': 'JS0001' });
 });
 
 test('Reports exports the visible official report history as a real Excel download', async ({ page }) => {
