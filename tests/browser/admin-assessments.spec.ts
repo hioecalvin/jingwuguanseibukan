@@ -63,7 +63,9 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
 
 test('assessment search finds JS IDs and keeps selected members first', async ({ page }) => {
   await page.goto(NAV_ORIGIN + '/admin-assessments');
+  await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
   await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  await expect(page.getByText('Included 0 of 3 eligible candidates.')).toBeVisible();
   const search = page.getByLabel('Search assessment members');
   await search.fill('JS0103');
   await expect(page.getByRole('checkbox', { name: 'Include Citra Junior' })).toBeVisible();
