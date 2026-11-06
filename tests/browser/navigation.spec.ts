@@ -9,10 +9,10 @@ for (const role of ['member', 'admin', 'super_admin']) {
       await page.goto(`${NAV_ORIGIN}/profile?role=${role}${enabled ? '&history=enabled' : ''}`);
       await expect(page.getByRole('heading', { name: 'Navigation component fixture' })).toBeVisible();
       await page.setViewportSize({ width: 1440, height: 1000 });
-      await expect(page.getByRole('navigation', { name: 'Desktop primary' }).getByRole('link', { name: 'Assessment History', exact: true })).toHaveCount(enabled ? 1 : 0);
+      await expect(page.getByRole('navigation', { name: 'Desktop primary' }).getByRole('link', { name: 'Assessment History', exact: true, includeHidden: true })).toHaveCount(enabled ? 1 : 0);
       await page.setViewportSize({ width: 390, height: 844 });
       await page.getByRole('button', { name: 'Menu', exact: true }).click();
-      await expect(page.getByRole('navigation', { name: 'Mobile primary' }).getByRole('link', { name: 'Assessment History', exact: true })).toHaveCount(enabled ? 1 : 0);
+      await expect(page.getByRole('navigation', { name: 'Mobile primary' }).getByRole('link', { name: 'Assessment History', exact: true, includeHidden: true })).toHaveCount(enabled ? 1 : 0);
     });
   }
 }
@@ -101,8 +101,9 @@ for (const role of ['member', 'admin', 'super_admin']) {
     await expect(page.getByRole('heading', { name: 'Navigation component fixture' })).toBeVisible();
     if (page.viewportSize()!.width < 1024) await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await expect(page.getByRole('link', { name: 'Profile', exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(page.getByRole('link', { name: 'Members', exact: true })).toHaveCount(role === 'member' ? 0 : 1);
-    await expect(page.getByRole('link', { name: 'Classes', exact: true })).toHaveCount(role === 'super_admin' ? 1 : 0);
+    const primary = page.getByRole('navigation', { name: page.viewportSize()!.width < 1024 ? 'Mobile primary' : 'Desktop primary' });
+    await expect(primary.getByRole('link', { name: 'Members', exact: true, includeHidden: true })).toHaveCount(role === 'member' ? 0 : 1);
+    await expect(primary.getByRole('link', { name: 'Classes', exact: true, includeHidden: true })).toHaveCount(role === 'super_admin' ? 1 : 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(scan.violations).toEqual([]);
@@ -139,4 +140,18 @@ test('account disclosure supports keyboard dismissal and shows sign-out failure 
   await expect(page).toHaveURL(`${NAV_ORIGIN}/profile`);
   const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   expect(scan.violations).toEqual([]);
+});
+
+test('compact groups expand one at a time and keep the current route visible', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 568 });
+  await page.goto(NAV_ORIGIN + '/profile?role=super_admin');
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  const nav = page.getByRole('navigation', { name: 'Mobile primary' });
+  await expect(nav.getByRole('link')).toHaveCount(2);
+  await nav.getByRole('button', { name: 'Members', exact: true }).click();
+  await expect(nav.getByRole('link', { name: 'Account Claims' })).toBeVisible();
+  await nav.getByRole('button', { name: 'Training', exact: true }).click();
+  await expect(nav.getByRole('link', { name: 'Account Claims' })).toBeHidden();
+  await expect(nav.getByRole('link', { name: 'Calendar' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeInViewport();
 });

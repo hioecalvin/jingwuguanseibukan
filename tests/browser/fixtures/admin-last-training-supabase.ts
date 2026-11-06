@@ -6,6 +6,8 @@ type TrainingCall = {
 };
 
 type LastTrainingFixtureState = {
+  administrativeStatuses: Record<string, string>;
+  administrativeChanges: RpcArguments[];
   examQueries: RpcArguments[];
   failNextExam: boolean;
   failNextTraining: boolean;
@@ -24,6 +26,8 @@ declare global {
 const user = { id: 'fixture-super-admin' };
 
 export const fixtureState: LastTrainingFixtureState = {
+  administrativeStatuses: { 'fixture-member': 'active', 'fixture-unenrolled': 'inactive' },
+  administrativeChanges: [],
   examQueries: [],
   failNextExam: false,
   failNextTraining: false,
@@ -128,6 +132,16 @@ export function createClient() {
     },
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args: RpcArguments = {}) => {
+      if (name === 'get_member_administrative_status' || name === 'set_member_administrative_status') {
+        const id = String(args.target_member_id);
+        const saved = fixtureState.administrativeStatuses[id];
+        if (!saved || new URLSearchParams(window.location.search).has('dojo-admin')) throw new Error('Unexpected administrative status access');
+        if (name === 'get_member_administrative_status') return { data: saved, error: null };
+        fixtureState.administrativeChanges.push(args);
+        if (saved !== args.expected_status) return { data: null, error: new Error('Concurrent change') };
+        fixtureState.administrativeStatuses[id] = String(args.new_status);
+        return { data: args.new_status, error: null };
+      }
       if (name === 'get_assessment_result_history') {
         fixtureState.examQueries.push(args);
         if (args.target_member_id === 'fixture-unenrolled') return { data: [{ result_id: 'recovered-exam', class_id: 'fixture-class', class_name: 'Aikido', assessment_number: '2008-0001', assessment_date: '2008-01-01', rank_before: null, rank_assessed: '6th Kyu', outcome: 'recorded_grade', assessor_name: null, dojo_name: null, notes: 'Original historical evidence' }], error: null };

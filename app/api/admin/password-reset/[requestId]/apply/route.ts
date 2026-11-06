@@ -355,7 +355,9 @@ export async function POST(
         .select(`
           id,
           full_name,
-          is_super_admin
+          is_super_admin,
+          account_status,
+          date_of_passing
         `)
         .eq(
           "id",
@@ -386,7 +388,7 @@ export async function POST(
 
 
     if (
-      !callerProfile
+      !callerProfile || callerProfile.account_status !== "active" || callerProfile.date_of_passing
     ) {
       return NextResponse.json(
         {
@@ -704,7 +706,9 @@ export async function POST(
           id,
           registration_number,
           full_name,
-          email
+          email,
+          account_status,
+          date_of_passing
         `)
         .eq(
           "id",
@@ -748,6 +752,10 @@ export async function POST(
       );
     }
 
+
+    if (memberProfile.account_status !== "active" || memberProfile.date_of_passing) {
+      return NextResponse.json({ error: "Restore member account access before resetting the password." }, { status: 409 });
+    }
 
     const memberEmail =
       memberProfile.email

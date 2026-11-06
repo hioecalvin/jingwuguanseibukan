@@ -113,7 +113,7 @@ export default function AdminEventsPage() {
         await supabase
           .from("classes")
           .select("id, name")
-          .eq("active", true)
+          .eq("is_active", true)
           .order("name");
 
       if (classError) {

@@ -46,3 +46,15 @@ test('concurrent edit reports conflict and preserves form', async ({ page }) => 
   await expect(page.getByLabel('Session details')).toHaveValue('Keep my entry');
   await expect(page.getByRole('checkbox', { name: /Home Member/ })).toBeChecked();
 });
+
+test('selected attendees move above others and remain reviewable during search', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).check();
+  await expect(page.getByRole('checkbox').first()).toHaveAccessibleName(/Visiting Member/);
+  await page.getByLabel('Find attendees').fill('Home Member');
+  await expect(page.getByRole('checkbox').first()).toHaveAccessibleName(/Visiting Member/);
+  await expect(page.getByRole('checkbox', { name: /Home Member/ })).toBeVisible();
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).click();
+  await expect(page.getByRole('checkbox', { name: /Visiting Member/ })).toHaveCount(0);
+});

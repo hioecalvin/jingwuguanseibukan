@@ -1,4 +1,5 @@
 
+import MemberAdministrativeStatus from "@/components/member-administrative-status";
 import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
 import MemberTrainingSummary from "@/components/member-training-summary";
 import Link from "next/link";
@@ -33,10 +34,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       <div><dt className="text-neutral-400">Date of birth</dt><dd>{person.private_details.date_of_birth ?? "Unknown"}</dd></div>
     </dl></section>}
     {person.personal_edit_id && <MemberPersonalDetailsEditor memberId={person.personal_edit_id} />}
+    {person.personal_edit_id && <MemberAdministrativeStatus key={person.personal_edit_id} memberId={person.personal_edit_id} memberName={person.full_name} />}
     <section aria-label="Class enrollments" className="space-y-3"><h2 className="font-semibold">Classes and dojos</h2>
       {person.enrollments.map((enrollment, index) => <article key={enrollment.membership_id ?? index} className="rounded-lg border border-neutral-800 p-3 text-sm">
         <h3 className="font-semibold">{enrollment.class_name} · {enrollment.home_dojo ?? "Dojo not assigned"}</h3><p>{enrollment.rank_name ?? "Rank not recorded"}</p>
-        {person.private_details && <p className="mt-2 text-neutral-400">Joined: {enrollment.joined_date ?? "Unknown"} · Status: {enrollment.status ?? "Unknown"} · Last training: {enrollment.last_training_date ?? "Unknown"}</p>}
+        {person.private_details && <p className="mt-2 text-neutral-400">Joined: {enrollment.joined_date ?? "Unknown"} · Enrollment status: {enrollment.status ?? "Unknown"} · Last training: {enrollment.last_training_date ?? "Unknown"}</p>}
         {enrollment.membership_id && <MemberTrainingSummary membershipId={enrollment.membership_id} />}
       </article>)}
       {!person.enrollments.length && <p className="text-sm text-neutral-400">No class enrollments available.</p>}

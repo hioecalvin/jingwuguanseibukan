@@ -15,7 +15,7 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
   await expect(page.getByText('Included 0 of 3 eligible candidates.')).toBeVisible();
   await expect(page.getByText('Legacy member tier', { exact: false })).toHaveCount(0);
   await expect(page.getByText('1st Kyu', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Include all' }).click();
+  await page.getByRole('button', { name: 'Include visible' }).click();
   const assessors = page.getByRole('region', { name: '2. Assessors' });
   await assessors.getByRole('combobox').selectOption('fixture-assessor');
   await expect(assessors.getByRole('textbox')).toHaveCount(0);
@@ -59,4 +59,19 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
       announcementOrder: ['Akira Senior', 'Budi Middle'],
     },
   });
+});
+
+test('assessment search finds JS IDs and keeps selected members first', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-assessments');
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  const search = page.getByLabel('Search assessment members');
+  await search.fill('JS0103');
+  await expect(page.getByRole('checkbox', { name: 'Include Citra Junior' })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Include Akira Senior' })).toHaveCount(0);
+  await page.getByRole('checkbox', { name: 'Include Citra Junior' }).check();
+  await search.fill('Akira');
+  const choices = page.getByRole('checkbox', { name: /^Include / });
+  await expect(choices).toHaveCount(2);
+  await expect(choices.first()).toHaveAccessibleName('Include Citra Junior');
+  await expect(page.getByText('Included 1 of 3 eligible candidates.')).toBeVisible();
 });

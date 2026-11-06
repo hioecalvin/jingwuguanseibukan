@@ -1,4 +1,5 @@
 "use client";
+import { selectedFirst } from "@/lib/selected-first";
 
 export type MemorialClassOption = { id: string; name: string };
 
@@ -128,7 +129,7 @@ export default function DeceasedMemorialPanel({
                 These classes receive the Initial Memorial and enabled annual reminders.
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {classes.map((classOption) => (
+                {selectedFirst(classes, option => draft.recipientClassIds.includes(option.id)).map((classOption) => (
                   <label
                     key={classOption.id}
                     className="flex min-h-11 items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-950/50 px-3 py-2 text-sm"

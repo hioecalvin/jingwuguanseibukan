@@ -54,7 +54,7 @@ test('Member list opens contacts, rank, subscription history and records through
 test('Selected membership status preserves confirmation and retry', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-last-training?promotion=1`);
   await page.getByRole('button', { name: openId, exact: true }).click();
-  const status = page.getByRole('combobox', { name: 'Status for Fixture Member' });
+  const status = page.getByRole('combobox', { name: 'Enrollment status for Fixture Member' });
   await status.selectOption('break_1');
   await expect(status).toHaveValue('break_1');
   await expect(page.getByRole('button', { name: 'Promote Tier', exact: true })).toHaveCount(0);
@@ -78,8 +78,8 @@ test('Selected membership status preserves confirmation and retry', async ({ pag
 test('Deceased row prevents status/promotion changes and subscription read failures can retry', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-last-training?promotion=1&deceased=1`);
   await page.getByRole('button', { name: openId, exact: true }).click();
-  await expect(page.getByRole('combobox', { name: 'Status for Fixture Member' })).toBeDisabled();
-  await expect(page.getByRole('combobox', { name: 'Status for Fixture Member' })).toContainText('Deceased');
+  await expect(page.getByRole('combobox', { name: 'Enrollment status for Fixture Member' })).toBeDisabled();
+  await expect(page.getByRole('combobox', { name: 'Enrollment status for Fixture Member' })).toContainText('Deceased');
   await expect(page.getByRole('button', { name: 'Promote Tier', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: openId, exact: true }).click();
   await page.evaluate(() => { (window as Window & { __lastTrainingFixture: { failNextHistory: boolean } }).__lastTrainingFixture.failNextHistory = true; });
@@ -108,12 +108,12 @@ test('one JS ID groups class rows and sorting keeps them together',async({page})
  await expect(member.getByRole('group',{name:'Classes enrolled for Fixture Member'})).toContainText('Aikido');
  await member.getByRole('button',{name:'View Details: Karate at Second Dojo for Fixture Member',exact:true}).click();
  await expect(member.locator('.member-overview')).toContainText('4th Kyu');
- await expect(member.getByRole('combobox',{name:'Status for Fixture Member'})).toHaveValue('inactive');
+ await expect(member.getByRole('combobox',{name:'Enrollment status for Fixture Member'})).toHaveValue('inactive');
  const queries=await page.evaluate(()=>window.__lastTrainingFixture.historyQueries);
  expect(queries.some(query=>query.filters.membership_id==='fixture-karate')).toBe(true);
  await member.getByRole('button',{name:'View Details: Aikido at Fixture Dojo for Fixture Member',exact:true}).click();
  await expect(member.locator('.member-overview')).toContainText('5th Kyu');
- await expect(member.getByRole('combobox',{name:'Status for Fixture Member'})).toHaveValue('active');
+ await expect(member.getByRole('combobox',{name:'Enrollment status for Fixture Member'})).toHaveValue('active');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const scan=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();expect(scan.violations).toEqual([]);
 });

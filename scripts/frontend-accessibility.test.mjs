@@ -27,6 +27,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
         dirty = true;
       }];
     },
+    useCallback(fn, deps) { return react.useMemo(() => fn, deps); },
     useRef(initial) { return react.useState(() => ({ current: initial }))[0]; },
     useId() { return react.useState(() => `fixture-${cursor}`)[0]; },
     useMemo(fn, deps) {
@@ -55,6 +56,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
     '@/lib/application-origin': { configuredApplicationOrigin: () => 'https://configured.example.test' },
     '@/lib/supabase/client': { createClient: () => supabase },
     '@/lib/aikikai': aikikaiModule.exports,
+    '@/components/compact-navigation': { default: 'CompactNavigation' },
     ...extras,
   };
   const signOutModule = { exports: {} };
@@ -409,7 +411,7 @@ test('mobile navigation uses a labelled native modal and identifies the current 
   assert.equal(menu.props['aria-controls'], dialog.props.id);
   assert.equal(menu.props['aria-haspopup'], 'dialog');
   assert.equal(menu.props['aria-expanded'], false);
-  assert.equal(ui.find(node => node.props.href === '/profile').props['aria-current'], 'page');
+  assert.equal(ui.find(node => node.type === 'CompactNavigation').props.pathname, '/profile');
   // Source checks supplement the rendered contract; native focus/Escape still need browser verification.
   const source = fs.readFileSync('components/mobile-nav.tsx', 'utf8');
   assert.match(source, /\.showModal\(\)/);
@@ -530,4 +532,59 @@ test('the page error boundary retries without rendering exception details', () =
   assert.doesNotMatch(ui.text(), /private stack detail/);
   ui.find(node => node.type === 'button').props.onClick();
   assert.equal(retried, true);
+});
+
+test('Events loads class choices using the live is_active column', async () => {
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: 'admin' } }, error: null }) },
+    from(table) {
+      const filters = [];
+      const query = {
+        select() { return query; },
+        eq(key, value) { filters.push([key, value]); return query; },
+        single: async () => ({ data: { is_super_admin: true }, error: null }),
+        async order() {
+          if (table === 'classes') {
+            assert.deepEqual(filters, [['is_active', true]]);
+            return { data: [{ id: 'aikido', name: 'Fixture Aikido' }], error: null };
+          }
+          assert.equal(table, 'events');
+          return { data: [], error: null };
+        },
+      };
+      return query;
+    },
+  };
+  const router = { replace() {}, push() {} };
+  const ui = componentHarness('app/admin/events/page.tsx', client, {
+    'next/navigation': { useRouter: () => router },
+    '@/components/compact-record': { default: 'article' },
+    '@/lib/exportExcel': { exportToExcel() {} },
+  });
+  ui.render();
+  await ui.flush();
+  await new Promise(resolve => setImmediate(resolve));
+  await ui.flush();
+  assert.ok(ui.find(node => node.type === 'option' && node.props.value === 'aikido'), ui.text());
+});
+
+test('Announcements names the direct class relationship to avoid ambiguous embedding', async () => {
+  const client = {
+    auth: { getUser: async () => ({ data: { user: { id: 'admin' } }, error: null }) },
+    from(table) {
+      assert.equal(table, 'announcements');
+      const query = {
+        select(selection) { assert.match(selection, /classes:classes!announcements_class_id_fkey/); return query; },
+        eq() { return query; },
+        order: async () => ({ data: [], error: null }),
+      };
+      return query;
+    },
+  };
+  const ui = componentHarness('app/admin/announcements/page.tsx', client, {
+    '@/components/compact-record': { default: 'article' },
+  });
+  ui.render();
+  await ui.flush();
+  assert.doesNotMatch(ui.text(), /Loading announcements/);
 });

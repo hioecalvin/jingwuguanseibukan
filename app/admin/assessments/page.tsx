@@ -1,5 +1,7 @@
 "use client";
 
+import { selectedFirst } from "@/lib/selected-first";
+
 import CompactRecord from "@/components/compact-record";
 
 /* eslint-disable @next/next/no-img-element */
@@ -32,6 +34,7 @@ type GradingAssessor = {
 type Candidate = {
   membership_id: string;
   user_id: string;
+  member_id?: string | null;
   full_name: string;
   avatar_url: string | null;
   class_id: string;
@@ -127,6 +130,7 @@ export default function BulkAssessmentsPage() {
   const [assessmentDate, setAssessmentDate] = useState(todayInputValue);
   const [assessorMemberId, setAssessorMemberId] = useState("");
   const [externalAssessorName, setExternalAssessorName] = useState("");
+  const [candidateSearch, setCandidateSearch] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [decisions, setDecisions] = useState<Record<string, CandidateDecision>>({});
   const [submissionKey, setSubmissionKey] = useState("");
@@ -207,6 +211,8 @@ export default function BulkAssessmentsPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [classId, scopeRows]);
 
+  const query = candidateSearch.toLowerCase().replace(/[-\s]/g, "");
+  const visibleCandidates = selectedFirst(candidates, candidate => Boolean(decisions[candidate.membership_id]?.included)).filter(candidate => decisions[candidate.membership_id]?.included || [candidate.member_id, candidate.full_name, candidate.dojo_name, candidate.rank_before_name, candidate.rank_to_name].filter(Boolean).join(" ").toLowerCase().replace(/[-\s]/g, "").includes(query));
   const includedCandidates = candidates.filter(
     (candidate) => decisions[candidate.membership_id]?.included,
   );
@@ -262,7 +268,7 @@ export default function BulkAssessmentsPage() {
     setError(null);
     resetSubmissionState();
     const { data, error: rosterError } = await supabase.rpc(
-      "get_bulk_assessment_candidates",
+      "get_bulk_assessment_candidates_with_member_ids",
       {
         target_class_id: classId,
         target_dojo_id: dojoId || null,
@@ -289,6 +295,7 @@ export default function BulkAssessmentsPage() {
       };
     }
     setCandidates(rows);
+    setCandidateSearch("");
     setDecisions(nextDecisions);
     setSubmissionKey(crypto.randomUUID());
     clearPreparedAssessment();
@@ -331,6 +338,7 @@ export default function BulkAssessmentsPage() {
     setPreparedAssessmentId(targetId);
     setPreparedRows(rows);
     setCandidates(rows);
+    setCandidateSearch("");
     setDecisions(nextDecisions);
     setClassId(first.class_id);
     setDojoId(first.dojo_id ?? "");
@@ -749,11 +757,11 @@ export default function BulkAssessmentsPage() {
                 type="button"
                 disabled={submitting || Boolean(preparedAssessmentId)}
                 onClick={() => {
-                  for (const candidate of candidates) updateDecision(candidate.membership_id, { included: true });
+                  for (const candidate of visibleCandidates) updateDecision(candidate.membership_id, { included: true });
                 }}
                 className="rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
               >
-                Include all
+                Include visible
               </button>
               <button
                 type="button"
@@ -769,7 +777,10 @@ export default function BulkAssessmentsPage() {
           )}
         </div>
 
-        {candidates.map((candidate) => {
+        <label className="block text-sm text-neutral-300">Search assessment members<input type="search" value={candidateSearch} onChange={event => setCandidateSearch(event.target.value)} placeholder="Name, JS ID, dojo or rank" className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2" /></label>
+        <p className="text-sm text-neutral-400">Showing {visibleCandidates.length} of {candidates.length}. Selected members stay at the top.</p>
+        {visibleCandidates.length === 0 && candidates.length > 0 && <p className="text-sm text-neutral-400">No matching members.</p>}
+        {visibleCandidates.map((candidate) => {
           const decision = decisions[candidate.membership_id];
           if (!decision) return null;
           const controlPrefix = `candidate-${candidate.membership_id}`;

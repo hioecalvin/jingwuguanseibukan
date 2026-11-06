@@ -1,5 +1,7 @@
 "use client";
 
+import { selectedFirst } from "@/lib/selected-first";
+
 import { useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import CompactRecord from "@/components/compact-record";
@@ -82,7 +84,7 @@ export default function AdvancePaymentForm({ mode, memberships, onComplete }: {
       <label className="text-sm">First month<input className={control} type="month" value={month} onChange={e => { setMonth(e.target.value); setExcluded([]); invalidate(); }}/></label>
       <label className="text-sm">Months to show<input className={control} type="number" min="1" max="12" step="1" value={count} onChange={e => { setCount(e.target.value); setExcluded([]); invalidate(); }}/></label>
       {oldest && <button type="button" className={button} onClick={() => { setMonth(oldest.slice(0,7)); setCount("1"); setExcluded([]); invalidate(); }}>Choose oldest unpaid month ({oldest.slice(0,7)})</button>}
-      {candidates.length > 0 && <div className="flex flex-wrap gap-3 sm:col-span-2">{candidates.map(value =>
+      {candidates.length > 0 && <div className="flex flex-wrap gap-3 sm:col-span-2">{selectedFirst(candidates, value => !excluded.includes(value)).map(value =>
         <label key={value} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!excluded.includes(value)}
           onChange={e => { setExcluded(current => e.target.checked ? current.filter(v => v !== value) : [...current, value]); invalidate(); }} />Pay {value.slice(0,7)}</label>)}</div>}
       <div className="self-end"><button type="button" className={button} onClick={() => void act(false)}>Review monthly fees</button></div>

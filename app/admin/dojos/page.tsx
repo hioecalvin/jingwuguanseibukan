@@ -1,5 +1,7 @@
 "use client";
 
+import { selectedFirst } from "@/lib/selected-first";
+
 import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
 
@@ -2270,7 +2272,7 @@ export default function DojoManagementPage() {
 
                 <div className="mt-4 max-h-[460px] space-y-2 overflow-y-auto">
 
-                  {transferMembers.map(
+                  {selectedFirst(transferMembers, member => selectedMembershipIds.includes(member.membership_id)).map(
                     (
                       member
                     ) => {

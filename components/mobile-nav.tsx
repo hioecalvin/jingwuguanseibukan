@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import Link from "next/link";
+import CompactNavigation from "@/components/compact-navigation";
 import { usePathname } from "next/navigation";
 import { useSignOut } from "@/components/use-sign-out";
 
@@ -227,8 +228,8 @@ export default function MobileNav({
                 justify-between
                 border-b
                 border-neutral-800
-                px-5
-                py-5
+                px-4
+                py-3
               "
             >
               <div>
@@ -279,79 +280,9 @@ export default function MobileNav({
             </div>
 
 
-            <nav
-              aria-label="Mobile primary"
-              className="
-                min-h-0
-                flex-1
-                overflow-y-auto
-                p-3
-              "
-            >
-              <div
-                className="
-                  space-y-1
-                "
-              >
-                {items.map(
-                  (
-                    item
-                  ) => {
-
-                    const active =
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname ===
-                            item.href ||
-                          pathname.startsWith(
-                            `${item.href}/`
-                          );
-
-
-                    return (
-                      <Link
-                        key={
-                          item.href
-                        }
-                        href={
-                          item.href
-                        }
-                        aria-current={active ? "page" : undefined}
-                        onClick={closeNavigation}
-                        className={[
-                          `
-                            block
-                            rounded-lg
-                            px-4
-                            py-3
-                            text-sm
-                            font-medium
-                            transition
-                          `,
-
-                          active
-                            ? `
-                                bg-neutral-800
-                                text-white
-                              `
-                            : `
-                                text-neutral-400
-                                hover:bg-neutral-900
-                                hover:text-white
-                              `,
-                        ].join(
-                          " "
-                        )}
-                      >
-                        {
-                          item.label
-                        }
-                      </Link>
-                    );
-                  }
-                )}
-              </div>
-            </nav>
+            <nav aria-label="Mobile primary" className="min-h-0 flex-1 overflow-y-auto p-2">
+        <CompactNavigation key={pathname} items={items} pathname={pathname} onNavigate={closeNavigation} />
+      </nav>
 
 
             <div
@@ -360,7 +291,7 @@ export default function MobileNav({
                 border-t
                 border-neutral-800
                 px-5
-                pt-5
+                pt-3
                 pb-[max(1.25rem,env(safe-area-inset-bottom))]
               "
             >

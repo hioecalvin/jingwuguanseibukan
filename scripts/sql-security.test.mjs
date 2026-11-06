@@ -232,6 +232,7 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // Browser RPCs added after the destructive migration-018 reset must be
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
+    "get_member_administrative_status", "set_member_administrative_status", "get_bulk_assessment_candidates_with_member_ids",
     "get_my_emergency_contact", "update_my_emergency_contact",
     // Follow-up migrations 078–080 explicitly grant these authenticated entry points.
     "get_training_session_roster", "save_training_session", "get_training_sessions",

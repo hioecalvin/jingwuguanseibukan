@@ -1,5 +1,7 @@
 "use client";
 
+import { selectedFirst } from "@/lib/selected-first";
+
 import MemberIdLink from "@/components/member-id-link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MemberTrainingSummary from "@/components/member-training-summary";
@@ -95,7 +97,7 @@ export default function TrainingSessionsPage() {
     } catch { setError("The result could not be confirmed. Reload history before trying again; your entries have been kept."); }
     finally { setSaving(false); }
   };
-  const visibleRoster = roster.filter((p) => `${p.member_id} ${p.full_name} ${p.dojo_name ?? ""}`.toLowerCase().replace(/[-\s]/g, "").includes(search.toLowerCase().replace(/[-\s]/g, "")));
+  const visibleRoster = selectedFirst(roster, p => selected.includes(p.membership_id)).filter((p) => selected.includes(p.membership_id) || `${p.member_id} ${p.full_name} ${p.dojo_name ?? ""}`.toLowerCase().replace(/[-\s]/g, "").includes(search.toLowerCase().replace(/[-\s]/g, "")));
   const loadAudit = async (id: string) => {
     const result = await client.rpc("get_training_session_audit", { target_session_id: id });
     if (result.error) { setError("Edit history could not be loaded."); return; }

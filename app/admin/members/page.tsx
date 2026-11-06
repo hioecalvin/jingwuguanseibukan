@@ -1,5 +1,6 @@
 "use client";
 import { aikikaiForClass, isAikidoClass, isAikidoYudansha } from "@/lib/aikikai";
+import MemberAdministrativeStatus from "@/components/member-administrative-status";
 import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
 import MemberTrainingSummary from "@/components/member-training-summary";
 
@@ -4805,7 +4806,7 @@ export default function MemberManagementPage() {
                           <div><span className="member-list-label">Class</span>{enrollment.class_name}</div>
                           <div><span className="member-list-label">Dojo</span>{enrollment.dojo_name ?? "Not recorded"}</div>
                           <div><span className="member-list-label">Rank</span>{enrollment.rank_name ?? "Unranked"}</div>
-                          <div><span className="member-list-label">Status</span>{statusLabel(enrollment.membership_status, enrollment.date_of_passing)}</div>
+                          <div><span className="member-list-label">Enrollment status</span>{statusLabel(enrollment.membership_status, enrollment.date_of_passing)}</div>
                           <button type="button" aria-label={"View Details: " + enrollment.class_name + " at " + (enrollment.dojo_name ?? "unknown dojo") + " for " + member.full_name}
                             aria-expanded={enrollment.membership_id === member.membership_id && memberViews[member.membership_id] === "details"}
                             aria-controls={"member-details-" + group.userId}
@@ -4818,11 +4819,12 @@ export default function MemberManagementPage() {
                       </div>
                     </div>
                     <div id={`member-details-${group.userId}`} hidden={memberViews[member.membership_id] !== "details"} className="member-expanded-panel">
+                      {isSuperAdmin && memberViews[member.membership_id] === "details" && <MemberAdministrativeStatus memberId={member.user_id} memberName={member.full_name} />}
                       <p className="mb-3 font-semibold">{member.class_name} · {member.dojo_name ?? "Not recorded"}</p>
                       <div className="member-list-actions">
                         <p className="text-sm text-neutral-300">Rank promotion is recorded through assessment.</p>
-                        <label className="text-xs text-neutral-400">Status
-                          <select aria-label={`Status for ${member.full_name}`} value={member.membership_status} disabled={processing || Boolean(member.date_of_passing)}
+                        <label className="text-xs text-neutral-400">Enrollment status
+                          <select aria-label={`Enrollment status for ${member.full_name}`} value={member.membership_status} disabled={processing || Boolean(member.date_of_passing)}
                             onChange={event => {
                               const action = event.target.value;
                               if (action === member.membership_status) return;

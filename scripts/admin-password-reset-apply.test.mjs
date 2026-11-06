@@ -38,7 +38,7 @@ function resetRoute(overrides = {}) {
   function resultFor(table, filters, terminal) {
     const id = filters.find(([column]) => column === "id")?.[1];
     if (table === "profiles") {
-      return { data: id === CALLER_ID ? state.callerProfile : state.memberProfile, error: null };
+      return { data: { account_status: "active", date_of_passing: null, ...(id === CALLER_ID ? state.callerProfile : state.memberProfile) }, error: null };
     }
     if (table === "dojo_admin_assignments") {
       return { data: state.callerAssignments, error: null };
@@ -237,4 +237,15 @@ test("mark failure is sanitized and a later existing-email retry repairs only th
   assert.equal(retry.calls.some(({ kind }) => kind === "update-password"), false);
   assert.equal(retry.calls.some(({ name }) => name === "queue_email"), false);
   assert.equal(retry.calls.filter(({ name }) => name === "mark_password_reset_applied").length, 1);
+});
+
+test("terminated administrators cannot reset passwords", async () => {
+ const route=resetRoute({callerProfile:{id:CALLER_ID,is_super_admin:true,account_status:"disabled"}});
+ assert.equal((await route.run()).status,403);
+ assert.ok(!route.calls.some(c=>c.kind==="update-password"));
+});
+test("terminated members cannot receive password resets", async () => {
+ const route=resetRoute({memberProfile:{id:MEMBER_ID,email:"member@example.invalid",account_status:"disabled"}});
+ assert.equal((await route.run()).status,409);
+ assert.ok(!route.calls.some(c=>c.kind==="update-password"));
 });

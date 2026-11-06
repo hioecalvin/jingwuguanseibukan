@@ -1,6 +1,8 @@
 
 // app/admin/settlements/page.tsx
 "use client";
+
+import { selectedFirst } from "@/lib/selected-first";
 import MemberIdLink from "@/components/member-id-link";
 
 import CompactRecord from "@/components/compact-record";
@@ -778,7 +780,7 @@ export default function AdminSettlementsPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-zinc-800">
-                  {eligible.map((p) => (
+                  {selectedFirst(eligible, p => selectedPayments.includes(p.payment_id)).map((p) => (
                     <label
                       key={p.payment_id}
                       className="flex cursor-pointer items-center gap-3 p-3 hover:bg-zinc-900"

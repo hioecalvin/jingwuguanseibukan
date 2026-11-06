@@ -62,7 +62,7 @@ export default function AnnouncementsPage() {
           created_at,
           class_id,
 
-          classes (
+          classes:classes!announcements_class_id_fkey (
             name
           )
         `)

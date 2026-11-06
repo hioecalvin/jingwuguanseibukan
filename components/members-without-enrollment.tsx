@@ -4,6 +4,7 @@ import MemberIdLink from "@/components/member-id-link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sortMemberGroups, type MemberSort } from "@/lib/group-visible-members";
+import MemberAdministrativeStatus from "@/components/member-administrative-status";
 import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
 import MemberExamHistory from "@/components/member-exam-history";
 
@@ -56,6 +57,7 @@ export default function MembersWithoutEnrollment({ search, sort }: { search: str
       <p className="mt-3 text-sm text-neutral-400">Showing {rows.length} of {state.rows.length} profiles without enrollment</p>
       <div className="mt-3 space-y-2">{rows.map(person => <details key={person.id} className="rounded-lg border border-neutral-700 p-3">
         <summary className="cursor-pointer break-words text-sm"><strong><MemberIdLink memberId={person.registration_number} fallback={"ID unavailable"} /></strong> · {person.full_name}{person.account_status === "disabled" ? " · Account disabled" : ""}</summary>
+        <MemberAdministrativeStatus memberId={person.id} memberName={person.full_name} />
         <MemberPersonalDetailsEditor memberId={person.id} />
         <MemberExamHistory memberId={person.id} />
       </details>)}</div>

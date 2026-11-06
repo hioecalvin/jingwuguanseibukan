@@ -17,6 +17,7 @@ function deceasedRoute({
   superAdmin = true,
   rpcError = null,
   authUpdateError = null,
+  restoredStatus = "disabled",
 } = {}) {
   const calls = [];
   const client = {
@@ -37,7 +38,7 @@ function deceasedRoute({
             return {
               data: {
                 is_super_admin: superAdmin,
-                account_status: "active",
+                account_status: value === adminId ? "active" : restoredStatus,
               },
               error: null,
             };
@@ -157,7 +158,7 @@ test("deceased-member update deduplicates classes, saves first, then disables fu
 });
 
 test("reversal restores future sign-in and remains an explicit null-date operation", async () => {
-  const route = deceasedRoute();
+  const route = deceasedRoute({ restoredStatus: "active" });
   const response = await route.run({
     dateOfPassing: null,
     recipientClassIds: [],

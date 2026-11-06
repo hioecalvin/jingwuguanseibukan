@@ -191,10 +191,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { data: target, error: targetError } = await supabase.from("profiles").select("account_status").eq("id", targetUserId).maybeSingle();
+    if (targetError || !target) return NextResponse.json({ error: "Unable to confirm account access after saving." }, { status: 503 });
+    const accessDisabled = target.account_status !== "active";
     const admin = createAdminClient();
     const { error: authError } = await admin.auth.admin.updateUserById(
       targetUserId,
-      { ban_duration: reversing ? "none" : "876000h" },
+      { ban_duration: accessDisabled ? "876000h" : "none" },
     );
 
     if (authError) {
@@ -214,8 +217,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      accessDisabled: !reversing,
-      message: reversing
+      accessDisabled,
+      message: reversing && accessDisabled
+        ? "The deceased designation was cleared. Account access remains disabled."
+        : reversing
         ? "The deceased designation was cleared and future sign-in was restored."
         : "The deceased record was saved and future sign-in was disabled.",
       memorialSettings: data,
