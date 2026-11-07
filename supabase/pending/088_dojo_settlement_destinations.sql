@@ -40,13 +40,13 @@ DECLARE expected record; dojo public.dojos%rowtype;
 BEGIN
   LOCK TABLE public.membership_payments, public.dojo_settlements IN SHARE MODE;
   FOR expected IN SELECT * FROM (VALUES
-    ('849e3573-dc96-4a9a-9ea2-5d5051aef7e1'::uuid,'Aikido','Chushin Dojo',true),
+    ('849e3573-dc96-4a9a-9ea2-5d5051aef7e1'::uuid,'Aikido','Chushin',true),
     ('9e5f895c-4f2c-40df-ab64-0ce3fab226a0','Karate','Chushin',true),
     ('5efc11aa-dbf9-417f-aaaa-6c9799efb57e','Taijiquan','Zhongxin',true),
     ('881025c4-13d1-4ae8-9345-046a5d468cda','Xingyiquan','Zhongxin',true),
     ('6660e2bd-bcbf-4cca-9d30-f45475a1aeca','Kungfu Kids','Zhongxin',true),
-    ('6662df61-5d54-47d6-9e9a-d1eeec8060c8','Aikido','Kagami Dojo',false),
-    ('f2a2c754-2d0b-4f63-a6da-994e935e26e2','Aikido','Hayashitane Dojo',false),
+    ('6662df61-5d54-47d6-9e9a-d1eeec8060c8','Aikido','Kagami',false),
+    ('f2a2c754-2d0b-4f63-a6da-994e935e26e2','Aikido','Hayashitane',false),
     ('2eea0a4e-fafe-4020-a59b-37985fe52919','Aikido','UBM Aikido Club',false)
   ) AS target(id,class_name,dojo_name,shares) LOOP
     SELECT d.* INTO STRICT dojo FROM public.dojos d JOIN public.classes c ON c.id=d.class_id

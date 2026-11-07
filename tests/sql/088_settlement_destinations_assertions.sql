@@ -2,7 +2,7 @@ DO $$ BEGIN
  IF (SELECT count(*) FROM public.dojos WHERE requires_superadmin_share AND superadmin_share_percent=30)<>5
  OR (SELECT count(*) FROM settlement_private.scopes)<>5
  OR (SELECT count(*) FROM public.dojo_settlement_config_history)<>5 THEN RAISE EXCEPTION 'Five-dojo setup failed'; END IF;
- IF EXISTS(SELECT FROM public.dojos WHERE name IN ('Kagami Dojo','Hayashitane Dojo','UBM Aikido Club')
+ IF EXISTS(SELECT FROM public.dojos WHERE name IN ('Kagami','Hayashitane','UBM Aikido Club')
  AND (requires_superadmin_share OR superadmin_share_percent<>0)) THEN RAISE EXCEPTION 'Independent administration changed'; END IF;
  IF has_schema_privilege('authenticated','settlement_private','USAGE')
  OR has_function_privilege('anon','public.nominate_settlement_destination(uuid,uuid,text,text,text)','EXECUTE')
