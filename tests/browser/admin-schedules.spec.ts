@@ -21,7 +21,7 @@ test('scoped Admin creates, edits and deactivates one regular schedule atomicall
   await page.getByLabel('Notes', { exact: false }).fill('Bring jo and bokken');
   await page.getByRole('button', { name: 'Add schedule' }).click();
 
-  await expect(page.getByRole('status')).toHaveText('Schedule created.');
+  await expect(page.getByRole('status', { name: 'Schedule save result' })).toHaveText('Schedule created.');
   await expandCompactRecords(page);
   const card = page.getByRole('article');
   await expect(card.getByRole('heading', { name: 'Fixture Dojo — Fixture Aikido' })).toBeVisible();
@@ -38,9 +38,11 @@ test('scoped Admin creates, edits and deactivates one regular schedule atomicall
   await page.getByLabel('Active and visible to members').uncheck();
   await page.getByRole('button', { name: 'Save changes' }).click();
 
-  await expect(page.getByRole('status')).toHaveText('Schedule updated.');
+  await expect(page.getByRole('status', { name: 'Schedule save result' })).toHaveText('Schedule updated.');
   await expect(card).toContainText('Venue: Upstairs hall');
   await expect(card).toContainText('INACTIVE');
+  await expect(card.getByRole('button', { name: 'Edit schedule' })).toBeVisible();
+  await expect(card.getByRole('link', { name: 'Fixture Dojo', exact: true })).toHaveAttribute('href', '/dojos?dojo=fixture-dojo');
 });
 
 test('schedule mutation errors stay visible and do not create a row', async ({ page }) => {
@@ -50,5 +52,29 @@ test('schedule mutation errors stay visible and do not create a row', async ({ p
   await page.getByRole('button', { name: 'Add schedule' }).click();
 
   await expect(page.getByRole('alert')).toHaveText('Finish time must be after start time.');
-  await expect(page.getByText('No schedules exist in your scope.')).toBeVisible();
+  await expect(page.getByText('No schedules exist for this dojo.')).toBeVisible();
+});
+
+
+test('changing dojo discards an edit and ignores late results from the previous dojo', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-schedules?multi-scope');
+  await expandCompactRecords(page);
+  const card = page.getByRole('article');
+  await card.getByRole('button', { name: 'Edit schedule' }).click();
+  const dojo = page.getByRole('combobox', { name: 'Dojo and class' });
+  await dojo.selectOption('dojo-b');
+  await expect(page.getByRole('heading', { name: 'Add schedule', exact: true })).toBeVisible();
+  await dojo.selectOption('dojo-c');
+  await expandCompactRecords(page);
+  await expect(card).toContainText('Kids Dojo');
+  await page.waitForTimeout(350);
+  await expect(card).not.toContainText('South Dojo');
+  await page.getByRole('button', { name: 'Refresh schedules' }).click();
+  await expect(page.getByRole('button', { name: 'Refresh schedules' })).toBeEnabled();
+  await expect(card.getByRole('button', { name: 'Edit schedule' })).toBeVisible();
+  const requests = await page.evaluate(() => (window as unknown as {scheduleRequests: Array<{name: string; column?: string; value?: string}>}).scheduleRequests);
+  const reads = requests.filter(request => request.name === 'get_regular_schedules_with_instructor');
+  expect(reads.map(request => [request.column, request.value])).toEqual([
+    ['dojo_id', 'fixture-dojo'], ['dojo_id', 'dojo-b'], ['dojo_id', 'dojo-c'], ['dojo_id', 'dojo-c'],
+  ]);
 });

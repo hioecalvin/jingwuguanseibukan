@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { loadRoute } from './load-route-test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -32,6 +33,7 @@ function render(rankId, search = '') {
     if (name === 'next/navigation') return { useParams: () => ({ classId: 'class' }), useRouter: () => ({ push() {} }) };
     if (name === '@/lib/supabase/client') return { createClient: () => ({}) };
     if (name === '@/components/compact-record') return { __esModule: true, default: ({ summary, children }) => React.createElement('section', null, summary, children) };
+    if (name === '@/lib/grading-category') return loadRoute('lib/grading-category.ts', {});
     return require(name);
   };
   vm.runInNewContext(compiled, { module: compiledModule, exports: compiledModule.exports, require: imports });

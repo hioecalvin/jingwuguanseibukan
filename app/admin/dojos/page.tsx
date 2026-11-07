@@ -4,6 +4,7 @@ import { selectedFirst } from "@/lib/selected-first";
 
 import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
+import DojoLogo from "@/components/dojo-logo";
 import DojoContactDetails from "@/components/dojo-contact-details";
 
 import {
@@ -2572,9 +2573,7 @@ export default function DojoManagementPage() {
 
 
               return (
-                <CompactRecord summary={<>{
-                            dojo.name
-                          }</>}
+                <CompactRecord summary={<span className="flex items-center gap-3"><DojoLogo name={dojo.name} /><span>{dojo.name}</span></span>}
                   key={
                     dojo.id
                   }
@@ -2598,7 +2597,7 @@ export default function DojoManagementPage() {
 
                       {!editing ? (
 
-                        <h3 className="mt-1 truncate text-xl font-bold">
+                        <h3 className="mt-1 flex items-center gap-3 text-xl font-bold"><DojoLogo name={dojo.name} />
                           {
                             dojo.name
                           }

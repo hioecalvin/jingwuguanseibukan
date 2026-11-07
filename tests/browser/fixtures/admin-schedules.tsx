@@ -1,3 +1,4 @@
+import SchedulesPage from '../../../app/(member)/schedules/page';
 import { createRoot } from 'react-dom/client';
 
 import ScheduleManagementPage from '../../../app/admin/schedules/page';
@@ -5,7 +6,7 @@ import ScheduleManagementPage from '../../../app/admin/schedules/page';
 function Fixture() {
   return (
     <main className="min-h-screen bg-neutral-950 px-4 py-8 text-white sm:px-6">
-      <ScheduleManagementPage />
+      {new URLSearchParams(location.search).has("member-view") ? <SchedulesPage /> : <ScheduleManagementPage />}
     </main>
   );
 }

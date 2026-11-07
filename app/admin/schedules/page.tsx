@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import DojoLogo from "@/components/dojo-logo";
+import ScheduleInstructor from "@/components/schedule-instructor";
 import CompactRecord from "@/components/compact-record";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
@@ -25,6 +28,8 @@ type ScheduleRow = ScheduleScope & {
   finish_time: string;
   instructor_id: string | null;
   instructor_name: string | null;
+  instructor_rank: string | null;
+  instructor_phone: string | null;
   venue: string | null;
   notes: string | null;
   is_active: boolean;
@@ -76,28 +81,21 @@ export default function ScheduleManagementPage() {
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
+  const [listLoading, setListLoading] = useState(false);
+  const [listError, setListError] = useState("");
+  const [listRevision, setListRevision] = useState(0);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   const loadPage = useCallback(async () => {
-    const [scopeResponse, scheduleResponse] = await Promise.all([
-      supabase.rpc("get_manageable_schedule_scopes"),
-      supabase.rpc("get_regular_class_schedules", { include_inactive: true }),
-    ]);
-
-    if (scopeResponse.error || scheduleResponse.error) {
-      setMessage(scopeResponse.error?.message ?? scheduleResponse.error?.message ?? "Unable to load schedules.");
-      setMessageType("error");
-      setLoading(false);
-      return;
+    const scopeResponse = await supabase.rpc("get_manageable_schedule_scopes");
+    if (scopeResponse.error) {
+      setMessage(scopeResponse.error.message);
+      setMessageType("error"); setLoading(false); return;
     }
-
     const nextScopes = (scopeResponse.data ?? []) as ScheduleScope[];
     setScopes(nextScopes);
-    setSchedules(
-      ((scheduleResponse.data ?? []) as ScheduleRow[]).filter((row) => row.can_manage),
-    );
     setForm((current) => ({
       ...current,
       dojoId: current.dojoId || nextScopes[0]?.dojo_id || "",
@@ -109,6 +107,23 @@ export default function ScheduleManagementPage() {
     void loadPage();
   }, [loadPage]);
 
+  useEffect(() => {
+    if (!form.dojoId) return;
+    let active = true;
+    async function loadSelectedSchedules() {
+      setListLoading(true); setListError("");
+      try {
+        const result = await supabase.rpc("get_regular_schedules_with_instructor", { include_inactive: true }).eq("dojo_id", form.dojoId);
+        if (!active) return;
+        if (result.error) throw new Error("Schedules could not be loaded.");
+        setSchedules(((result.data ?? []) as ScheduleRow[]).filter(row => row.can_manage));
+      } catch {
+        if (active) { setSchedules([]); setListError("Schedules could not be loaded. Please retry."); }
+      } finally { if (active) setListLoading(false); }
+    }
+    void loadSelectedSchedules();
+    return () => { active = false; };
+  }, [supabase, form.dojoId, listRevision]);
   useEffect(() => {
     let active = true;
 
@@ -194,7 +209,7 @@ export default function ScheduleManagementPage() {
     setMessage(form.scheduleId ? "Schedule updated." : "Schedule created.");
     setMessageType("success");
     resetForm(retainedDojoId);
-    await loadPage();
+    setListRevision(value => value + 1);
     setSaving(false);
   }
 
@@ -213,6 +228,7 @@ export default function ScheduleManagementPage() {
 
       {message && (
         <p
+          aria-label="Schedule save result"
           role={messageType === "error" ? "alert" : "status"}
           className={`rounded-xl border px-4 py-3 text-sm ${
             messageType === "error"
@@ -235,6 +251,7 @@ export default function ScheduleManagementPage() {
           {form.scheduleId && (
             <button
               type="button"
+              disabled={saving}
               onClick={() => resetForm()}
               className="rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
             >
@@ -248,13 +265,14 @@ export default function ScheduleManagementPage() {
         ) : scopes.length === 0 ? (
           <p className="text-neutral-300">No active dojo and class scope is assigned to this account.</p>
         ) : (
-          <form onSubmit={saveSchedule} className="grid gap-4 md:grid-cols-2">
+          <form onSubmit={saveSchedule}>
+            <fieldset disabled={saving} className="grid min-w-0 gap-4 md:grid-cols-2">
             <label className="text-sm text-neutral-300">
               <span className="mb-1 block font-medium">Dojo and class</span>
               <select
                 required
                 value={form.dojoId}
-                onChange={(event) => setForm((current) => ({ ...current, dojoId: event.target.value, instructorId: "" }))}
+                onChange={(event) => { resetForm(event.target.value); setSchedules([]); setInstructors([]); setMessage(""); setMessageType(""); }}
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
               >
                 {scopes.map((scope) => (
@@ -354,6 +372,7 @@ export default function ScheduleManagementPage() {
                 {saving ? "Saving…" : form.scheduleId ? "Save changes" : "Add schedule"}
               </button>
             </div>
+            </fieldset>
           </form>
         )}
       </section>
@@ -362,17 +381,20 @@ export default function ScheduleManagementPage() {
         <div>
           <h2 id="managed-schedules-heading" className="text-xl font-semibold text-white">Your managed schedules</h2>
           <p className="mt-1 text-sm text-neutral-400">Inactive rows remain here for history and can be reactivated.</p>
+          <button type="button" disabled={loading || listLoading || saving || !form.dojoId} onClick={() => setListRevision(value => value + 1)} className="mt-3 min-h-11 rounded border px-3 disabled:opacity-50">Refresh schedules</button>
         </div>
 
-        {schedules.length === 0 ? (
-          <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 text-neutral-300">No schedules exist in your scope.</p>
-        ) : (
+        {listLoading && <p role="status" aria-label="Schedule loading">Loading selected dojo schedules…</p>}
+        {listError ? <div><p role="alert">{listError}</p><button type="button" onClick={() => setListRevision(value => value + 1)} className="min-h-11 rounded border px-3">Retry schedules</button></div> : schedules.filter(row => row.dojo_id === form.dojoId).length === 0 ? (!loading && !listLoading && (
+          <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5 text-neutral-300">No schedules exist for this dojo.</p>
+        )) : (
           <div className="grid gap-4 lg:grid-cols-2">
-            {schedules.map((row) => (
+            {schedules.filter(row => row.dojo_id === form.dojoId).map((row) => (
               <CompactRecord summary={<>{row.dojo_name} — {row.class_name}</>} key={row.schedule_id} className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold text-white">{row.dojo_name} — {row.class_name}</h3>
+                    <DojoLogo name={row.dojo_name} className="mb-2" />
+                    <h3 className="font-semibold text-white"><Link className="text-sky-300 underline" href={`/dojos?dojo=${encodeURIComponent(row.dojo_id)}`}>{row.dojo_name}</Link> — {row.class_name}</h3>
                     <p className="mt-1 text-sm text-amber-300">
                       {DAY_NAMES[row.day_of_week]} · {displayTime(row.start_time)} – {displayTime(row.finish_time)}
                     </p>
@@ -381,11 +403,12 @@ export default function ScheduleManagementPage() {
                     {row.is_active ? "ACTIVE" : "INACTIVE"}
                   </span>
                 </div>
-                <p className="mt-3 text-sm text-neutral-300">Instructor: {row.instructor_name ?? "To be confirmed"}</p>
+                <ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} phone={row.instructor_phone} />
                 {row.venue && <p className="mt-1 text-sm text-neutral-400">Venue: {row.venue}</p>}
                 {row.notes && <p className="mt-3 text-sm leading-6 text-neutral-400">{row.notes}</p>}
                 <button
                   type="button"
+                  disabled={saving || listLoading}
                   onClick={() => editSchedule(row)}
                   className="mt-4 rounded-lg border border-neutral-700 px-3 py-2 text-sm font-medium text-neutral-200 hover:bg-neutral-800"
                 >

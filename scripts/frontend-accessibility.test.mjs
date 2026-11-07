@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
+import { loadRoute } from './load-route-test.mjs';
 
 const aikikaiModule = { exports: {} };
 vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/aikikai.ts', 'utf8'), {
@@ -56,6 +57,7 @@ function componentHarness(relativePath, supabase, extras = {}) {
     '@/lib/application-origin': { configuredApplicationOrigin: () => 'https://configured.example.test' },
     '@/lib/supabase/client': { createClient: () => supabase },
     '@/lib/aikikai': aikikaiModule.exports,
+    '@/lib/grading-category': loadRoute('lib/grading-category.ts', {}),
     '@/components/compact-navigation': { default: 'CompactNavigation' },
     ...extras,
   };

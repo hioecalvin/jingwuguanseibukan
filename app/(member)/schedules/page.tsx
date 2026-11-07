@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import type { DojoContact } from "@/lib/dojo-contact";
+import DojoLogo from "@/components/dojo-logo";
+import ScheduleInstructor from "@/components/schedule-instructor";
 import CompactRecord from "@/components/compact-record";
 
 import { useEffect, useMemo, useState } from "react";
@@ -17,6 +21,8 @@ type ScheduleRow = {
   finish_time: string;
   instructor_id: string | null;
   instructor_name: string | null;
+  instructor_rank: string | null;
+  instructor_phone: string | null;
   venue: string | null;
   notes: string | null;
   is_active: boolean;
@@ -55,40 +61,60 @@ export default function SchedulesPage() {
   const supabase = useMemo(() => createClient(), []);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [view, setView] = useState<"dojo" | "class">("dojo");
+  const [dojos, setDojos] = useState<DojoContact[]>([]);
+  const [selected, setSelected] = useState("");
+  const [retry, setRetry] = useState(0);
+  const [categoryRetry, setCategoryRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     let active = true;
-
-    async function loadSchedules() {
-      const { data, error } = await supabase.rpc(
-        "get_regular_class_schedules",
-        { include_inactive: false },
-      );
-
-      if (!active) return;
-
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setSchedules((data ?? []) as ScheduleRow[]);
+    async function loadDojos() {
+      setLoading(true); setMessage("");
+      try {
+        const result = await supabase.rpc("get_dojo_contact_details");
+        if (!active) return;
+        if (result.error) throw new Error("Unable to load schedule categories.");
+        const rows = ((result.data ?? []) as DojoContact[]).filter(row => row.active);
+        setDojos(rows);
+        setSelected(current => { const requested = new URLSearchParams(window.location.search).get("dojo"); return current || rows.find(row => row.dojo_id === requested)?.dojo_id || rows[0]?.dojo_id || ""; });
+        if (!rows.length) setLoading(false);
+      } catch {
+        if (active) { setMessage("Schedule categories could not be loaded."); setLoading(false); }
       }
-
-      setLoading(false);
     }
+    void loadDojos();
+    return () => { active = false; };
+  }, [supabase, categoryRetry]);
 
+  useEffect(() => {
+    if (!selected) return;
+    let active = true;
+    async function loadSchedules() {
+      setLoading(true); setMessage("");
+      try {
+        const result = await supabase.rpc("get_regular_schedules_with_instructor", { include_inactive: false })
+          .eq(view === "dojo" ? "dojo_id" : "class_id", selected);
+        if (!active) return;
+        if (result.error) throw new Error("Unable to load this schedule.");
+        setSchedules((result.data ?? []) as ScheduleRow[]);
+      } catch {
+        if (active) { setSchedules([]); setMessage("Schedules could not be loaded. Please retry."); }
+      } finally { if (active) setLoading(false); }
+    }
     void loadSchedules();
+    return () => { active = false; };
+  }, [supabase, selected, view, retry]);
 
-    return () => {
-      active = false;
-    };
-  }, [supabase]);
-
+  const categories = useMemo(() => [...new Map(dojos.map(row => [
+    view === "dojo" ? row.dojo_id : row.class_id,
+    { id: view === "dojo" ? row.dojo_id : row.class_id, name: view === "dojo" ? `${row.dojo_name} · ${row.class_name}` : row.class_name },
+  ])).values()], [dojos, view]);
   const groups = useMemo(() => {
     const grouped = new Map<string, { title: string; subtitle: string; rows: ScheduleRow[] }>();
 
-    for (const row of schedules) {
+    for (const row of schedules.filter(row => (view === "dojo" ? row.dojo_id : row.class_id) === selected)) {
       const key = view === "dojo" ? row.dojo_id : row.class_id;
       const title = view === "dojo" ? row.dojo_name : row.class_name;
       const subtitle = view === "dojo" ? row.class_name : "All dojos";
@@ -102,7 +128,7 @@ export default function SchedulesPage() {
     }
 
     return [...grouped.values()];
-  }, [schedules, view]);
+  }, [schedules, view, selected]);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -127,7 +153,7 @@ export default function SchedulesPage() {
             key={option}
             type="button"
             aria-pressed={view === option}
-            onClick={() => setView(option)}
+            onClick={() => { if (option !== view) { setView(option); setSchedules([]); setSelected(option === "dojo" ? dojos[0]?.dojo_id ?? "" : dojos[0]?.class_id ?? ""); } }}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
               view === option
                 ? "bg-amber-500 text-neutral-950"
@@ -139,6 +165,13 @@ export default function SchedulesPage() {
         ))}
       </div>
 
+      <label className="block" htmlFor="schedule-category">Choose {view}
+        <select id="schedule-category" value={selected} onChange={event => { setSelected(event.target.value); setSchedules([]); }} className="mt-2 block min-h-11 w-full rounded border border-neutral-600 bg-neutral-950 px-3 py-2">
+          {!categories.length && <option value="">No categories available</option>}
+          {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+        </select>
+      </label>
+      <button type="button" disabled={loading} onClick={() => dojos.length ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>
       {loading ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
           Loading schedules…
@@ -159,7 +192,8 @@ export default function SchedulesPage() {
               className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/60"
             >
               <div className="border-b border-neutral-800 px-5 py-4">
-                <h2 className="text-xl font-semibold text-white">{group.title}</h2>
+                {view === "dojo" && <DojoLogo name={group.title} className="mb-2" />}
+                <h2 className="text-xl font-semibold text-white">{view === "dojo" ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(group.rows[0].dojo_id)}`}>{group.title}</Link> : group.title}</h2>
                 <p className="mt-1 text-sm text-neutral-400">{group.subtitle}</p>
               </div>
 
@@ -167,6 +201,7 @@ export default function SchedulesPage() {
                 {group.rows.map((row) => (
                   <CompactRecord summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)}</>} detail={<>{row.class_name} · {row.dojo_name}</>} key={row.schedule_id} className="space-y-3 px-5 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
+                      {view === "class" && <DojoLogo name={row.dojo_name} />}
                       <div>
                         <p className="font-semibold text-white">
                           {DAY_NAMES[row.day_of_week] ?? "Unknown day"}
@@ -176,14 +211,14 @@ export default function SchedulesPage() {
                         </p>
                       </div>
                       <span className="rounded-full border border-neutral-700 px-3 py-1 text-xs text-neutral-300">
-                        {view === "class" ? row.dojo_name : row.class_name}
+                        <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(row.dojo_id)}`}>{row.dojo_name}</Link>
                       </span>
                     </div>
 
                     <dl className="grid gap-2 text-sm text-neutral-300 sm:grid-cols-2">
                       <div>
                         <dt className="text-neutral-500">Instructor</dt>
-                        <dd>{row.instructor_name ?? "To be confirmed"}</dd>
+                        <dd><ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} phone={row.instructor_phone} /></dd>
                       </div>
                       {row.venue && (
                         <div>
