@@ -16,6 +16,8 @@ test('members can search all dojos and open the published contact links', async 
   await page.getByLabel('Search dojos').fill('South Dojo');
   if (await toggle.isVisible()) await toggle.click();
   await expect(page.getByText('Not provided', {exact:true})).toHaveCount(2);
+  await expect(page.getByText('No active schedules')).toBeVisible();
+  await expect(page.getByRole('link',{name:'View schedules'})).toHaveCount(0);
   await expect(page.getByText('Fixture Class · Inactive', { exact:true }).last()).toBeVisible();
 });
 test('malicious stored Maps link does not render, and unsafe edits are rejected before saving',async({page})=>{
