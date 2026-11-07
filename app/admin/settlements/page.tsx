@@ -4,6 +4,7 @@
 
 import { selectedFirst } from "@/lib/selected-first";
 import MemberIdLink from "@/components/member-id-link";
+import SettlementDestinations, { SettlementDestinationAccount } from "@/components/settlement-destinations";
 
 import CompactRecord from "@/components/compact-record";
 
@@ -450,7 +451,7 @@ export default function AdminSettlementsPage() {
       setError(rpcError.message);
     } else {
       await loadPage();
-      setMessage("Share sent to Super Admin for review.");
+      setMessage("Share submitted for Super Admin review.");
     }
 
     setBusy(null);
@@ -530,7 +531,7 @@ export default function AdminSettlementsPage() {
           { header: "Payment Count", key: "item_count", value: (s) => Number(s.item_count) },
           { header: "Gross Amount", key: "gross_amount", value: (s) => Number(s.gross_amount) },
           { header: "Share Percent", key: "share_percent", value: (s) => Number(s.share_percent) },
-          { header: "Super Admin Share", key: "share_amount", value: (s) => Number(s.share_amount) },
+          { header: "Dojo Share", key: "share_amount", value: (s) => Number(s.share_amount) },
           {
             header: "Dojo Retained",
             key: "dojo_retained",
@@ -590,7 +591,7 @@ export default function AdminSettlementsPage() {
           { header: "Payment Method", key: "payment_method" },
           { header: "Member Payment Reference", key: "payment_reference" },
           { header: "Share Percent", key: "share_percent", value: (i) => Number(i.share_percent) },
-          { header: "Super Admin Share", key: "share_amount", value: (i) => Number(i.share_amount) },
+          { header: "Dojo Share", key: "share_amount", value: (i) => Number(i.share_amount) },
         ],
       });
 
@@ -651,7 +652,7 @@ export default function AdminSettlementsPage() {
             </button>
             <h1 className="text-3xl font-bold">Dojo Settlements</h1>
             <p className="mt-1 text-zinc-400">
-              Calculate, record and review the Super Admin share.
+              Calculate, record and review dojo revenue shares.
             </p>
           </div>
 
@@ -697,6 +698,7 @@ export default function AdminSettlementsPage() {
           </div>
         )}
 
+        <SettlementDestinations />
         {createOpen && (
           <section className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
             <h2 className="text-xl font-semibold">Create Settlement Draft</h2>
@@ -829,7 +831,7 @@ export default function AdminSettlementsPage() {
                   <strong>{money(selectedGross, "IDR")}</strong>
                 </div>
                 <div>
-                  Super Admin share:{" "}
+                  Dojo share:{" "}
                   <strong>{money(selectedShare, "IDR")}</strong>
                 </div>
               </div>
@@ -956,7 +958,7 @@ export default function AdminSettlementsPage() {
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between gap-4">
-                            <span className="text-zinc-400">Super Admin share</span>
+                            <span className="text-zinc-400">Dojo share</span>
                             <strong>{money(s.share_amount, s.currency)}</strong>
                           </div>
                           <div className="flex justify-between gap-4">
@@ -977,7 +979,7 @@ export default function AdminSettlementsPage() {
 
                       <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
                         <div className="mb-3 flex items-center justify-between">
-                          <h3 className="font-semibold">Transfer to Super Admin</h3>
+                          <h3 className="font-semibold">Recorded share transfer</h3>
                           {hasTransfer && (
                             <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs text-emerald-300">
                               Recorded
@@ -1093,14 +1095,14 @@ export default function AdminSettlementsPage() {
                             title={
                               hasTransfer
                                 ? ""
-                                : "Record the transfer before sending the share"
+                                : "Record the transfer before submitting for review"
                             }
                           >
                             {busy === `submit:${s.settlement_id}`
                               ? "Sending..."
                               : s.status === "rejected"
-                              ? "Resubmit Share"
-                              : "Send the Share"}
+                              ? "Resubmit for Review"
+                              : "Submit for Review"}
                           </button>
 
                           <button
@@ -1145,10 +1147,11 @@ export default function AdminSettlementsPage() {
 
                     {editable && !hasTransfer && (
                       <div className="mt-2 text-xs text-amber-300">
-                        Record the transfer before Send the Share becomes available.
+                        Record the transfer before Submit for Review becomes available.
                       </div>
                     )}
 
+                    <SettlementDestinationAccount dojoId={s.dojo_id} settlementId={s.settlement_id} />
                     {transferId === s.settlement_id && (
                       <div className="mt-5 rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
                         <h3 className="font-semibold">Transfer Details</h3>
@@ -1158,7 +1161,7 @@ export default function AdminSettlementsPage() {
 
                         <div className="mt-4 rounded-xl bg-zinc-950 p-4">
                           <div className="text-xs uppercase tracking-wide text-zinc-400">
-                            Amount to Super Admin
+                            Share amount
                           </div>
                           <div className="mt-1 text-2xl font-bold">
                             {money(s.share_amount, s.currency)}

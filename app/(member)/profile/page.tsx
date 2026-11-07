@@ -1977,6 +1977,8 @@ export default function ProfilePage() {
         )}
       </section>
 
+      <MemberEmergencyContact />
+
       {/* CLASSES */}
 
       <section className="mt-8">
@@ -1987,7 +1989,7 @@ export default function ProfilePage() {
         <h2 className="mt-1 text-2xl font-bold">
           My Classes
         </h2>
-<MemberEmergencyContact />
+
 <ClassEnrollmentPanel />
         {memberships.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900 p-6">

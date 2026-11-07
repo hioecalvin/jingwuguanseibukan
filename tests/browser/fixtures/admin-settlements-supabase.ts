@@ -115,6 +115,9 @@ function queryFor(table: string) {
   return query;
 }
 
+const recordedAccount = { nomination_id: 'nomination-original', bank_name: 'TEST BANK', account_holder_name: 'TEST HOLDER', account_number: 'TEST-ORIGINAL' };
+let nominatedAccount: typeof recordedAccount | null = null;
+
 export function createClient() {
   return {
     auth: {
@@ -122,6 +125,21 @@ export function createClient() {
     },
     from: (table: string) => queryFor(table),
     rpc: async (name: string, args: RpcArguments = {}) => {
+      if (name === 'get_my_settlement_destinations') {
+        return { data: [{ dojo_id: 'fixture-dojo', dojo_name: 'Chushin Dojo', class_name: 'Aikido',
+          share_percent: 30, nomination_id: nominatedAccount?.nomination_id ?? null, collection_configured: false },
+        { dojo_id: 'karate-dojo', dojo_name: 'Chushin', class_name: 'Karate',
+          share_percent: 25, nomination_id: null, collection_configured: false }], error: null };
+      }
+      if (name === 'get_settlement_destination_account') {
+        return { data: args.target_settlement_id ? [recordedAccount] : args.target_dojo_id === 'fixture-dojo' && nominatedAccount ? [nominatedAccount] : [], error: null };
+      }
+      if (name === 'nominate_settlement_destination') {
+        if (args.new_account_number === 'TEST-REJECT') return { data: null, error: new Error('The destination changed. Refresh before saving.') };
+        nominatedAccount = { nomination_id: 'nomination-new', bank_name: String(args.new_bank_name),
+          account_holder_name: String(args.new_account_holder_name), account_number: String(args.new_account_number) };
+        return { data: nominatedAccount.nomination_id, error: null };
+      }
       if (name === 'get_dojo_settlement_configs') {
         return { data: [{ ...config }], error: null };
       }
