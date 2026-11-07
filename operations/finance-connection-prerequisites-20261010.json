@@ -1,0 +1,39 @@
+{
+  "dateSydney": "2026-10-10",
+  "scope": "local-only staging connection prerequisites",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "credentialPath": "C:\\Users\\hioec\\AppData\\Local\\jwg-database-access-19a62b2e36b7406dbf01abc13d949d56\\staging.credential.xml",
+  "credentialLocalValidation": {
+    "ownerOnlyAcl": true,
+    "dpapiDecryptable": true,
+    "currentSidAndStagingBinding": true,
+    "passwordOutputOrModification": false,
+    "serverAcceptanceVerified": false
+  },
+  "clientPath": "C:\\Users\\hioec\\.codex\\.chatgpt-projects\\g-p-6a82d9108974819182fef42ef83189ba\\tools\\postgresql-17.11\\pgsql\\bin\\psql.exe",
+  "clientVersion": "psql (PostgreSQL) 17.11",
+  "clientObservedSha256": "5bb3fad8a7ff555abff37921a24ee3d9e377c15408b5e7267aa9245596965ca0",
+  "rootCertificatePath": "C:\\Users\\hioec\\.codex\\.chatgpt-projects\\g-p-6a82d9108974819182fef42ef83189ba\\release-evidence-20260831-database-access\\supabase-prod-ca-2021.crt",
+  "rootCertificateObservedSha256": "700723581420dd1ac98fd7e9ac529f0ef210eadcaf87fc868a3ad7d114c2f3b7",
+  "certificate": {
+    "commonName": "Supabase Root 2021 CA",
+    "isCa": true,
+    "selfSignatureValid": true,
+    "validFromUtc": "2021-04-28T10:56:53Z",
+    "validToUtc": "2031-04-26T10:56:53Z",
+    "derFingerprintSha256": "807025ad50d4ed219d2c9c7d299c004f824eb00cf7f65afef607d07b72e6cafa"
+  },
+  "offlinePlanResourceValidation": true,
+  "remoteContact": false,
+  "liveTlsVerified": false,
+  "freshLedgerVerified": false,
+  "readyForMigrationRehearsal": false,
+  "notes": [
+    "Observed local hashes pin the existing files; they are not a new independent vendor-provenance check.",
+    "Certificate self-signature/validity does not prove the remote server uses this trust chain.",
+    "Historical CA filename includes prod; no production endpoint was contacted.",
+    "Initial sandbox realpath check was denied; the same offline check passed with approved filesystem escalation.",
+    "No credential values, tokens, member records or raw connection responses are included.",
+    "Live read-only preflight requires approval; write rehearsal and persistent migration application require separate approvals."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "scope": "Disposable-only restored-account Auth acceptance",
+  "projectRef": "lzkpibxeqxytewbwgklj",
+  "recordedAt": "2026-10-16T04:24:29.6576286Z",
+  "result": "blocked-before-account-login",
+  "accountsPassed": 0,
+  "accountLoginAttempts": 0,
+  "protectedPasswordsMatchRestoredBackup": 3,
+  "passwordsReset": false,
+  "messagesSent": false,
+  "otherProjectsContacted": false,
+  "failure": {
+    "step": "temporary-password-enable",
+    "assertion": "Other Auth config changed",
+    "historicalConfigDifference": [
+      "custom_oauth_max_providers"
+    ],
+    "exactCauseVerified": false,
+    "explanation": "The exact pre-enable configuration was retained only as a hash. The historical post-restore comparison is diagnostic context, not proof of the exact enablement delta."
+  },
+  "cleanup": {
+    "independentManagementAuthDisabledVerified": true,
+    "independentInactiveVerified": true,
+    "smtpAbsent": true,
+    "functions": 0,
+    "secrets": 0,
+    "effectiveAuthServiceDisablementVerified": false,
+    "completeDatabasePostflightVerified": false
+  },
+  "evidenceDirectory": "C:\\protected\\jwg-database-access-5ff37a1e79bc48d78f8ffb6a5179a77d",
+  "evidence": [
+    {
+      "File": "auth-service-ready-1792124299684\\result.json",
+      "Sha256": "4a4baf5dc064791715510ce6ce232360342a12bfaf1014ee2a1dba028cce21e3"
+    },
+    {
+      "File": "auth-service-ready-1792124299684\\stopped.json",
+      "Sha256": "9f4159417ea718731691d75541bda7e01d3df75f90934573ae66b9e999ccd102"
+    },
+    {
+      "File": "auth-service-ready-1792124299684\\before.json",
+      "Sha256": "33f16fc75f7b49e240a85c6b3f62744c81cd21efdcdee61c44f4ea0dd788b667"
+    },
+    {
+      "File": "auth-acceptance-attempt-060.json",
+      "Sha256": "8e250a2d22aada00dad811f85f02f47f8ed1fe6b2894d4b5ebbe67f4fd8a9737"
+    },
+    {
+      "File": "state-inspection-47342f2fb58b4f8caf7091e1866b8810.json",
+      "Sha256": "06285441cdd1ef20fadee8da30f10024064817af744c1217bb7018c5501cf46d"
+    },
+    {
+      "File": "auth-config-reconciliation-c67da25296b44747a5e7bad58214feb6.json",
+      "Sha256": "40423db0af93610f2a2cda9d0f4426d91b36e3b5d268b14bac24f6a5eaeccf0d"
+    }
+  ],
+  "localGuardTestsPassed": 35,
+  "ownerOnlyEvidenceFilesVerified": 192,
+  "automaticRetryPerformed": false,
+  "originalRestoreEvidencePreserved": true,
+  "notes": [
+    "Initial sandbox credential lookup stopped before network/resume; approved privileged execution used the existing Windows credential.",
+    "A local read-only comparison script parser error was corrected before successful read-only reconciliation; no extra settings mutation.",
+    "Original runner result did not verify exact full-config restoration. Independent subsequent reads verified disabled Auth and paused project; neither result replaces the other.",
+    "Expected complete login/refresh/logout acceptance remains outstanding."
+  ]
+}

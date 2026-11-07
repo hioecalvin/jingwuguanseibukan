@@ -1,0 +1,51 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "approvedScope": "One read-only full migration-ledger capture and offline comparison",
+  "remoteAttempts": 1,
+  "capture": {
+    "path": "C:\\protected\\jwg-finance-ledger-b3aad0b7d54f45cbba6e2db666d622eb\\ledger-capture.json",
+    "sha256": "1e023cb545f13e155c9acfa64fb216e9524f7b9437ca8769a63345101508722b",
+    "querySha256": "2c80c6b732c80ff9ad3ad645ef672a31a3dcccd5804ab675a62dcd7405eed3e9",
+    "capturedAt": "2026-10-11T01:43:40.195295+00:00",
+    "transport": "session-pooler",
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
+    "port": 5432,
+    "connectionUser": "postgres.eomubndonbetszdbhsrj",
+    "sslmode": "verify-full",
+    "sslVerified": true,
+    "serverReadOnlyVerified": true,
+    "currentUserOnlyAclVerified": true,
+    "createNewReservation": true,
+    "flushAndReadbackVerified": true,
+    "rawBodiesPrinted": false
+  },
+  "offlineComparison": {
+    "captureHashVerified": true,
+    "envelopeMatchesApprovedCapture": true,
+    "freshnessCheckPassed": true,
+    "repositoryMigrationContractMatched": true,
+    "firstVersion": "006",
+    "lastVersion": "058",
+    "migrationCount": 53,
+    "namesAndSqlContentsMatched": true,
+    "comparisonNormalization": "Existing SQL matcher permits CRLF, outer whitespace and statement separators only",
+    "ledgerSha256": "9d341d30c586cfe85fd8c328e05ef97d008f26623f7dc9506b615f89cbd6c4d1",
+    "ledgerCatalogDigest": "f4d37236139f12423a9aa9986028067396f27d69cd1e73d0bac54a1af1ad6a41",
+    "remoteContact": false
+  },
+  "databaseWrites": false,
+  "migrations059060Applied": false,
+  "productionOrOtherProjectContact": false,
+  "providerContact": false,
+  "credentialsChanged": false,
+  "priorEvidenceOverwritten": false,
+  "readyForWriteRehearsal": false,
+  "applicationApproval": false,
+  "localSetupNote": "Directory creation and DACL restriction succeeded. Two local ACL checks used an incompatible host runtime before any connection. Direct invocation of Windows PowerShell verified the folder successfully; the remote capture then ran exactly once.",
+  "remaining": [
+    "Fresh complete catalog and actor binding; ledger-table digest alone is not full schema verification",
+    "Complete independent remote baseline reconciliation and fixed protected attempt-journal integration",
+    "Separate approval for rollback-contained writes and persistent migration application"
+  ]
+}

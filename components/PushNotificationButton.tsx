@@ -9,6 +9,10 @@ import {
 import {
   createClient,
 } from "@/lib/supabase/client";
+import {
+  disableExistingPushSubscription,
+  persistCreatedPushSubscription,
+} from "@/lib/push/client-subscription";
 
 
 function urlBase64ToUint8Array(
@@ -55,6 +59,50 @@ function urlBase64ToUint8Array(
         )
     )
   );
+}
+
+
+async function persistPushSubscription(
+  method: "POST" | "DELETE",
+  body: Record<string, unknown>
+) {
+  const response =
+    await fetch(
+      "/api/subscribe",
+      {
+        method,
+        headers: {
+          "content-type":
+            "application/json",
+        },
+        body:
+          JSON.stringify(
+            body
+          ),
+      }
+    );
+
+
+  const result =
+    (
+      await response
+        .json()
+        .catch(
+          () => ({})
+        )
+    ) as {
+      error?: string;
+    };
+
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      result.error ??
+      "Unable to update push notification settings."
+    );
+  }
 }
 
 
@@ -207,7 +255,6 @@ export default function PushNotificationButton() {
 
     setMessage("");
 
-
     try {
       /*
        * Confirm logged-in user
@@ -281,6 +328,9 @@ export default function PushNotificationButton() {
           .pushManager
           .getSubscription();
 
+      let createdSubscription =
+        false;
+
 
       /*
        * Create subscription if none exists
@@ -301,6 +351,9 @@ export default function PushNotificationButton() {
                   publicKey
                 ),
             });
+
+        createdSubscription =
+          true;
       }
 
 
@@ -328,31 +381,35 @@ export default function PushNotificationButton() {
        * Save subscription to Supabase
        */
 
-      const {
-        error,
-      } =
-        await supabase.rpc(
-          "save_my_push_subscription",
-          {
-            subscription_endpoint:
-              json.endpoint,
+      const subscriptionBody = {
+        endpoint:
+          json.endpoint,
 
-            subscription_p256dh:
-              json.keys.p256dh,
+        keys: {
+          p256dh:
+            json.keys.p256dh,
 
-            subscription_auth:
-              json.keys.auth,
+          auth:
+            json.keys.auth,
+        },
 
-            subscription_user_agent:
-              navigator.userAgent,
-          }
-        );
-
+        userAgent:
+          navigator.userAgent,
+      };
 
       if (
-        error
+        createdSubscription
       ) {
-        throw error;
+        await persistCreatedPushSubscription(
+          subscription,
+          subscriptionBody,
+          persistPushSubscription,
+        );
+      } else {
+        await persistPushSubscription(
+          "POST",
+          subscriptionBody,
+        );
       }
 
 
@@ -425,6 +482,9 @@ export default function PushNotificationButton() {
 
     setMessage("");
 
+    let fallbackEnabled =
+      enabled;
+
 
     try {
       /*
@@ -488,31 +548,14 @@ export default function PushNotificationButton() {
       if (
         oldSubscription
       ) {
-        try {
-          await supabase.rpc(
-            "disable_my_push_subscription",
-            {
-              subscription_endpoint:
-                oldSubscription.endpoint,
-            }
-          );
-        } catch (
-          disableError
-        ) {
-          console.warn(
-            "Could not disable old push subscription in database:",
-            disableError
-          );
-        }
-
-
-        /*
-         * Remove old browser subscription
-         */
-
-        await oldSubscription
-          .unsubscribe();
+        await disableExistingPushSubscription(
+          oldSubscription,
+          persistPushSubscription,
+        );
       }
+
+      fallbackEnabled =
+        false;
 
 
       setEnabled(
@@ -589,33 +632,25 @@ export default function PushNotificationButton() {
        * to Supabase
        */
 
-      const {
-        error:
-          saveError,
-      } =
-        await supabase.rpc(
-          "save_my_push_subscription",
-          {
-            subscription_endpoint:
-              json.endpoint,
+      await persistCreatedPushSubscription(
+        newSubscription,
+        {
+          endpoint:
+            json.endpoint,
 
-            subscription_p256dh:
+          keys: {
+            p256dh:
               json.keys.p256dh,
 
-            subscription_auth:
+            auth:
               json.keys.auth,
+          },
 
-            subscription_user_agent:
-              navigator.userAgent,
-          }
-        );
-
-
-      if (
-        saveError
-      ) {
-        throw saveError;
-      }
+          userAgent:
+            navigator.userAgent,
+        },
+        persistPushSubscription,
+      );
 
 
       setEnabled(
@@ -636,7 +671,7 @@ export default function PushNotificationButton() {
 
 
       setEnabled(
-        false
+        fallbackEnabled
       );
 
 

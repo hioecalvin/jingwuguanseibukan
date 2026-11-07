@@ -1,0 +1,7 @@
+# Exact-byte finance acceptance pins must survive Windows and Linux checkouts.
+/supabase/migrations/059_advance_subscription_payment_records.sql text eol=lf
+/supabase/migrations/060_selected_month_fee_adjustment.sql text eol=lf
+/supabase/pending/059_advance_subscription_payment_records.sql text eol=lf
+/supabase/pending/060_selected_month_fee_adjustment.sql text eol=lf
+/tests/sql/059_060_staging_fixture.sql text eol=lf
+/tests/sql/059_060_staging_fixture_assertions.sql text eol=lf

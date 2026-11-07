@@ -1,0 +1,44 @@
+{
+  "migration": "064",
+  "sha256": "6d0b8c3b2a870a4505a6ebb4d7e03869df4d185c5be4d6ba71922d5e24470597",
+  "catalogSha256": "560b93a53c3097262c5d8f4338d4b625be497c48a71ac9ecaff0c0acbc7f97b2",
+  "sourceFiles": [
+    {
+      "path": "supabase/design/offline_same_id_foundation.sql",
+      "sha256": "804f2001eed3f53e4d48b994be38babed33d53c4c91f90a2554534f670fa9cb8"
+    },
+    {
+      "path": "supabase/design/offline_claim_scope.sql",
+      "sha256": "8c95fdce9ca8beab692b7b450ab1acc0879c826f1097b6b8213e63fe97cdaa42"
+    },
+    {
+      "path": "supabase/design/offline_claim_provisioning.sql",
+      "sha256": "eae30c0b0590453616b569ba42b676f7e16af812a8a5097350394cbcba44a94f"
+    },
+    {
+      "path": "supabase/design/offline_claim_api.sql",
+      "sha256": "be174bd343ea71133f34235dd82fb972de7250b0a3b0294d4317965971625a9f"
+    },
+    {
+      "path": "supabase/design/offline_claim_setup.sql",
+      "sha256": "212a150c31834e9888a3ed85cd486ecb49b87d30c3b46673002cf9b8b037276c"
+    },
+    {
+      "path": "supabase/design/offline_app_access.sql",
+      "sha256": "fa55e465ff35f29ea2367af268da8f6c4be6e34d54e76b4616c272e4e9271d67"
+    },
+    {
+      "path": "supabase/design/offline_delivery_guards.sql",
+      "sha256": "2046df5b91266e0b9f4d8c26be8a835ac4fd9329fc350e8ed0497f53e429add3"
+    },
+    {
+      "path": "supabase/design/offline_catalog_consumers.sql",
+      "sha256": "a37668f808666271f4b4d87245331776eaeed680a2b34d09275c89b17ae460d7"
+    },
+    {
+      "path": "supabase/design/offline_member_conversion.sql",
+      "sha256": "d53e5cc8381706da0daa9db248144454320913a98a6db6812ebbbe1b479c858f"
+    }
+  ],
+  "generatedNotApplied": true
+}

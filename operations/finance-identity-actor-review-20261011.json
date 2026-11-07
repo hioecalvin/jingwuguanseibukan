@@ -1,0 +1,53 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "Read-only dedicated identity lookup, private binding, actor capture and offline comparison",
+  "remoteAttempts": {"identityLookup": 1, "actorCapture": 1, "retries": 0},
+  "evidenceDirectory": "C:\\protected\\jwg-finance-identities-802f8e8f99d44b19a92b527c2e50a4ea",
+  "identity": {
+    "file": "identity-capture.json",
+    "sha256": "a6b4af7c0fd47f9e84f55262bbdcd385d138e85fa823d1df8da9f8bb3478d5e8",
+    "querySha256": "aaf3484bebe54f1dce348507b978261bd3eb0b509756032f615b6e5fe897afb2",
+    "capturedAt": "2026-10-11T02:22:14.209504+00:00",
+    "accountCount": 3,
+    "fixedMailboxAuthIdsMatchJsProfiles": true,
+    "eligibleProfilesAndExpectedRoles": true
+  },
+  "binding": {
+    "file": "bindings-capture.json",
+    "sha256": "129013db6d380a6541a8fc7f33920b59675cfd8d1669c6065227a55c080179bd",
+    "derivedFromVerifiedIdentityCaptureNotActorCapture": true,
+    "createNewPrivateAclAndReadbackVerified": true
+  },
+  "actors": {
+    "file": "actors-capture.json",
+    "sha256": "7ba45ccf603a0390eacfc6ebec998f9fc6abc0f15a44e34f37a8aec805a2ec0a",
+    "querySha256": "723e23d15bfcdff8127a39f15550154c4b68e03fc9c30e83fbb231677ae04d80",
+    "capturedAt": "2026-10-11T02:22:42.693175+00:00",
+    "offlineIntegrityFreshnessIdentityAndEligibilityPassed": true
+  },
+  "transport": {"kind": "session-pooler", "tlsVerifyFull": true, "serverSsl": true, "serverReadOnly": true},
+  "independence": {
+    "separateClientProcesses": true,
+    "sameServerBackendPidObserved": true,
+    "differentBackendProof": false,
+    "initialExtraDistinctPidCheckPassed": false,
+    "offlineDiagnosisOnlyAfterFailure": true,
+    "rollbackIndependentBackendGateCleared": false
+  },
+  "accountOrMembershipWrites": false,
+  "databaseWrites": false,
+  "passwordsOrTokensSelected": false,
+  "passwordResetOrLogin": false,
+  "messagesSent": false,
+  "productionOtherProjectOrProviderContact": false,
+  "previousEvidenceOverwritten": false,
+  "migrations059060Applied": false,
+  "readyForWriteRehearsal": false,
+  "tests": {"typecheck": "passed", "unitCount": 715, "skipped": 0, "focusedLint": "passed", "localPostgresSuite": "passed", "syntheticCluster": "js-fee-test-XxQvvu", "clusterStopped": true},
+  "remaining": [
+    "Fresh catalog evidence and complete remote baseline/journal integration",
+    "Independent backend/session proof for future rollback reconciliation without weakening existing gates",
+    "Separate rollback-write rehearsal and migration-application approvals"
+  ]
+}

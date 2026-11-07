@@ -1,0 +1,69 @@
+{
+  "manifestVersion": 1,
+  "environment": "staging",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "release": {
+    "branch": "release/v1-readiness-20260918",
+    "commitSha": "REPLACE_WITH_40_CHARACTER_RELEASE_SHA",
+    "deploymentId": "REPLACE_WITH_EXACT_DEPLOYMENT_ID"
+  },
+  "scheduler": {
+    "provider": "REPLACE_WITH_REVIEWED_PROVIDER",
+    "jobId": "REPLACE_WITH_JOB_ID",
+    "owner": "REPLACE_WITH_OWNER",
+    "planSupportsSixtySeconds": false,
+    "enabled": false
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://jingwuguanseibukan-staging.vercel.app/api/system/email-worker",
+    "headerName": "x-worker-secret",
+    "secretReference": "REPLACE_WITH_PROTECTED_SECRET_REFERENCE"
+  },
+  "timing": {
+    "cadenceSeconds": 60,
+    "maxConcurrentExecutions": 1,
+    "overlapPrevented": false,
+    "workerBudgetSeconds": 45,
+    "providerTimeoutSeconds": 10,
+    "schedulerTimeoutSeconds": 55
+  },
+  "delivery": {
+    "automaticRetries": false,
+    "applicationIdempotencyVerified": false,
+    "nonSuccessResponsesRetained": false
+  },
+  "security": {
+    "tlsVerified": false,
+    "secretStoredProtected": false,
+    "secretDistinctFromOtherSecrets": false,
+    "requestHeadersRedacted": false
+  },
+  "monitoring": {
+    "owner": "REPLACE_WITH_OWNER",
+    "alertOnNonSuccess": false,
+    "alertOnRateLimit": false,
+    "alertOnQueueFailure": false,
+    "maxOldestReadyEmailSeconds": 0
+  },
+  "acceptance": {
+    "configuredAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "testedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedAt": "REPLACE_WITH_ISO_TIMESTAMP_AND_OFFSET",
+    "verifiedBy": "REPLACE_WITH_INDEPENDENT_VERIFIER",
+    "protectedReference": "REPLACE_WITH_PROTECTED_EVIDENCE_REFERENCE",
+    "emptyQueueConfirmed": false,
+    "responseStatus": 0,
+    "providerRequests": -1,
+    "noUnrelatedRowsChanged": false,
+    "nonSuccessRetentionVerified": false,
+    "queueHealthTelemetryVerified": false,
+    "alertDeliveryTested": false,
+    "noProductionMutation": false
+  },
+  "approvals": {
+    "operatorApproved": false,
+    "monitoringApproved": false,
+    "providerPlanApproved": false
+  }
+}

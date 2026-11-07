@@ -1,0 +1,42 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "newCredential": {
+    "path": "C:\\protected\\jwg-finance-staging-credential-40228b0a8abc4a82bff0c0379466bd9b\\staging.credential.xml",
+    "source": "STAGING_DB_URL in C:\\protected\\jingwuguan-staging.env",
+    "ownerOnlyAclVerified": true,
+    "dpapiRoundTripVerified": true,
+    "sourceEnvironmentUnchanged": true,
+    "oldCredentialUnchanged": true,
+    "serverPasswordReset": false
+  },
+  "probe": {
+    "attemptsUnderThisApproval": 1,
+    "exitCode": 0,
+    "transport": "session-pooler",
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
+    "port": 5432,
+    "connectionUser": "postgres.eomubndonbetszdbhsrj",
+    "databaseAndSessionUserVerified": "postgres",
+    "credentialValidated": true,
+    "sslVerified": true,
+    "serverReadOnlyVerified": true,
+    "ledgerVersionsExact006Through058": true,
+    "ledgerStatementContentsCompared": false,
+    "remoteContact": true,
+    "databaseWrites": false
+  },
+  "migrations059060Applied": false,
+  "productionContact": false,
+  "messagesSent": false,
+  "localCorrections": [
+    "Windows PowerShell ambiguous String.Split overload corrected before any destination creation.",
+    "Initial new empty directory ACL update requested unnecessary owner reassignment and was denied; no credential had been written.",
+    "Verified current ownership, restricted only the captured empty directory DACL, rechecked sole current-user access, then wrote the encrypted credential. No existing folder ACL modified."
+  ],
+  "remaining": [
+    "Full ledger statement-content and current catalog/actor binding refresh",
+    "Complete remote baseline/reconciliation and fixed attempt-journal integration",
+    "Separate approval for rollback-contained write rehearsal and persistent migration application"
+  ]
+}

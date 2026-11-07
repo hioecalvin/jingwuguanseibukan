@@ -1,0 +1,40 @@
+{
+  "kind": "read-only-staging-remaining-metadata-review",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "capturedAt": "2026-10-09T17:26:08.723558+11:00",
+  "querySha256": "84981343260c2aa7914c3639c8c137698c863214054b85af50849ea3b66dfed7",
+  "definitionFileSha256": "fb7d9837290aa4dd3542c15c27aebf2588a18f0abd5e3e0ac5a4dd36ec531fc1",
+  "privateEvidenceDirectory": "C:\\protected\\jwg-database-access-a6fb905d608d4bcbb9f7f2639d245564",
+  "projectIdentityVerified": true,
+  "serverReadOnlyVerified": true,
+  "ownerOnlyAclVerified": true,
+  "ledgerVersionsExact006Through058": true,
+  "ledgerStatementContentsRecomparedThisAudit": false,
+  "membershipStatusLabels": ["active", "break", "break_1", "break_2", "inactive"],
+  "accountStatusLabels": ["active", "disabled"],
+  "authHelpers": [
+    {"name": "auth.jwt", "definitionSha256": "7ce3ad8fb99f7ad5f5cd869fbd5479a6325e9444da472c26394cfa66c83b2d11"},
+    {"name": "auth.role", "definitionSha256": "c96a9358b02089b03f3962fd85c5f83c9d64f32240481915c0efe74398dc761b"},
+    {"name": "auth.uid", "definitionSha256": "7c1ff2ecbe653c9358b3115a2607db9573f88a2944ae4eca9e296a89cc5186a7"}
+  ],
+  "authHelperReview": "SQL/STABLE helpers read request claim settings. Local copies match captured bodies after whitespace normalization and were tested with synthetic claims; this is not managed Auth login/JWT verification.",
+  "eventTriggers": [
+    {"name": "issue_graphql_placeholder", "enabled": "O", "event": "sql_drop", "tags": ["DROP EXTENSION"], "definitionSha256": "b0cadab880dc68f569b3e01057dc6f5acee9d05e122de6f4256130ae330bbcec"},
+    {"name": "issue_pg_cron_access", "enabled": "O", "event": "ddl_command_end", "tags": ["CREATE EXTENSION"], "definitionSha256": "eb3fa2e82a0135bc04a6236f93331911861c91b45d72cba5d9c03c1be2c34b4c"},
+    {"name": "issue_pg_graphql_access", "enabled": "O", "event": "ddl_command_end", "tags": ["CREATE EXTENSION"], "definitionSha256": "9ec845adab4ba00bbf7740458b6c4461094697023f0f7adc693b373e2ea54f68"},
+    {"name": "issue_pg_net_access", "enabled": "O", "event": "ddl_command_end", "tags": ["CREATE EXTENSION"], "definitionSha256": "e38c4060751c9695123350596f1cb0d0c943015f3267a2a455d8efe02c711184"},
+    {"name": "pgrst_ddl_watch", "enabled": "O", "event": "ddl_command_end", "tags": null, "definitionSha256": "2b4b5d702ddf70fbd1a05c9825f9f9016d5c0ef97dd3df5f5b012ea23d9b94b1"},
+    {"name": "pgrst_drop_watch", "enabled": "O", "event": "sql_drop", "tags": null, "definitionSha256": "3a2696133853e17a0456cbfbb233a03815f50895492143e84df983b558d76593"}
+  ],
+  "eventTriggerReview": "Four hooks are gated to extension creation/drop, neither of which the current 059/060 drafts perform. Two general hooks inspect DDL/dropped-object metadata and issue NOTIFY pgrst. No live DDL or notification was invoked. Future wrapper must preserve one rollback-only transaction and recheck trigger definitions/tags; this review is not execution approval.",
+  "ownedSequenceMappings": [
+    {"sequence": "membership_status_history_id_seq", "table": "membership_status_history", "column": "id"},
+    {"sequence": "notification_outbox_id_seq", "table": "notification_outbox", "column": "id"},
+    {"sequence": "repository_uploader_assignment_audit_id_seq", "table": "repository_uploader_assignment_audit", "column": "id"},
+    {"sequence": "repository_video_events_id_seq", "table": "repository_video_events", "column": "id"}
+  ],
+  "readyToExecute": false,
+  "readyToApply": false,
+  "remaining": ["Complete candidate/fixture/RLS transitive review and build a hash-bound rollback-only remote wrapper.", "Bind exactly the three dedicated staging test actors after approval; never mutate their profiles or passwords.", "Refresh full catalog/ledger baselines before the separately approved rehearsal and compare independent data/catalog/sequence evidence afterward."],
+  "boundary": {"memberOrAuthRowsRead": false, "applicationFunctionsInvoked": false, "databaseWrites": false, "settingsChanged": false, "schedulersTriggered": false, "messagesSent": false, "deliveryProvidersContacted": false, "otherProjectsContacted": false, "migrationsApplied": false, "deployment": false}
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "approved-read-only-staging-index-dependency-review",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "capturedAt": "2026-10-09T18:49:23.705932+11:00",
+  "querySha256": "c2d6dbd1b1f3d9038d12e5b1b6e9c08ea15f74cd765112ee18aa4af0cb5e68f0",
+  "definitionFileSha256": "1be54ea954dcd4b53bc3e8fea79fd0e09272439567acec9fcc6c72ce60ddeb0a",
+  "privateEvidenceDirectory": "C:\\protected\\jwg-database-access-2efa290b66dc4d20ac5d53bb9e219c7a",
+  "projectIdentityVerified": true,
+  "serverReadOnlyVerified": true,
+  "ownerOnlyAclVerified": true,
+  "savedEvidenceHashVerified": true,
+  "tableCount": 10,
+  "indexCount": 33,
+  "allIndexesValidReadyLive": true,
+  "allScopedTablesRlsEnabled": true,
+  "allScopedTablesOwner": "postgres",
+  "partitionedTables": 0,
+  "forcedRlsTables": 0,
+  "expressionIndexes": 0,
+  "partialIndexes": [
+    {"name": "membership_fee_adjustment_history_charge_idx", "predicate": "(charge_id IS NOT NULL)"},
+    {"name": "membership_payment_confirmations_one_pending_per_charge_idx", "predicate": "(status = 'pending'::text)"},
+    {"name": "membership_payments_confirmation_unique_idx", "predicate": "(confirmation_id IS NOT NULL)"}
+  ],
+  "dependencyFunctions": [
+    {"name": "auth.uid", "sha256": "7c1ff2ecbe653c9358b3115a2607db9573f88a2944ae4eca9e296a89cc5186a7"},
+    {"name": "public.can_access_dojo_finance", "sha256": "81d1282a0e097ce3030bf6b2f9cadc07992fb39b3afa2a47ee519048724a4599"},
+    {"name": "public.is_active_app_user", "sha256": "c15dd342f24fd29eef4de4754024239214e387dcf69422ad0fc4a41e1dbdd39a"},
+    {"name": "public.is_class_admin", "sha256": "f34326e10a54d5e2108b50c0a34069195edeac6a95ff95e33d65ff97006a186a"},
+    {"name": "public.is_super_admin", "sha256": "1cfa723f121a012706b9c88ceb68f393371a98c3b20810cdcfd50a59dd4b3b63"}
+  ],
+  "allDependencyDefinitionsMatchPriorProtectedCaptures": true,
+  "ledgerVersionsExact006Through058": true,
+  "ledgerStatementContentsRecomparedThisAudit": false,
+  "review": [
+    "All 33 scoped index definitions use ordinary btree columns; no expression indexes, custom function expressions or function calls in the three simple predicates were found.",
+    "The five captured dependencies are previously reviewed read-only claim/profile/assignment helpers. Definitions match earlier protected captures after newline normalization.",
+    "Current can_access_dojo_finance remains the pre-059 assignment-scoped helper; candidate 059 has not been applied.",
+    "This closes the saved index-metadata gap for the ten scoped tables at capture time. It does not establish full transitive closure, current grants, managed Auth behavior or production readiness."
+  ],
+  "verification": {"offlineStructureValidation": "passed", "focusedValidatorTestsPassed": 6, "fullSuiteRerunThisAudit": false, "newBuildOrBrowserRun": false},
+  "readyToExecute": false,
+  "readyToApply": false,
+  "remaining": [
+    "Complete and review the remote rollback-only executor and fixture/actor binding.",
+    "Refresh full identity, exact ledger statements, candidates, catalog and independent baselines before any separately approved write rehearsal.",
+    "Persistent migration application and staging deployment require later separate approval."
+  ],
+  "boundary": {"memberOrAuthRowsRead": false, "applicationFunctionsInvoked": false, "databaseWrites": false, "migrationsApplied": false, "settingsChanged": false, "schedulersTriggered": false, "messagesSent": false, "deliveryProvidersContacted": false, "otherProjectsContacted": false, "deployment": false}
+}

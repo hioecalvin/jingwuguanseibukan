@@ -1,6 +1,11 @@
 "use client";
+import { isAikidoClass, aikikaiForClass } from "@/lib/aikikai";
+import MemberIdLink from "@/components/member-id-link";
+
+import CompactRecord from "@/components/compact-record";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -200,6 +205,90 @@ export default function DocumentArchivePage() {
       DocumentArchiveRow | null
     >(null);
 
+  const loadArchive = useCallback(async (
+    showRefreshing =
+      true
+  ) => {
+    if (
+      showRefreshing
+    ) {
+      setRefreshing(
+        true
+      );
+    }
+
+
+    setMessage("");
+    setMessageType("");
+
+
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "search_document_archive",
+        {
+          search_text:
+            null,
+
+          requested_document_group:
+            "all",
+
+          requested_document_type:
+            "all",
+
+          requested_class_id:
+            null,
+
+          requested_dojo_id:
+            null,
+
+          requested_status:
+            "all",
+
+          requested_date_from:
+            null,
+
+          requested_date_to:
+            null,
+        }
+      );
+
+
+    if (
+      error
+    ) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      setRefreshing(
+        false
+      );
+
+      return;
+    }
+
+
+    setDocuments(
+      (
+        data ??
+        []
+      ) as
+        DocumentArchiveRow[]
+    );
+
+
+    setRefreshing(
+      false
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -281,94 +370,10 @@ export default function DocumentArchivePage() {
 
     loadPage();
   }, [
+    loadArchive,
     router,
     supabase,
   ]);
-
-
-  async function loadArchive(
-    showRefreshing =
-      true
-  ) {
-    if (
-      showRefreshing
-    ) {
-      setRefreshing(
-        true
-      );
-    }
-
-
-    setMessage("");
-    setMessageType("");
-
-
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "search_document_archive",
-        {
-          search_text:
-            null,
-
-          requested_document_group:
-            "all",
-
-          requested_document_type:
-            "all",
-
-          requested_class_id:
-            null,
-
-          requested_dojo_id:
-            null,
-
-          requested_status:
-            "all",
-
-          requested_date_from:
-            null,
-
-          requested_date_to:
-            null,
-        }
-      );
-
-
-    if (
-      error
-    ) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      setRefreshing(
-        false
-      );
-
-      return;
-    }
-
-
-    setDocuments(
-      (
-        data ??
-        []
-      ) as
-        DocumentArchiveRow[]
-    );
-
-
-    setRefreshing(
-      false
-    );
-  }
 
 
   const classes =
@@ -519,7 +524,7 @@ export default function DocumentArchivePage() {
             ) ||
 
           (
-            item.aikikai_registration_number ??
+            aikikaiForClass(item.class_name, item.aikikai_registration_number) ??
             ""
           )
             .toLowerCase()
@@ -728,21 +733,6 @@ export default function DocumentArchivePage() {
   }
 
 
-  function formatIdentity(
-    item:
-      DocumentArchiveRow
-  ) {
-    if (
-      item.aikikai_registration_number
-    ) {
-      return `${item.member_id ?? "Not assigned"} / ${item.aikikai_registration_number}`;
-    }
-
-
-    return item.member_id ??
-      "Not assigned";
-  }
-
 
   function clearFilters() {
     setSearch("");
@@ -792,7 +782,7 @@ export default function DocumentArchivePage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -965,7 +955,7 @@ export default function DocumentArchivePage() {
                   e.target.value
                 )
               }
-              placeholder="Document number, Member, Member ID, Aikikai, class, dojo, rank, title..."
+              placeholder="Search by document, member, class, dojo, rank or title"
               className="w-full rounded-xl border border-neutral-700 bg-neutral-800 px-4 py-4 text-base text-white"
             />
 
@@ -1209,7 +1199,11 @@ export default function DocumentArchivePage() {
                 document
               ) => (
 
-                <article
+                <CompactRecord summary={<>{document.member_name ??
+                          document.document_subject ??
+                          labelFromValue(
+                            document.document_type
+                          )}</>}
                   key={
                     `${document.document_type}:${document.archive_id}`
                   }
@@ -1268,9 +1262,7 @@ export default function DocumentArchivePage() {
                       {document.member_name && (
 
                         <p className="mt-1 text-sm text-neutral-500">
-                          {formatIdentity(
-                            document
-                          )}
+                          <><MemberIdLink memberId={document.member_id} />{aikikaiForClass(document.class_name, document.aikikai_registration_number) ? " / " + document.aikikai_registration_number : ""}</>
                         </p>
 
                       )}
@@ -1413,7 +1405,7 @@ export default function DocumentArchivePage() {
 
                   )}
 
-                </article>
+                </CompactRecord>
 
               )
             )
@@ -1426,6 +1418,9 @@ export default function DocumentArchivePage() {
         {selectedDocument && (
 
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="archive-record-title"
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(e) => {
               if (
@@ -1450,7 +1445,7 @@ export default function DocumentArchivePage() {
                   </p>
 
 
-                  <h2 className="mt-1 text-2xl font-bold">
+                  <h2 id="archive-record-title" className="mt-1 text-2xl font-bold">
                     {selectedDocument.document_reference}
                   </h2>
 
@@ -1531,12 +1526,8 @@ export default function DocumentArchivePage() {
                 {selectedDocument.membership_id && (
 
                   <Detail
-                    label="Member ID / Aikikai"
-                    value={
-                      formatIdentity(
-                        selectedDocument
-                      )
-                    }
+                    label={isAikidoClass(selectedDocument.class_name) ? "Member ID / Aikikai" : "Member ID"}
+                    value={<><MemberIdLink memberId={selectedDocument.member_id} />{aikikaiForClass(selectedDocument.class_name, selectedDocument.aikikai_registration_number) ? " / " + selectedDocument.aikikai_registration_number : ""}</>}
                   />
 
                 )}
@@ -1925,7 +1916,7 @@ function Detail({
   value,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">

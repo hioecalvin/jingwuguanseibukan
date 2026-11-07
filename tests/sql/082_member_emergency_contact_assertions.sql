@@ -1,0 +1,35 @@
+-- Run in the existing local synthetic transaction after 080/081 fixtures.
+select set_config('request.jwt.claim.sub','80000000-0000-0000-0000-000000000001',true);
+set local role authenticated;
+select pg_temp.assert_true(public.get_my_emergency_contact()->>'version'='0','emergency blank baseline');
+select pg_temp.assert_true(public.update_my_emergency_contact(' Contact  Name ','Sibling','CONTACT@example.invalid','081511508958',0)->>'version'='1','member emergency save');
+select pg_temp.assert_true(public.get_my_emergency_contact()->>'contact_name'='Contact Name','emergency name normalized');
+select pg_temp.assert_true(public.get_my_emergency_contact()->>'email'='contact@example.invalid','emergency email normalized');
+select pg_temp.assert_true(public.update_my_emergency_contact('Contact Name','Sibling','contact@example.invalid','081511508958',1)->>'version'='1','emergency no-op idempotent');
+do $$begin
+ begin perform public.update_my_emergency_contact('Stale',null,null,null,0);raise exception 'stale emergency accepted';exception when serialization_failure then null;end;
+ begin perform public.update_my_emergency_contact(null,null,'invalid',null,1);raise exception 'invalid emergency email';exception when invalid_parameter_value then null;end;
+ begin perform public.update_my_emergency_contact(null,null,null,'( )',1);raise exception 'invalid emergency phone';exception when invalid_parameter_value then null;end;
+ begin perform contact_name from emergency_contact_private.contacts;raise exception 'direct emergency read';exception when insufficient_privilege then null;end;
+end$$;
+reset role;
+select pg_temp.assert_true((select count(*)=1 from emergency_contact_private.audit),'one emergency audit');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+set local role authenticated;
+select pg_temp.assert_true(public.get_my_emergency_contact()->>'version'='0','Super Admin cannot read another contact through self reader');
+reset role;
+select set_config('request.jwt.claim.sub','80000000-0000-0000-0000-000000000001',true);
+set local role authenticated;
+select pg_temp.assert_true(public.update_my_emergency_contact(null,null,null,null,1)->>'version'='2','member can clear optional emergency details');
+reset role;
+select pg_temp.assert_true((select count(*)=2 from emergency_contact_private.audit),'clear emergency audited');
+update auth.users set banned_until=now()+interval '1 day' where id='80000000-0000-0000-0000-000000000001';
+set local role authenticated;
+do $$begin begin perform public.get_my_emergency_contact();raise exception 'banned emergency read';exception when insufficient_privilege then null;end;end$$;
+reset role;
+update auth.users set banned_until=null where id='80000000-0000-0000-0000-000000000001';
+select pg_temp.assert_true(not has_function_privilege('anon','public.get_my_emergency_contact()','EXECUTE'),'emergency anonymous denied');
+select pg_temp.assert_true(not has_function_privilege('service_role','public.update_my_emergency_contact(text,text,text,text,integer)','EXECUTE'),'emergency service write denied');
+select pg_temp.assert_true(not has_schema_privilege('authenticated','emergency_contact_private','USAGE'),'emergency schema private');
+select pg_temp.assert_true(not exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='emergency_contact_private' and c.relkind='r' and not(c.relrowsecurity and c.relforcerowsecurity)),'emergency forced RLS');
+do $$begin begin delete from emergency_contact_private.audit;raise exception 'emergency audit mutable';exception when raise_exception then if sqlerrm='emergency audit mutable' then raise;end if;end;end$$;

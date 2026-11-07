@@ -1,0 +1,24 @@
+{
+  "dateSydney": "2026-10-10",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "host": "db.eomubndonbetszdbhsrj.supabase.co",
+  "scope": "one explicitly approved diagnostic read-only retry",
+  "attemptsThisApproval": 1,
+  "exitCode": 1,
+  "failureCode": "DNS_FAILED",
+  "reportedError": "FINANCE_PREFLIGHT_FAILED [DNS_FAILED]: preserve evidence; no automatic retry. Raw details suppressed.",
+  "databaseConnectionEstablished": false,
+  "tlsVerified": false,
+  "loginVerified": false,
+  "ledgerVerified": false,
+  "migrationAttempted": false,
+  "databaseWrites": false,
+  "productionContact": false,
+  "additionalRetries": 0,
+  "notes": [
+    "Client could not resolve the fixed staging direct hostname; this does not establish a password failure.",
+    "No credential reset, settings change, TLS weakening, pooler fallback, migration, message or deployment.",
+    "Original generic failure receipt is preserved separately; its cause is not retroactively inferred.",
+    "Next proposed step: read-only staging project-status/connection-hostname and DNS/network diagnosis. Not performed in this attempt."
+  ]
+}

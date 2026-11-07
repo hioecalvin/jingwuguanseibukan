@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 
 import {
   useEffect,
@@ -467,27 +468,6 @@ export default function RankRepositoryPage() {
    * =====================================================
    */
 
-  function levelLabel(
-    level:
-      RankInfo["level"]
-  ) {
-    if (
-      level ===
-      "mudansha"
-    ) {
-      return "Mudansha (Kyu)";
-    }
-
-    if (
-      level ===
-      "yudansha"
-    ) {
-      return "Yudansha (Dan)";
-    }
-
-    return "Grade";
-  }
-
   function levelBadgeClass(
     level:
       RankInfo["level"]
@@ -748,9 +728,7 @@ export default function RankRepositoryPage() {
                 )}
               `}
             >
-              {levelLabel(
-                rankInfo.level
-              )}
+              {gradingCategoryLabel(classInfo?.name, rankInfo.level)}
             </span>
           )}
         </div>
@@ -1070,11 +1048,7 @@ export default function RankRepositoryPage() {
             text-neutral-500
           "
         >
-          Repository access is based
-          on your class membership.
-          Your current grade does not
-          restrict access to published
-          tiers in this class.
+          Members can open all tiers within their current rank and lower ranks in this class. Tiers organize the published training materials.
         </p>
       </section>
     </main>

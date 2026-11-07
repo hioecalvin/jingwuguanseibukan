@@ -1,4 +1,8 @@
 "use client";
+import { isAikidoClass } from "@/lib/aikikai";
+
+import { assessmentOutcomeLabel } from "@/lib/assessment-history-labels";
+import type { MemberExamRecord, MemberTransferRecord } from "@/lib/official-member-history";
 
 import {
   Document,
@@ -7,7 +11,12 @@ import {
   View,
   Image,
   StyleSheet,
+  Font,
 } from "@react-pdf/renderer";
+
+Font.registerHyphenationCallback(
+  (word) => [word]
+);
 
 export type PromotionRecord = {
   id: string;
@@ -71,8 +80,8 @@ export type OfficialRecord = {
 
     full_name: string;
 
-    email: string;
-    phone: string;
+    email: string | null;
+    phone: string | null;
 
     whatsapp_number: string | null;
 
@@ -117,6 +126,8 @@ export type OfficialRecord = {
   };
 
   promotion_history: PromotionRecord[];
+  assessment_history?: MemberExamRecord[];
+  transfer_history?: MemberTransferRecord[];
 
   title_history: TitleAppointmentRecord[];
 };
@@ -557,6 +568,15 @@ function formatWhatsApp(
   return value;
 }
 
+function formatEmail(
+  value: string
+) {
+  return value.replace(
+    /([.@+_-])/g,
+    "$1\u200b"
+  );
+}
+
 function getStatusStyle(
   status: string
 ) {
@@ -590,12 +610,7 @@ export default function MemberRecordPDF({
       .rank_name ??
     "Unranked";
 
-  const currentTier =
-    record.current_grade
-      .tier_name ??
-    "-";
-
-  return (
+return (
     <Document
       title={`Official Member Record - ${record.member.full_name}`}
       author="Jingwuguan Seibukan"
@@ -820,7 +835,7 @@ export default function MemberRecordPDF({
                   </View>
 
 
-                  {record.member.aikikai_registration_number && (
+                  {isAikidoClass(record.membership.class_name) && record.member.aikikai_registration_number && (
                     <View
                       style={
                         styles.infoRow
@@ -921,9 +936,11 @@ export default function MemberRecordPDF({
                         styles.infoValue
                       }
                     >
-                      {record.member
-                        .email ||
-                        "-"}
+                      {record.member.email
+                        ? formatEmail(
+                            record.member.email
+                          )
+                        : "-"}
                     </Text>
                   </View>
 
@@ -1244,14 +1261,6 @@ export default function MemberRecordPDF({
 
             <Text
               style={
-                styles.gradeTier
-              }
-            >
-              Tier: {currentTier}
-            </Text>
-
-            <Text
-              style={
                 styles.gradeCategory
               }
             >
@@ -1275,8 +1284,9 @@ export default function MemberRecordPDF({
             style={
               styles.sectionTitle
             }
+            minPresenceAhead={84}
           >
-            OFFICIAL PROMOTION RECORD
+            OFFICIAL RANK PROMOTION HISTORY
           </Text>
 
 
@@ -1481,6 +1491,38 @@ export default function MemberRecordPDF({
         </View>
 
 
+        {/* DATED ASSESSMENT AND IMPORTED RANK HISTORY */}
+        {(record.assessment_history?.length ?? 0) > 0 && <View style={styles.section}>
+          <Text style={styles.sectionTitle} minPresenceAhead={84}>RANK AND ASSESSMENT HISTORY</Text>
+          <Text style={styles.subtitle}>Assessment outcomes and original historical grade records. Incomplete dates remain unknown.</Text>
+          {record.assessment_history!.map(item => <View key={item.result_id} style={styles.documentBox} wrap={false}>
+            <View style={styles.row}>
+              <Text style={styles.metaLabel}>Assessment date</Text>
+              <Text style={styles.metaValue}>{item.assessment_date ? formatDate(item.assessment_date) : "Unknown / incomplete"}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.metaLabel}>Rank</Text>
+              <Text style={styles.metaValue}>{item.rank_before ? item.rank_before + " to " : ""}{item.rank_assessed}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.metaLabel}>Outcome</Text>
+              <Text style={styles.metaValue}>{assessmentOutcomeLabel(item.outcome)}</Text>
+            </View>
+            {item.assessment_number && <View style={styles.row}><Text style={styles.metaLabel}>Assessment number</Text><Text style={styles.metaValue}>{item.assessment_number}</Text></View>}
+            {item.notes && <Text style={styles.subtitle}>{item.notes}</Text>}
+          </View>)}
+        </View>}
+
+        {(record.transfer_history?.length ?? 0) > 0 && <View style={styles.section}>
+          <Text style={styles.sectionTitle} minPresenceAhead={84}>TRANSFER HISTORY</Text>
+          <Text style={styles.subtitle}>Transfer records visible to the requesting administrator.</Text>
+          {record.transfer_history!.map(item => <View key={item.id} style={styles.documentBox} wrap={false}>
+            <View style={styles.row}><Text style={styles.metaLabel}>{item.dateLabel}</Text><Text style={styles.metaValue}>{formatDate(item.date)}</Text></View>
+            <View style={styles.row}><Text style={styles.metaLabel}>From / To</Text><Text style={styles.metaValue}>{item.fromDojo} to {item.toDojo}</Text></View>
+            <View style={styles.row}><Text style={styles.metaLabel}>Status</Text><Text style={styles.metaValue}>{item.status.replaceAll("_", " ")}</Text></View>
+          </View>)}
+        </View>}
+
         {/* TITLE APPOINTMENT HISTORY */}
 
         {record.title_history &&
@@ -1494,6 +1536,7 @@ export default function MemberRecordPDF({
               style={
                 styles.sectionTitle
               }
+              minPresenceAhead={84}
             >
               TITLE APPOINTMENT HISTORY
             </Text>
@@ -1668,128 +1711,6 @@ export default function MemberRecordPDF({
           </View>
 
         )}
-
-
-        {/* REPORT INFORMATION */}
-
-        <View
-          style={styles.section}
-          wrap={false}
-        >
-          <Text
-            style={
-              styles.sectionTitle
-            }
-          >
-            REPORT INFORMATION
-          </Text>
-
-
-          <View
-            style={
-              styles.reportBox
-            }
-          >
-            <View
-              style={
-                styles.infoRow
-              }
-            >
-              <Text
-                style={
-                  styles.infoLabel
-                }
-              >
-                Generated By
-              </Text>
-
-              <Text
-                style={
-                  styles.infoValue
-                }
-              >
-                {
-                  audit.generated_by_name
-                }
-              </Text>
-            </View>
-
-
-            <View
-              style={
-                styles.infoRow
-              }
-            >
-              <Text
-                style={
-                  styles.infoLabel
-                }
-              >
-                Role
-              </Text>
-
-              <Text
-                style={
-                  styles.infoValue
-                }
-              >
-                {
-                  audit.generated_by_role
-                }
-              </Text>
-            </View>
-
-
-            <View
-              style={
-                styles.infoRow
-              }
-            >
-              <Text
-                style={
-                  styles.infoLabel
-                }
-              >
-                Generated
-              </Text>
-
-              <Text
-                style={
-                  styles.infoValue
-                }
-              >
-                {formatDateTime(
-                  audit.generated_at
-                )}
-              </Text>
-            </View>
-
-
-            <View
-              style={
-                styles.infoRow
-              }
-            >
-              <Text
-                style={
-                  styles.infoLabel
-                }
-              >
-                Reference
-              </Text>
-
-              <Text
-                style={
-                  styles.infoValue
-                }
-              >
-                {
-                  audit.document_reference
-                }
-              </Text>
-            </View>
-          </View>
-        </View>
 
 
         <Text

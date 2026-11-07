@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-import {
-  createClient,
-} from "@/lib/supabase/client";
+import MemberIdLink from "@/components/member-id-link";
+import { useEffect, useId, useRef, useState } from "react";
+import { useSignOut } from "@/components/use-sign-out";
 
 import type {
   AppRole,
@@ -24,42 +21,21 @@ export default function UserMenu({
   memberId,
   role,
 }: UserMenuProps) {
-  const router =
-    useRouter();
+  const menuId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const signOutRef = useRef<HTMLButtonElement>(null);
+  const { errorMessage, signingOut, handleLogout } = useSignOut();
 
   const [open, setOpen] =
     useState(false);
 
-  const [
-    signingOut,
-    setSigningOut,
-  ] = useState(false);
+  useEffect(() => {
+    if (open) signOutRef.current?.focus();
+  }, [open]);
 
-  async function handleLogout() {
-    try {
-      setSigningOut(true);
-
-      const supabase =
-        createClient();
-
-      const { error } =
-        await supabase.auth.signOut();
-
-      if (error) {
-        console.error(
-          "Sign out error:",
-          error
-        );
-
-        return;
-      }
-
-      router.replace("/login");
-
-      router.refresh();
-    } finally {
-      setSigningOut(false);
-    }
+  function closeMenu() {
+    setOpen(false);
+    triggerRef.current?.focus();
   }
 
   const initial =
@@ -71,8 +47,21 @@ export default function UserMenu({
     ).toUpperCase();
 
   return (
-    <div className="relative">
+    <div className="relative" onKeyDown={(event) => {
+      if (open && event.key === "Escape") {
+        event.preventDefault();
+        closeMenu();
+      }
+    }} onBlur={(event) => {
+      // Disabling the focused sign-out button can blur it with no new focus
+      // target. Keep its pending/error state visible; close on actual exit.
+      if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
       <button
+        ref={triggerRef}
+        aria-label="Account menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
         type="button"
         onClick={() =>
           setOpen(
@@ -132,7 +121,7 @@ export default function UserMenu({
               mt-0.5
               text-xs
               capitalize
-              text-neutral-500
+              text-neutral-400
             "
           >
             {role.replaceAll(
@@ -147,10 +136,9 @@ export default function UserMenu({
         <>
           <button
             type="button"
+            tabIndex={-1}
             aria-label="Close user menu"
-            onClick={() =>
-              setOpen(false)
-            }
+            onClick={closeMenu}
             className="
               fixed
               inset-0
@@ -160,6 +148,9 @@ export default function UserMenu({
           />
 
           <div
+            id={menuId}
+            role="region"
+            aria-label="Account menu"
             className="
               absolute
               right-0
@@ -200,11 +191,11 @@ export default function UserMenu({
                   className="
                     mt-1
                     text-xs
-                    text-neutral-500
+                    text-neutral-400
                   "
                 >
                   Member ID:{" "}
-                  {memberId}
+                  <MemberIdLink memberId={memberId} />
                 </div>
               )}
 
@@ -213,7 +204,7 @@ export default function UserMenu({
                   mt-1
                   text-xs
                   capitalize
-                  text-neutral-500
+                  text-neutral-400
                 "
               >
                 {role.replaceAll(
@@ -224,7 +215,9 @@ export default function UserMenu({
             </div>
 
             <div className="p-2">
+              {errorMessage && <p role="alert" className="px-3 py-2 text-sm text-red-300">{errorMessage}</p>}
               <button
+                ref={signOutRef}
                 type="button"
                 disabled={
                   signingOut
@@ -241,10 +234,11 @@ export default function UserMenu({
                   text-sm
                   font-medium
                   text-red-300
-                  transition
+                  transition-colors
                   hover:bg-red-950/40
                   disabled:cursor-not-allowed
-                  disabled:opacity-50
+                  disabled:bg-neutral-900
+                  disabled:text-red-200
                 "
               >
                 {signingOut

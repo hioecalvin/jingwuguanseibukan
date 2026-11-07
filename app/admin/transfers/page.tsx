@@ -1,6 +1,10 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
+import CompactRecord from "@/components/compact-record";
+
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -293,9 +297,9 @@ export default function DojoTransferPage() {
    * =====================================================
    */
 
-  function showSuccess(
+  const showSuccess = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -303,12 +307,12 @@ export default function DojoTransferPage() {
     setMessageType(
       "success"
     );
-  }
+  }, []);
 
 
-  function showError(
+  const showError = useCallback((
     text: string
-  ) {
+  ) => {
     setMessage(
       text
     );
@@ -316,13 +320,119 @@ export default function DojoTransferPage() {
     setMessageType(
       "error"
     );
-  }
+  }, []);
 
 
-  function clearMessage() {
+  const clearMessage = useCallback(() => {
     setMessage("");
     setMessageType("");
-  }
+  }, []);
+
+
+  const loadMemberTransfers = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "dojo_transfer_requests"
+        )
+        .select(`
+          id,
+          user_id,
+          class_id,
+          from_dojo_id,
+          to_dojo_id,
+          reason,
+          status,
+          created_at,
+
+          profiles:profiles!dojo_transfer_requests_user_id_fkey (
+            full_name,
+            registration_number
+          ),
+
+          from_dojo:dojos!dojo_transfer_requests_from_dojo_id_fkey (
+            name
+          ),
+
+          to_dojo:dojos!dojo_transfer_requests_to_dojo_id_fkey (
+            name
+          )
+        `)
+        .eq(
+          "status",
+          "pending"
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              true,
+          }
+        );
+
+
+    if (
+      error
+    ) {
+      showError(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setMemberTransfers(
+      (
+        data ??
+        []
+      ) as unknown as MemberTransferRequest[]
+    );
+  }, [showError, supabase]);
+
+
+  const loadAdminTransfers = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_admin_dojo_transfer_requests"
+      );
+
+
+    if (
+      error
+    ) {
+      showError(
+        error.message
+      );
+
+      return;
+    }
+
+
+    setAdminTransfers(
+      (
+        data ??
+        []
+      ) as AdminTransferRow[]
+    );
+  }, [showError, supabase]);
+
+
+  const reloadAll = useCallback(async () => {
+    await Promise.all([
+      loadMemberTransfers(),
+      loadAdminTransfers(),
+    ]);
+  }, [
+    loadAdminTransfers,
+    loadMemberTransfers,
+  ]);
 
 
   /*
@@ -405,6 +515,7 @@ export default function DojoTransferPage() {
 
     loadPage();
   }, [
+    reloadAll,
     router,
     supabase,
   ]);
@@ -415,115 +526,6 @@ export default function DojoTransferPage() {
    * LOAD MEMBER TRANSFERS
    * =====================================================
    */
-
-  async function loadMemberTransfers() {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from(
-          "dojo_transfer_requests"
-        )
-        .select(`
-          id,
-          user_id,
-          class_id,
-          from_dojo_id,
-          to_dojo_id,
-          reason,
-          status,
-          created_at,
-
-          profiles:profiles!dojo_transfer_requests_user_id_fkey (
-            full_name,
-            registration_number
-          ),
-
-          from_dojo:dojos!dojo_transfer_requests_from_dojo_id_fkey (
-            name
-          ),
-
-          to_dojo:dojos!dojo_transfer_requests_to_dojo_id_fkey (
-            name
-          )
-        `)
-        .eq(
-          "status",
-          "pending"
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              true,
-          }
-        );
-
-
-    if (
-      error
-    ) {
-      showError(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setMemberTransfers(
-      (
-        data ??
-        []
-      ) as unknown as MemberTransferRequest[]
-    );
-  }
-
-
-  /*
-   * =====================================================
-   * LOAD ADMIN TRANSFERS
-   * =====================================================
-   */
-
-  async function loadAdminTransfers() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_admin_dojo_transfer_requests"
-      );
-
-
-    if (
-      error
-    ) {
-      showError(
-        error.message
-      );
-
-      return;
-    }
-
-
-    setAdminTransfers(
-      (
-        data ??
-        []
-      ) as AdminTransferRow[]
-    );
-  }
-
-
-  async function reloadAll() {
-    await Promise.all([
-      loadMemberTransfers(),
-      loadAdminTransfers(),
-    ]);
-  }
-
 
   /*
    * =====================================================
@@ -583,9 +585,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -722,9 +734,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -848,9 +870,19 @@ export default function DojoTransferPage() {
       }
 
 
+      if (
+        !reason.trim()
+      ) {
+        showError(
+          "A rejection reason is required."
+        );
+
+        return;
+      }
+
+
       rejectionNote =
-        reason.trim() ||
-        null;
+        reason.trim();
     }
 
 
@@ -2039,8 +2071,7 @@ export default function DojoTransferPage() {
    */
 
   const bulkGroups =
-    useMemo(
-      () => {
+    (() => {
         const map =
           new Map<
             string,
@@ -2086,11 +2117,7 @@ export default function DojoTransferPage() {
 
 
         return map;
-      },
-      [
-        filteredAdminRows,
-      ]
-    );
+      })();
 
 
   /*
@@ -2245,7 +2272,7 @@ export default function DojoTransferPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -2487,7 +2514,10 @@ export default function DojoTransferPage() {
 
 
                   return (
-                    <article
+                    <CompactRecord summary={<>{transfer
+                              .profiles
+                              ?.full_name ??
+                              "Unknown Member"}</>}
                       key={
                         transfer.id
                       }
@@ -2508,10 +2538,9 @@ export default function DojoTransferPage() {
 
                           <p className="mt-1 text-sm text-neutral-400">
                             Member ID:{" "}
-                            {transfer
+                            <MemberIdLink memberId={transfer
                               .profiles
-                              ?.registration_number ??
-                              "Not assigned"}
+                              ?.registration_number} fallback={"Not assigned"} />
                           </p>
 
                         </div>
@@ -2598,7 +2627,7 @@ export default function DojoTransferPage() {
 
                       </div>
 
-                    </article>
+                    </CompactRecord>
                   );
                 }
               )
@@ -2928,7 +2957,7 @@ export default function DojoTransferPage() {
 
 
                   return (
-                    <article
+                    <CompactRecord summary={<>Bulk Transfer</>}
                       key={
                         batchId
                       }
@@ -3317,8 +3346,7 @@ export default function DojoTransferPage() {
 
 
                                       <p className="mt-1 text-xs text-neutral-500">
-                                        {row.member_id ??
-                                          "No Member ID"}
+                                        <MemberIdLink memberId={row.member_id} fallback={"No Member ID"} />
                                       </p>
 
                                     </div>
@@ -3498,7 +3526,7 @@ export default function DojoTransferPage() {
 
                       )}
 
-                    </article>
+                    </CompactRecord>
                   );
                 }
               )}
@@ -3691,7 +3719,9 @@ function TransferCard({
     ) => string;
 }) {
   return (
-    <article className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+    <CompactRecord summary={<>{
+                row.member_name
+              }</>} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
 
 
       {/* HEADER */}
@@ -3718,8 +3748,7 @@ function TransferCard({
 
           <p className="mt-1 text-sm text-neutral-400">
             Member ID:{" "}
-            {row.member_id ??
-              "Not assigned"}
+            <MemberIdLink memberId={row.member_id} fallback={"Not assigned"} />
           </p>
 
 
@@ -4081,7 +4110,7 @@ function TransferCard({
 
       )}
 
-    </article>
+    </CompactRecord>
   );
 }
 

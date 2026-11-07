@@ -10,14 +10,13 @@
  *   0401-0410  10 Taiji Members
  *   0501-0510  10 Xingyi Members
  *
- * Shared TEST password: 00000000
- *
  * Run from the project root:
- *   node scripts/seed-dummy-users.mjs
+ *   node scripts/seed-dummy-users.mjs --environment=staging --expected-project-ref=...
  *
  * Required .env.local:
  *   NEXT_PUBLIC_SUPABASE_URL=...
- *   SUPABASE_SERVICE_ROLE_KEY=...
+ *   SUPABASE_SECRET_KEY=...
+ *   DUMMY_ACCOUNT_PASSWORD=...
  *
  * IMPORTANT:
  * - The service-role key must stay server-side and must never use NEXT_PUBLIC_.
@@ -28,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
+import { validateCleanupTarget } from "./dummy-account-cleanup.mjs";
 
 function loadDotEnvLocal() {
   const envPath = path.resolve(process.cwd(), ".env.local");
@@ -61,7 +61,12 @@ function loadDotEnvLocal() {
 loadDotEnvLocal();
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+function option(name) {
+  const prefix = `--${name}=`;
+  return process.argv.slice(2).find((arg) => arg.startsWith(prefix))?.slice(prefix.length);
+}
 
 if (!SUPABASE_URL) {
   throw new Error(
@@ -75,6 +80,16 @@ if (!SERVICE_ROLE_KEY) {
   );
 }
 
+validateCleanupTarget({
+  url: SUPABASE_URL,
+  environment: option("environment"),
+  expectedProjectRef: option("expected-project-ref"),
+});
+
+if (option("environment") !== "staging") {
+  throw new Error("Dummy accounts may be seeded only into an explicitly verified staging project.");
+}
+
 const supabase = createClient(
   SUPABASE_URL,
   SERVICE_ROLE_KEY,
@@ -86,7 +101,17 @@ const supabase = createClient(
   }
 );
 
-const TEST_PASSWORD = "00000000";
+const TEST_PASSWORD = process.env.DUMMY_ACCOUNT_PASSWORD;
+if (
+  !TEST_PASSWORD ||
+  TEST_PASSWORD.length < 16 ||
+  !/[A-Z]/.test(TEST_PASSWORD) ||
+  !/[a-z]/.test(TEST_PASSWORD) ||
+  !/[0-9]/.test(TEST_PASSWORD) ||
+  !/[^A-Za-z0-9]/.test(TEST_PASSWORD)
+) {
+  throw new Error("DUMMY_ACCOUNT_PASSWORD must be at least 16 characters with upper/lowercase, a number and a symbol.");
+}
 const TEST_EMAIL_DOMAIN = "dummy.jingwuguan.test";
 
 const CLASS_NAMES = [
@@ -144,10 +169,6 @@ function dateOfBirthFor(memberId, child = false) {
   const day = String((n % 27) + 1).padStart(2, "0");
   const year = child ? 2014 + (n % 4) : 1990 + (n % 12);
   return `${year}-${month}-${day}`;
-}
-
-function safeSlug(value) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 async function must(queryPromise, label) {
@@ -594,8 +615,6 @@ async function main() {
 
   console.log("\nDummy-data seed complete.");
   console.log(`Accounts prepared: ${createdSummary.length}`);
-  console.log(`Shared TEST password: ${TEST_PASSWORD}\n`);
-
   console.table(createdSummary);
 
   console.log(

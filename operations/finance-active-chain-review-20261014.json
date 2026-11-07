@@ -1,0 +1,39 @@
+{
+  "recordedDate": "2026-10-14",
+  "scope": "local-active-chain-and-release-contract-synchronization",
+  "branch": "release/v1-readiness-20260918",
+  "headUnchanged": "319fb20",
+  "activeLedger": "006-060",
+  "migrationCount": 55,
+  "repositoryFilesSha256": "1fb8ea8facf8f4553d81d40f2ae808665290709a52367facd7a227be988ff8f2",
+  "exactSourceCopies": {
+    "059": "e2e4defb705cf9216dac32946ca61c029477a9062bf92b7f0ba777d4d070f406",
+    "060": "482ad4c3de6126123fac4250978f81c32c368ed50940287ba3a6b03b0a588b5d"
+  },
+  "historicalSourcesAndRecoveryEvidencePreserved": true,
+  "historical058RejectedByCurrentGates": true,
+  "exactByteSourcesLfCheckoutCount": 6,
+  "typecheckPassed": true,
+  "fullSuite": { "passed": 868, "failed": 0, "skipped": 0 },
+  "finalFocusedGateSuite": { "passed": 102, "failed": 0, "skipped": 0 },
+  "testCountNote": "The final focused suite includes one LF regression added after full-suite test loading; counts overlap and are not additive.",
+  "fullLintAndFinalTargetedLintPassed": true,
+  "productionModeBuild": "passed-isolated-localhost-mock-configuration",
+  "syntheticPg17": { "financeRoleConcurrencyRollbackPassed": true, "clusterStopped": true, "sourceBackupsRead": false },
+  "diffWhitespacePassed": true,
+  "logSha256": {
+    "release-060-local-tests-20261014.log": "4bafc91bee557f496e9d0f1da1fa4c48b3c06e481cf7e189d9e7d28b33a2db96",
+    "release-060-local-pg-20261014.log": "4997dc57c5a8a3934e3684be15d1704970c318afdc73a100b9bc7ab1284632c0",
+    "release-060-local-build-20261014.log": "a830bf471c252d687154f83da56336c7bc2e69230ebe8ff2a26367ed261deca0",
+    "release-060-gates-20261014.log": "2cf28ce56231917dee18d0c32d65737aacfb5f7906571a0c24d314cc673fa398"
+  },
+  "remoteContact": false,
+  "migrationsAppliedThisTurn": false,
+  "messagesSent": false,
+  "accountsOrSchedulersChanged": false,
+  "committedPushedOrDeployed": false,
+  "freshManaged060RecoveryVerified": false,
+  "freshLiveBrowserAcceptanceVerified": false,
+  "productionReadyClaimed": false,
+  "next": "Approve reviewed candidate commit/push and staging deployment/guarded browser acceptance; separately approve fresh 060 backup/recovery."
+}

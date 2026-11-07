@@ -1,0 +1,14 @@
+import { build } from "esbuild";
+import { createRequire } from "node:module";
+import { mkdir } from "node:fs/promises";
+import { rmSync } from "node:fs";
+import { join, resolve } from "node:path";
+const moduleRoot = resolve("test-results", `modules-${process.pid}`);
+await mkdir(moduleRoot, { recursive: true });
+process.on("exit", () => rmSync(moduleRoot, { recursive: true, force: true }));
+await build({ entryPoints: ["src/auth.ts", "src/config.ts", "src/video-processing.ts", "src/mux.ts"], outdir: moduleRoot, outExtension: { ".js": ".cjs" }, bundle: true, platform: "node", format: "cjs", packages: "external" });
+const require = createRequire(import.meta.url);
+export const { DesktopAuth, makeClient } = require(join(moduleRoot, "auth.cjs"));
+export const { publicConfig } = require(join(moduleRoot, "config.cjs"));
+export const { validateVideo } = require(join(moduleRoot, "video-processing.cjs"));
+export const { uploadToMux } = require(join(moduleRoot, "mux.cjs"));

@@ -1,0 +1,39 @@
+{
+  "kind": "read-only-staging-dependency-audit-and-local-review",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "capturedAt": "2026-10-08T22:39:57.854368+11:00",
+  "definitionFileSha256": "e87a66ae63aeaed68872f9327706a3647bf7245af1b7d9e80d3c204b89a25ba6",
+  "querySha256": "f36a82723b3926ab2649696744e56800c60edfccfa5df4fd92c49e4c88c67a7c",
+  "privateEvidenceDirectory": "C:\\protected\\jwg-database-access-60e7c4da57df418c8406e0e4a8b5f147",
+  "readOnlyVerified": true,
+  "projectIdentityVerified": true,
+  "ownerOnlyAclVerified": true,
+  "ledgerVersionsExact006Through058": true,
+  "functionCount": 223,
+  "triggerCount": 23,
+  "requiredDefinitionCount": 18,
+  "missingIdentifiedDefinitions": [],
+  "publicForeignTableCount": 0,
+  "publicRewriteRuleCount": 0,
+  "notificationTriggerCount": 0,
+  "sequenceRisks": ["public.membership_status_history.id", "public.notification_outbox.id"],
+  "findings": [
+    "create_notification inserts notifications; no captured public trigger on notifications.",
+    "on_membership_status_change inserts membership_status_history and notification_outbox when status changes.",
+    "The legacy outbox BEFORE INSERT bridge invokes queue_email and suppresses the legacy row; its identity can already have advanced.",
+    "queue_email inserts email_outbox; its captured normalization trigger normalizes fields. Reviewed bodies do not directly invoke a delivery provider.",
+    "notify_dojo_admins selects active assigned recipients; do not exercise it on an ordinary dojo.",
+    "Definition inventory and limited manual review are not a complete transitive call-chain or behavioural authorization proof."
+  ],
+  "readyToExecute": false,
+  "transitiveReviewComplete": false,
+  "runnerImplemented": false,
+  "remaining": [
+    "Prove candidate RPC, RLS, default and fixture paths avoid sequence-backed legacy status/outbox writes; do not reset shared sequences or bypass triggers.",
+    "Resolve Auth/profile FK fixture prerequisites and any uncaptured non-public dependencies without modifying existing users.",
+    "Prepare complete-schema assertions and independent baseline/residue verification.",
+    "Obtain separate explicit rehearsal approval, and later separate application/deployment approval."
+  ],
+  "verification": {"typecheck": "passed", "localTestsPassed": 612, "focusedLint": "passed", "newBuildOrBrowserRun": false},
+  "boundary": {"memberRowsRead": false, "applicationFunctionsInvoked": false, "databaseWrites": false, "migrationApplied": false, "deployment": false, "settingsChanged": false, "schedulerInvoked": false, "messagesSent": false, "deliveryProvidersContacted": false, "otherProjectsContacted": false}
+}

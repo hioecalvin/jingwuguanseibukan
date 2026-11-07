@@ -1,0 +1,60 @@
+import { test, expect } from './fixtures';
+import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
+test('instructor submits same-class visitor attendance and edits with history', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await page.getByLabel('Session details').fill('Footwork and partner practice');
+  await page.getByLabel('Duration (minutes)').fill('90');
+  await page.getByRole('checkbox', { name: /JS-0001/ }).check();
+  await page.getByLabel('Find attendees').fill('JS0002');
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).check();
+  await expect(page.getByText('Attendance — 2 selected')).toBeVisible();
+  await page.getByRole('button', { name: 'Submit session' }).click();
+  await expect(page.getByRole('status')).toContainText('Training session saved');
+  const history = page.getByRole('region', { name: 'Training session history' });
+  await history.locator('summary').filter({ hasText: '2 attendees' }).click();
+  await expect(history).toContainText('90 minutes');
+  await history.getByRole('button', { name: 'Edit session' }).click();
+  await expect(page.getByLabel('Class and host dojo')).toBeDisabled();
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).uncheck();
+  await page.getByLabel('Session details').fill('Corrected attendance');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await history.locator('summary').filter({ hasText: '1 attendees' }).click();
+  await history.getByRole('button', { name: 'View edit history' }).click();
+  await expect(history).toContainText('Footwork and partner practice');
+  await expect(history).toContainText('Corrected attendance');
+  await history.locator('summary').filter({ hasText: 'Training days' }).click();
+  await expect(history).toContainText('Current grade: 1 training days');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+test('attendance failure blocks submit and retries without exposing internals', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions?roster-fail=1');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await expect(page.getByRole('alert')).toContainText('Attendance could not be loaded');
+  await expect(page.getByRole('button', { name: 'Submit session' })).toBeDisabled();
+  await expect(page.getByText('Private database detail')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Retry attendance' }).click();
+  await expect(page.getByRole('checkbox', { name: /Visiting Member/ })).toBeVisible();
+});
+test('concurrent edit reports conflict and preserves form', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions?conflict=1');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await page.getByLabel('Session details').fill('Keep my entry');
+  await page.getByRole('checkbox', { name: /Home Member/ }).check();
+  await page.getByRole('button', { name: 'Submit session' }).click();
+  await expect(page.getByRole('alert')).toContainText('Reload the history');
+  await expect(page.getByLabel('Session details')).toHaveValue('Keep my entry');
+  await expect(page.getByRole('checkbox', { name: /Home Member/ })).toBeChecked();
+});
+
+test('selected attendees move above others and remain reviewable during search', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).check();
+  await expect(page.getByRole('checkbox').first()).toHaveAccessibleName(/Visiting Member/);
+  await page.getByLabel('Find attendees').fill('Home Member');
+  await expect(page.getByRole('checkbox').first()).toHaveAccessibleName(/Visiting Member/);
+  await expect(page.getByRole('checkbox', { name: /Home Member/ })).toBeVisible();
+  await page.getByRole('checkbox', { name: /Visiting Member/ }).click();
+  await expect(page.getByRole('checkbox', { name: /Visiting Member/ })).toHaveCount(0);
+});

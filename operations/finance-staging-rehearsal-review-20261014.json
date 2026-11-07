@@ -1,0 +1,102 @@
+{
+  "dateSydney": "2026-10-14",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "one-approved-rollback-contained-059-060-rehearsal",
+  "result": "verified-rollback",
+  "beforeEvidenceDirectory": "C:\\protected\\jwg-finance-rehearsal-inputs-749c443975264cb7ad714085b0c7dedc",
+  "fixedJournalDirectory": "C:\\protected\\jwg-finance-059-060-staging-rehearsal",
+  "bundleSha256": "331bd068a0c826324f54e77a951240790db9b5f93b18211e32ac7edb26d5c2e3",
+  "claimedAtUtc": "2026-10-13T21:16:52.671Z",
+  "verifiedOutcomeRecordedAtUtc": "2026-10-13T21:17:09.834Z",
+  "journalEvidenceSha256": {
+    "claim": "cc2c1d66982ad81ddc4ebc4eaba042fc6a65f1ce566906fc5561a8cca58187ba",
+    "outcome": "ebe92b1044ce24e5b24ffa57c0f0e3ea22dee5192a69526681968144983798c4",
+    "mutation": "39f4d70fb1479a98c5ca0a3830585d54c99a17b53a73eb8008984040c6e26b5c",
+    "closure": "02a68c2e4b83053bbf2dbff91fbd0471944390c4c06a85ed83e3e614fd7fd192",
+    "baseline": "f0283061d65601f166cc21cba713c11d512adf51c6154dadcfd9edc1671ea511",
+    "ledger": "a09d0bc379392aa13bb810c76571b794622667358edb80c5f05fba85708b9766",
+    "actors": "e8e6455a035aaaf3dc154476592e9bbc6bb19b888c836a7637076eda6b5e276a"
+  },
+  "localPreparationCorrection": {
+    "initialStopBeforeDatabaseContact": true,
+    "cause": "Existing writer emits createdUtc; protected reader accepted only the older six-field credential record.",
+    "correction": "Allow the exact known seven-field shape only with a valid round-trip UTC timestamp, retaining legacy support and all ACL/hash/identity/DPAPI checks.",
+    "unknownFieldsAndMalformedMetadataRejected": true,
+    "credentialFileAndPasswordUnchanged": true,
+    "emptyOwnerOnlyFoldersReusedBeforeAnyClaim": true,
+    "priorEvidenceDeletedOrOverwritten": false,
+    "databaseAttemptRetried": false
+  },
+  "execution": {
+    "freshBeforeCaptureConnections": 7,
+    "mutationAttempts": 1,
+    "afterReadOnlyConnections": 4,
+    "automaticRetries": 0,
+    "tlsVerifyFull": true,
+    "fixedTargetPinnedResourcesProtectedCredential": true,
+    "guardAndAccountRecheckPassed": true,
+    "migrations059060ExecutedInsideTransaction": true,
+    "fixtureAccounts": ["Member 0101", "Admin 0002", "Super Admin 0001"],
+    "fixtureAssertionsCompleted": true,
+    "expectedSentinelSqlstate": "Z0590",
+    "psqlExitCode": 3,
+    "exactBoundInputVerified": true,
+    "allClientsClosed": true,
+    "transactionStatus": "aborted",
+    "closureObserverDifferentFromMutation": true,
+    "matchingMutationSessions": 0,
+    "mutationPhysicalBackendGone": true
+  },
+  "acceptance": {
+    "firstOverdueMonthWaiver": true,
+    "skippedDebtPreserved": true,
+    "multiMonthReportPendingBeforeReceipt": true,
+    "assignedAdminReceiptConfirmation": true,
+    "memberCannotWaiveOrConfirmOwnReceipt": true,
+    "adminCrossDojoDenied": true,
+    "superAdminScope": true,
+    "memberAdminSuperAdminAndMissingClaimsRls": true,
+    "directFinancialUpdateDenied": true,
+    "expectedTransactionalAlertsAndAudit": true,
+    "originalProfilesMembershipsAssignmentsNotificationsOutboxAndSequencesPreserved": true
+  },
+  "independentReconciliation": {
+    "publicTables": 67,
+    "publicSequences": 6,
+    "catalogDataAndSequenceBaselineUnchanged": true,
+    "afterBaselineDifferentFromBeforeAndMutation": true,
+    "ledgerVersions": "006-058",
+    "ledgerCount": 53,
+    "ledgerContentsAndCatalogUnchanged": true,
+    "actorCount": 3,
+    "actorProfileMembershipAssignmentDigestsUnchanged": true,
+    "ledgerAndActorObserversDifferentFromMutation": true,
+    "failureCount": 0,
+    "outcomeJournalPersisted": true
+  },
+  "boundaries": {
+    "persistentMigrationApplication": false,
+    "permanentMemberChanges": false,
+    "authAccountWritesOrPasswordResets": false,
+    "externalMessagesSent": false,
+    "productionRetiredDisposableOrProviderContact": false,
+    "commitPushOrDeployment": false,
+    "originalBackupsAndEvidencePreserved": true,
+    "fixedAttemptCannotBeReused": true
+  },
+  "localVerification": {
+    "typecheck": "passed",
+    "unitTests": 845,
+    "failures": 0,
+    "skipped": 0,
+    "protectedTransportFocusedTests": 9,
+    "assemblerGuardFixtureFocusedTests": 10,
+    "focusedEslint": "passed",
+    "wrapperSyntax": "passed"
+  },
+  "remaining": [
+    "Obtain separate explicit approval before permanently applying 059 then 060 to staging.",
+    "Do not reuse the fixed attempt journal or infer authority for another rehearsal.",
+    "Staging application, post-application acceptance/deployment and production release remain separate gates."
+  ]
+}
