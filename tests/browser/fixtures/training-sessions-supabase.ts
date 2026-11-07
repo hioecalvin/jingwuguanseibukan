@@ -11,7 +11,7 @@ let failRoster = new URLSearchParams(location.search).has('roster-fail');
 export function createClient() {
   return { rpc: async (name: string, args: Record<string, unknown> = {}) => {
     await new Promise(resolve => setTimeout(resolve, 10));
-    if (name === 'get_manageable_schedule_scopes') return { data: [scope], error: null };
+    if (name === 'get_manageable_training_scopes') return { data: [scope], error: null };
     if (name === 'get_training_sessions') return { data: structuredClone(sessions), error: null };
     if (name === 'get_training_session_roster') {
       if (failRoster) { failRoster = false; return { data: null, error: { message: 'Private database detail' } }; }

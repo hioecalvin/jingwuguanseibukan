@@ -43,7 +43,7 @@ export default function TrainingSessionsPage() {
   const load = useCallback(async (before = "", cursor: string | null = null) => {
     setLoading(true);
     const [scopeResult, sessionResult] = await Promise.all([
-      client.rpc("get_manageable_schedule_scopes"),
+      client.rpc("get_manageable_training_scopes"),
       client.rpc("get_training_sessions", { before_date: before || null, after_session_id: cursor }),
     ]);
     if (scopeResult.error || sessionResult.error) {

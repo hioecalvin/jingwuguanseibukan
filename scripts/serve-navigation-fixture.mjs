@@ -24,6 +24,8 @@ async function bundleFixture(entry, supabaseFixture) {
     },
   });
 }
+const instructorAppointmentsBundle = await bundleFixture('instructor-appointments.tsx', 'instructor-appointments-supabase.ts');
+const dojoContactsBundle = await bundleFixture('dojo-contacts.tsx', 'dojo-contacts-supabase.ts');
 const personalDetailsBundle = await bundleFixture('personal-details-fixture.tsx', 'personal-details-supabase.ts');
 const trainingSessionsBundle = await bundleFixture('training-sessions.tsx', 'training-sessions-supabase.ts');
 const navigationBundle = await bundleFixture('navigation.tsx', 'supabase.ts');
@@ -42,6 +44,8 @@ const adminSettlementsBundle = await bundleFixture('admin-settlements.tsx', 'adm
 const profileContactBundle = await bundleFixture('profile-contact.tsx', 'profile-contact-supabase.ts');
 const advancePaymentsBundle = await bundleFixture('advance-payments.tsx', 'advance-payments-supabase.ts');
 const assets = new Map([
+  ['/dojo-contacts-fixture.js', { type: 'text/javascript', data: dojoContactsBundle.outputFiles[0].contents }],
+  ['/instructor-appointments-fixture.js', { type: 'text/javascript', data: instructorAppointmentsBundle.outputFiles[0].contents }],
   ['/personal-details-fixture.js', { type: 'text/javascript', data: personalDetailsBundle.outputFiles[0].contents }],
   ['/training-sessions-fixture.js', { type: 'text/javascript', data: trainingSessionsBundle.outputFiles[0].contents }],
   ['/assessment-history-fixture.js', { type: 'text/javascript', data: assessmentHistoryBundle.outputFiles[0].contents }],
@@ -70,6 +74,8 @@ function collectCss(directory) {
 collectCss(path.join(root, BROWSER_SMOKE_DIST_DIR, 'static'));
 const cssLinks = [...assets.keys()].filter(name => name.endsWith('.css')).map(name => `<link rel="stylesheet" href="${name}">`).join('');
 function fixtureHtml(pathname) {
+  if (pathname === '/dojo-contacts') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dojo contacts fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/dojo-contacts-fixture.js"></script></body></html>`;
+  if (pathname === '/instructor-appointments') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Instructor appointments</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/instructor-appointments-fixture.js"></script></body></html>`;
   if (pathname === '/assessment-history-fixture') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assessment history fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/assessment-history-fixture.js"></script></body></html>`;
   if (pathname === '/advance-payments') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Advance payments fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/advance-payments-fixture.js"></script></body></html>`;
   if (pathname === '/directory-fixture') return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Directory fixture</title>${cssLinks}</head><body class="bg-neutral-950 text-neutral-100"><div id="fixture-root"></div><script src="/directory-fixture.js"></script></body></html>`;

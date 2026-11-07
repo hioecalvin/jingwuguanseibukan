@@ -4,6 +4,7 @@ import { selectedFirst } from "@/lib/selected-first";
 
 import MemberIdLink from "@/components/member-id-link";
 import CompactRecord from "@/components/compact-record";
+import DojoContactDetails from "@/components/dojo-contact-details";
 
 import {
   useCallback,
@@ -2728,6 +2729,8 @@ export default function DojoManagementPage() {
 
                   )}
 
+
+                  <DojoContactDetails dojoId={dojo.id} />
 
                   {!isSuperAdmin && (
 

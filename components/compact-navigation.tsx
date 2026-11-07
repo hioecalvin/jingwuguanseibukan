@@ -6,7 +6,7 @@ import type { NavigationItem } from "@/lib/navigation";
 
 const groups = [
   { label: "Members", paths: ["/admin/members", "/directory", "/admin/applications", "/admin/member-claims", "/admin/enrollment-requests", "/admin/break-request", "/admin/transfers", "/admin/archive", "/admin/member-ids"] },
-  { label: "Training", paths: ["/calendar", "/schedules", "/admin/training-sessions", "/admin/schedules", "/admin/assessments", "/assessment-history", "/admin/certificates"] },
+  { label: "Training", paths: ["/calendar", "/schedules", "/dojos", "/admin/instructors", "/admin/training-sessions", "/admin/schedules", "/admin/assessments", "/assessment-history", "/admin/certificates"] },
   { label: "Library", paths: ["/repository", "/repository/upload", "/admin/repository-uploaders", "/admin/tiers"] },
   { label: "Finance", paths: ["/subscription", "/admin/payments", "/admin/subscriptions", "/admin/settlements", "/admin/reports"] },
   { label: "Organisation", paths: ["/admin/classes", "/admin/dojos", "/admin/ranks", "/admin/dojo-migrations"] },
