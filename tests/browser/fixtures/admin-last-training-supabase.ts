@@ -76,7 +76,15 @@ const member = {
 };
 
 const multi = new URLSearchParams(window.location.search).has('multiple');
-const fixtureMembers = multi ? [
+const gradingCategories = new URLSearchParams(window.location.search).has('grading-categories');
+const fixtureMembers = gradingCategories ? [
+ member,
+ {...member,membership_id:'category-karate',user_id:'category-karate-member',registration_number:'JS-0301',full_name:'Karate Dan Member',class_id:'category-karate-class',class_name:'Karate',rank_id:'category-dan',rank_name:'Dan 1',level:'yudansha'},
+ {...member,membership_id:'category-tai-zhong',user_id:'category-tai-zhong-member',registration_number:'JS-0302',full_name:'Taijiquan Zhong Member',class_id:'category-tai-class',class_name:'Taijiquan',rank_id:'category-zhong',rank_name:'Zhongyi',title_system:'chinese'},
+ {...member,membership_id:'category-tai-gao',user_id:'category-tai-gao-member',registration_number:'JS-0303',full_name:'Taijiquan Gao Member',class_id:'category-tai-class',class_name:'Taijiquan',rank_id:'category-gao',rank_name:'Gaoyi',level:'yudansha',title_system:'chinese'},
+ {...member,membership_id:'category-xing-zhong',user_id:'category-xing-zhong-member',registration_number:'JS-0304',full_name:'Xingyiquan Zhong Member',class_id:'category-xing-class',class_name:'Xingyiquan',rank_id:'category-xing-zhong-rank',rank_name:'Zhongsan',title_system:'chinese'},
+ {...member,membership_id:'category-kids',user_id:'category-kids-member',registration_number:'JS-0305',full_name:'Kungfu Kids Member',class_id:'category-kids-class',class_name:'Kungfu Kids',rank_id:'category-xiao',rank_name:'Xiaoshi',title_system:'chinese'},
+] : multi ? [
  member,
  {...member,membership_id:'fixture-karate',class_id:'fixture-karate-class',class_name:'Karate',dojo_id:'fixture-other-dojo',dojo_name:'Second Dojo',rank_name:'4th Kyu',membership_status:'inactive'},
  {...member,membership_id:'fixture-amy',user_id:'fixture-amy-user',registration_number:'JS-0010',full_name:'Amy Member'},

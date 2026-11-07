@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 import { isAikidoYudansha } from "@/lib/aikikai";
 import MemberEmergencyContact from "@/components/member-emergency-contact";
 import MemberTrainingSummary from "@/components/member-training-summary";
@@ -1196,14 +1197,6 @@ export default function ProfilePage() {
     return "Active";
   }
 
-  function levelLabel(
-    level: Membership["level"]
-  ) {
-    return level === "yudansha"
-      ? "Yudansha (Dan)"
-      : "Mudansha (Kyu)";
-  }
-
   function levelClass(
     level: Membership["level"]
   ) {
@@ -2084,9 +2077,7 @@ export default function ProfilePage() {
                             )}
                           `}
                         >
-                          {levelLabel(
-                            membership.level
-                          )}
+                          {gradingCategoryLabel(membership.classes?.name, membership.level)}
                         </span>
 
                         <span className="rounded-full border border-neutral-700 bg-neutral-800 px-3 py-1 text-xs text-neutral-300">
@@ -2135,9 +2126,7 @@ export default function ProfilePage() {
                       <DetailCard
                         label="Grade Category"
                         value={
-                          levelLabel(
-                            membership.level
-                          )
+                          gradingCategoryLabel(membership.classes?.name, membership.level)
                         }
                       />
 

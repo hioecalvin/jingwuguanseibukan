@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 
 import {
   useEffect,
@@ -22,6 +23,7 @@ import { getYouTubeEmbedUrl } from "@/lib/video/youtube";
 
 type ClassBrand = {
   id: string;
+  name: string;
   logo_url: string | null;
 };
 
@@ -320,6 +322,7 @@ export default function RepositoryTierPage() {
           )
           .select(`
             id,
+            name,
             logo_url
           `)
           .eq(
@@ -632,27 +635,6 @@ export default function RepositoryTierPage() {
    * HELPERS
    * =====================================================
    */
-
-  function levelLabel(
-    level:
-      Rank["level"]
-  ) {
-    if (
-      level ===
-      "mudansha"
-    ) {
-      return "Mudansha (Kyu)";
-    }
-
-    if (
-      level ===
-      "yudansha"
-    ) {
-      return "Yudansha (Dan)";
-    }
-
-    return "Grade";
-  }
 
   function levelBadgeClass(
     level:
@@ -1034,9 +1016,7 @@ export default function RepositoryTierPage() {
                     )}
                   `}
                 >
-                  {levelLabel(
-                    rank.level
-                  )}
+                  {gradingCategoryLabel(classBrand?.name, rank.level)}
                 </span>
               )}
             </div>
@@ -1129,9 +1109,7 @@ export default function RepositoryTierPage() {
               text-neutral-400
             "
           >
-            {levelLabel(
-              rank.level
-            )}
+            {gradingCategoryLabel(classBrand?.name, rank.level)}
           </p>
         )}
       </section>

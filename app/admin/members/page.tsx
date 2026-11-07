@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 import { aikikaiForClass, isAikidoClass, isAikidoYudansha } from "@/lib/aikikai";
 import MemberAdministrativeStatus from "@/components/member-administrative-status";
 import MemberPersonalDetailsEditor from "@/components/member-personal-details-editor";
@@ -138,7 +139,7 @@ type Member = {
 
   /*
    * Super Admin controlled flag.
-   * Active assessors can be selected for Mudansha grading.
+   * Active assessors can be selected for grading at every rank.
    */
   is_grading_assessor: boolean;
 };
@@ -3842,6 +3843,7 @@ export default function MemberManagementPage() {
    * =====================================================
    */
 
+  const selectedClassName = classes.find(([id]) => id === classFilter)?.[1];
   const memberGroups = sortMemberGroups(groupVisibleMembers(members, filteredMembers), memberSort);
   const totalMemberCount = new Set(members.map(member => member.user_id)).size;
 
@@ -4074,9 +4076,7 @@ export default function MemberManagementPage() {
             (
               member
             ) =>
-              levelLabel(
-                member.level
-              ),
+              gradingCategoryLabel(member.class_name, member.level),
         },
 
         {
@@ -4201,17 +4201,6 @@ export default function MemberManagementPage() {
     return "border-red-700 bg-red-950/40 text-red-300";
   }
 
-
-  function levelLabel(
-    level:
-      | "mudansha"
-      | "yudansha"
-  ) {
-    return level ===
-      "yudansha"
-      ? "Yudansha (Dan)"
-      : "Mudansha (Kyu)";
-  }
 
 
   function levelClass(
@@ -4437,11 +4426,11 @@ export default function MemberManagementPage() {
               </option>
 
               <option value="mudansha">
-                Mudansha (Kyu)
+                {gradingCategoryLabel(selectedClassName, "mudansha")}
               </option>
 
               <option value="yudansha">
-                Yudansha (Dan)
+                {gradingCategoryLabel(selectedClassName, "yudansha")}
               </option>
 
             </select>
@@ -4902,9 +4891,7 @@ export default function MemberManagementPage() {
                                   member.level
                                 )}`}
                               >
-                                {levelLabel(
-                                  member.level
-                                )}
+                                {gradingCategoryLabel(member.class_name, member.level)}
                               </span>
 
                             )}
@@ -6192,7 +6179,7 @@ export default function MemberManagementPage() {
 
 
                               <p className="mt-2 text-sm text-neutral-400">
-                                Active assessors can be selected for Mudansha grading. Super Admin can switch this on or off at any time.
+                                Active assessors can be selected for grading at every rank. Super Admin can switch this on or off at any time.
                               </p>
 
                             </div>

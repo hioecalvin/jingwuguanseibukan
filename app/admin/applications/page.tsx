@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 
 import CompactRecord from "@/components/compact-record";
 
@@ -143,7 +144,7 @@ export default function ApplicationsPage() {
 
     setMessage(
       `${application.full_name ?? "Member"} was approved as ${
-        level === "yudansha" ? "Yudansha" : "Mudansha"
+        gradingCategoryLabel(application.class_name, level)
       }. Their permanent JS Member ID was assigned automatically.`
     );
 
@@ -279,9 +280,7 @@ export default function ApplicationsPage() {
             const level =
               selectedLevels[row.request_id] ?? "mudansha";
 
-            return level === "yudansha"
-              ? "Yudansha"
-              : "Mudansha";
+            return gradingCategoryLabel(row.class_name, level);
           },
         },
       ],
@@ -323,13 +322,13 @@ export default function ApplicationsPage() {
    * ============================================================
    */
 
-  const mudanshaCount = applications.filter(
+  const lowerCategoryCount = applications.filter(
     (application) =>
       (selectedLevels[application.request_id] ?? "mudansha") ===
       "mudansha"
   ).length;
 
-  const yudanshaCount = applications.filter(
+  const higherCategoryCount = applications.filter(
     (application) =>
       selectedLevels[application.request_id] === "yudansha"
   ).length;
@@ -434,13 +433,13 @@ export default function ApplicationsPage() {
           />
 
           <SummaryCard
-            label="Mudansha"
-            value={mudanshaCount}
+            label="Lower category"
+            value={lowerCategoryCount}
           />
 
           <SummaryCard
-            label="Yudansha"
-            value={yudanshaCount}
+            label="Higher category"
+            value={higherCategoryCount}
           />
         </section>
       )}
@@ -671,11 +670,11 @@ export default function ApplicationsPage() {
                           "
                         >
                           <option value="mudansha">
-                            Mudansha
+                            {gradingCategoryLabel(application.class_name, "mudansha")}
                           </option>
 
                           <option value="yudansha">
-                            Yudansha
+                            {gradingCategoryLabel(application.class_name, "yudansha")}
                           </option>
                         </select>
 
@@ -714,9 +713,7 @@ export default function ApplicationsPage() {
                           {isProcessing
                             ? "Processing..."
                             : `Approve as ${
-                                selectedLevel === "yudansha"
-                                  ? "Yudansha"
-                                  : "Mudansha"
+                                gradingCategoryLabel(application.class_name, selectedLevel)
                               }`}
                         </button>
 
@@ -765,7 +762,7 @@ export default function ApplicationsPage() {
         <section className="mt-10 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
           <p className="text-sm leading-6 text-neutral-500">
             Approval creates or activates the Member&apos;s class
-            membership. Select Mudansha or Yudansha before approval.
+            membership. Select the initial grading category before approval.
             The JS Member ID is assigned automatically. Rank, tier, grading
             history and other Member records can be managed afterwards from
             Admin → Members.

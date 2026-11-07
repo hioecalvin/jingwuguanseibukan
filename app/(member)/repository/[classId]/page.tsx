@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 
 import CompactRecord from "@/components/compact-record";
 
@@ -553,29 +554,6 @@ export default function RepositoryClassPage() {
       );
   }
 
-  function levelLabel(
-    level:
-      | "mudansha"
-      | "yudansha"
-      | null
-  ) {
-    if (
-      level ===
-      "mudansha"
-    ) {
-      return "Mudansha (Kyu)";
-    }
-
-    if (
-      level ===
-      "yudansha"
-    ) {
-      return "Yudansha (Dan)";
-    }
-
-    return "Grade";
-  }
-
   function levelBadgeClass(
     level:
       | "mudansha"
@@ -701,9 +679,7 @@ export default function RepositoryClassPage() {
             );
 
         const levelMatches =
-          levelLabel(
-            rank.level
-          )
+          gradingCategoryLabel(classItem?.name, rank.level)
             .toLowerCase()
             .includes(
               query
@@ -1049,9 +1025,7 @@ export default function RepositoryClassPage() {
                       )}
                     `}
                   >
-                    {levelLabel(
-                      currentRank.level
-                    )}
+                    {gradingCategoryLabel(classItem?.name, currentRank.level)}
                   </span>
                 </div>
 
@@ -1275,11 +1249,11 @@ export default function RepositoryClassPage() {
               </option>
 
               <option value="mudansha">
-                Mudansha (Kyu)
+                {gradingCategoryLabel(classItem?.name, "mudansha")}
               </option>
 
               <option value="yudansha">
-                Yudansha (Dan)
+                {gradingCategoryLabel(classItem?.name, "yudansha")}
               </option>
             </select>
           </div>
@@ -1579,9 +1553,7 @@ export default function RepositoryClassPage() {
                               )}
                             `}
                           >
-                            {levelLabel(
-                              rank.level
-                            )}
+                            {gradingCategoryLabel(classItem?.name, rank.level)}
                           </span>
 
                           {isCurrentRank && (

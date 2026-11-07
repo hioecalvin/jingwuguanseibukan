@@ -1,4 +1,5 @@
 "use client";
+import { gradingCategoryLabel } from "@/lib/grading-category";
 
 import { selectedFirst } from "@/lib/selected-first";
 
@@ -807,7 +808,7 @@ export default function BulkAssessmentsPage() {
                       <span>Include {candidate.full_name}</span>
                     </label>
                     <p className="mt-1 text-sm text-neutral-400">Home dojo: {candidate.dojo_name ?? "Not assigned"}</p>
-                    <p className="mt-1 text-xs uppercase tracking-wide text-neutral-500">{candidate.level_to}</p>
+                    <p className="mt-1 text-xs uppercase tracking-wide text-neutral-500">{gradingCategoryLabel(candidate.class_name, candidate.level_to)}</p>
                   </div>
                 </div>
 
