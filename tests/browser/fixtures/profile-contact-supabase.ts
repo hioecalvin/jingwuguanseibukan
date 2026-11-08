@@ -21,6 +21,8 @@ export type ProfileContactFixtureState = {
   contactCalls: RecordedContactArguments[];
   emailCalls: EmailCall[];
   trainingRequests: number;
+  avatarUploads: Array<{ path: string; type: string; image: string }>;
+  avatarUpdates: string[];
 };
 
 declare global {
@@ -35,6 +37,8 @@ export const fixtureState: ProfileContactFixtureState = {
   contactCalls: [],
   emailCalls: [],
   trainingRequests: 0,
+  avatarUploads: [],
+  avatarUpdates: [],
 };
 
 window.__profileContactFixture = fixtureState;
@@ -159,7 +163,7 @@ export function createClient() {
       }),
     },
     from: (table: string) => queryFor(table),
-    rpc: async (name: string, args?: ContactArguments) => {
+    rpc: async (name: string, args?: ContactArguments | { new_avatar_url: string }) => {
       if (name === 'get_my_last_training_sessions') {
         fixtureState.trainingRequests += 1;
         if (new URLSearchParams(window.location.search).has('training-error')) {
@@ -176,7 +180,13 @@ export function createClient() {
         return { data: [], error: null };
       }
 
-      if (name === 'update_my_contact_details_if_unchanged' && args) {
+      if (name === 'update_my_avatar' && args && 'new_avatar_url' in args) {
+        profile.avatar_url = args.new_avatar_url;
+        fixtureState.avatarUpdates.push(args.new_avatar_url);
+        return { data: null, error: null };
+      }
+
+      if (name === 'update_my_contact_details_if_unchanged' && args && 'new_phone' in args) {
         fixtureState.contactCalls.push({
           new_phone: args.new_phone,
           new_instagram_username: args.new_instagram_username,
@@ -211,9 +221,19 @@ export function createClient() {
       return { data: null, error: new Error(`Unexpected fixture RPC: ${name}`) };
     },
     storage: {
-      from: () => ({
-        upload: async () => ({ data: null, error: new Error('Fixture upload is disabled.') }),
-        getPublicUrl: () => ({ data: { publicUrl: '' } }),
+      from: (bucket: string) => ({
+        upload: async (path: string, image: Blob) => {
+          if (bucket !== 'avatars') throw new Error('Unexpected storage bucket.');
+          const encoded = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(image);
+          });
+          fixtureState.avatarUploads.push({ path, type: image.type, image: encoded });
+          return { data: { path }, error: null };
+        },
+        getPublicUrl: (path: string) => ({ data: { publicUrl: window.location.origin + '/fixture-avatars/' + path } }),
       }),
     },
   };

@@ -103,6 +103,7 @@ const handler = (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405).end(); return; }
   const asset = assets.get(url.pathname);
   const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; frame-ancestors 'none'" };
+  if (url.pathname === '/profile-contact') headers['Content-Security-Policy'] += "; img-src 'self' blob:";
   if (asset) { res.writeHead(200, { ...headers, 'Content-Type': asset.type }).end(asset.data); return; }
   if (url.pathname.startsWith('/_next/')) { res.writeHead(404, headers).end(); return; }
   res.writeHead(200, { ...headers, 'Content-Type': 'text/html; charset=utf-8' }).end(fixtureHtml(url.pathname));

@@ -62,7 +62,9 @@ export default function SchedulesPage() {
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [view, setView] = useState<"dojo" | "class">("dojo");
   const [dojos, setDojos] = useState<DojoContact[]>([]);
-  const [selected, setSelected] = useState("");
+  const [selectedDojo, setSelectedDojo] = useState("");
+  const [selectedClass, setSelectedClass] = useState("");
+  const selected = view === "dojo" ? selectedDojo : selectedClass;
   const [retry, setRetry] = useState(0);
   const [categoryRetry, setCategoryRetry] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -78,8 +80,9 @@ export default function SchedulesPage() {
         if (result.error) throw new Error("Unable to load schedule categories.");
         const rows = ((result.data ?? []) as DojoContact[]).filter(row => row.active);
         setDojos(rows);
-        setSelected(current => { const requested = new URLSearchParams(window.location.search).get("dojo"); return current || rows.find(row => row.dojo_id === requested)?.dojo_id || rows[0]?.dojo_id || ""; });
-        if (!rows.length) setLoading(false);
+        const requested = new URLSearchParams(window.location.search).get("dojo");
+        if (requested && rows.some(row => row.dojo_id === requested)) setSelectedDojo(requested);
+        setLoading(false);
       } catch {
         if (active) { setMessage("Schedule categories could not be loaded."); setLoading(false); }
       }
@@ -98,7 +101,8 @@ export default function SchedulesPage() {
           .eq(view === "dojo" ? "dojo_id" : "class_id", selected);
         if (!active) return;
         if (result.error) throw new Error("Unable to load this schedule.");
-        setSchedules((result.data ?? []) as ScheduleRow[]);
+        const rows = (result.data ?? []) as ScheduleRow[];
+        setSchedules(rows.sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time) || a.dojo_name.localeCompare(b.dojo_name)));
       } catch {
         if (active) { setSchedules([]); setMessage("Schedules could not be loaded. Please retry."); }
       } finally { if (active) setLoading(false); }
@@ -110,14 +114,14 @@ export default function SchedulesPage() {
   const categories = useMemo(() => [...new Map(dojos.map(row => [
     view === "dojo" ? row.dojo_id : row.class_id,
     { id: view === "dojo" ? row.dojo_id : row.class_id, name: view === "dojo" ? `${row.dojo_name} · ${row.class_name}` : row.class_name },
-  ])).values()], [dojos, view]);
+  ])).values()].sort((left, right) => left.name.localeCompare(right.name)), [dojos, view]);
   const groups = useMemo(() => {
     const grouped = new Map<string, { title: string; subtitle: string; rows: ScheduleRow[] }>();
 
     for (const row of schedules.filter(row => (view === "dojo" ? row.dojo_id : row.class_id) === selected)) {
       const key = view === "dojo" ? row.dojo_id : row.class_id;
       const title = view === "dojo" ? row.dojo_name : row.class_name;
-      const subtitle = view === "dojo" ? row.class_name : "All dojos";
+      const subtitle = view === "dojo" ? row.class_name : "";
       const existing = grouped.get(key);
 
       if (existing) {
@@ -153,7 +157,14 @@ export default function SchedulesPage() {
             key={option}
             type="button"
             aria-pressed={view === option}
-            onClick={() => { if (option !== view) { setView(option); setSchedules([]); setSelected(option === "dojo" ? dojos[0]?.dojo_id ?? "" : dojos[0]?.class_id ?? ""); } }}
+            onClick={() => {
+              if (option === view) return;
+              setView(option);
+              setSchedules([]);
+              setSelectedDojo("");
+              setSelectedClass("");
+              if (dojos.length) { setLoading(false); setMessage(""); }
+            }}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
               view === option
                 ? "bg-amber-500 text-neutral-950"
@@ -166,12 +177,19 @@ export default function SchedulesPage() {
       </div>
 
       <label className="block" htmlFor="schedule-category">Choose {view}
-        <select id="schedule-category" value={selected} onChange={event => { setSelected(event.target.value); setSchedules([]); }} className="mt-2 block min-h-11 w-full rounded border border-neutral-600 bg-neutral-950 px-3 py-2">
-          {!categories.length && <option value="">No categories available</option>}
+        <select id="schedule-category" value={selected} onChange={event => {
+          const id = event.target.value;
+          if (view === "dojo") setSelectedDojo(id);
+          else setSelectedClass(id);
+          setSchedules([]);
+          setLoading(Boolean(id));
+          setMessage("");
+        }} className="mt-2 block min-h-11 w-full rounded border border-neutral-600 bg-neutral-950 px-3 py-2">
+          <option value="">{categories.length ? `Select a ${view}` : "No categories available"}</option>
           {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
         </select>
       </label>
-      <button type="button" disabled={loading} onClick={() => dojos.length ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>
+      {(selected || message) && <button type="button" disabled={loading} onClick={() => dojos.length ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>}
       {loading ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
           Loading schedules…
@@ -180,9 +198,9 @@ export default function SchedulesPage() {
         <p role="alert" className="rounded-2xl border border-red-900 bg-red-950/50 p-6 text-red-200">
           {message}
         </p>
-      ) : groups.length === 0 ? (
+      ) : !selected ? null : groups.length === 0 ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
-          No regular schedules have been published yet.
+          No regular schedules for this {view}.
         </p>
       ) : (
         <div className="grid gap-5 lg:grid-cols-2">
@@ -194,12 +212,12 @@ export default function SchedulesPage() {
               <div className="border-b border-neutral-800 px-5 py-4">
                 {view === "dojo" && <DojoLogo name={group.title} className="mb-2" />}
                 <h2 className="text-xl font-semibold text-white">{view === "dojo" ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(group.rows[0].dojo_id)}`}>{group.title}</Link> : group.title}</h2>
-                <p className="mt-1 text-sm text-neutral-400">{group.subtitle}</p>
+                {group.subtitle && <p className="mt-1 text-sm text-neutral-400">{group.subtitle}</p>}
               </div>
 
               <div className="divide-y divide-neutral-800">
                 {group.rows.map((row) => (
-                  <CompactRecord summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)}</>} detail={<>{row.class_name} · {row.dojo_name}</>} key={row.schedule_id} className="space-y-3 px-5 py-4">
+                  <CompactRecord alwaysCollapsible summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)} – {formatTime(row.finish_time)}</>} detail={view === "class" ? row.dojo_name : row.class_name} key={row.schedule_id} className="space-y-3 px-5 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       {view === "class" && <DojoLogo name={row.dojo_name} />}
                       <div>

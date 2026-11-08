@@ -1,6 +1,7 @@
 "use client";
 import { gradingCategoryLabel } from "@/lib/grading-category";
 import { isAikidoYudansha } from "@/lib/aikikai";
+import ProfilePhotoCrop from "@/components/profile-photo-crop";
 import MemberEmergencyContact from "@/components/member-emergency-contact";
 import MemberTrainingSummary from "@/components/member-training-summary";
 
@@ -175,8 +176,7 @@ export default function ProfilePage() {
   const [avatarFile, setAvatarFile] =
     useState<File | null>(null);
 
-  const [avatarPreview, setAvatarPreview] =
-    useState<string | null>(null);
+  const [photoSelection, setPhotoSelection] = useState(0);
 
   const [uploadingAvatar, setUploadingAvatar] =
     useState(false);
@@ -517,6 +517,7 @@ export default function ProfilePage() {
     event: ChangeEvent<HTMLInputElement>
   ) {
     const file = event.target.files?.[0];
+    event.target.value = "";
 
     if (!file) {
       return;
@@ -541,28 +542,17 @@ export default function ProfilePage() {
       return;
     }
 
-    if (avatarPreview) {
-      URL.revokeObjectURL(
-        avatarPreview
-      );
-    }
-
-    const preview =
-      URL.createObjectURL(file);
-
+    setPhotoSelection(previous => previous + 1);
     setAvatarFile(file);
-    setAvatarPreview(preview);
 
     setMessage("");
     setMessageType("");
   }
 
-  async function uploadAvatar() {
-    if (!avatarFile || !profile) {
+  async function uploadAvatar(file: Blob) {
+    if (!profile) {
       return;
     }
-
-    setUploadingAvatar(true);
 
     setMessage("");
     setMessageType("");
@@ -577,15 +567,13 @@ export default function ProfilePage() {
         "You are not logged in."
       );
       setMessageType("error");
-      setUploadingAvatar(false);
       return;
     }
 
-    const extension = imageUploadExtension(avatarFile.type);
-    if (!extension || avatarFile.size > 5 * 1024 * 1024) {
+    const extension = imageUploadExtension(file.type);
+    if (!extension || file.size > 5 * 1024 * 1024) {
       setMessage("Choose a JPEG, PNG, or WebP image up to 5 MB.");
       setMessageType("error");
-      setUploadingAvatar(false);
       return;
     }
 
@@ -598,11 +586,11 @@ export default function ProfilePage() {
       .from("avatars")
       .upload(
         filePath,
-        avatarFile,
+        file,
         {
           upsert: true,
           contentType:
-            avatarFile.type,
+            file.type,
           cacheControl: "3600",
         }
       );
@@ -612,7 +600,6 @@ export default function ProfilePage() {
         uploadError.message
       );
       setMessageType("error");
-      setUploadingAvatar(false);
       return;
     }
 
@@ -640,7 +627,6 @@ export default function ProfilePage() {
         rpcError.message
       );
       setMessageType("error");
-      setUploadingAvatar(false);
       return;
     }
 
@@ -654,31 +640,12 @@ export default function ProfilePage() {
         : current
     );
 
-    if (avatarPreview) {
-      URL.revokeObjectURL(
-        avatarPreview
-      );
-    }
-
     setAvatarFile(null);
-    setAvatarPreview(null);
 
     setMessage(
       "Profile picture updated successfully."
     );
     setMessageType("success");
-    setUploadingAvatar(false);
-  }
-
-  function cancelAvatar() {
-    if (avatarPreview) {
-      URL.revokeObjectURL(
-        avatarPreview
-      );
-    }
-
-    setAvatarFile(null);
-    setAvatarPreview(null);
   }
 
   /*
@@ -1413,7 +1380,6 @@ export default function ProfilePage() {
    */
 
   const displayedAvatar =
-    avatarPreview ||
     profile?.avatar_url ||
     null;
 
@@ -1484,8 +1450,6 @@ export default function ProfilePage() {
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-neutral-800 bg-neutral-800">
             {displayedAvatar ? (
-              // The upload preview may be a temporary blob URL, which
-              // next/image cannot optimize.
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={displayedAvatar}
@@ -1516,7 +1480,7 @@ export default function ProfilePage() {
             </p>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              <label className="cursor-pointer rounded-lg border border-sky-800 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-950/40">
+              <label className="cursor-pointer rounded-lg border border-sky-800 focus-within:outline-2 focus-within:outline-sky-400 px-4 py-2 text-sm font-medium text-sky-300 transition hover:bg-sky-950/40">
                 Choose Image
 
                 <input
@@ -1525,42 +1489,16 @@ export default function ProfilePage() {
                   onChange={
                     handleAvatarSelect
                   }
-                  className="hidden"
+                  disabled={uploadingAvatar}
+                  className="sr-only"
                 />
               </label>
 
-              {avatarFile && (
-                <>
-                  <button
-                    type="button"
-                    onClick={
-                      uploadAvatar
-                    }
-                    disabled={
-                      uploadingAvatar
-                    }
-                    className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:opacity-50"
-                  >
-                    {uploadingAvatar
-                      ? "Uploading..."
-                      : "Save Picture"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={
-                      cancelAvatar
-                    }
-                    disabled={
-                      uploadingAvatar
-                    }
-                    className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 transition hover:bg-neutral-800 disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
             </div>
+            {avatarFile && (
+              <ProfilePhotoCrop key={photoSelection} file={avatarFile} onSave={uploadAvatar}
+                onCancel={() => setAvatarFile(null)} onBusyChange={setUploadingAvatar} />
+            )}
           </div>
         </div>
       </section>
