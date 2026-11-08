@@ -23,6 +23,8 @@ let started=false,stopped=false,passed=false,checks=0;
 const migration=readFileSync(join(repo,'supabase/pending/090_schedule_instructor_details.sql'),'utf8');
 const fixture=readFileSync(join(repo,'tests/sql/090_dojo_instructor_fixture.sql'),'utf8');
 const assertions=readFileSync(join(repo,'tests/sql/090_dojo_instructor_assertions.sql'),'utf8');
+const whatsappMigration=readFileSync(join(repo,'supabase/pending/091_schedule_instructor_whatsapp.sql'),'utf8');
+const whatsappAssertions=readFileSync(join(repo,'tests/sql/091_schedule_instructor_whatsapp_assertions.sql'),'utf8');
 const schedule048=readFileSync(join(repo,'supabase/migrations/048_regular_class_schedules.sql'),'utf8');
 const appointment086=readFileSync(join(repo,'supabase/pending/086_class_instructor_appointments.sql'),'utf8');
 function routine(sql,name){
@@ -61,11 +63,18 @@ try {
  rollbackChecks();
  q(migration);
  eq(q("select pg_get_functiondef('public.get_regular_class_schedules(boolean)'::regprocedure);"),oldGetter,'Original getter remains unchanged');
- const output=q(assertions);
- const marker=output.match(/INSTRUCTOR090_PASS checks=(\d+)/);assert.ok(marker,'Missing SQL pass marker');
+ q('alter table public.profiles add column whatsapp_number text;');
+ const instructorDefinition=q("select pg_get_functiondef('public.get_regular_schedules_with_instructor(boolean)'::regprocedure);");
+ q(whatsappMigration.replace(/commit;\s*$/i,'rollback;'));
+ eq(q("select to_regprocedure('public.get_regular_schedules_with_whatsapp(boolean)') is null;"),'t','Rollback removes WhatsApp reader');
+ q(whatsappMigration);
+ eq(q("select pg_get_functiondef('public.get_regular_schedules_with_instructor(boolean)'::regprocedure);"),instructorDefinition,'Original instructor reader unchanged');
+ const output=q(assertions+'\n'+whatsappAssertions);
+ assert.match(output,/INSTRUCTOR090_PASS checks=\d+/,'Missing 090 SQL pass marker');
+ const marker=output.match(/SCHEDULE091_PASS checks=(\d+)/);assert.ok(marker,'Missing 091 SQL pass marker');
  checks+=Number(marker[1]);passed=true;
 } finally {
  if(started){run('pg_ctl',['-D',data,'-m','fast','-w','-t','30','stop']);stopped=true;}
- const receipt={passed,checks,stopped,scope:'fresh local synthetic PostgreSQL 17 cluster; auth helpers stubbed; original 048 getter and 086 picker/upsert/appointment/trigger routines',migrationSha256:createHash('sha256').update(migration).digest('hex'),testSha256:createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).update(fixture).update(assertions).update(schedule048).update(appointment086).digest('hex'),root};
+ const receipt={passed,checks,stopped,scope:'fresh local synthetic PostgreSQL 17 cluster; auth helpers stubbed; original 048 getter and 086 picker/upsert/appointment/trigger routines',migrationSha256:createHash('sha256').update(migration).digest('hex'),whatsappMigrationSha256:createHash('sha256').update(whatsappMigration).digest('hex'),testSha256:createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).update(fixture).update(assertions).update(whatsappAssertions).update(schedule048).update(appointment086).digest('hex'),root};
  writeFileSync(join(root,'receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));
 }

@@ -1,15 +1,15 @@
-import { dojoPhoneLink } from "@/lib/dojo-contact";
+import { instructorWhatsAppLink } from "@/lib/dojo-contact";
 
-export default function ScheduleInstructor({ name, rank, phone }: {
+export default function ScheduleInstructor({ name, rank, whatsapp }: {
   name: string | null;
   rank: string | null;
-  phone: string | null;
+  whatsapp: string | null;
 }) {
-  const link = dojoPhoneLink(phone);
+  const link = instructorWhatsAppLink(whatsapp);
   return <div className="space-y-1 text-sm">
     <p>{name ?? "To be confirmed"}{name && rank ? ` / ${rank}` : ""}</p>
     {name && <p className="text-neutral-400">Contact: {link
-      ? <a className="text-sky-300 underline" href={link}>{phone}</a>
-      : "Not provided"}</p>}
+      ? <a className="break-all text-sky-300 underline" href={link} target="_blank" rel="noopener noreferrer">{link.slice("https://".length)}</a>
+      : "WhatsApp not provided"}</p>}
   </div>;
 }

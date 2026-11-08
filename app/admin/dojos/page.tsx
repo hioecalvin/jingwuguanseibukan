@@ -3,6 +3,7 @@
 import { selectedFirst } from "@/lib/selected-first";
 
 import MemberIdLink from "@/components/member-id-link";
+import { dojoGroupKey, dojoGroupName } from "@/lib/dojo-groups";
 import CompactRecord from "@/components/compact-record";
 import DojoLogo from "@/components/dojo-logo";
 import DojoContactDetails from "@/components/dojo-contact-details";
@@ -1656,6 +1657,15 @@ export default function DojoManagementPage() {
     );
 
 
+  const groupedDojos = new Map<string, { name: string; rows: DojoRecord[] }>();
+  for (const dojo of filteredDojos) {
+    const contact = { dojo_id: dojo.id, dojo_name: dojo.name, class_name: dojo.classes?.name ?? "" };
+    const key = dojoGroupKey(contact);
+    const group = groupedDojos.get(key);
+    if (group) group.rows.push(dojo);
+    else groupedDojos.set(key, { name: dojoGroupName(contact) ?? dojo.name, rows: [dojo] });
+  }
+
   function exportDojosExcel() {
     if (filteredDojos.length === 0) {
       fail("There are no dojos to export.");
@@ -2440,8 +2450,8 @@ export default function DojoManagementPage() {
 
             <div className="flex flex-col items-start gap-2 sm:items-end">
               <p className="text-sm text-neutral-500">
-                {filteredDojos.length} dojo
-                {filteredDojos.length ===
+                {groupedDojos.size} dojo
+                {groupedDojos.size ===
                 1
                   ? ""
                   : "s"}
@@ -2557,7 +2567,9 @@ export default function DojoManagementPage() {
 
         <section className="mt-5 grid gap-4 md:grid-cols-2">
 
-          {filteredDojos.map(
+          {[...groupedDojos].map(([key, group]) => <section key={key} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+            <h2 className="mb-3 flex items-center gap-3 text-xl font-semibold"><DojoLogo name={group.name} />{group.name}</h2>
+            {group.rows.map(
             (
               dojo
             ) => {
@@ -2573,7 +2585,7 @@ export default function DojoManagementPage() {
 
 
               return (
-                <CompactRecord summary={<span className="flex items-center gap-3"><DojoLogo name={dojo.name} /><span>{dojo.name}</span></span>}
+                <CompactRecord alwaysCollapsible summary={dojo.classes?.name ?? "Class"}
                   key={
                     dojo.id
                   }
@@ -2743,6 +2755,7 @@ export default function DojoManagementPage() {
               );
             }
           )}
+          </section>)}
 
         </section>
 

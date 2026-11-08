@@ -73,7 +73,7 @@ test('changing dojo discards an edit and ignores late results from the previous 
   await expect(page.getByRole('button', { name: 'Refresh schedules' })).toBeEnabled();
   await expect(card.getByRole('button', { name: 'Edit schedule' })).toBeVisible();
   const requests = await page.evaluate(() => (window as unknown as {scheduleRequests: Array<{name: string; column?: string; value?: string}>}).scheduleRequests);
-  const reads = requests.filter(request => request.name === 'get_regular_schedules_with_instructor');
+  const reads = requests.filter(request => request.name === 'get_regular_schedules_with_whatsapp');
   expect(reads.map(request => [request.column, request.value])).toEqual([
     ['dojo_id', 'fixture-dojo'], ['dojo_id', 'dojo-b'], ['dojo_id', 'dojo-c'], ['dojo_id', 'dojo-c'],
   ]);

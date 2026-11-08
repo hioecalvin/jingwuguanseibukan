@@ -17,3 +17,12 @@ test('phone links preserve only valid phone digits and an optional leading plus'
 test('Maps path traversal and generic redirect endpoints cannot be saved as map links', () => {
  for (const url of ['https://www.google.com/maps/../url?q=https://example.invalid', 'https://google.com/maps/%2E%2e/url', 'https://maps.google.com/url?q=https://example.invalid']) assert.equal(safeGoogleMapsUrl(url), null);
 });
+
+test('schedule WhatsApp links use international digits and reject malformed contacts', () => {
+ const { instructorWhatsAppLink } = loadRoute('lib/dojo-contact.ts', {});
+ for (const value of ['0812 3456 7890', '+62 (812) 3456-7890', '6281234567890', '0062 81234567890'])
+  assert.equal(instructorWhatsAppLink(value), 'https://wa.me/6281234567890');
+ assert.equal(instructorWhatsAppLink('+61 412 345 678'), 'https://wa.me/61412345678');
+ for (const value of [null, '', 'https://example.com/', '123', '+08123456789', '1234567890123456', '08123/456789'])
+  assert.equal(instructorWhatsAppLink(value), null);
+});

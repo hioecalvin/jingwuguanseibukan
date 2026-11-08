@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { DojoContact } from "@/lib/dojo-contact";
+import { dojoGroupKey, dojoGroupName } from "@/lib/dojo-groups";
 import DojoLogo from "@/components/dojo-logo";
 import ScheduleInstructor from "@/components/schedule-instructor";
 import CompactRecord from "@/components/compact-record";
@@ -22,7 +23,7 @@ type ScheduleRow = {
   instructor_id: string | null;
   instructor_name: string | null;
   instructor_rank: string | null;
-  instructor_phone: string | null;
+  instructor_whatsapp: string | null;
   venue: string | null;
   notes: string | null;
   is_active: boolean;
@@ -57,6 +58,33 @@ function formatTime(value: string) {
   }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)));
 }
 
+type ScheduleCategory = { id: string; title: string; label: string; filterIds: string[] };
+
+function dojoCategory(row: DojoContact): ScheduleCategory {
+  const shared = dojoGroupName(row);
+  return {
+    id: dojoGroupKey(row),
+    title: shared || row.dojo_name,
+    label: shared || `${row.dojo_name} · ${row.class_name}`,
+    filterIds: [row.dojo_id],
+  };
+}
+
+function scheduleCategories(dojos: DojoContact[], view: "dojo" | "class") {
+  const categories = new Map<string, ScheduleCategory>();
+  for (const row of dojos) {
+    if (view === "class") {
+      categories.set(row.class_id, { id: row.class_id, label: row.class_name, title: row.class_name, filterIds: [row.class_id] });
+      continue;
+    }
+    const option = dojoCategory(row);
+    const existing = categories.get(option.id);
+    if (!existing) categories.set(option.id, option);
+    else if (!existing.filterIds.includes(row.dojo_id)) existing.filterIds.push(row.dojo_id);
+  }
+  return [...categories.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export default function SchedulesPage() {
   const supabase = useMemo(() => createClient(), []);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
@@ -65,6 +93,8 @@ export default function SchedulesPage() {
   const [selectedDojo, setSelectedDojo] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const selected = view === "dojo" ? selectedDojo : selectedClass;
+  const categories = useMemo(() => scheduleCategories(dojos, view), [dojos, view]);
+  const category = categories.find(option => option.id === selected);
   const [retry, setRetry] = useState(0);
   const [categoryRetry, setCategoryRetry] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -81,7 +111,8 @@ export default function SchedulesPage() {
         const rows = ((result.data ?? []) as DojoContact[]).filter(row => row.active);
         setDojos(rows);
         const requested = new URLSearchParams(window.location.search).get("dojo");
-        if (requested && rows.some(row => row.dojo_id === requested)) setSelectedDojo(requested);
+        const requestedDojo = rows.find(row => row.dojo_id === requested);
+        if (requestedDojo) setSelectedDojo(dojoCategory(requestedDojo).id);
         setLoading(false);
       } catch {
         if (active) { setMessage("Schedule categories could not be loaded."); setLoading(false); }
@@ -92,47 +123,29 @@ export default function SchedulesPage() {
   }, [supabase, categoryRetry]);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!category) return;
+    const { filterIds } = category;
+    const column = view === "dojo" ? "dojo_id" : "class_id";
     let active = true;
     async function loadSchedules() {
       setLoading(true); setMessage("");
       try {
-        const result = await supabase.rpc("get_regular_schedules_with_instructor", { include_inactive: false })
-          .eq(view === "dojo" ? "dojo_id" : "class_id", selected);
+        const query = supabase.rpc("get_regular_schedules_with_whatsapp", { include_inactive: false });
+        const result = await (filterIds.length === 1 ? query.eq(column, filterIds[0]) : query.in(column, filterIds));
         if (!active) return;
         if (result.error) throw new Error("Unable to load this schedule.");
         const rows = (result.data ?? []) as ScheduleRow[];
-        setSchedules(rows.sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time) || a.dojo_name.localeCompare(b.dojo_name)));
+        setSchedules(rows.filter(row => filterIds.includes(row[column])).sort((a, b) =>
+          a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time) ||
+          a.dojo_name.localeCompare(b.dojo_name) || a.class_name.localeCompare(b.class_name)
+        ));
       } catch {
         if (active) { setSchedules([]); setMessage("Schedules could not be loaded. Please retry."); }
       } finally { if (active) setLoading(false); }
     }
     void loadSchedules();
     return () => { active = false; };
-  }, [supabase, selected, view, retry]);
-
-  const categories = useMemo(() => [...new Map(dojos.map(row => [
-    view === "dojo" ? row.dojo_id : row.class_id,
-    { id: view === "dojo" ? row.dojo_id : row.class_id, name: view === "dojo" ? `${row.dojo_name} · ${row.class_name}` : row.class_name },
-  ])).values()].sort((left, right) => left.name.localeCompare(right.name)), [dojos, view]);
-  const groups = useMemo(() => {
-    const grouped = new Map<string, { title: string; subtitle: string; rows: ScheduleRow[] }>();
-
-    for (const row of schedules.filter(row => (view === "dojo" ? row.dojo_id : row.class_id) === selected)) {
-      const key = view === "dojo" ? row.dojo_id : row.class_id;
-      const title = view === "dojo" ? row.dojo_name : row.class_name;
-      const subtitle = view === "dojo" ? row.class_name : "";
-      const existing = grouped.get(key);
-
-      if (existing) {
-        existing.rows.push(row);
-      } else {
-        grouped.set(key, { title, subtitle, rows: [row] });
-      }
-    }
-
-    return [...grouped.values()];
-  }, [schedules, view, selected]);
+  }, [supabase, category, view, retry]);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -186,7 +199,7 @@ export default function SchedulesPage() {
           setMessage("");
         }} className="mt-2 block min-h-11 w-full rounded border border-neutral-600 bg-neutral-950 px-3 py-2">
           <option value="">{categories.length ? `Select a ${view}` : "No categories available"}</option>
-          {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+          {categories.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
         </select>
       </label>
       {(selected || message) && <button type="button" disabled={loading} onClick={() => dojos.length ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>}
@@ -198,25 +211,24 @@ export default function SchedulesPage() {
         <p role="alert" className="rounded-2xl border border-red-900 bg-red-950/50 p-6 text-red-200">
           {message}
         </p>
-      ) : !selected ? null : groups.length === 0 ? (
+      ) : !category ? null : schedules.length === 0 ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
           No regular schedules for this {view}.
         </p>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
-          {groups.map((group) => (
             <section
-              key={`${view}-${group.title}`}
+              key={category.id}
               className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/60"
             >
               <div className="border-b border-neutral-800 px-5 py-4">
-                {view === "dojo" && <DojoLogo name={group.title} className="mb-2" />}
-                <h2 className="text-xl font-semibold text-white">{view === "dojo" ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(group.rows[0].dojo_id)}`}>{group.title}</Link> : group.title}</h2>
-                {group.subtitle && <p className="mt-1 text-sm text-neutral-400">{group.subtitle}</p>}
+                {view === "dojo" && <DojoLogo name={category.title} className="mb-2" />}
+                <h2 className="text-xl font-semibold text-white">{view === "dojo" && category.filterIds.length === 1
+                  ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(category.filterIds[0])}`}>{category.title}</Link>
+                  : category.title}</h2>
               </div>
 
               <div className="divide-y divide-neutral-800">
-                {group.rows.map((row) => (
+                {schedules.map((row) => (
                   <CompactRecord alwaysCollapsible summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)} – {formatTime(row.finish_time)}</>} detail={view === "class" ? row.dojo_name : row.class_name} key={row.schedule_id} className="space-y-3 px-5 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       {view === "class" && <DojoLogo name={row.dojo_name} />}
@@ -236,7 +248,7 @@ export default function SchedulesPage() {
                     <dl className="grid gap-2 text-sm text-neutral-300 sm:grid-cols-2">
                       <div>
                         <dt className="text-neutral-500">Instructor</dt>
-                        <dd><ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} phone={row.instructor_phone} /></dd>
+                        <dd><ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} whatsapp={row.instructor_whatsapp} /></dd>
                       </div>
                       {row.venue && (
                         <div>
@@ -251,8 +263,6 @@ export default function SchedulesPage() {
                 ))}
               </div>
             </section>
-          ))}
-        </div>
       )}
     </div>
   );

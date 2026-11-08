@@ -16,7 +16,7 @@ const navigation = await readFile(
 );
 
 test("members can browse the same regular schedule source by dojo or class", () => {
-  assert.match(memberPage, /get_regular_schedules_with_instructor/);
+  assert.match(memberPage, /get_regular_schedules_with_whatsapp/);
   assert.match(memberPage, /By \{option\}/);
   assert.match(memberPage, /view === "dojo"/);
   assert.match(memberPage, /class_id/);

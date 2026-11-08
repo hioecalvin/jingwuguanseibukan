@@ -29,7 +29,7 @@ type ScheduleRow = ScheduleScope & {
   instructor_id: string | null;
   instructor_name: string | null;
   instructor_rank: string | null;
-  instructor_phone: string | null;
+  instructor_whatsapp: string | null;
   venue: string | null;
   notes: string | null;
   is_active: boolean;
@@ -113,7 +113,7 @@ export default function ScheduleManagementPage() {
     async function loadSelectedSchedules() {
       setListLoading(true); setListError("");
       try {
-        const result = await supabase.rpc("get_regular_schedules_with_instructor", { include_inactive: true }).eq("dojo_id", form.dojoId);
+        const result = await supabase.rpc("get_regular_schedules_with_whatsapp", { include_inactive: true }).eq("dojo_id", form.dojoId);
         if (!active) return;
         if (result.error) throw new Error("Schedules could not be loaded.");
         setSchedules(((result.data ?? []) as ScheduleRow[]).filter(row => row.can_manage));
@@ -403,7 +403,7 @@ export default function ScheduleManagementPage() {
                     {row.is_active ? "ACTIVE" : "INACTIVE"}
                   </span>
                 </div>
-                <ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} phone={row.instructor_phone} />
+                <ScheduleInstructor name={row.instructor_name} rank={row.instructor_rank} whatsapp={row.instructor_whatsapp} />
                 {row.venue && <p className="mt-1 text-sm text-neutral-400">Venue: {row.venue}</p>}
                 {row.notes && <p className="mt-3 text-sm leading-6 text-neutral-400">{row.notes}</p>}
                 <button

@@ -9,11 +9,29 @@ const scope = {
 
 
 const multiScope = new URLSearchParams(location.search).has('multi-scope');
-const requests: Array<{name: string; column?: string; value?: string}> = [];
+const requests: Array<{name: string; column?: string; value?: string; values?: string[]}> = [];
 Object.assign(window, {scheduleRequests: requests});
 const memberView = new URLSearchParams(location.search).has('member-view');
-const scopes = [scope, {...scope,dojo_id:'dojo-b',dojo_name:'South Dojo'}, {...scope,dojo_id:'dojo-c',dojo_name:'Kids Dojo',class_id:'class-kids',class_name:'Kungfu Kids'}];
-let schedules: Array<Record<string, unknown>> = (memberView || multiScope) ? scopes.map((s,index) => ({...s,schedule_id:String(index),day_of_week:2,start_time:'19:00:00',finish_time:'20:00:00',instructor_id:'fixture-instructor',instructor_name:'Fixture Instructor',instructor_rank:'2nd Dan',instructor_phone:'083813636997',is_active:true,can_manage:!memberView,venue:null,notes:null,updated_at:''})) : [];
+const groupedDojos = new URLSearchParams(location.search).has('grouped-dojos');
+const scopes = groupedDojos ? [
+  {dojo_id:'10000000-0000-0000-0000-000000000001',dojo_name:'Chushin',class_id:'class-aikido',class_name:'Aikido'},
+  {dojo_id:'10000000-0000-0000-0000-000000000002',dojo_name:'Chushin Dojo',class_id:'class-karate',class_name:'Karate'},
+  {dojo_id:'10000000-0000-0000-0000-000000000003',dojo_name:'Zhongxin',class_id:'class-taiji',class_name:'Taijiquan'},
+  {dojo_id:'10000000-0000-0000-0000-000000000004',dojo_name:'Zhongxin Dojo',class_id:'class-xingyi',class_name:'Xingyiquan'},
+  {dojo_id:'10000000-0000-0000-0000-000000000005',dojo_name:'Zhongxin',class_id:'class-kids',class_name:'Kungfu Kids'},
+  {dojo_id:'10000000-0000-0000-0000-000000000006',dojo_name:'South Dojo',class_id:'class-aikido',class_name:'Aikido'},
+  {dojo_id:'10000000-0000-0000-0000-000000000007',dojo_name:'Zhongxin',class_id:'class-bagua',class_name:'Bagua'},
+  {dojo_id:'10000000-0000-0000-0000-000000000008',dojo_name:'Chushin Annex',class_id:'class-karate',class_name:'Karate'},
+] : [scope, {...scope,dojo_id:'dojo-b',dojo_name:'South Dojo'}, {...scope,dojo_id:'dojo-c',dojo_name:'Kids Dojo',class_id:'class-kids',class_name:'Kungfu Kids'}];
+let schedules: Array<Record<string, unknown>> = (memberView || multiScope) ? scopes.map((s,index) => ({
+  ...s, schedule_id:String(index),
+  day_of_week:groupedDojos ? [5,1,2,2,1,3,4,6][index] : 2,
+  start_time:groupedDojos && index === 3 ? '18:00:00' : '19:00:00',
+  finish_time:'20:00:00',instructor_id:'fixture-instructor',instructor_name:'Fixture Instructor',
+  instructor_rank:'2nd Dan',instructor_phone:'083813636997',
+  instructor_whatsapp:groupedDojos && index === 1 ? null : '0812 3456 7890',
+  is_active:true,can_manage:!memberView,venue:null,notes:null,updated_at:'',
+})) : [];
 
 
 function timeMinutes(value: unknown) {
@@ -25,7 +43,13 @@ function timeMinutes(value: unknown) {
 export function createClient() {
   return {
     rpc: (name: string, args: Record<string, unknown> = {}) => {
- if (name === 'get_regular_schedules_with_instructor') return {
+ if (name === 'get_regular_schedules_with_whatsapp') return {
+  in: async (column: string, values: string[]): Promise<RpcResult> => {
+   requests.push({name, column, values:[...values]});
+   if (column !== 'dojo_id' || values.length < 2) throw Error('Expected combined dojo IDs');
+   await new Promise(resolve => setTimeout(resolve, 20));
+   return {data:schedules.filter(row => values.includes(String(row[column]))).map(row => ({...row})),error:null};
+  },
   eq: async (column: string, value: string): Promise<RpcResult> => {
    requests.push({name, column, value});
    if (!['dojo_id','class_id'].includes(column)) throw Error('Expected category filter');
@@ -38,7 +62,10 @@ export function createClient() {
 
       await new Promise(resolve => setTimeout(resolve, 20));
 
-      if (name === 'get_dojo_contact_details') return {data:scopes.map(s => ({...s,active:true})),error:null};
+      if (name === 'get_dojo_contact_details') {
+        const visibleScopes = new URLSearchParams(location.search).has('limited-dojos') ? scopes.slice(0,1) : scopes;
+        return {data:visibleScopes.map(s => ({...s,active:true})),error:null};
+      }
       if (name === 'get_manageable_schedule_scopes') {
         return { data: multiScope ? scopes : [scope], error: null };
       }
@@ -67,6 +94,7 @@ export function createClient() {
           instructor_name: args.target_instructor_id ? 'Fixture Instructor' : null,
           instructor_rank: args.target_instructor_id ? '2nd Dan' : null,
           instructor_phone: args.target_instructor_id ? '083813636997' : null,
+          instructor_whatsapp: args.target_instructor_id ? '+62 812 3456 7890' : null,
           venue: args.target_venue,
           notes: args.target_notes,
           is_active: args.target_is_active,

@@ -18,3 +18,13 @@ export function dojoPhoneLink(value: string | null) {
   const digits = value.replace(/[^0-9]/g, "");
   return digits.length >= 3 ? `tel:${value.startsWith("+") ? "+" : ""}${digits}` : null;
 }
+
+export function instructorWhatsAppLink(value: string | null) {
+  const raw = value?.trim();
+  if (!raw || !/^\+?[0-9 ()-]+$/.test(raw)) return null;
+  let digits = raw.replace(/[^0-9]/g, "");
+  if (digits.startsWith("00") && !raw.startsWith("+")) digits = digits.slice(2);
+  else if (digits.startsWith("08") && !raw.startsWith("+")) digits = "62" + digits.slice(1);
+  if (!/^[1-9]\d{7,14}$/.test(digits)) return null;
+  return `https://wa.me/${digits}`;
+}

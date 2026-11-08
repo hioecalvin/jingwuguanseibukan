@@ -7,8 +7,17 @@ let saved: DojoContact = {
   version: 3, can_manage: query.has('admin-card'),
 };
 const empty = { ...saved, dojo_id: 'dojo-b', dojo_name: 'South Dojo', active: false, contact_name: null, contact_phone: null, instagram_username: null, address: null, maps_url: null, version: 0, can_manage: false };
+const groupedRows = [
+  ["chushin-a", "Chushin", "Aikido"], ["chushin-k", "Chushin Dojo", "Karate"],
+  ["zhongxin-t", "Zhongxin", "Taijiquan"], ["zhongxin-x", "Zhongxin Dojo", "Xingyiquan"],
+  ["zhongxin-k", "Zhongxin", "Kungfu Kids"], ["kagami-a", "Kagami Dojo", "Aikido"],
+].map(([id, name, discipline]) => ({ ...saved, dojo_id: id, dojo_name: name, class_name: discipline,
+  class_id: discipline, active: id !== "zhongxin-k", can_manage: false,
+  instagram_username: id.replace("-", "_"), maps_url: "https://www.google.com/maps?q=" + id,
+}));
 export function createClient() {
   return { rpc: async (name: string, args: Record<string, string | number | null> = {}) => {
+    if (name === 'get_dojo_contact_details' && query.has('grouped')) return { data: args.target_dojo_id ? groupedRows.filter(row => row.dojo_id === args.target_dojo_id) : groupedRows, error: null };
     if (name === 'get_dojo_contact_details') return { data: args.target_dojo_id ? [saved] : [saved, empty], error: null };
     if (name !== 'update_dojo_contact_details' || !saved.can_manage || args.target_dojo_id !== saved.dojo_id) throw new Error('Unexpected fixture operation');
     if (query.has('conflict') || args.expected_version !== saved.version) return { data: null, error: { code: '40001' } };

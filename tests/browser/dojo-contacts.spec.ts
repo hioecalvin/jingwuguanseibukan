@@ -55,3 +55,22 @@ test('a schedule link opens the selected dojo details expanded', async ({page}) 
   await page.getByRole('button',{name:'Show all dojos'}).click();
   await expect(page.getByRole('article')).toHaveCount(2);
 });
+test('shared locations list their classes once and preserve each class schedule target', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/dojo-contacts?grouped&dojo=chushin-k');
+  const card = page.getByRole('article');
+  await expect(card).toHaveCount(1);
+  await expect(card.getByRole('heading', { name: 'Chushin', exact: true })).toBeVisible();
+  await expect(card.getByRole('region', { name: 'Aikido', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=chushin-a');
+  await expect(card.getByRole('region', { name: 'Karate', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=chushin-k');
+  await page.getByRole('button', { name: 'Show all dojos' }).click();
+  await expect(card).toHaveCount(3);
+  await page.getByLabel('Search dojos').fill('Xingyiquan');
+  await expect(card).toHaveCount(1);
+  const toggle = card.locator('.compact-record-toggle');
+  if (await toggle.isVisible()) await toggle.click();
+  await expect(card.getByRole('heading', { name: 'Zhongxin', exact: true })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Taijiquan', exact: true })).toBeVisible();
+  await expect(card.getByRole('heading', { name: 'Kungfu Kids · Inactive' })).toBeVisible();
+  await expect(card.getByRole('region', { name: 'Kungfu Kids', exact: true }).getByText('No active schedules')).toBeVisible();
+  await expect(card.getByRole('region', { name: 'Xingyiquan', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=zhongxin-x');
+});
