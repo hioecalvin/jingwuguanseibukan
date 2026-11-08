@@ -4,6 +4,8 @@ import { selectedFirst } from "@/lib/selected-first";
 
 import MemberIdLink from "@/components/member-id-link";
 import { dojoGroupKey, dojoGroupName } from "@/lib/dojo-groups";
+import DojoMartialArts from "@/components/dojo-martial-arts";
+import SharedDojoContactDetails from "@/components/shared-dojo-contact-details";
 import CompactRecord from "@/components/compact-record";
 import DojoLogo from "@/components/dojo-logo";
 import DojoContactDetails from "@/components/dojo-contact-details";
@@ -2568,7 +2570,11 @@ export default function DojoManagementPage() {
         <section className="mt-5 grid gap-4 md:grid-cols-2">
 
           {[...groupedDojos].map(([key, group]) => <section key={key} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
-            <h2 className="mb-3 flex items-center gap-3 text-xl font-semibold"><DojoLogo name={group.name} />{group.name}</h2>
+            <h2 className="mb-3 flex items-center gap-3 text-xl font-semibold"><span aria-hidden="true"><DojoLogo name={group.name} /></span>{group.name}</h2>
+            <DojoMartialArts classes={group.rows.map(row => ({ dojoId: row.id, classId: row.class_id, name: row.classes?.name ?? "Class", active: row.active }))} />
+            {key.startsWith("location-")
+              ? <SharedDojoContactDetails dojoId={group.rows[0].id} />
+              : <DojoContactDetails dojoId={group.rows[0].id} />}
             {group.rows.map(
             (
               dojo
@@ -2740,8 +2746,6 @@ export default function DojoManagementPage() {
 
                   )}
 
-
-                  <DojoContactDetails dojoId={dojo.id} />
 
                   {!isSuperAdmin && (
 

@@ -15,8 +15,16 @@ const groupedRows = [
   class_id: discipline, active: id !== "zhongxin-k", can_manage: false,
   instagram_username: id.replace("-", "_"), maps_url: "https://www.google.com/maps?q=" + id,
 }));
+const sharedContact = { version_token: 'v1', maps_url: 'https://www.google.com/maps?q=shared', instagram_username: 'shared_dojo',
+  can_manage: query.has('shared-admin'), has_conflicts: false, source_values: [] };
 export function createClient() {
   return { rpc: async (name: string, args: Record<string, string | number | null> = {}) => {
+    if (name === 'get_shared_dojo_contact_details' && query.has('grouped')) return { data: [{ ...sharedContact }], error: null };
+    if (name === 'update_shared_dojo_contact_details' && sharedContact.can_manage && args.expected_version_token === sharedContact.version_token) {
+      sharedContact.instagram_username = String(args.new_instagram_username);
+      sharedContact.version_token = 'v2';
+      return { data: { ...sharedContact }, error: null };
+    }
     if (name === 'get_dojo_contact_details' && query.has('grouped')) return { data: args.target_dojo_id ? groupedRows.filter(row => row.dojo_id === args.target_dojo_id) : groupedRows, error: null };
     if (name === 'get_dojo_contact_details') return { data: args.target_dojo_id ? [saved] : [saved, empty], error: null };
     if (name !== 'update_dojo_contact_details' || !saved.can_manage || args.target_dojo_id !== saved.dojo_id) throw new Error('Unexpected fixture operation');

@@ -58,7 +58,7 @@ function formatTime(value: string) {
   }).format(new Date(Date.UTC(2000, 0, 1, hours, minutes)));
 }
 
-type ScheduleCategory = { id: string; title: string; label: string; filterIds: string[] };
+type ScheduleCategory = { id: string; title: string; label: string; filterIds: string[]; classId?: string };
 
 function dojoCategory(row: DojoContact): ScheduleCategory {
   const shared = dojoGroupName(row);
@@ -92,8 +92,13 @@ export default function SchedulesPage() {
   const [dojos, setDojos] = useState<DojoContact[]>([]);
   const [selectedDojo, setSelectedDojo] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
+  const [scopedDojo, setScopedDojo] = useState<ScheduleCategory | null>(null);
   const selected = view === "dojo" ? selectedDojo : selectedClass;
-  const categories = useMemo(() => scheduleCategories(dojos, view), [dojos, view]);
+  const categories = useMemo(() => {
+    const options = scheduleCategories(dojos, view);
+    if (view !== "dojo" || !scopedDojo) return options;
+    return [...options.filter(option => option.id !== scopedDojo.id), scopedDojo];
+  }, [dojos, view, scopedDojo]);
   const category = categories.find(option => option.id === selected);
   const [retry, setRetry] = useState(0);
   const [categoryRetry, setCategoryRetry] = useState(0);
@@ -110,9 +115,21 @@ export default function SchedulesPage() {
         if (result.error) throw new Error("Unable to load schedule categories.");
         const rows = ((result.data ?? []) as DojoContact[]).filter(row => row.active);
         setDojos(rows);
-        const requested = new URLSearchParams(window.location.search).get("dojo");
-        const requestedDojo = rows.find(row => row.dojo_id === requested);
-        if (requestedDojo) setSelectedDojo(dojoCategory(requestedDojo).id);
+        const params = new URLSearchParams(window.location.search);
+        const dojoId = params.get("dojo");
+        const classId = params.get("class");
+        const requestedDojo = rows.find(row => row.dojo_id === dojoId &&
+          (classId === null || row.class_id === classId));
+        setSelectedDojo("");
+        setScopedDojo(null);
+        if (requestedDojo && classId !== null) {
+          const title = dojoGroupName(requestedDojo) || requestedDojo.dojo_name;
+          setScopedDojo({
+            id: requestedDojo.dojo_id, title, label: `${title} · ${requestedDojo.class_name}`,
+            filterIds: [requestedDojo.dojo_id], classId: requestedDojo.class_id,
+          });
+          setSelectedDojo(requestedDojo.dojo_id);
+        } else if (requestedDojo) setSelectedDojo(dojoCategory(requestedDojo).id);
         setLoading(false);
       } catch {
         if (active) { setMessage("Schedule categories could not be loaded."); setLoading(false); }
@@ -124,7 +141,7 @@ export default function SchedulesPage() {
 
   useEffect(() => {
     if (!category) return;
-    const { filterIds } = category;
+    const { filterIds, classId } = category;
     const column = view === "dojo" ? "dojo_id" : "class_id";
     let active = true;
     async function loadSchedules() {
@@ -135,7 +152,7 @@ export default function SchedulesPage() {
         if (!active) return;
         if (result.error) throw new Error("Unable to load this schedule.");
         const rows = (result.data ?? []) as ScheduleRow[];
-        setSchedules(rows.filter(row => filterIds.includes(row[column])).sort((a, b) =>
+        setSchedules(rows.filter(row => filterIds.includes(row[column]) && (!classId || row.class_id === classId)).sort((a, b) =>
           a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time) ||
           a.dojo_name.localeCompare(b.dojo_name) || a.class_name.localeCompare(b.class_name)
         ));
@@ -176,6 +193,7 @@ export default function SchedulesPage() {
               setSchedules([]);
               setSelectedDojo("");
               setSelectedClass("");
+              setScopedDojo(null);
               if (dojos.length) { setLoading(false); setMessage(""); }
             }}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
@@ -223,7 +241,7 @@ export default function SchedulesPage() {
               <div className="border-b border-neutral-800 px-5 py-4">
                 {view === "dojo" && <DojoLogo name={category.title} className="mb-2" />}
                 <h2 className="text-xl font-semibold text-white">{view === "dojo" && category.filterIds.length === 1
-                  ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(category.filterIds[0])}`}>{category.title}</Link>
+                  ? <Link className="underline text-sky-300" href={`/dojos?dojo=${encodeURIComponent(category.filterIds[0])}`}>{category.classId ? category.label : category.title}</Link>
                   : category.title}</h2>
               </div>
 

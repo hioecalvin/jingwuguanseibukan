@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createServer } from 'node:net';
 import { fileURLToPath } from 'node:url';
+import { testSharedDojoContacts } from './test-shared-dojo-contact-local.mjs';
 const repo=fileURLToPath(new URL('../',import.meta.url));
 const pgBin=process.argv[2];assert.ok(pgBin,'Absolute PostgreSQL 17 bin directory required');
 const root=mkdtempSync(join(tmpdir(),'jwg-dojo-contact-'));const data=join(root,'data');
@@ -21,6 +22,7 @@ assert.match(run('postgres',['--version']).stdout,/PostgreSQL\) 17\./);
 const port=await new Promise((resolvePort,reject)=>{const socket=createServer();socket.once('error',reject);socket.listen(0,'127.0.0.1',()=>{const value=socket.address().port;socket.close(error=>error?reject(error):resolvePort(value));});});
 let started=false,stopped=false,passed=false,checks=0;
 const migration=readFileSync(join(repo,'supabase/pending/087_dojo_contact_details.sql'),'utf8');
+const sharedMigration=readFileSync(join(repo,'supabase/pending/092_shared_dojo_contact_details.sql'),'utf8');
 try {
  run('initdb',['-D',data,'--username=postgres','--auth-local=trust','--auth-host=trust','--no-locale','-E','UTF8']);
  started=true;run('pg_ctl',['-D',data,'-l',join(root,'server.log'),'-o',`-h 127.0.0.1 -p ${port}`,'-w','-t','30','start']);
@@ -67,9 +69,11 @@ try {
  eq(q(jwt(2)+`select public.update_dojo_contact_details('${dojo(1)}',null,null,null,null,null,${v})->>'version';`),String(v+1),'Optional fields can be cleared');
  q("update dojo_admin_assignments set active=false;");
  denied(jwt(2)+edit(1,v+1),/Only Super Admin/);
+ await testSharedDojoContacts({ q, eq, denied, jwt, uid, dojo, migration: sharedMigration,
+  psql: join(resolve(pgBin), process.platform==='win32'?'psql.exe':'psql'), args, env });
  passed=true;
 } finally {
  if(started){run('pg_ctl',['-D',data,'-m','fast','-w','-t','30','stop']);stopped=true;}
- const receipt={passed,checks,stopped,scope:'fresh local synthetic PostgreSQL 17 cluster; auth helpers stubbed',migrationSha256:createHash('sha256').update(migration).digest('hex'),root};
+ const receipt={passed,checks,stopped,scope:'fresh local synthetic PostgreSQL 17 cluster; auth helpers stubbed',migrationSha256:createHash('sha256').update(migration).digest('hex'),sharedMigrationSha256:createHash('sha256').update(sharedMigration).digest('hex'),root};
  writeFileSync(join(root,'receipt.json'),JSON.stringify(receipt,null,2));console.log(JSON.stringify(receipt));
 }

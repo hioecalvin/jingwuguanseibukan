@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { safeGoogleMapsUrl, type DojoContact } from "@/lib/dojo-contact";
@@ -63,7 +62,6 @@ export default function DojoContactDetails({ dojoId, initialContact }: { dojoId:
       {contact && !draft && <><dl className="grid gap-3 sm:grid-cols-2">
         <div><dt className="text-neutral-400">Google Maps location</dt><dd>{maps ? <a href={maps} target="_blank" rel="noopener noreferrer" className="text-sky-300 underline">Open Google Maps</a> : "Not provided"}</dd></div>
         <div><dt className="text-neutral-400">Instagram</dt><dd>{instagram ? <a href={instagram.href} target="_blank" rel="noopener noreferrer" className="break-all text-sky-300 underline">@{instagram.handle}</a> : "Not provided"}</dd></div>
-        <div><dt className="text-neutral-400">Available schedules</dt><dd>{contact.active ? <Link href={`/schedules?dojo=${encodeURIComponent(dojoId)}`} className="text-sky-300 underline">View schedules</Link> : "No active schedules"}</dd></div>
       </dl>{contact.can_manage && <button type="button" disabled={busy} onClick={() => { setDraft({ ...contact }); setMessage(""); setError(""); }} className="min-h-11 rounded border border-neutral-600 px-3 py-2">Edit dojo details</button>}</>}
       {draft && <form onSubmit={save} className="space-y-3">
         <p className="text-neutral-400">All signed-in active members can see the dojo location and Instagram handle.</p>

@@ -143,6 +143,54 @@ test('every grouped dojo UUID deep link resolves to its combined timetable', asy
   }
 });
 
+test('a class link opens just that dojo record and keeps its scope on refresh', async ({ page }) => {
+  await page.goto(fixture + '&grouped-dojos&dojo=' + dojoIds[0] + '&class=class-aikido');
+  const dojo = page.getByLabel('Choose dojo');
+  const rows = page.getByRole('article');
+  await expect(dojo).toHaveValue(dojoIds[0]);
+  await expect(page.getByRole('heading', {name:'Chushin · Aikido', exact:true})).toBeVisible();
+  await expect(rows).toHaveCount(1);
+  await expect(rows.getByRole('button')).toContainText('Friday');
+  await expect(rows.getByRole('button')).toContainText('Aikido');
+
+  await page.getByRole('button', {name:'Refresh schedules'}).click();
+  await expect(page.getByRole('button', {name:'Refresh schedules'})).toBeEnabled();
+  await expect(dojo).toHaveValue(dojoIds[0]);
+  await expect(rows).toHaveCount(1);
+  await dojo.selectOption({label:'Chushin'});
+  await expect(rows).toHaveCount(2);
+
+  await page.getByRole('button', {name:'By class', exact:true}).click();
+  await page.getByLabel('Choose class').selectOption('class-aikido');
+  await expect(rows).toHaveCount(2);
+  await page.getByRole('button', {name:'By dojo', exact:true}).click();
+  await expect(dojo).toHaveValue('');
+  await expect(dojo.getByRole('option', {name:'Chushin · Aikido', exact:true})).toHaveCount(0);
+  const reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);
+  expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toEqual([
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',value:dojoIds[0]},
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',value:dojoIds[0]},
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds.slice(0,2)},
+    {name:'get_regular_schedules_with_whatsapp',column:'class_id',value:'class-aikido'},
+  ]);
+});
+
+test('mismatched or unavailable class links do not request any schedule', async ({ page }) => {
+  for (const query of [
+    '&dojo=' + dojoIds[0] + '&class=class-karate',
+    '&dojo=' + dojoIds[0] + '&class=',
+    '&limited-dojos&dojo=' + dojoIds[1] + '&class=class-karate',
+  ]) {
+    await page.goto(fixture + '&grouped-dojos' + query);
+    const dojo = page.getByLabel('Choose dojo');
+    await expect(dojo.getByRole('option', {name:'Chushin',exact:true})).toBeAttached();
+    await expect(dojo).toHaveValue('');
+    await expect(page.getByRole('article')).toHaveCount(0);
+    const reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);
+    expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toHaveLength(0);
+  }
+});
+
 test('a combined location with one visible dojo uses only that UUID', async ({ page }) => {
   await page.goto(fixture + '&grouped-dojos&limited-dojos&dojo=' + dojoIds[0]);
   await expect(page.getByLabel('Choose dojo').getByRole('option')).toHaveText(['Select a dojo', 'Chushin']);

@@ -235,6 +235,7 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_class_instructor_appointments", "set_class_instructor_appointment", "get_manageable_training_scopes",
     "get_my_settlement_destinations", "nominate_settlement_destination", "get_settlement_destination_account",
     "get_dojo_contact_details", "update_dojo_contact_details",
+    "get_shared_dojo_contact_details", "update_shared_dojo_contact_details",
     "get_regular_schedules_with_instructor", "get_regular_schedules_with_whatsapp",
     "get_member_administrative_status", "set_member_administrative_status", "get_bulk_assessment_candidates_with_member_ids",
     "get_my_emergency_contact", "update_my_emergency_contact",

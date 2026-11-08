@@ -9,15 +9,14 @@ test('members can search all dojos and open the published contact links', async 
   if (await toggle.isVisible()) await toggle.click();
   await expect(page.getByText('Fixture Instructor', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('link', {name: '+62 (812) 555-123'})).toHaveCount(0);
-  await expect(page.getByRole('link',{name:'View schedules'})).toHaveAttribute('href','/schedules?dojo=dojo-a');
+  await expect(page.getByRole('link',{name:'Fixture Class', exact:true})).toHaveAttribute('href','/schedules?dojo=dojo-a&class=class-a');
   await expect(page.getByRole('link', {name: '@fixture_dojo'})).toHaveAttribute('href','https://www.instagram.com/fixture_dojo/');
   await expect(page.getByRole('link', {name: 'Open Google Maps'})).toHaveAttribute('href','https://www.google.com/maps?q=north');
   await expect(page.getByRole('button',{name:'Edit dojo details'})).toHaveCount(0);
   await page.getByLabel('Search dojos').fill('South Dojo');
   if (await toggle.isVisible()) await toggle.click();
   await expect(page.getByText('Not provided', {exact:true})).toHaveCount(2);
-  await expect(page.getByText('No active schedules')).toBeVisible();
-  await expect(page.getByRole('link',{name:'View schedules'})).toHaveCount(0);
+  await expect(page.getByRole('link',{name:'Fixture Class', exact:true})).toHaveCount(0);
   await expect(page.getByText('Fixture Class · Inactive', { exact:true }).last()).toBeVisible();
 });
 test('malicious stored Maps link does not render, and unsafe edits are rejected before saving',async({page})=>{
@@ -51,26 +50,34 @@ test('a schedule link opens the selected dojo details expanded', async ({page}) 
   await page.goto(NAV_ORIGIN+'/dojo-contacts?dojo=dojo-a');
   await expect(page.getByRole('article')).toHaveCount(1);
   await expect(page.getByRole('link',{name:'Open Google Maps'})).toBeVisible();
-  await expect(page.getByRole('link',{name:'View schedules'})).toHaveAttribute('href','/schedules?dojo=dojo-a');
+  await expect(page.getByRole('link',{name:'Fixture Class', exact:true})).toHaveAttribute('href','/schedules?dojo=dojo-a&class=class-a');
   await page.getByRole('button',{name:'Show all dojos'}).click();
   await expect(page.getByRole('article')).toHaveCount(2);
 });
-test('shared locations list their classes once and preserve each class schedule target', async ({ page }) => {
+test('one dojo contact section follows the class links, each opening its own schedule', async ({ page }) => {
   await page.goto(NAV_ORIGIN + '/dojo-contacts?grouped&dojo=chushin-k');
   const card = page.getByRole('article');
   await expect(card).toHaveCount(1);
-  await expect(card.getByRole('heading', { name: 'Chushin', exact: true })).toBeVisible();
-  await expect(card.getByRole('region', { name: 'Aikido', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=chushin-a');
-  await expect(card.getByRole('region', { name: 'Karate', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=chushin-k');
+  await expect(card.getByRole('heading')).toHaveText(['Chushin', 'Martial arts', 'Dojo details']);
+  await expect(card.getByRole('link', { name: 'Aikido', exact: true })).toHaveAttribute('href', '/schedules?dojo=chushin-a&class=Aikido');
+  await expect(card.getByRole('link', { name: 'Karate', exact: true })).toHaveAttribute('href', '/schedules?dojo=chushin-k&class=Karate');
+  await expect(card.getByRole('link', { name: 'Open Google Maps' })).toHaveCount(1);
+  await expect(card.getByRole('link', { name: '@shared_dojo' })).toHaveCount(1);
   await page.getByRole('button', { name: 'Show all dojos' }).click();
   await expect(card).toHaveCount(3);
   await page.getByLabel('Search dojos').fill('Xingyiquan');
   await expect(card).toHaveCount(1);
-  const toggle = card.locator('.compact-record-toggle');
-  if (await toggle.isVisible()) await toggle.click();
   await expect(card.getByRole('heading', { name: 'Zhongxin', exact: true })).toBeVisible();
-  await expect(card.getByRole('heading', { name: 'Taijiquan', exact: true })).toBeVisible();
-  await expect(card.getByRole('heading', { name: 'Kungfu Kids · Inactive' })).toBeVisible();
-  await expect(card.getByRole('region', { name: 'Kungfu Kids', exact: true }).getByText('No active schedules')).toBeVisible();
-  await expect(card.getByRole('region', { name: 'Xingyiquan', exact: true }).getByRole('link', { name: 'View schedules' })).toHaveAttribute('href', '/schedules?dojo=zhongxin-x');
+  await expect(card.getByRole('link', { name: 'Taijiquan', exact: true })).toBeVisible();
+  await expect(card.getByText('Kungfu Kids · Inactive')).toBeVisible();
+  await expect(card.getByRole('link', { name: /Kungfu Kids/ })).toHaveCount(0);
+  await expect(card.getByRole('link', { name: 'Xingyiquan', exact: true })).toHaveAttribute('href', '/schedules?dojo=zhongxin-x&class=Xingyiquan');
+});
+test('a location administrator can save the shared contact once for the whole dojo', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/dojo-contacts?grouped&shared-admin&dojo=chushin-k');
+  await page.getByRole('button', { name: 'Edit shared dojo details' }).click();
+  await page.getByLabel('Dojo Instagram handle').fill('shared_aikido_karate');
+  await page.getByRole('button', { name: 'Save shared dojo details' }).click();
+  await expect(page.getByRole('link', { name: '@shared_aikido_karate' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Karate', exact:true })).toHaveAttribute('href','/schedules?dojo=chushin-k&class=Karate');
 });
