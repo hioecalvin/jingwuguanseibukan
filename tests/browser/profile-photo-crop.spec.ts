@@ -46,7 +46,7 @@ async function avatarWrites(page: Page) {
   });
 }
 
-test('zoomed and repositioned preview matches the uploaded profile picture pixel for pixel', async ({ page, browserName }, testInfo) => {
+test('zoomed and repositioned preview matches the displayed saved profile picture', async ({ page, browserName }, testInfo) => {
   await page.route('**/fixture-avatars/**', async route => {
     const upload = await page.evaluate(() => window.__profileContactFixture.avatarUploads.at(-1)!);
     await route.fulfill({ contentType: upload.type, body: Buffer.from(upload.image.split(',')[1], 'base64') });
@@ -87,7 +87,13 @@ test('zoomed and repositioned preview matches the uploaded profile picture pixel
   }
   await expect.poll(async () => (await cropSample(preview)).x).toBeLessThan(zoomed.x - 3);
   await expect.poll(async () => (await cropSample(preview)).y).toBeLessThan(zoomed.y - 3);
-  const previewPng = await preview.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+  // Compare decoded pixels. Different WebKit ports can encode the same crop
+  // with different PNG metadata or slightly different colour rounding.
+  const expectedPixels = await preview.evaluateHandle(async node => {
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const canvas = node as HTMLCanvasElement;
+    return canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+  });
   expect(await avatarWrites(page)).toEqual({ uploads: 0, updates: 0 });
   await page.getByRole('button', { name: 'Save Picture' }).click();
   await expect(page.getByText('Profile picture updated successfully.')).toBeVisible();
@@ -100,15 +106,25 @@ test('zoomed and repositioned preview matches the uploaded profile picture pixel
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
     canvas.getContext('2d')!.drawImage(image, 0, 0);
+    const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+    let maxColourDifference = 0;
+    let maxAlphaDifference = 0;
+    for (let i = 0; i < pixels.length; i++) {
+      const difference = Math.abs(pixels[i] - expected[i]);
+      if (i % 4 === 3) maxAlphaDifference = Math.max(maxAlphaDifference, difference);
+      else maxColourDifference = Math.max(maxColourDifference, difference);
+    }
     const state = window.__profileContactFixture;
     return {
       width: canvas.width, height: canvas.height,
-      matchesPreview: canvas.toDataURL() === expected,
+      maxColourDifference, maxAlphaDifference,
       displayedSavedUrl: image.src === state.avatarUpdates[0],
       uploadType: state.avatarUploads[0].type,
     };
-  }, previewPng);
-  expect(actual).toEqual({ width: 512, height: 512, matchesPreview: true, displayedSavedUrl: true, uploadType: 'image/png' });
+  }, expectedPixels);
+  await expectedPixels.dispose();
+  expect(actual).toMatchObject({ width: 512, height: 512, maxAlphaDifference: 0, displayedSavedUrl: true, uploadType: 'image/png' });
+  expect(actual.maxColourDifference).toBeLessThanOrEqual(2);
   expect(await avatarWrites(page)).toEqual({ uploads: 1, updates: 1 });
   const savedUrl = await avatar.getAttribute('src');
   await choosePhoto(page, 320, 640);
