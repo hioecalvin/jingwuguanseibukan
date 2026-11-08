@@ -1,0 +1,47 @@
+{
+  "recordedDate": "2026-10-14",
+  "scope": "offline-release-review-and-local-browser-verification",
+  "head": "319fb201a0da4172709d9e7e813c9773009e8680",
+  "stagingBrowserCasesCollectedOffline": 36,
+  "newFinanceCases": 9,
+  "liveCasesExecuted": 0,
+  "readOnlyRpcAdditions": [
+    "get_my_payment_confirmations",
+    "get_dojo_receiving_account",
+    "get_dojo_monthly_payment_summary",
+    "get_pending_advance_payment_groups"
+  ],
+  "rpcAllowlistAppliesBeforeGetHeadFastPath": true,
+  "paymentMutationsAndQuotesRemainBlocked": true,
+  "typecheckPassed": true,
+  "focusedSqlAndGuardTestsPassed": 29,
+  "sharedGuardTestsPassed": 11,
+  "testCountsOverlap": true,
+  "targetedLintPassed": true,
+  "diffWhitespacePassed": true,
+  "isolatedProductionBuildPassed": true,
+  "localBrowser": {
+    "engine": "webkit",
+    "devices": ["desktop", "tablet", "mobile"],
+    "passed": 210,
+    "failed": 0,
+    "mockOnly": true,
+    "successfulLogSha256": "a11a60b1b317de0f0a7d2fc58cb9f89e7f6da49bc646e4d252f30399b1c69419",
+    "initialSandboxTraceFileEpermPreserved": true
+  },
+  "candidateInventoryBeforeReport": {
+    "nonMetadataPaths": 228,
+    "excludedSupabaseCliMetadataPaths": 9,
+    "sensitiveFilenameMatches": 0,
+    "overTwoMiB": 0,
+    "completeSecretContentReview": false,
+    "completeSourceReview": false
+  },
+  "gitIndexEmptyAtVerification": true,
+  "commitPushDeploymentPerformed": false,
+  "remoteProjectOrProviderContact": false,
+  "protectedCredentialsChanged": false,
+  "migrationsApplied": false,
+  "messagesSent": false,
+  "next": "Approve final intended-file review, candidate commit/push, staging Preview deployment and guarded read-only acceptance."
+}

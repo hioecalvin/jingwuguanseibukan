@@ -1,0 +1,35 @@
+{
+  "scope": "read-only-staging-rollback-metadata-and-offline-source-review",
+  "observedAt": "2026-10-16T09:07:15.343Z",
+  "alias": "jingwuguanseibukan-staging.vercel.app",
+  "current": {"deploymentId": "dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y", "commit": "ea004d36d8fd9e65bda981b6e131f6b739392690", "state": "READY", "target": "preview"},
+  "previous": {"deploymentId": "dpl_HW2ismrCKo8tw1trEbcdXtcUtxKH", "commit": "319fb201a0da4172709d9e7e813c9773009e8680", "state": "READY", "target": "preview"},
+  "aliasMatchesCurrent": true,
+  "previousApprovedAsRollbackTarget": false,
+  "sourceReviewFindings": [
+    "Previous subscription UI infers Paid from zero outstanding instead of preserving waived/cancelled status; current migration 060 writes waived status.",
+    "Previous UI lacks advance-payment forms, receipt reviews and selected-month fee adjustment.",
+    "Previous lockfile has sharp 0.35.4 and source-map-js 1.2.1 instead of the current security-patched 0.35.5 and 1.2.2."
+  ],
+  "conclusion": "Do not automatically switch to the retained older Preview. Ready metadata alone does not establish current-schema compatibility or a suitable security baseline.",
+  "nextSafePlan": "Retain the verified current deployment as the baseline for a future reviewed candidate rehearsal, or prepare and verify a compatible patched fallback. Pin both identities before any alias switch.",
+  "vercelCredential": "Initial GET returned 403; installed CLI whoami refreshed the existing session; fixed-target read-only inspection then passed. No new token created.",
+  "freshDependencyAudit": {
+    "productionVulnerabilities": 0,
+    "fullTreePolicyPassed": true,
+    "developmentExceptionStillRequired": true,
+    "exceptionExpiresAt": "2026-10-19T11:09:49Z",
+    "registryLatestBraces": "3.0.3",
+    "registryLatestMicromatch": "4.0.8",
+    "registryLatestFastGlob": "3.3.3",
+    "packageVersionsChanged": false
+  },
+  "aliasChanged": false,
+  "rollbackRehearsalPassed": false,
+  "applicationEndpointsContacted": false,
+  "databaseContacted": false,
+  "productionContacted": false,
+  "messagesSent": false,
+  "schedulersEnabled": false,
+  "disposableResumed": false
+}

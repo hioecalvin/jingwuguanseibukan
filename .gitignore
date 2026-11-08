@@ -12,13 +12,24 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
 
 # next.js
 /.next/
+/.next-browser-smoke/
 /out/
 
 # production
 /build
+
+# local generated artifacts
+/output/
+/tmp/
+/desktop/**/node_modules/
+/desktop/**/dist/
+/desktop/**/release/
+/desktop/**/test-results/
 
 # misc
 .DS_Store

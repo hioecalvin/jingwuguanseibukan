@@ -4,20 +4,54 @@ import {
 } from "next/server";
 
 import {
-  createClient,
-} from "@supabase/supabase-js";
-
-import {
   sendWebPush,
 } from "@/lib/push/server";
 
+import {
+  createAdminClient,
+} from "@/lib/supabase/admin";
+import {
+  configuredRateLimit,
+  consumeDurableRateLimit,
+  durableRateLimitHeaders,
+} from "@/lib/security/durable-rate-limit";
+import {
+  matchesSecret,
+} from "@/lib/security/constant-time-secret";
+
 
 type PushRequest = {
-  userId: string;
-  title: string;
-  body: string;
-  url?: string;
+  userId?: unknown;
+  title?: unknown;
+  body?: unknown;
+  url?: unknown;
 };
+
+
+function safeApplicationPath(
+  value: string,
+) {
+  if (
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.includes("\\") ||
+    /[\u0000-\u001f\u007f]/.test(value) ||
+    value.length > 2048
+  ) {
+    return false;
+  }
+
+  try {
+    const base =
+      "https://application.invalid";
+    const parsed =
+      new URL(value, base);
+
+    return parsed.origin === base;
+  } catch {
+    return false;
+  }
+}
 
 
 export async function POST(
@@ -31,9 +65,10 @@ export async function POST(
 
 
     if (
-      !process.env.PUSH_API_SECRET ||
-      secret !==
-        process.env.PUSH_API_SECRET
+      !matchesSecret(
+        secret,
+        process.env.PUSH_API_SECRET,
+      )
     ) {
       return NextResponse.json(
         {
@@ -47,16 +82,126 @@ export async function POST(
     }
 
 
-    const body =
-      (
-        await request.json()
-      ) as PushRequest;
+    let body:
+      PushRequest;
+
+
+    try {
+      const parsed: unknown =
+        await request.json();
+
+      if (
+        !parsed ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed)
+      ) {
+        throw new Error(
+          "Expected an object."
+        );
+      }
+
+      body =
+        parsed as PushRequest;
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid request body.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    try {
+      const rateLimit =
+        await consumeDurableRateLimit({
+          bucket:
+            "push-worker",
+          subject:
+            "authorised-worker",
+          limit:
+            configuredRateLimit(
+              "PUSH_WORKER_RATE_LIMIT",
+              120,
+              100_000,
+            ),
+          windowSeconds:
+            configuredRateLimit(
+              "PUSH_WORKER_RATE_WINDOW_SECONDS",
+              60,
+              86_400,
+            ),
+        });
+
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          {
+            error:
+              "Too many push requests.",
+          },
+          {
+            status: 429,
+            headers:
+              durableRateLimitHeaders(
+                rateLimit,
+              ),
+          },
+        );
+      }
+    } catch {
+      console.error(
+        "Push worker rate-limit persistence failed.",
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Push delivery is temporarily unavailable.",
+        },
+        {
+          status: 503,
+        },
+      );
+    }
+
+
+    const userId =
+      typeof body.userId ===
+        "string"
+        ? body.userId.trim()
+        : "";
+
+    const title =
+      typeof body.title ===
+        "string"
+        ? body.title.trim()
+        : "";
+
+    const messageBody =
+      typeof body.body ===
+        "string"
+        ? body.body.trim()
+        : "";
+
+    const targetUrl =
+      typeof body.url ===
+        "string"
+        ? body.url.trim()
+        : "/notifications";
 
 
     if (
-      !body.userId ||
-      !body.title ||
-      !body.body
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        userId
+      ) ||
+      !title ||
+      title.length > 120 ||
+      !messageBody ||
+      messageBody.length > 500 ||
+      !safeApplicationPath(
+        targetUrl
+      )
     ) {
       return NextResponse.json(
         {
@@ -70,38 +215,60 @@ export async function POST(
     }
 
 
-    const supabaseUrl =
-      process.env
-        .NEXT_PUBLIC_SUPABASE_URL;
+    const supabase =
+      createAdminClient();
 
-    const serviceRoleKey =
-      process.env
-        .SUPABASE_SERVICE_ROLE_KEY;
+
+    const {
+      data:
+        activeRecipient,
+
+      error:
+        activeRecipientError,
+    } =
+      await supabase
+        .from(
+          "profiles"
+        )
+        .select(
+          "id"
+        )
+        .eq(
+          "id",
+          userId
+        )
+        .eq(
+          "account_status",
+          "active"
+        )
+        .is(
+          "date_of_passing",
+          null
+        )
+        .maybeSingle();
 
 
     if (
-      !supabaseUrl ||
-      !serviceRoleKey
+      activeRecipientError
     ) {
       throw new Error(
-        "Supabase server configuration is incomplete."
+        "Unable to verify push recipient eligibility.",
       );
     }
 
 
-    const supabase =
-      createClient(
-        supabaseUrl,
-        serviceRoleKey,
-        {
-          auth: {
-            persistSession:
-              false,
-            autoRefreshToken:
-              false,
-          },
-        }
-      );
+    if (
+      !activeRecipient
+    ) {
+      return NextResponse.json({
+        success:
+          true,
+        sent:
+          0,
+        message:
+          "User is not eligible for push notifications.",
+      });
+    }
 
 
     const {
@@ -123,7 +290,7 @@ export async function POST(
         `)
         .eq(
           "user_id",
-          body.userId
+          userId
         )
         .eq(
           "active",
@@ -164,6 +331,9 @@ export async function POST(
     let failed =
       0;
 
+    let stateFailed =
+      0;
+
 
     for (
       const subscription
@@ -184,14 +354,13 @@ export async function POST(
 
           {
             title:
-              body.title,
+              title,
 
             body:
-              body.body,
+              messageBody,
 
             url:
-              body.url ??
-              "/notifications",
+              targetUrl,
           }
         );
 
@@ -200,7 +369,10 @@ export async function POST(
           1;
 
 
-        await supabase
+        const {
+          error:
+            stateError,
+        } = await supabase
           .from(
             "push_subscriptions"
           )
@@ -216,17 +388,22 @@ export async function POST(
             "id",
             subscription.id
           );
+
+        if (
+          stateError
+        ) {
+          stateFailed +=
+            1;
+
+          console.error(
+            "Push subscription state persistence failed.",
+          );
+        }
       } catch (
         error: unknown
       ) {
         failed +=
           1;
-
-
-        console.error(
-          "Push delivery failed:",
-          error
-        );
 
 
         const statusCode =
@@ -246,6 +423,20 @@ export async function POST(
             : null;
 
 
+        console.error(
+          "Push provider delivery failed.",
+          {
+            statusCode:
+              Number.isInteger(statusCode) &&
+              statusCode !== null &&
+              statusCode >= 100 &&
+              statusCode <= 599
+                ? statusCode
+                : null,
+          },
+        );
+
+
         /*
          * 404 / 410 usually mean
          * the browser subscription
@@ -258,7 +449,10 @@ export async function POST(
           statusCode ===
             410
         ) {
-          await supabase
+          const {
+            error:
+              stateError,
+          } = await supabase
             .from(
               "push_subscriptions"
             )
@@ -274,8 +468,22 @@ export async function POST(
               "id",
               subscription.id
             );
+
+          if (
+            stateError
+          ) {
+            stateFailed +=
+              1;
+
+            console.error(
+              "Push subscription state persistence failed.",
+            );
+          }
         } else {
-          await supabase
+          const {
+            error:
+              stateError,
+          } = await supabase
             .from(
               "push_subscriptions"
             )
@@ -288,6 +496,17 @@ export async function POST(
               "id",
               subscription.id
             );
+
+          if (
+            stateError
+          ) {
+            stateFailed +=
+              1;
+
+            console.error(
+              "Push subscription state persistence failed.",
+            );
+          }
         }
       }
     }
@@ -295,31 +514,35 @@ export async function POST(
 
     return NextResponse.json({
       success:
-        true,
+        failed === 0 &&
+        stateFailed === 0,
 
       sent,
 
       failed,
 
+      stateFailed,
+
       total:
         subscriptions.length,
+    }, {
+      status:
+        stateFailed > 0
+          ? 500
+          : failed > 0
+            ? 502
+            : 200,
     });
-  } catch (
-    error: unknown
-  ) {
+  } catch {
     console.error(
-      "Push API error:",
-      error
+      "Push API request failed.",
     );
 
 
     return NextResponse.json(
       {
         error:
-          error instanceof
-            Error
-            ? error.message
-            : "Push delivery failed.",
+          "Push delivery failed.",
       },
       {
         status: 500,

@@ -1,0 +1,53 @@
+{
+  "scope": "Approved bounded disposable-only read-only stability diagnostic",
+  "projectRef": "lzkpibxeqxytewbwgklj",
+  "runId": "e3f77df74d1b4796b9cb8f0abecd0401",
+  "completedAt": "2026-10-16T04:49:51.0342315Z",
+  "independentStateVerifiedAt": "2026-10-16T04:52:03.1927255Z",
+  "result": "observed-stability-window-passed",
+  "probes": {
+    "count": 8,
+    "passed": 8,
+    "failed": 0,
+    "firstStartedAt": "2026-10-16T04:44:42.979Z",
+    "lastStartedAt": "2026-10-16T04:48:36.863Z",
+    "spanSeconds": 233.884,
+    "distinctServerStartValues": 1,
+    "stableFinalFive": true,
+    "allReadOnly": true,
+    "allClientTlsVerified": true,
+    "attemptCap": 8,
+    "samplingDeadlineSeconds": 360
+  },
+  "logs": {
+    "priorFailureWindow": {"from": "2026-10-16T04:32:00Z", "to": "2026-10-16T04:35:00Z", "rows": 23, "available": true},
+    "currentWindow": {"from": "2026-10-16T04:42:14.5773970Z", "to": "2026-10-16T04:48:38.7440755Z", "rows": 21, "available": true},
+    "observed": "Fast shutdown requests, PostgreSQL starts and readiness events, with 57P01 connection terminations around startup.",
+    "limitation": "Event timing supports startup interruption but does not identify its initiator or uniquely correlate the prior failed client connection. Log ingestion and bounded filtering limit completeness.",
+    "apiReference": "https://supabase.com/docs/guides/observability/advanced-log-filtering"
+  },
+  "finalIsolation": {"status": "INACTIVE", "authDisabledVerified": true, "smtpAbsent": true, "functions": 0, "secrets": 0},
+  "authEnabled": false,
+  "accountLoginsAttempted": 0,
+  "settingsPatched": false,
+  "databaseImportAttempted": false,
+  "messagesSent": false,
+  "otherProjectsContacted": false,
+  "evidenceDirectory": "C:\\protected\\jwg-database-access-5ff37a1e79bc48d78f8ffb6a5179a77d",
+  "ownerOnlyEvidenceFilesVerified": 255,
+  "localStabilityGuardTestsPassed": 4,
+  "evidence": [
+    {"file": "stability-attempt-060.json", "sha256": "053772bb928d4a04778a2f315e7194cfe8e20972550f6228f7a6dd9634de8e2a"},
+    {"file": "stability-wrapper-result-e3f77df74d1b4796b9cb8f0abecd0401.json", "sha256": "5919ab9933bc3d240d274d58caffdf5abcafb0b796bd906eff2d103ffa38a874"},
+    {"file": "stability-summary-e3f77df74d1b4796b9cb8f0abecd0401.json", "sha256": "eed597d2dc50aa5760c4ebdf994a9bae733c2857326cd50b58e5140cfd9deeaa"},
+    {"file": "stability-probes-e3f77df74d1b4796b9cb8f0abecd0401.json", "sha256": "6f720d3d21e6fe5344c28cc5cbdc01175d7a5b7b20b898615b0c0e6a4268064c"},
+    {"file": "stability-logs-e3f77df74d1b4796b9cb8f0abecd0401-prior-failure-private.json", "sha256": "dc4b5ff43bd5ad0d97b3c1bf4fdb837066b6558e0b1dfda4738ec3962539334a"},
+    {"file": "stability-logs-e3f77df74d1b4796b9cb8f0abecd0401-current-window-private.json", "sha256": "1ff64a943f056304cd9bbdec5a7ce9111de4a0a731ec3079644608b2ad146413"},
+    {"file": "state-inspection-2df821ae4ad54c3487dfe50d546d806e.json", "sha256": "0feff9a3d95bc53e339e33180e2c5a662f23a66193756d29fcbee4dbbca99717"}
+  ],
+  "remaining": [
+    "This observed window does not guarantee stability after another resume.",
+    "A separately approved Auth run must verify fresh stable readiness before enabling password login and preserve strict configuration equality.",
+    "Three-account login/refresh/logout and complete Auth postflight remain unverified; this diagnostic does not pass the recovery Auth or production gate."
+  ]
+}

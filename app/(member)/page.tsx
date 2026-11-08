@@ -1,4 +1,8 @@
 "use client";
+import { isAikidoYudansha } from "@/lib/aikikai";
+
+import MemberIdLink from "@/components/member-id-link";
+import CompactRecord from "@/components/compact-record";
 
 import {
   useEffect,
@@ -328,7 +332,7 @@ export default function HomePage() {
               created_at,
               class_id,
 
-              classes (
+              classes:classes!announcements_class_id_fkey (
                 name
               )
             `)
@@ -844,9 +848,8 @@ export default function HomePage() {
             "
           >
             Member ID:{" "}
-            {profile
-              ?.registration_number ??
-              "Not assigned"}
+            <MemberIdLink memberId={profile
+              ?.registration_number} fallback={"Not assigned"} />
           </span>
 
           {profile
@@ -895,7 +898,7 @@ export default function HomePage() {
        * QUICK ACTIONS
        */}
 
-      <section
+      <CompactRecord summary={<>Quick Access</>} detail="Repository, calendar, subscription & inbox" as="section" defaultExpanded
         className="
           mt-8
         "
@@ -969,13 +972,13 @@ export default function HomePage() {
             }
           />
         </div>
-      </section>
+      </CompactRecord>
 
       {/*
        * MEMBERSHIP
        */}
 
-      <section
+      <CompactRecord summary={<>My Classes</>} detail={`${activeMemberships.length} memberships`} as="section"
         className="
           mt-10
         "
@@ -1062,17 +1065,14 @@ export default function HomePage() {
                     membership
                   );
 
-                const isAikidoYudansha =
-                  membership
-                    .classes
-                    ?.name ===
-                    "Aikido" &&
-                  membership
-                    .level ===
-                    "yudansha";
+                const showAikikai =
+                  isAikidoYudansha(membership.classes?.name, membership.level);
 
                 return (
-                  <article
+                  <CompactRecord summary={<>{membership
+                            .ranks
+                            ?.name ??
+                            "Rank not assigned"}</>} detail={<>{membership.classes?.name} · {membership.dojos?.name}</>}
                     key={
                       `${membership.classes?.name ?? "class"}-${index}`
                     }
@@ -1126,23 +1126,7 @@ export default function HomePage() {
                             "Rank not assigned"}
                         </h3>
 
-                        {membership
-                          .sub_ranks
-                          ?.name && (
-                          <p
-                            className="
-                              mt-1
-                              text-sm
-                              text-neutral-400
-                            "
-                          >
-                            {
-                              membership
-                                .sub_ranks
-                                .name
-                            }
-                          </p>
-                        )}
+
                       </div>
 
                       <span
@@ -1231,7 +1215,7 @@ export default function HomePage() {
                           text-neutral-500
                         "
                       >
-                        {isAikidoYudansha
+                        {showAikikai
                           ? "Member ID / Aikikai Registration Number"
                           : "Member ID"}
                       </p>
@@ -1245,11 +1229,10 @@ export default function HomePage() {
                           text-neutral-200
                         "
                       >
-                        {profile
-                          ?.registration_number ??
-                          "Not assigned"}
+                        <MemberIdLink memberId={profile
+                          ?.registration_number} fallback={"Not assigned"} />
 
-                        {isAikidoYudansha
+                        {showAikikai
                           ? ` / ${
                               profile?.aikikai_registration_number ??
                               "Not assigned"
@@ -1279,19 +1262,19 @@ export default function HomePage() {
                         </span>
                       </p>
                     </div>
-                  </article>
+                  </CompactRecord>
                 );
               }
             )}
           </div>
         )}
-      </section>
+      </CompactRecord>
 
       {/*
        * ANNOUNCEMENTS
        */}
 
-      <section
+      <CompactRecord summary={<>Announcements</>} detail={`${announcements.length} recent announcements`} as="section"
         className="
           mt-10
         "
@@ -1336,7 +1319,9 @@ export default function HomePage() {
               (
                 announcement
               ) => (
-                <article
+                <CompactRecord summary={<>{
+                          announcement.title
+                        }</>}
                   key={
                     announcement.id
                   }
@@ -1419,18 +1404,18 @@ export default function HomePage() {
                       )}
                     </p>
                   </div>
-                </article>
+                </CompactRecord>
               )
             )}
           </div>
         )}
-      </section>
+      </CompactRecord>
 
       {/*
        * EVENTS
        */}
 
-      <section
+      <CompactRecord summary={<>Upcoming Events</>} detail={`${events.length} upcoming events`} as="section"
         className="
           mt-10
         "
@@ -1593,13 +1578,13 @@ export default function HomePage() {
             )}
           </div>
         )}
-      </section>
+      </CompactRecord>
 
       {/*
        * ACCOUNT
        */}
 
-      <section
+      <CompactRecord summary={<>Member Services</>} as="section"
         className="
           mt-10
         "
@@ -1658,14 +1643,14 @@ export default function HomePage() {
             }
           />
         </div>
-      </section>
+      </CompactRecord>
 
       {/*
        * ADMIN ACCESS
        */}
 
       {isAdmin && (
-        <section
+        <CompactRecord summary={<>Admin Dashboard</>} as="section"
           className="
             mt-10
           "
@@ -1756,7 +1741,7 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-        </section>
+        </CompactRecord>
       )}
     </main>
   );
@@ -1796,6 +1781,7 @@ function QuickAction({
 
       className="
         group
+        compact-action
         rounded-2xl
         border
         border-neutral-800

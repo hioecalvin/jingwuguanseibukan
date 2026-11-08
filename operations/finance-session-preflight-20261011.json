@@ -1,0 +1,49 @@
+{
+  "dateSydney": "2026-10-11",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "projectStatus": "ACTIVE_HEALTHY",
+  "managementMetadata": {
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
+    "user": "postgres.eomubndonbetszdbhsrj",
+    "database": "postgres",
+    "advertisedPort": 6543,
+    "advertisedMode": "transaction"
+  },
+  "selectedTransport": {
+    "mode": "session-pooler",
+    "port": 5432,
+    "portBasis": "Supabase documentation: same shared pooler host, session mode on 5432",
+    "sslmode": "verify-full",
+    "automaticFallback": false,
+    "documentation": "https://supabase.com/docs/guides/database/connecting-to-postgres"
+  },
+  "probe": {
+    "attemptCount": 1,
+    "exitCode": 1,
+    "failureCode": "AUTHENTICATION_FAILED",
+    "poolerReachable": true,
+    "loginVerified": false,
+    "ledgerVerified": false,
+    "migrationAttempted": false,
+    "databaseWrites": false
+  },
+  "localCredentialComparison": {
+    "encryptedRecordLastWriteUtc": "2026-08-31T10:57:11.8392543Z",
+    "environmentFile": "C:\\protected\\jingwuguan-staging.env",
+    "environmentKey": "STAGING_DB_URL",
+    "environmentUrlStagingBindingVerified": true,
+    "passwordsMatch": false,
+    "environmentPasswordServerValidityVerified": false,
+    "valuesDisplayedOrChanged": false
+  },
+  "validation": {
+    "focusedPreflightTestsPassed": 8,
+    "fullTestsPassed": 683,
+    "typecheckPassed": true,
+    "focusedLintPassed": true
+  },
+  "productionContact": false,
+  "settingsChanged": false,
+  "messagesSent": false,
+  "nextApproval": "Create a new owner-only DPAPI credential from the existing staging-bound STAGING_DB_URL password, preserve the old record, then run one session-pooler read-only preflight. No server password reset."
+}

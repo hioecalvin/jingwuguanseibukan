@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import CompactNavigation from "@/components/compact-navigation";
 import { usePathname } from "next/navigation";
 
 import {
@@ -12,44 +13,39 @@ import {
 type SidebarProps = {
   role: AppRole;
   memberName?: string | null;
+  hasRepositoryUpload?: boolean;
+  assessmentHistoryEnabled?: boolean;
 };
 
 
-const sectionLabels = {
-  main: "Main",
-  management: "Management",
-  content: "Content",
-  system: "System",
-} as const;
 
 
 export default function Sidebar({
   role,
   memberName,
+  hasRepositoryUpload = false,
+  assessmentHistoryEnabled = false,
 }: SidebarProps) {
   const pathname =
     usePathname();
 
   const items =
     getNavigationForRole(
-      role
+      role,
+      { repositoryUpload: hasRepositoryUpload, assessmentHistory: assessmentHistoryEnabled },
     );
 
 
-  const sections = [
-    "main",
-    "management",
-    "content",
-    "system",
-  ] as const;
 
 
   return (
     <aside
       className="
         hidden
-        min-h-screen
-        w-72
+        h-dvh
+        sticky
+        top-0
+        w-60
         shrink-0
         border-r
         border-neutral-800
@@ -62,8 +58,8 @@ export default function Sidebar({
         className="
           border-b
           border-neutral-800
-          px-6
-          py-6
+          px-4
+          py-4
         "
       >
         <Link
@@ -87,7 +83,7 @@ export default function Sidebar({
             className="
               mt-1
               text-sm
-              text-neutral-500
+              text-neutral-400
             "
           >
             Member Management
@@ -96,128 +92,8 @@ export default function Sidebar({
       </div>
 
 
-      <nav
-        className="
-          flex-1
-          overflow-y-auto
-          px-3
-          py-4
-        "
-      >
-        {sections.map(
-          (
-            section
-          ) => {
-
-            const sectionItems =
-              items.filter(
-                (
-                  item
-                ) =>
-                  item.section ===
-                  section
-              );
-
-
-            if (
-              sectionItems.length ===
-              0
-            ) {
-              return null;
-            }
-
-
-            return (
-              <div
-                key={section}
-                className="
-                  mb-6
-                "
-              >
-                <div
-                  className="
-                    mb-2
-                    px-3
-                    text-xs
-                    font-semibold
-                    uppercase
-                    tracking-wider
-                    text-neutral-600
-                  "
-                >
-                  {
-                    sectionLabels[
-                      section
-                    ]
-                  }
-                </div>
-
-
-                <div
-                  className="
-                    space-y-1
-                  "
-                >
-                  {sectionItems.map(
-                    (
-                      item
-                    ) => {
-
-                      const active =
-                        item.href === "/"
-                          ? pathname === "/"
-                          : pathname ===
-                              item.href ||
-                            pathname.startsWith(
-                              `${item.href}/`
-                            );
-
-
-                      return (
-                        <Link
-                          key={
-                            item.href
-                          }
-                          href={
-                            item.href
-                          }
-                          className={[
-                            `
-                              block
-                              rounded-lg
-                              px-3
-                              py-2.5
-                              text-sm
-                              font-medium
-                              transition
-                            `,
-
-                            active
-                              ? `
-                                  bg-neutral-800
-                                  text-white
-                                `
-                              : `
-                                  text-neutral-400
-                                  hover:bg-neutral-900
-                                  hover:text-white
-                                `,
-                          ].join(
-                            " "
-                          )}
-                        >
-                          {
-                            item.label
-                          }
-                        </Link>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
-            );
-          }
-        )}
+      <nav aria-label="Desktop primary" className="min-h-0 flex-1 overflow-y-auto p-2">
+        <CompactNavigation key={pathname} items={items} pathname={pathname} />
       </nav>
 
 
@@ -226,7 +102,7 @@ export default function Sidebar({
           border-t
           border-neutral-800
           px-6
-          py-5
+          py-3
         "
       >
         <div
@@ -246,7 +122,7 @@ export default function Sidebar({
             mt-1
             text-xs
             capitalize
-            text-neutral-500
+            text-neutral-400
           "
         >
           {role.replace(

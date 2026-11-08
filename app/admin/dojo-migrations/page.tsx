@@ -1,6 +1,10 @@
 "use client";
 
+import MemberIdLink from "@/components/member-id-link";
+import CompactRecord from "@/components/compact-record";
+
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -114,6 +118,39 @@ export default function DojoMigrationHistoryPage() {
       | ""
     >("");
 
+  const loadMigrations = useCallback(async () => {
+    const {
+      data,
+      error,
+    } =
+      await supabase.rpc(
+        "get_dojo_migration_history"
+      );
+
+
+    if (
+      error
+    ) {
+      setMessage(
+        error.message
+      );
+
+      setMessageType(
+        "error"
+      );
+
+      return;
+    }
+
+
+    setMigrations(
+      (
+        data ??
+        []
+      ) as MigrationRow[]
+    );
+  }, [supabase]);
+
 
   useEffect(() => {
     async function loadPage() {
@@ -189,43 +226,10 @@ export default function DojoMigrationHistoryPage() {
 
     loadPage();
   }, [
+    loadMigrations,
     router,
     supabase,
   ]);
-
-
-  async function loadMigrations() {
-    const {
-      data,
-      error,
-    } =
-      await supabase.rpc(
-        "get_dojo_migration_history"
-      );
-
-
-    if (
-      error
-    ) {
-      setMessage(
-        error.message
-      );
-
-      setMessageType(
-        "error"
-      );
-
-      return;
-    }
-
-
-    setMigrations(
-      (
-        data ??
-        []
-      ) as MigrationRow[]
-    );
-  }
 
 
   const classes =
@@ -541,7 +545,7 @@ export default function DojoMigrationHistoryPage() {
           <div className="flex items-center gap-4">
 
             <Image
-              src="/js-logo.jpeg"
+              src="/logos/organization/logo-js.png"
               alt="Jingwuguan Seibukan"
               width={65}
               height={65}
@@ -844,7 +848,10 @@ export default function DojoMigrationHistoryPage() {
                 migration
               ) => (
 
-                <article
+                <CompactRecord summary={<>{
+                            migration
+                              .member_name
+                          }</>}
                   key={
                     migration
                       .migration_id
@@ -895,9 +902,8 @@ export default function DojoMigrationHistoryPage() {
 
                         Member ID:{" "}
 
-                        {migration
-                          .member_id ??
-                          "Not assigned"}
+                        <MemberIdLink memberId={migration
+                          .member_id} fallback={"Not assigned"} />
 
                       </p>
 
@@ -1034,7 +1040,7 @@ export default function DojoMigrationHistoryPage() {
 
                   </div>
 
-                </article>
+                </CompactRecord>
 
               )
             )

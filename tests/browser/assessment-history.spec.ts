@@ -1,0 +1,65 @@
+import { test, expect } from './fixtures';
+import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
+import { installRequestGate, releaseRequestGate } from './request-gate';
+for(const scenario of ['throw-once','error-once']){
+ test(`history recovers from ${scenario} without leaking errors or losing the filter`,async({page})=>{
+  await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=${scenario}`);
+  await expect(page.getByRole('status')).toHaveText('Unable to load assessment history. Please retry.');
+  await expect(page.getByText(/Private/)).toHaveCount(0);
+  await page.getByLabel('Find a record').fill('2026-0042');
+  await page.getByRole('button',{name:'Refresh',exact:true}).click();
+  await expect(page.getByText('2026-0042',{exact:true})).toBeVisible();
+  await expect(page.getByText('2026-0001',{exact:true})).toHaveCount(0);
+ });
+}
+test('empty history is distinct from a failed request',async({page})=>{
+ await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=empty`);
+ await expect(page.getByRole('status')).toHaveText('No assessment records yet.');
+ await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
+});
+test('history refresh is disabled until the request finishes',async({page})=>{
+ await installRequestGate(page,'assessment-history');
+ await page.goto(`${NAV_ORIGIN}/assessment-history-fixture?scenario=slow`);
+ await expect(page.getByRole('button',{name:'Loading…',exact:true})).toBeDisabled();
+ await releaseRequestGate(page,'assessment-history');
+ await expect(page.getByRole('button',{name:'Refresh',exact:true})).toBeEnabled();
+});
+test('history keeps fail and pass separate with unique numbers and expandable details',async({page})=>{
+ await page.goto(`${NAV_ORIGIN}/assessment-history-fixture`);
+ await expect(page.getByText('2026-0001',{exact:true})).toBeVisible();
+ await expect(page.getByText('2026-0042',{exact:true})).toBeVisible();
+ await expect(page.locator('summary .font-mono')).toHaveText(['2026-0001', '2026-0042']);
+ await expect(page.getByText(/^\d{2}-\d{4}$/)).toHaveCount(0);
+ await expect(page.getByText('Reassess later',{exact:true})).not.toBeVisible();
+ await page.locator('summary').filter({hasText:'2026-0001'}).click();
+ await expect(page.getByText('Reassess later',{exact:true})).toBeVisible();
+ await page.getByLabel('Find a record').fill('2026-0042');
+ await expect(page.getByText('2026-0001',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('2026-0042',{exact:true})).toBeVisible();
+ await expect(page.getByText('Pass',{exact:true})).toBeVisible();
+});
+
+test('historical lost, skipped and partial dates are not failed exams',async({page})=>{
+ await page.goto(NAV_ORIGIN+'/assessment-history-fixture?scenario=historical');
+ await expect(page.locator('summary')).toHaveCount(3);
+ await expect(page.getByText('Record lost',{exact:true})).toBeVisible();
+ await expect(page.getByText('Rank skipped',{exact:true})).toBeVisible();
+ await expect(page.getByText('Historical grade',{exact:true})).toBeVisible();
+ await expect(page.getByText('Fail',{exact:true})).toHaveCount(0);
+ await expect(page.locator('summary .font-mono')).toHaveText(['Not numbered — record lost','Not numbered — rank skipped','Not numbered — date incomplete']);
+ await page.locator('summary').first().click();
+ await expect(page.getByText('Source value: X',{exact:true})).toBeVisible();
+ await page.getByLabel('Find a record').fill('Unknown Number');
+ await expect(page.locator('summary')).toHaveCount(0);
+ await page.getByLabel('Find a record').fill('Historical Member');
+ await expect(page.locator('summary')).toHaveCount(3);
+});
+
+test('historical prior grades use the assessment ladder and explain the first grade',async({page})=>{
+ await page.goto(NAV_ORIGIN+'/assessment-history-fixture?scenario=derived');
+ await page.locator('summary').filter({hasText:'2010-0001'}).click();
+ await expect(page.getByText('Kyu-5 → Kyu-4',{exact:true})).toBeVisible();
+ await page.locator('summary').filter({hasText:'0000-0001'}).click();
+ await expect(page.getByText('Ungraded → Chu-yi',{exact:true})).toBeVisible();
+ await expect(page.getByText('Rank Before derived from the class grade order.',{exact:true})).toHaveCount(2);
+});

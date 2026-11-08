@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-15T06:01:19.108Z",
+  "scope": "staging-preview-read-only-browser-acceptance",
+  "branch": "release/v1-readiness-20260918",
+  "runtimeCommit": "ea004d36d8fd9e65bda981b6e131f6b739392690",
+  "testHarnessCommit": "cf21b75bce56e835f0712ee8d77b2a63a64fba5b",
+  "deploymentId": "dpl_7MyaSqrhiQCMXNyfm5SwKVjpHM7y",
+  "origin": "https://jingwuguanseibukan-staging.vercel.app",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "aliasIndependentlyVerified": true,
+  "previousDeploymentRetained": "dpl_HW2ismrCKo8tw1trEbcdXtcUtxKH",
+  "runtimeCi": { "runId": 38530390876, "result": "success", "jobsPassed": 5 },
+  "testHarnessCi": { "runId": 38688688960, "result": "success", "jobsPassed": 5 },
+  "hostProbesPassed": 11,
+  "securityHeadersPassed": true,
+  "browserPassed": 36,
+  "browserFailed": 0,
+  "browserDurationMinutesReported": 5.8,
+  "browserProjects": { "webkit-desktop": 12, "webkit-tablet": 12, "webkit-mobile": 12 },
+  "requestGuardViolations": 0,
+  "testAccounts": ["Member 0101", "Admin 0002", "Super Admin 0001"],
+  "previousAttempts": [
+    { "result": "interrupted", "reason": "Two finance tests awaited lazy-mounted grouped-report RPC before opening its tab; corrected test order only." },
+    { "passed": 31, "failed": 5, "reason": "HTTP 429 at login after consecutive runs; retained failure evidence and waited a full natural cooldown before one fresh run." }
+  ],
+  "focusedLocalChecks": { "typecheck": "passed", "targetedLint": "passed", "browserGuardTestsPassed": 5, "windowsInertSerialRerunPassed": 12 },
+  "commands": [
+    "pwsh -NoProfile -File scripts/probe-staging-host.ps1",
+    "node scripts/staging-browser-smoke.mjs --confirm-staging",
+    "node --test scripts/staging-browser-target.test.mjs",
+    "node --test --test-concurrency=1 scripts/finance-interactive-input.test.mjs scripts/finance-protected-pooler-process.test.mjs"
+  ],
+  "boundaries": {
+    "browserBusinessMutationsPermitted": false,
+    "expectedAuthSessionAndLoginRateLimitWrites": true,
+    "independentSqlResidueOrLedgerRecapturedThisRun": false,
+    "priorSqlEvidence": "operations/finance-postcommit-acceptance-review-20261014.json",
+    "passwordsOrRateLimitsReset": false,
+    "migrationsApplied": false,
+    "messagesSent": false,
+    "workersTriggered": false,
+    "schedulersEnabled": false,
+    "productionContacted": false,
+    "retiredOrDisposableProjectsContacted": false
+  },
+  "remaining": [
+    "Separately approved encrypted current 006-060 staging backup and isolated managed recovery verification.",
+    "Reconcile remaining release evidence and obtain explicit production cutover approval; this record is staging evidence only."
+  ]
+}

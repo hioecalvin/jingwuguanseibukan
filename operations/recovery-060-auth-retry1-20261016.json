@@ -1,0 +1,47 @@
+{
+  "scope": "One approved disposable-only Auth retry",
+  "projectRef": "lzkpibxeqxytewbwgklj",
+  "runId": "82cbe26f7e4d4e01a90d02930feeaf6a",
+  "recordedAt": "2026-10-16T04:35:23.0560178Z",
+  "result": "blocked-at-read-only-database-readiness",
+  "accountsPassed": 0,
+  "accountLoginAttempts": 0,
+  "protectedPasswordMatches": 3,
+  "passwordProviderEnableAttempted": false,
+  "passwordsReset": false,
+  "messagesSent": false,
+  "otherProjectsContacted": false,
+  "failure": {
+    "step": "auth-preflight",
+    "sqlState": "57P01",
+    "psqlExitCode": 2,
+    "serverClosedConnection": true,
+    "passwordAuthenticationFailureReported": false,
+    "rootCauseVerified": false
+  },
+  "cleanup": {
+    "independentlyVerifiedAt": "2026-10-16T04:35:23.0560178Z",
+    "status": "INACTIVE",
+    "authDisabledVerified": true,
+    "smtpAbsent": true,
+    "functions": 0,
+    "secrets": 0
+  },
+  "evidenceDirectory": "C:\\protected\\jwg-database-access-5ff37a1e79bc48d78f8ffb6a5179a77d",
+  "evidence": [
+    {"file": "auth-retry1-wrapper-result-82cbe26f7e4d4e01a90d02930feeaf6a.json", "sha256": "ace52e6d07b1edd209c4db2353a4c1ced59047f2e224ffb58a65ac1e8bda5e89"},
+    {"file": "auth-retry1-error-82cbe26f7e4d4e01a90d02930feeaf6a.json", "sha256": "71abe9ba2d1467e10e6132222d024c64aa6c8579e069b3fc277f62666b158159"},
+    {"file": "direct-metadata-error-82cbe26f7e4d4e01a90d02930feeaf6a.json", "sha256": "41924e1f45dccbfedc3aecdd0740f96b3ef510408e9015f34bd71593c3f7bc1d"},
+    {"file": "state-inspection-b1aca520bb904e72b56b87462da38c43.json", "sha256": "fa23c5e03d8f3bae7792b7898da883c8a5b027650857b0be0bafa2f4867c38df"}
+  ],
+  "localGuardTestsPassed": 39,
+  "ownerOnlyEvidenceFilesVerified": 199,
+  "originalAttemptAndRestoreEvidencePreserved": true,
+  "retryApprovalConsumed": true,
+  "automaticFurtherRetryAllowed": false,
+  "limitations": [
+    "New config snapshots and strict current-baseline checks were prepared and locally tested but not reached live.",
+    "No live login, refresh, logout, or complete database postflight passed during this retry.",
+    "The prior Auth configuration discrepancy remains separate; this stop occurred before any Auth toggle."
+  ]
+}

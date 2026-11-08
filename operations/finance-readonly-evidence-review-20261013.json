@@ -1,0 +1,79 @@
+{
+  "dateSydney": "2026-10-13",
+  "projectRef": "eomubndonbetszdbhsrj",
+  "scope": "approved-read-only-baseline-capability-ledger-and-test-account-evidence",
+  "evidenceDirectory": "C:\\protected\\jwg-finance-readonly-a823c8874a05448db72f977a3e684fee",
+  "clientConnections": 7,
+  "retries": 0,
+  "captureWindowUtc": ["2026-10-13T08:05:30.737035Z", "2026-10-13T08:05:47.259639Z"],
+  "offlineVerifiedAtUtc": "2026-10-13T08:05:49.333Z",
+  "transport": {
+    "kind": "session-pooler",
+    "host": "aws-0-ap-southeast-2.pooler.supabase.com",
+    "port": 5432,
+    "sslmode": "verify-full",
+    "pinnedNodeClientCaVerified": true,
+    "ownerOnlyStagingBoundDpapiCredential": true,
+    "allCapturesServerReadOnly": true,
+    "allCapturesServerTls": true,
+    "sameServerIdentityVerified": true,
+    "distinctObservedBackendCount": 1,
+    "independentPostMutationBackendVerified": false
+  },
+  "findings": {
+    "publicTables": 67,
+    "publicSequences": 6,
+    "prerequisiteBlockers": [],
+    "nonCatalogColumnTypesRestrictedToPublicEnums": true,
+    "serializationFunctionsRestrictedToExecutablePgCatalog": true,
+    "requiredPoolerCapabilitiesVerified": true,
+    "allStatsVisible": true,
+    "capabilityProbeAssignedXid": null,
+    "ledgerVersions": "006-058",
+    "ledgerCount": 53,
+    "ledgerNamesAndStatementContentsMatchRepository": true,
+    "independentIdentityLookupAccountCount": 3,
+    "bindingDerivedFromIdentityNotActorCapture": true,
+    "boundActorIds": ["0101", "0002", "0001"],
+    "actorEligibilityAndExpectedRolesVerified": true,
+    "authLoginTested": false,
+    "liveRoleSecurityTested": false,
+    "completeBundleAssembledOffline": true,
+    "guardOrBundleExecuted": false
+  },
+  "captureSha256": {
+    "capabilities": "3f6037f329b44fd3d192c155bd10e411a98b32fc1b35a84bdd792a6704fb683f",
+    "prerequisites": "befd436ae344e132392bdff2f5702d08c2c150ce212690fdaa62ddb7a2ac2fca",
+    "identity": "819a410a4328215b74ac64b509083edf576daadd1c597204a9f6fdc888be6d5b",
+    "bindings": "b8c49db19f8fc2bbe6acc5d618551094107040f987a793c80e634f42af3f3c5d",
+    "ledgerV2": "76f7d951aae860a3cf64a6b1666fb29aab6c781f25717af57c80af02fd691529",
+    "inventory": "e82145e3df30c77226638f099582d7425e094b28b5837a412455037fc3843110",
+    "baseline": "d910a61a5a4a4d632f19b391fb9b7f50b3f8cf3e69ddedfc67d5693bb504905b",
+    "actorsV2": "eb03399a8d7be91755d1d0499a1a4b2e55fab4c37c863d01ca72d11c5d3d31cb"
+  },
+  "preparedBundleSha256": "f35c0e29c7607ce855fa1fa411240648736ba933c57d5b48e078cd190f826a97",
+  "boundaries": {
+    "newOwnerOnlyEvidenceFiles": 8,
+    "previousEvidenceOverwritten": false,
+    "credentialChanged": false,
+    "databaseWrites": false,
+    "writeRehearsalExecuted": false,
+    "migrations059060Applied": false,
+    "productionOtherProjectOrProviderContact": false,
+    "messagesSent": false,
+    "commitPushOrDeployment": false
+  },
+  "testsThisTurn": {
+    "oneOffWrapperAndVerifierSyntax": "passed",
+    "focusedAssemblerAndGuard": "7 passed, zero skipped",
+    "fullRegressionRerun": false,
+    "previousFullRegression": "typecheck +843 tests passed"
+  },
+  "remaining": [
+    "Freshness passed at the recorded verification time only; do not reuse expired captures or alter their timestamps.",
+    "Separate explicit approval for one rollback-contained staging 059-060 rehearsal with fresh before/after evidence and independent closure, ledger, actor and public catalog/data/sequence reconciliation.",
+    "Sequential read-only connections reused one physical backend; this is not post-mutation independence or rollback proof. Do not weaken distinct-backend gates.",
+    "Positive guard, account recheck, fixture and rollback acceptance remain unverified live.",
+    "Persistent migration application, deployment and production cutover remain separately authorized operations."
+  ]
+}
