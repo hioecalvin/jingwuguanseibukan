@@ -78,11 +78,19 @@ export function createClient() {
       await wait();
       if (name === 'get_active_grading_assessors') return { data: [assessor], error: null };
       if (name === 'get_prepared_bulk_assessments') return { data: preparedSummary.map(row => ({ ...row })), error: null };
-      if (name === 'get_bulk_assessment_candidates_with_member_ids') {
-        if (args.target_class_id !== scope.class_id || args.target_dojo_id !== scope.dojo_id) {
+      if (name === 'get_dated_assessment_candidates') {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(args.target_assessment_date)) || args.target_class_id !== scope.class_id || args.target_dojo_id !== scope.dojo_id) {
           return { data: null, error: new Error('Assessment scope is outside the fixture Admin assignment.') };
         }
-        return { data: candidates.map(row => ({ ...row, target_options: targetOptions(row) })), error: null };
+        return { data: candidates.map(row => {
+          if (!new URLSearchParams(window.location.search).has('starting-age') || row.membership_id !== 'membership-low') return { ...row, target_options: targetOptions(row) };
+          const missing = new URLSearchParams(window.location.search).get('starting-age') === 'missing';
+          const fifth = { ...targetOptions(row)[0], rank_to_id: 'rank-5kyu', rank_to_name: '5th Kyu' };
+          const ninth = { ...fifth, rank_to_id: 'rank-9kyu', rank_to_name: '9th Kyu' };
+          const options = missing ? [] : String(args.target_assessment_date) < '2030-01-01' ? [ninth, fifth] : [fifth];
+          return { ...row, rank_before_id: null, rank_before_name: null, rank_to_id: options[0]?.rank_to_id ?? null, rank_to_name: options[0]?.rank_to_name ?? null,
+            target_options: options, target_blocked_reason: missing ? 'Update the member date of birth before including this member.' : null };
+        }), error: null };
       }
       if (name === 'prepare_bulk_assessment') {
         const selected = Array.isArray(args.selected_candidates) ? args.selected_candidates as Array<Record<string, unknown>> : [];

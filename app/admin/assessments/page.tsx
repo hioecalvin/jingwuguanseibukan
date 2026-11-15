@@ -53,6 +53,7 @@ type Candidate = {
   is_rank_promotion: boolean;
   level_to: "mudansha" | "yudansha";
   target_options?: AssessmentTarget[];
+  target_blocked_reason?: string | null;
 };
 
 type AssessmentTarget = Pick<Candidate, "rank_to_id" | "rank_to_name" |
@@ -253,6 +254,7 @@ export default function BulkAssessmentsPage() {
     membershipId: string,
     update: Partial<CandidateDecision>,
   ) {
+    if (update.included && candidates.find(row => row.membership_id === membershipId)?.target_blocked_reason) return;
     setDecisions((current) => ({
       ...current,
       [membershipId]: {
@@ -285,10 +287,11 @@ export default function BulkAssessmentsPage() {
     setError(null);
     resetSubmissionState();
     const { data, error: rosterError } = await supabase.rpc(
-      "get_bulk_assessment_candidates_with_member_ids",
+      "get_dated_assessment_candidates",
       {
         target_class_id: classId,
         target_dojo_id: dojoId || null,
+        target_assessment_date: assessmentDate,
       },
     );
     setLoadingRoster(false);
@@ -670,7 +673,7 @@ export default function BulkAssessmentsPage() {
             <span className="mb-2 block font-medium">Class</span>
             <select
               value={classId}
-              disabled={loadingCatalog || submitting || Boolean(preparedAssessmentId)}
+              disabled={loadingCatalog || loadingRoster || submitting || Boolean(preparedAssessmentId)}
               onChange={(event) => {
                 setClassId(event.target.value);
                 setDojoId("");
@@ -688,7 +691,7 @@ export default function BulkAssessmentsPage() {
             <span className="mb-2 block font-medium">Dojo (optional)</span>
             <select
               value={dojoId}
-              disabled={!classId || submitting || Boolean(preparedAssessmentId)}
+              disabled={!classId || loadingRoster || submitting || Boolean(preparedAssessmentId)}
               onChange={(event) => {
                 setDojoId(event.target.value);
                 setCandidates([]);
@@ -707,9 +710,11 @@ export default function BulkAssessmentsPage() {
               type="date"
               value={assessmentDate}
               min={preparedAssessmentId ? undefined : todayInputValue()}
-              disabled={submitting || Boolean(preparedAssessmentId)}
+              disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
               onChange={(event) => {
                 setAssessmentDate(event.target.value);
+                setCandidates([]);
+                setDecisions({});
                 clearPreparedAssessment();
               }}
               className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2.5 text-white"
@@ -741,7 +746,7 @@ export default function BulkAssessmentsPage() {
             <span className="mb-2 block font-medium">Appointed grading assessor</span>
             <select
               value={assessorMemberId}
-              disabled={submitting || Boolean(preparedAssessmentId)}
+              disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
               onChange={(event) => {
                 setAssessorMemberId(event.target.value);
                 clearPreparedAssessment();
@@ -772,7 +777,7 @@ export default function BulkAssessmentsPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                disabled={submitting || Boolean(preparedAssessmentId)}
+                disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
                 onClick={() => {
                   for (const candidate of visibleCandidates) updateDecision(candidate.membership_id, { included: true });
                 }}
@@ -782,7 +787,7 @@ export default function BulkAssessmentsPage() {
               </button>
               <button
                 type="button"
-                disabled={submitting || Boolean(preparedAssessmentId)}
+                disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
                 onClick={() => {
                   for (const candidate of candidates) updateDecision(candidate.membership_id, { included: false });
                 }}
@@ -794,6 +799,7 @@ export default function BulkAssessmentsPage() {
           )}
         </div>
 
+        <p className="text-sm text-neutral-400">Ungraded Aikido: age 15 or older can assess for 5th Kyu; under 15 can choose 9th or 5th Kyu. Age is based on the assessment date.</p>
         <label className="block text-sm text-neutral-300">Search assessment members<input type="search" value={candidateSearch} onChange={event => setCandidateSearch(event.target.value)} placeholder="Name, JS ID, dojo or rank" className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2" /></label>
         <p className="text-sm text-neutral-400">Showing {visibleCandidates.length} of {candidates.length}. Selected members stay at the top.</p>
         {visibleCandidates.length === 0 && candidates.length > 0 && <p className="text-sm text-neutral-400">No matching members.</p>}
@@ -817,7 +823,7 @@ export default function BulkAssessmentsPage() {
                       <input
                         type="checkbox"
                         checked={decision.included}
-                        disabled={submitting || Boolean(preparedAssessmentId)}
+                        disabled={submitting || Boolean(preparedAssessmentId) || Boolean(candidate.target_blocked_reason)}
                         onChange={(event) => updateDecision(candidate.membership_id, { included: event.target.checked })}
                         className="h-5 w-5 rounded border-neutral-600 bg-neutral-950 text-amber-500"
                       />
@@ -837,8 +843,8 @@ export default function BulkAssessmentsPage() {
                     ) : (
                       <select
                         aria-label={`Target grade for ${candidate.full_name}`}
-                        value={candidate.rank_to_id}
-                        disabled={preparing || submitting}
+                        value={candidate.rank_to_id ?? ""}
+                        disabled={preparing || submitting || Boolean(candidate.target_blocked_reason)}
                         onChange={(event) => updateTarget(candidate.membership_id, event.target.value)}
                         className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 font-semibold text-amber-300 disabled:opacity-50"
                       >
@@ -847,7 +853,8 @@ export default function BulkAssessmentsPage() {
                         ))}
                       </select>
                     )}
-                    {candidate.is_rank_promotion && (
+                    {candidate.target_blocked_reason && <p className="mt-2 text-amber-300">{candidate.target_blocked_reason}</p>}
+                    {candidate.is_rank_promotion && !candidate.target_blocked_reason && (
                       <span className="mt-2 inline-flex rounded-full border border-violet-800 px-2 py-1 text-xs font-medium text-violet-200">
                         Certificate eligible if passed
                       </span>

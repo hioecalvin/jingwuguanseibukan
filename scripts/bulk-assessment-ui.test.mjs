@@ -16,7 +16,7 @@ const assessmentLayout = await readFile(
 );
 
 test("bulk assessment page prepares a persisted roster before atomic finalization", () => {
-  assert.match(page, /get_bulk_assessment_candidates/);
+  assert.match(page, /get_dated_assessment_candidates/);
   assert.match(page, /prepare_bulk_assessment/);
   assert.match(page, /get_prepared_bulk_assessments/);
   assert.match(page, /get_prepared_bulk_assessment/);

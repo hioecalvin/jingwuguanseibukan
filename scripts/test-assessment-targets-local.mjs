@@ -29,6 +29,7 @@ try{
  const query=sql=>run('psql',args,sql).trim();
  query(read('tests/sql/041_atomic_bulk_assessments_fixture.sql'));
  query(`alter table public.profiles add column registration_number text;
+ alter table public.profiles add column date_of_birth date;
  update public.profiles set registration_number='JS-'||right(id::text,4);
  alter table public.class_memberships add column role text default 'member';
  create type public.membership_status as enum('active','inactive','break','break_1','break_2');
@@ -63,17 +64,23 @@ try{
  update public.ranks set name=case right(id::text,1) when '1' then '8th Kyu' when '2' then '7th Kyu' when '3' then '5th Kyu' else '4th Kyu' end;
  update public.class_memberships set rank_id=null,sub_rank_id=null where class_id='10000000-0000-0000-0000-000000000002';`);
  query(definition('supabase/pending/071_member_rank_only_progression.sql','_calculate_membership_promotion'));
+ let currentCatalog=null;
  if(process.argv[3]){
   const raw=readFileSync(process.argv[3]);
   assert.equal(createHash('sha256').update(raw).digest('hex'),process.argv[4],'Captured assessment catalog differs');
   const catalog=JSON.parse(raw.toString('utf8'));
-  assert.equal(catalog.routines.length,11);
-  for(const routine of catalog.routines)query(routine.definition);
-  console.log('Loaded all11 captured production assessment routines; fictional profiles and Auth fixture only.');
+  assert.ok([11,13].includes(catalog.routines.length));
+  if(catalog.routines.length===11)for(const routine of catalog.routines)query(routine.definition);
+  else currentCatalog=catalog;
+  console.log('Captured '+catalog.routines.length+' production routines; fictional profiles and Auth fixture only.');
  }
  query(read('supabase/pending/096_assessment_higher_rank_targets.sql'));
+ if(currentCatalog)for(const routine of currentCatalog.routines)query(routine.definition);
+ query(read('supabase/pending/097_aikido_starting_assessment_age.sql'));
  query(read('tests/sql/096_assessment_higher_rank_targets_assertions.sql'));
- console.log('PASS: synthetic higher-target preparation, pass/fail attempts, snapshots, stale rejection and access checks.');
+ query(read('tests/sql/097_aikido_starting_assessment_age_assertions.sql'));
+ writeFileSync(path.join(root,'expected-routines.json'),query("select jsonb_agg(jsonb_build_object('name',p.proname,'definition',pg_get_functiondef(p.oid)) order by p.proname) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('_starting_assessment_target_allowed','_resolve_dated_assessment_target','get_dated_assessment_candidates','get_bulk_assessment_candidates_with_member_ids','prepare_bulk_assessment','submit_bulk_assessment','_apply_assessed_membership_target')"));
+ console.log('PASS: dated starting grades, higher targets, pass/fail attempts, stale rejection and access checks.');
  writeFileSync(path.join(root,'result.json'),JSON.stringify({passed:true,capturedRoutines:!!process.argv[3],syntheticOnly:true,remoteCalls:false}));
  console.log('Synthetic cluster retained: '+root);
 }finally{if(started)run('pg_ctl',['-D',data,'-m','fast','-w','stop']);}

@@ -1,6 +1,36 @@
 import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
 import { test, expect } from './fixtures';
 
+test('starting options use assessment date and a date change clears stale selections', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-assessments?starting-age=known');
+  await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
+  await page.getByLabel('Assessment date').fill('2029-12-31');
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  const target = page.getByRole('combobox', { name: 'Target grade for Citra Junior' });
+  await expect(target.locator('option')).toHaveText(['9th Kyu', '5th Kyu']);
+  await target.selectOption('rank-9kyu');
+  await page.getByRole('checkbox', { name: 'Include Citra Junior' }).check();
+  await page.getByLabel('Assessment date').fill('2030-01-01');
+  await expect(target).toHaveCount(0);
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  await expect(target.locator('option')).toHaveText(['5th Kyu']);
+  await expect(target).toHaveValue('rank-5kyu');
+  await expect(page.getByRole('checkbox', { name: 'Include Citra Junior' })).not.toBeChecked();
+});
+
+test('missing birth date prevents individual and include-visible selection', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-assessments?starting-age=missing');
+  await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  await expect(page.getByText('Update the member date of birth before including this member.')).toBeVisible();
+  const blocked = page.getByRole('checkbox', { name: 'Include Citra Junior' });
+  await expect(blocked).toBeDisabled();
+  await expect(page.getByRole('combobox', { name: 'Target grade for Citra Junior' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Include visible' }).click();
+  await expect(blocked).not.toBeChecked();
+  await expect(page.getByText('Included 2 of 3 eligible candidates.')).toBeVisible();
+});
+
 test('Super Admin prepares pending certificates and submits one atomic pass/fail assessment', async ({ page }) => {
   await page.goto(`${NAV_ORIGIN}/admin-assessments`);
   await expect(page).toHaveTitle('Assessment mutation workflow fixture');
