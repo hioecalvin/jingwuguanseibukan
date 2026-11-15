@@ -33,6 +33,17 @@ const candidates = [
   },
 ] as const;
 
+function targetOptions(candidate: typeof candidates[number]) {
+  const ownTarget = {
+    rank_to_id: candidate.rank_to_id, rank_to_name: candidate.rank_to_name,
+    sub_rank_to_id: null, sub_rank_to_name: null,
+    is_rank_promotion: true, level_to: candidate.level_to,
+  };
+  return candidate.membership_id === 'membership-low'
+    ? [ownTarget, { ...ownTarget, rank_to_id: 'rank-2kyu', rank_to_name: '2nd Kyu' }]
+    : [ownTarget];
+}
+
 let preparedRows: Array<Record<string, unknown>> = [];
 let preparedSummary: Array<Record<string, unknown>> = [];
 let submission: Record<string, unknown> | null = null;
@@ -71,7 +82,7 @@ export function createClient() {
         if (args.target_class_id !== scope.class_id || args.target_dojo_id !== scope.dojo_id) {
           return { data: null, error: new Error('Assessment scope is outside the fixture Admin assignment.') };
         }
-        return { data: candidates.map(row => ({ ...row })), error: null };
+        return { data: candidates.map(row => ({ ...row, target_options: targetOptions(row) })), error: null };
       }
       if (name === 'prepare_bulk_assessment') {
         const selected = Array.isArray(args.selected_candidates) ? args.selected_candidates as Array<Record<string, unknown>> : [];
@@ -79,8 +90,13 @@ export function createClient() {
           return { data: null, error: new Error('The complete roster and appointed assessor must be prepared together.') };
         }
         const assessmentDate = String(args.assessment_date);
+        const selectedTargets = new Map(selected.map(row => [row.membership_id, row.expected_rank_to_id]));
+        if (candidates.some(candidate => !targetOptions(candidate).some(target => target.rank_to_id === selectedTargets.get(candidate.membership_id)))) {
+          return { data: null, error: new Error('Target must be a configured higher grade.') };
+        }
         preparedRows = candidates.map((candidate, index) => ({
           ...candidate,
+          ...targetOptions(candidate).find(target => target.rank_to_id === selectedTargets.get(candidate.membership_id)),
           prepared_assessment_id: 'prepared-fixture', status: 'pending', assessment_date: assessmentDate,
           member_assessor_id: assessor.member_id, external_assessor_name: null, assessor_name_snapshot: null,
           member_id: `JS-${100 + index}`, aikikai_registration_number: null, class_logo_url: '/fixture-class-logo.png',

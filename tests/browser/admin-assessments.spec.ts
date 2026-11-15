@@ -77,3 +77,20 @@ test('assessment search finds JS IDs and keeps selected members first', async ({
   await expect(choices.first()).toHaveAccessibleName('Include Citra Junior');
   await expect(page.getByText('Included 1 of 3 eligible candidates.')).toBeVisible();
 });
+
+test('higher target selection is saved in the prepared roster and then fixed', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-assessments');
+  await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  const target = page.getByRole('combobox', { name: 'Target grade for Citra Junior' });
+  await expect(target.locator('option')).toHaveText(['4th Kyu', '2nd Kyu']);
+  await target.selectOption('rank-2kyu');
+  await page.getByRole('button', { name: 'Include visible' }).click();
+  await page.getByRole('button', { name: 'Prepare roster and pending certificates' }).click();
+  await expect(page.getByRole('status')).toContainText('Prepared assessment opened');
+  await expect(target).toHaveCount(0);
+  const state = await page.evaluate(() => (window as unknown as Window & {
+    __assessmentFixture: { preparedRows: Array<{ membership_id: string; rank_to_id: string }> }
+  }).__assessmentFixture);
+  expect(state.preparedRows.find(row => row.membership_id === 'membership-low')).toMatchObject({ rank_to_id: 'rank-2kyu' });
+});

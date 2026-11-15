@@ -52,7 +52,11 @@ type Candidate = {
   sub_rank_to_name: string | null;
   is_rank_promotion: boolean;
   level_to: "mudansha" | "yudansha";
+  target_options?: AssessmentTarget[];
 };
+
+type AssessmentTarget = Pick<Candidate, "rank_to_id" | "rank_to_name" |
+  "sub_rank_to_id" | "sub_rank_to_name" | "is_rank_promotion" | "level_to">;
 
 type CandidateDecision = {
   included: boolean;
@@ -259,6 +263,18 @@ export default function BulkAssessmentsPage() {
     resetSubmissionState();
   }
 
+  function updateTarget(membershipId: string, rankId: string) {
+    if (preparedAssessmentId || preparing || submitting) return;
+    const candidate = candidates.find((row) => row.membership_id === membershipId);
+    const target = candidate?.target_options?.find((option) => option.rank_to_id === rankId);
+    if (!target) return;
+    setCandidates((current) => current.map((row) =>
+      row.membership_id === membershipId ? { ...row, ...target } : row,
+    ));
+    setSubmissionKey(crypto.randomUUID());
+    resetSubmissionState();
+  }
+
   async function loadRoster() {
     if (!classId || !assessmentDate) {
       setError("Select a class and assessment date first.");
@@ -301,7 +317,7 @@ export default function BulkAssessmentsPage() {
     setSubmissionKey(crypto.randomUUID());
     clearPreparedAssessment();
     if (rows.length === 0) {
-      setError("No active members with a configured next grade were found.");
+      setError("No active members with a configured higher grade were found.");
     }
   }
 
@@ -816,7 +832,21 @@ export default function BulkAssessmentsPage() {
                   <p className="text-neutral-500">Current grade</p>
                   <p className="mt-1 font-medium text-neutral-200">{gradeLabel(candidate.rank_before_name, null)}</p>
                   <p className="mt-3 text-neutral-500">Target grade</p>
-                    <p className="mt-1 font-semibold text-amber-300">{gradeLabel(candidate.rank_to_name, candidate.sub_rank_to_name)}</p>
+                    {preparedAssessmentId ? (
+                      <p className="mt-1 font-semibold text-amber-300">{gradeLabel(candidate.rank_to_name, candidate.sub_rank_to_name)}</p>
+                    ) : (
+                      <select
+                        aria-label={`Target grade for ${candidate.full_name}`}
+                        value={candidate.rank_to_id}
+                        disabled={preparing || submitting}
+                        onChange={(event) => updateTarget(candidate.membership_id, event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 font-semibold text-amber-300 disabled:opacity-50"
+                      >
+                        {(candidate.target_options ?? [candidate]).map((target) => (
+                          <option key={target.rank_to_id} value={target.rank_to_id}>{target.rank_to_name}</option>
+                        ))}
+                      </select>
+                    )}
                     {candidate.is_rank_promotion && (
                       <span className="mt-2 inline-flex rounded-full border border-violet-800 px-2 py-1 text-xs font-medium text-violet-200">
                         Certificate eligible if passed
