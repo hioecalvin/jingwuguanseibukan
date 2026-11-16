@@ -1,5 +1,6 @@
 "use client";
 import { gradingCategoryLabel } from "@/lib/grading-category";
+import { assessmentPreparationError } from "@/lib/assessment-preparation-error";
 
 import { selectedFirst } from "@/lib/selected-first";
 
@@ -8,7 +9,7 @@ import CompactRecord from "@/components/compact-record";
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pdf } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 
@@ -137,6 +138,7 @@ export default function BulkAssessmentsPage() {
   const [assessorMemberId, setAssessorMemberId] = useState("");
   const [externalAssessorName, setExternalAssessorName] = useState("");
   const [candidateSearch, setCandidateSearch] = useState("");
+  const candidateSearchInput = useRef<HTMLInputElement>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [decisions, setDecisions] = useState<Record<string, CandidateDecision>>({});
   const [submissionKey, setSubmissionKey] = useState("");
@@ -218,7 +220,10 @@ export default function BulkAssessmentsPage() {
   }, [classId, scopeRows]);
 
   const query = candidateSearch.toLowerCase().replace(/[-\s]/g, "");
-  const visibleCandidates = selectedFirst(candidates, candidate => Boolean(decisions[candidate.membership_id]?.included)).filter(candidate => decisions[candidate.membership_id]?.included || [candidate.member_id, candidate.full_name, candidate.dojo_name, candidate.rank_before_name, candidate.rank_to_name].filter(Boolean).join(" ").toLowerCase().replace(/[-\s]/g, "").includes(query));
+  const matchingCandidates = candidates.filter(candidate => !decisions[candidate.membership_id]?.included && [candidate.member_id, candidate.full_name, candidate.dojo_name, candidate.rank_before_name, candidate.rank_to_name].filter(Boolean).join(" ").toLowerCase().replace(/[-\s]/g, "").includes(query));
+  const visibleCandidates = query
+    ? [...matchingCandidates, ...candidates.filter(candidate => decisions[candidate.membership_id]?.included)]
+    : selectedFirst(candidates, candidate => Boolean(decisions[candidate.membership_id]?.included));
   const includedCandidates = candidates.filter(
     (candidate) => decisions[candidate.membership_id]?.included,
   );
@@ -401,7 +406,7 @@ export default function BulkAssessmentsPage() {
     setPreparing(false);
     if (prepareError) {
       console.error("Assessment preparation failed", prepareError);
-      setError("The roster and pending certificates were not prepared. Review the selections and retry.");
+      setError(assessmentPreparationError(prepareError.message));
       return;
     }
     const response = (data ?? {}) as { prepared_assessment_id?: string };
@@ -709,7 +714,6 @@ export default function BulkAssessmentsPage() {
             <input
               type="date"
               value={assessmentDate}
-              min={preparedAssessmentId ? undefined : todayInputValue()}
               disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
               onChange={(event) => {
                 setAssessmentDate(event.target.value);
@@ -779,7 +783,8 @@ export default function BulkAssessmentsPage() {
                 type="button"
                 disabled={loadingRoster || submitting || Boolean(preparedAssessmentId)}
                 onClick={() => {
-                  for (const candidate of visibleCandidates) updateDecision(candidate.membership_id, { included: true });
+                  for (const candidate of matchingCandidates) updateDecision(candidate.membership_id, { included: true });
+                  setCandidateSearch("");
                 }}
                 className="rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
               >
@@ -800,14 +805,21 @@ export default function BulkAssessmentsPage() {
         </div>
 
         <p className="text-sm text-neutral-400">Ungraded Aikido: age 15 or older can assess for 5th Kyu; under 15 can choose 9th or 5th Kyu. Age is based on the assessment date.</p>
-        <label className="block text-sm text-neutral-300">Search assessment members<input type="search" value={candidateSearch} onChange={event => setCandidateSearch(event.target.value)} placeholder="Name, JS ID, dojo or rank" className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2" /></label>
-        <p className="text-sm text-neutral-400">Showing {visibleCandidates.length} of {candidates.length}. Selected members stay at the top.</p>
-        {visibleCandidates.length === 0 && candidates.length > 0 && <p className="text-sm text-neutral-400">No matching members.</p>}
-        {visibleCandidates.map((candidate) => {
+        <div className="flex items-end gap-2">
+          <label className="min-w-0 flex-1 text-sm text-neutral-300">Search assessment members
+            <input ref={candidateSearchInput} type="search" value={candidateSearch} onChange={event => setCandidateSearch(event.target.value)} onKeyDown={event => { if (event.key === "Escape") { setCandidateSearch(""); event.preventDefault(); } }} placeholder="Name, JS ID, dojo or rank" className="mt-1 w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2" />
+          </label>
+          <button type="button" disabled={!candidateSearch} onClick={() => { setCandidateSearch(""); candidateSearchInput.current?.focus(); }} className="min-h-11 shrink-0 rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-200 disabled:opacity-50">Clear search</button>
+        </div>
+        <p className="text-sm text-neutral-400">Showing {visibleCandidates.length} of {candidates.length}. {query ? "Search results first, then selected members." : "Selected members stay at the top."} Selecting a member clears the search. Press Escape to clear it too.</p>
+        {query && matchingCandidates.length === 0 && <p className="text-sm text-neutral-400">No matching unselected members. Your selections are kept below.</p>}
+        {visibleCandidates.map((candidate, index) => {
           const decision = decisions[candidate.membership_id];
           if (!decision) return null;
           const controlPrefix = `candidate-${candidate.membership_id}`;
           return (
+            <Fragment key={candidate.membership_id}>
+            {(index === 0 || Boolean(decisions[visibleCandidates[index - 1].membership_id]?.included) !== decision.included) && <h3 className="text-sm font-semibold text-neutral-300">{decision.included ? `Selected members (${includedCandidates.length})` : query ? "Search results" : "Available members"}</h3>}
             <CompactRecord summary={<>{candidate.full_name}</>} defaultExpanded detail={<>{candidate.dojo_name ?? "No dojo"} · {decision.included ? decision.outcome : "Not included"}</>} key={candidate.membership_id} className={`rounded-2xl border p-4 sm:p-5 ${decision.included ? "border-amber-700 bg-amber-950/10" : "border-neutral-800 bg-neutral-900/50"}`}>
               <div className="grid gap-5 xl:grid-cols-[minmax(15rem,1.2fr)_minmax(12rem,1fr)_minmax(14rem,1.2fr)]">
                 <div className="flex items-start gap-3">
@@ -824,7 +836,13 @@ export default function BulkAssessmentsPage() {
                         type="checkbox"
                         checked={decision.included}
                         disabled={submitting || Boolean(preparedAssessmentId) || Boolean(candidate.target_blocked_reason)}
-                        onChange={(event) => updateDecision(candidate.membership_id, { included: event.target.checked })}
+                        onChange={(event) => {
+                          updateDecision(candidate.membership_id, { included: event.target.checked });
+                          if (event.target.checked) {
+                            setCandidateSearch("");
+                            candidateSearchInput.current?.focus();
+                          }
+                        }}
                         className="h-5 w-5 rounded border-neutral-600 bg-neutral-950 text-amber-500"
                       />
                       <span>Include {candidate.full_name}</span>
@@ -902,6 +920,7 @@ export default function BulkAssessmentsPage() {
                 </div>
               </div>
             </CompactRecord>
+            </Fragment>
           );
         })}
       </section>

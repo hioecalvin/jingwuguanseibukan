@@ -65,22 +65,38 @@ try{
  update public.class_memberships set rank_id=null,sub_rank_id=null where class_id='10000000-0000-0000-0000-000000000002';`);
  query(definition('supabase/pending/071_member_rank_only_progression.sql','_calculate_membership_promotion'));
  let currentCatalog=null;
+ const current098Baseline=process.argv[5]==='--current-098-baseline';
  if(process.argv[3]){
   const raw=readFileSync(process.argv[3]);
   assert.equal(createHash('sha256').update(raw).digest('hex'),process.argv[4],'Captured assessment catalog differs');
   const catalog=JSON.parse(raw.toString('utf8'));
-  assert.ok([11,13].includes(catalog.routines.length));
-  if(catalog.routines.length===11)for(const routine of catalog.routines)query(routine.definition);
+  assert.ok(current098Baseline ? catalog.routines.length>=16 : [11,13].includes(catalog.routines.length));
+  if(!current098Baseline&&catalog.routines.length===11)for(const routine of catalog.routines)query(routine.definition);
   else currentCatalog=catalog;
   console.log('Captured '+catalog.routines.length+' production routines; fictional profiles and Auth fixture only.');
  }
  query(read('supabase/pending/096_assessment_higher_rank_targets.sql'));
- if(currentCatalog)for(const routine of currentCatalog.routines)query(routine.definition);
+ if(currentCatalog&&!current098Baseline)for(const routine of currentCatalog.routines)query(routine.definition);
  query(read('supabase/pending/097_aikido_starting_assessment_age.sql'));
+ if(current098Baseline){
+  const required=new Set(['_apply_assessed_membership_promotion','prepare_bulk_assessment','submit_bulk_assessment','finalize_prepared_bulk_assessment','get_bulk_assessment_candidates_with_member_ids','get_bulk_assessment_candidates','assert_membership_progression_scope','_calculate_membership_promotion','get_next_membership_promotion','is_active_super_admin','_require_active_grading_assessor','_resolve_assessment_rank_target','_apply_assessed_membership_target','_starting_assessment_target_allowed','_resolve_dated_assessment_target','get_dated_assessment_candidates']);
+  const selected=currentCatalog.routines.filter(r=>required.has(r.name));
+  assert.equal(selected.length,required.size,'Current assessment routines missing or overloaded');
+  for(const routine of selected)query(routine.definition);
+  console.log('Installed 16 exact current production assessment definitions into fictional fixture.');
+ }
+ const permissionsBefore=query("select proowner::text||coalesce(proacl::text,'') from pg_proc where oid='public.prepare_bulk_assessment(uuid,uuid,date,uuid,text,uuid,jsonb)'::regprocedure" );
+ query(read('supabase/pending/098_past_dated_assessment_preparation.sql'));
+ assert.equal(query("select proowner::text||coalesce(proacl::text,'') from pg_proc where oid='public.prepare_bulk_assessment(uuid,uuid,date,uuid,text,uuid,jsonb)'::regprocedure"),permissionsBefore,'Preparation owner/ACL changed');
+ const tableSnapshot=()=>query(query("select string_agg(format('select %L as relation,count(*) as rows,md5(coalesce(string_agg(to_jsonb(r)::text,%L order by to_jsonb(r)::text),%L)) as fingerprint from %I.%I r',n.nspname||'.'||c.relname,'','',n.nspname,c.relname),' union all ' order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'")+' order by relation');
+ const beforeTests=tableSnapshot();
+ query(read('tests/sql/098_past_dated_assessment_assertions.sql'));
  query(read('tests/sql/096_assessment_higher_rank_targets_assertions.sql'));
  query(read('tests/sql/097_aikido_starting_assessment_age_assertions.sql'));
+ assert.equal(tableSnapshot(),beforeTests,'Assessment test rollback left row changes');
+ writeFileSync(path.join(root,'expected-prepare.sql'),query("select pg_get_functiondef('public.prepare_bulk_assessment(uuid,uuid,date,uuid,text,uuid,jsonb)'::regprocedure)")+'\n');
  writeFileSync(path.join(root,'expected-routines.json'),query("select jsonb_agg(jsonb_build_object('name',p.proname,'definition',pg_get_functiondef(p.oid)) order by p.proname) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('_starting_assessment_target_allowed','_resolve_dated_assessment_target','get_dated_assessment_candidates','get_bulk_assessment_candidates_with_member_ids','prepare_bulk_assessment','submit_bulk_assessment','_apply_assessed_membership_target')"));
- console.log('PASS: dated starting grades, higher targets, pass/fail attempts, stale rejection and access checks.');
- writeFileSync(path.join(root,'result.json'),JSON.stringify({passed:true,capturedRoutines:!!process.argv[3],syntheticOnly:true,remoteCalls:false}));
+ console.log('PASS: 13-member past-day preparation/finalization, finite dates, future/chronology rejection, retries, zero residue, dated starting grades and higher targets.');
+ writeFileSync(path.join(root,'result.json'),JSON.stringify({passed:true,capturedRoutines:!!process.argv[3],current098Baseline,syntheticOnly:true,remoteCalls:false,zeroResidue:true,ownerAndAclPreserved:true,expectedPrepareSha256:createHash('sha256').update(readFileSync(path.join(root,'expected-prepare.sql'))).digest('hex')}));
  console.log('Synthetic cluster retained: '+root);
 }finally{if(started)run('pg_ctl',['-D',data,'-m','fast','-w','stop']);}

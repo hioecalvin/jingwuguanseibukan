@@ -91,7 +91,7 @@ test('Super Admin prepares pending certificates and submits one atomic pass/fail
   });
 });
 
-test('assessment search finds JS IDs and keeps selected members first', async ({ page }) => {
+test('assessment search puts matches before selections and clears on selection, Escape or Clear', async ({ page }) => {
   await page.goto(NAV_ORIGIN + '/admin-assessments');
   await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
   await page.getByRole('button', { name: 'Load eligible roster' }).click();
@@ -101,11 +101,38 @@ test('assessment search finds JS IDs and keeps selected members first', async ({
   await expect(page.getByRole('checkbox', { name: 'Include Citra Junior' })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: 'Include Akira Senior' })).toHaveCount(0);
   await page.getByRole('checkbox', { name: 'Include Citra Junior' }).check();
+  await expect(search).toHaveValue('');
+  await expect(search).toBeFocused();
   await search.fill('Akira');
   const choices = page.getByRole('checkbox', { name: /^Include / });
   await expect(choices).toHaveCount(2);
+  await expect(choices.first()).toHaveAccessibleName('Include Akira Senior');
+  await expect(choices.last()).toHaveAccessibleName('Include Citra Junior');
+  await search.fill('no-such-member');
+  await expect(choices).toHaveCount(1);
+  await expect(choices.first()).toBeChecked();
+  await search.press('Escape');
+  await expect(search).toHaveValue('');
+  await expect(choices).toHaveCount(3);
   await expect(choices.first()).toHaveAccessibleName('Include Citra Junior');
+  await search.fill('Budi');
+  await page.getByRole('button', { name: 'Clear search', exact: true }).click();
+  await expect(search).toHaveValue('');
+  await expect(search).toBeFocused();
   await expect(page.getByText('Included 1 of 3 eligible candidates.')).toBeVisible();
+});
+
+test('past assessment dates remain usable when preparing certificates', async ({ page }) => {
+  await page.goto(NAV_ORIGIN + '/admin-assessments');
+  await page.getByRole('region', { name: '1. Assessment scope' }).getByRole('combobox').nth(1).selectOption('fixture-dojo');
+  const date = page.getByLabel('Assessment date');
+  await date.fill('2026-11-15');
+  await expect(date).not.toHaveAttribute('min');
+  await page.getByRole('button', { name: 'Load eligible roster' }).click();
+  await page.getByRole('button', { name: 'Include visible' }).click();
+  await page.getByRole('button', { name: 'Prepare roster and pending certificates' }).click();
+  await expect(page.getByRole('status')).toContainText('Prepared assessment opened with 3 candidates');
+  await expect(date).toHaveValue('2026-11-15');
 });
 
 test('higher target selection is saved in the prepared roster and then fixed', async ({ page }) => {
