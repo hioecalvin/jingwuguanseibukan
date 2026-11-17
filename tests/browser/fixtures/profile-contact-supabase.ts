@@ -163,7 +163,10 @@ export function createClient() {
       }),
     },
     from: (table: string) => queryFor(table),
-    rpc: async (name: string, args?: ContactArguments | { new_avatar_url: string }) => {
+    rpc: async (name: string, args?: ContactArguments | { new_avatar_url: string } | { target_membership_id: string }) => {
+      if (name === 'get_membership_current_rank_date') {
+        return {data: args && 'target_membership_id' in args && args.target_membership_id === 'fixture-membership-aikido' ? '2026-11-15' : null, error:null};
+      }
       if (name === 'get_my_last_training_sessions') {
         fixtureState.trainingRequests += 1;
         if (new URLSearchParams(window.location.search).has('training-error')) {

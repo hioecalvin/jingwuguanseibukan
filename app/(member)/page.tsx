@@ -162,6 +162,8 @@ export default function HomePage() {
       Announcement[]
     >([]);
 
+  const [canRecordTraining, setCanRecordTraining] = useState(false);
+
   const [
     events,
     setEvents,
@@ -410,6 +412,10 @@ export default function HomePage() {
           );
         }
 
+        // Use the same caller-bound permission check as the training form.
+        // Instructor titles and ordinary class membership do not grant access.
+        const trainingScopes = await supabase.rpc("get_manageable_training_scopes");
+
         if (
           !active
         ) {
@@ -419,6 +425,7 @@ export default function HomePage() {
         setProfile(
           profileData as Profile
         );
+        setCanRecordTraining(!trainingScopes.error && Array.isArray(trainingScopes.data) && trainingScopes.data.length > 0);
 
         setMemberships(
           (
@@ -898,7 +905,7 @@ export default function HomePage() {
        * QUICK ACTIONS
        */}
 
-      <CompactRecord summary={<>Quick Access</>} detail="Repository, calendar, subscription & inbox" as="section" defaultExpanded
+      <CompactRecord summary={<>Quick Access</>} detail={canRecordTraining ? "Training sessions, repository, calendar & more" : "Repository, calendar, subscription & inbox"} as="section" defaultExpanded
         className="
           mt-8
         "
@@ -924,6 +931,13 @@ export default function HomePage() {
             xl:grid-cols-4
           "
         >
+          {canRecordTraining && <QuickAction
+            title="Training Session"
+            eyebrow="Instructor"
+            description="Record training, mark attendance and review session history."
+            action="Record Training Session"
+            onClick={() => router.push("/admin/training-sessions")}
+          />}
           <QuickAction
             title="Repository"
             eyebrow="Training"

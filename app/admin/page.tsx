@@ -96,6 +96,7 @@ export default function AdminDashboardPage() {
     hasRepositoryUpload,
     setHasRepositoryUpload,
   ] = useState(false);
+  const [canRecordTraining, setCanRecordTraining] = useState(false);
 
   /*
    * ============================================================
@@ -242,6 +243,7 @@ export default function AdminDashboardPage() {
           repositoryUploadError
         );
       }
+      const trainingScopes = await supabase.rpc("get_manageable_training_scopes");
 
       /*
        * ACCESS CHECK
@@ -266,6 +268,7 @@ export default function AdminDashboardPage() {
         setProfile(
           profileData as Profile
         );
+        setCanRecordTraining(!trainingScopes.error && Array.isArray(trainingScopes.data) && trainingScopes.data.length > 0);
 
         setMemberships(
           adminMemberships
@@ -688,6 +691,15 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </header>
+
+      {canRecordTraining && <section aria-label="Quick Access" className="mt-6">
+        <h2 className="mb-2 text-sm font-semibold text-neutral-400">Quick Access</h2>
+        <button type="button" onClick={() => router.push("/admin/training-sessions")}
+          className="min-h-11 rounded-xl border border-sky-800 bg-sky-950/30 px-4 py-3 text-left text-sky-200 hover:bg-sky-950/60">
+          <span className="block font-semibold">Training Session</span>
+          <span className="text-sm">Record Training Session · Attendance &amp; history</span>
+        </button>
+      </section>}
 
       {/*
        * MESSAGE

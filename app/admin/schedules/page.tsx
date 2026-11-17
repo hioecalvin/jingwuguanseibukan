@@ -116,7 +116,8 @@ export default function ScheduleManagementPage() {
         const result = await supabase.rpc("get_regular_schedules_with_whatsapp", { include_inactive: true }).eq("dojo_id", form.dojoId);
         if (!active) return;
         if (result.error) throw new Error("Schedules could not be loaded.");
-        setSchedules(((result.data ?? []) as ScheduleRow[]).filter(row => row.can_manage));
+        setSchedules(((result.data ?? []) as ScheduleRow[]).filter(row => row.can_manage).sort((a,b) =>
+          ((a.day_of_week + 6) % 7) - ((b.day_of_week + 6) % 7) || a.start_time.localeCompare(b.start_time)));
       } catch {
         if (active) { setSchedules([]); setListError("Schedules could not be loaded. Please retry."); }
       } finally { if (active) setListLoading(false); }
@@ -290,7 +291,7 @@ export default function ScheduleManagementPage() {
                 onChange={(event) => setForm((current) => ({ ...current, dayOfWeek: event.target.value }))}
                 className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
               >
-                {DAY_NAMES.map((day, index) => <option key={day} value={index}>{day}</option>)}
+                {[1,2,3,4,5,6,0].map(index => <option key={index} value={index}>{DAY_NAMES[index]}</option>)}
               </select>
             </label>
 

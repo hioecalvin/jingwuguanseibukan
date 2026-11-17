@@ -4,12 +4,22 @@ import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
 const fixture = NAV_ORIGIN + '/admin-schedules?member-view';
 const dojoIds = Array.from({ length: 8 }, (_, index) => `10000000-0000-0000-0000-${String(index + 1).padStart(12, '0')}`);
 
-test('only the chosen category loads and details expand on demand', async ({ page }) => {
+test('initial timetable starts on Monday and ends on Sunday without a filter',async({page})=>{
+ await page.goto(fixture+'&week-order');
+ await expect(page.getByLabel('Choose dojo')).toHaveValue('');
+ const rows=page.getByRole('article');
+ await expect(rows).toHaveCount(7);
+ for(const [index,day] of ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].entries()) {
+  await expect(rows.nth(index).getByRole('button')).toContainText(day);
+ }
+});
+
+test('all schedules load first, then only the chosen category loads with collapsed details', async ({ page }) => {
   await page.goto(fixture);
   const dojo = page.getByRole('combobox', { name: 'Choose dojo' });
   await expect(dojo.getByRole('option', { name: 'Fixture Dojo · Fixture Aikido' })).toBeAttached();
   await expect(dojo).toHaveValue('');
-  await expect(page.getByRole('article')).toHaveCount(0);
+  await expect(page.getByRole('article')).toHaveCount(3);
 
   await dojo.selectOption('fixture-dojo');
   const first = page.getByRole('article').first();
@@ -25,8 +35,8 @@ test('only the chosen category loads and details expand on demand', async ({ pag
   const classPicker = page.getByRole('combobox', { name: 'Choose class' });
   await expect(classPicker).toHaveValue('');
   await expect(dojo).toHaveCount(0);
-  await expect(classPicker.getByRole('option')).toHaveText(['Select a class', 'Fixture Aikido', 'Kungfu Kids']);
-  await expect(page.getByRole('article')).toHaveCount(0);
+  await expect(classPicker.getByRole('option')).toHaveText(['All classes', 'Fixture Aikido', 'Kungfu Kids']);
+  await expect(page.getByRole('article')).toHaveCount(3);
 
   await classPicker.selectOption('fixture-class');
   await expect(page.getByRole('article')).toHaveCount(2);
@@ -46,15 +56,16 @@ test('only the chosen category loads and details expand on demand', async ({ pag
   await expect(dojo).toHaveValue('');
   await expect(classPicker).toHaveCount(0);
   await page.waitForTimeout(350); // Delayed response from the previous dojo must not repopulate the list.
-  await expect(page.getByRole('article')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'South Dojo', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('article')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: 'South Dojo', exact: true })).toHaveCount(1);
   const requests = await page.evaluate(() => (window as unknown as {
-    scheduleRequests: Array<{ name: string; column?: string; value?: string }>;
+    scheduleRequests: Array<{ name: string; column?: string; value?: string; values?: string[] }>;
   }).scheduleRequests);
   expect(requests.filter(request => request.name === 'get_dojo_contact_details')).toHaveLength(1);
-  expect(requests.filter(request => request.name === 'get_regular_schedules_with_whatsapp').map(r => [r.column, r.value])).toEqual([
-    ['dojo_id', 'fixture-dojo'], ['dojo_id', 'dojo-b'], ['class_id', 'fixture-class'],
-    ['class_id', 'class-kids'], ['class_id', 'class-kids'],
+  expect(requests.filter(request => request.name === 'get_regular_schedules_with_whatsapp').map(r => [r.column, r.value ?? r.values])).toEqual([
+    ['dojo_id', ['fixture-dojo','dojo-b','dojo-c']],
+    ['dojo_id', 'fixture-dojo'], ['dojo_id', 'dojo-b'], ['dojo_id', ['fixture-dojo','dojo-b','dojo-c']], ['class_id', 'fixture-class'],
+    ['class_id', 'class-kids'], ['class_id', 'class-kids'], ['dojo_id', ['fixture-dojo','dojo-b','dojo-c']],
   ]);
 });
 
@@ -75,11 +86,11 @@ test('combined dojos load only their approved UUIDs with mixed classes in day an
   await page.goto(fixture + '&grouped-dojos');
   const dojo = page.getByLabel('Choose dojo');
   await expect(dojo.getByRole('option')).toHaveText([
-    'Select a dojo', 'Chushin', 'Chushin Annex · Karate', 'South Dojo · Aikido', 'Zhongxin', 'Zhongxin · Bagua',
+    'All dojos', 'Chushin', 'Chushin Annex · Karate', 'South Dojo · Aikido', 'Zhongxin', 'Zhongxin · Bagua',
   ]);
-  await expect(page.getByRole('article')).toHaveCount(0);
+  await expect(page.getByRole('article')).toHaveCount(8);
   let reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);
-  expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toHaveLength(0);
+  expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toHaveLength(1);
 
   await dojo.selectOption({ label: 'Chushin' });
   const rows = page.getByRole('article');
@@ -114,7 +125,7 @@ test('combined dojos load only their approved UUIDs with mixed classes in day an
   await page.getByRole('button', { name: 'By class', exact: true }).click();
   const classPicker = page.getByLabel('Choose class');
   await expect(classPicker).toHaveValue('');
-  await expect(rows).toHaveCount(0);
+  await expect(rows).toHaveCount(8);
   await classPicker.selectOption('class-aikido');
   await expect(rows).toHaveCount(2);
   await expect(rows.nth(0).getByRole('button')).toContainText('South Dojo');
@@ -125,9 +136,11 @@ test('combined dojos load only their approved UUIDs with mixed classes in day an
 
   reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);
   expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toEqual([
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds},
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds.slice(0,2)},
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds.slice(2,5)},
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',value:dojoIds[5]},
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds},
     {name:'get_regular_schedules_with_whatsapp',column:'class_id',value:'class-aikido'},
     {name:'get_regular_schedules_with_whatsapp',column:'class_id',value:'class-taiji'},
   ]);
@@ -166,12 +179,15 @@ test('a class link opens just that dojo record and keeps its scope on refresh', 
   await page.getByRole('button', {name:'By dojo', exact:true}).click();
   await expect(dojo).toHaveValue('');
   await expect(dojo.getByRole('option', {name:'Chushin · Aikido', exact:true})).toHaveCount(0);
+  await expect(rows).toHaveCount(8);
   const reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);
   expect(reads.filter(request => request.name === 'get_regular_schedules_with_whatsapp')).toEqual([
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',value:dojoIds[0]},
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',value:dojoIds[0]},
     {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds.slice(0,2)},
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds},
     {name:'get_regular_schedules_with_whatsapp',column:'class_id',value:'class-aikido'},
+    {name:'get_regular_schedules_with_whatsapp',column:'dojo_id',values:dojoIds},
   ]);
 });
 
@@ -193,7 +209,7 @@ test('mismatched or unavailable class links do not request any schedule', async 
 
 test('a combined location with one visible dojo uses only that UUID', async ({ page }) => {
   await page.goto(fixture + '&grouped-dojos&limited-dojos&dojo=' + dojoIds[0]);
-  await expect(page.getByLabel('Choose dojo').getByRole('option')).toHaveText(['Select a dojo', 'Chushin']);
+  await expect(page.getByLabel('Choose dojo').getByRole('option')).toHaveText(['All dojos', 'Chushin']);
   await expect(page.getByRole('article')).toHaveCount(1);
   await expect(page.getByRole('article').getByRole('button')).toContainText('Aikido');
   const reads = await page.evaluate(() => (window as unknown as {scheduleRequests: {name: string}[]}).scheduleRequests);

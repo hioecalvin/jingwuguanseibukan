@@ -6,11 +6,14 @@ export function createClient() {
     class_memberships: [membership],
     dojo_admin_assignments: role === 'member' ? [] : [membership],
     announcements: [{ id: 'announcement', title: 'Training update', message: 'Bring your training equipment.', created_at: '2026-10-05T00:00:00Z', classes: { name: 'Aikido' } }],
-    events: [],
+    events: new URLSearchParams(window.location.search).has('calendar') ? [{id:'winter',title:'Synthetic December seminar',starts_at:'2026-12-10T12:00:00+07:00',end_at:null,description:'Fixture seminar',location:'Fixture Dojo',classes:{name:'Aikido'}}] : [],
   };
   return {
     auth: { getUser: async () => ({ data: { user: { id: 'fixture-user' } }, error: null }) },
     rpc: async (name: string) => {
+      if (name === 'get_manageable_training_scopes') return {
+        data: ['instructor', 'super_admin'].includes(role) ? [{dojo_id:'fixture-dojo',class_id:'fixture-class'}] : [], error: null,
+      };
       if (name !== 'get_my_repository_upload_scopes') throw new Error('Unexpected fixture RPC');
       return { data: [], error: null };
     },

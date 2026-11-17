@@ -233,6 +233,7 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
   // granted explicitly by their own immutable follow-up migration.
   const laterAllowedNames = new Set([
     "get_dated_assessment_candidates", // 097: authenticated Super Admin, assessment-date age policy.
+    "get_membership_current_rank_date", // 072/074: own membership or scoped administration.
     "get_class_instructor_appointments", "set_class_instructor_appointment", "get_manageable_training_scopes",
     "get_my_settlement_destinations", "nominate_settlement_destination", "get_settlement_destination_account",
     "get_dojo_contact_details", "update_dojo_contact_details",
@@ -290,6 +291,8 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_settlement_eligible_payment_details",
   ]);
   const startingGradeSql = fs.readFileSync(path.join(process.cwd(), "supabase/pending/097_aikido_starting_assessment_age.sql"), "utf8");
+  const rankDateSql = fs.readFileSync('supabase/pending/072_member_source_dates.sql','utf8');
+  assert.match(rankDateSql, /grant execute on function public\.get_membership_current_rank_date\(uuid\) to authenticated/i);
   assert.match(startingGradeSql, /grant execute on function public\.get_dated_assessment_candidates\(uuid,uuid,date\) to authenticated/i);
   assert.match(startingGradeSql, /revoke all on function public\._resolve_dated_assessment_target\(uuid,uuid,date\) from public,anon,authenticated,service_role/i);
   assert.match(startingGradeSql, /is_active_super_admin\(auth\.uid\(\)\)/);

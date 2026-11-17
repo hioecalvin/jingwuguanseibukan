@@ -93,6 +93,8 @@ export default function SchedulesPage() {
   const [selectedDojo, setSelectedDojo] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [scopedDojo, setScopedDojo] = useState<ScheduleCategory | null>(null);
+  const [categoriesReady, setCategoriesReady] = useState(false);
+  const [invalidLink, setInvalidLink] = useState(false);
   const selected = view === "dojo" ? selectedDojo : selectedClass;
   const categories = useMemo(() => {
     const options = scheduleCategories(dojos, view);
@@ -100,6 +102,11 @@ export default function SchedulesPage() {
     return [...options.filter(option => option.id !== scopedDojo.id), scopedDojo];
   }, [dojos, view, scopedDojo]);
   const category = categories.find(option => option.id === selected);
+  const sections = (category ? [category] : scheduleCategories(dojos, view)).map(option => ({
+    ...option,
+    rows: schedules.filter(row => option.filterIds.includes(view === "dojo" ? row.dojo_id : row.class_id)
+      && (!option.classId || row.class_id === option.classId)),
+  })).filter(option => option.rows.length > 0);
   const [retry, setRetry] = useState(0);
   const [categoryRetry, setCategoryRetry] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -108,7 +115,7 @@ export default function SchedulesPage() {
   useEffect(() => {
     let active = true;
     async function loadDojos() {
-      setLoading(true); setMessage("");
+      setLoading(true); setCategoriesReady(false); setMessage("");
       try {
         const result = await supabase.rpc("get_dojo_contact_details");
         if (!active) return;
@@ -120,6 +127,7 @@ export default function SchedulesPage() {
         const classId = params.get("class");
         const requestedDojo = rows.find(row => row.dojo_id === dojoId &&
           (classId === null || row.class_id === classId));
+        setInvalidLink((dojoId !== null || classId !== null) && !requestedDojo);
         setSelectedDojo("");
         setScopedDojo(null);
         if (requestedDojo && classId !== null) {
@@ -130,7 +138,8 @@ export default function SchedulesPage() {
           });
           setSelectedDojo(requestedDojo.dojo_id);
         } else if (requestedDojo) setSelectedDojo(dojoCategory(requestedDojo).id);
-        setLoading(false);
+        setCategoriesReady(true);
+        if ((dojoId !== null || classId !== null) && !requestedDojo) setLoading(false);
       } catch {
         if (active) { setMessage("Schedule categories could not be loaded."); setLoading(false); }
       }
@@ -140,20 +149,23 @@ export default function SchedulesPage() {
   }, [supabase, categoryRetry]);
 
   useEffect(() => {
-    if (!category) return;
-    const { filterIds, classId } = category;
-    const column = view === "dojo" ? "dojo_id" : "class_id";
+    if (!categoriesReady || invalidLink) return;
+    const filterIds = category?.filterIds ?? dojos.map(dojo => dojo.dojo_id);
+    const classId = category?.classId;
+    const column = category && view === "class" ? "class_id" : "dojo_id";
     let active = true;
     async function loadSchedules() {
       setLoading(true); setMessage("");
       try {
-        const query = supabase.rpc("get_regular_schedules_with_whatsapp", { include_inactive: false });
-        const result = await (filterIds.length === 1 ? query.eq(column, filterIds[0]) : query.in(column, filterIds));
+        const result = filterIds.length === 0 ? { data: [], error: null } : await (() => {
+          const query = supabase.rpc("get_regular_schedules_with_whatsapp", { include_inactive: false });
+          return filterIds.length === 1 ? query.eq(column, filterIds[0]) : query.in(column, filterIds);
+        })();
         if (!active) return;
         if (result.error) throw new Error("Unable to load this schedule.");
         const rows = (result.data ?? []) as ScheduleRow[];
         setSchedules(rows.filter(row => filterIds.includes(row[column]) && (!classId || row.class_id === classId)).sort((a, b) =>
-          a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time) ||
+          ((a.day_of_week + 6) % 7) - ((b.day_of_week + 6) % 7) || a.start_time.localeCompare(b.start_time) ||
           a.dojo_name.localeCompare(b.dojo_name) || a.class_name.localeCompare(b.class_name)
         ));
       } catch {
@@ -162,7 +174,7 @@ export default function SchedulesPage() {
     }
     void loadSchedules();
     return () => { active = false; };
-  }, [supabase, category, view, retry]);
+  }, [supabase, category, view, retry, categoriesReady, invalidLink, dojos]);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -194,7 +206,8 @@ export default function SchedulesPage() {
               setSelectedDojo("");
               setSelectedClass("");
               setScopedDojo(null);
-              if (dojos.length) { setLoading(false); setMessage(""); }
+              setInvalidLink(false);
+              if (categoriesReady) { setLoading(true); setMessage(""); }
             }}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
               view === option
@@ -212,15 +225,16 @@ export default function SchedulesPage() {
           const id = event.target.value;
           if (view === "dojo") setSelectedDojo(id);
           else setSelectedClass(id);
+          setInvalidLink(false);
           setSchedules([]);
-          setLoading(Boolean(id));
+          setLoading(true);
           setMessage("");
         }} className="mt-2 block min-h-11 w-full rounded border border-neutral-600 bg-neutral-950 px-3 py-2">
-          <option value="">{categories.length ? `Select a ${view}` : "No categories available"}</option>
+          <option value="">{categories.length ? `All ${view === "dojo" ? "dojos" : "classes"}` : "No categories available"}</option>
           {categories.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
         </select>
       </label>
-      {(selected || message) && <button type="button" disabled={loading} onClick={() => dojos.length ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>}
+      {!invalidLink && <button type="button" disabled={loading} onClick={() => categoriesReady ? setRetry(value => value + 1) : setCategoryRetry(value => value + 1)} className="min-h-11 rounded border px-3 disabled:opacity-50">{message ? "Retry schedules" : "Refresh schedules"}</button>}
       {loading ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
           Loading schedules…
@@ -229,11 +243,11 @@ export default function SchedulesPage() {
         <p role="alert" className="rounded-2xl border border-red-900 bg-red-950/50 p-6 text-red-200">
           {message}
         </p>
-      ) : !category ? null : schedules.length === 0 ? (
+      ) : invalidLink ? <p role="status">This schedule link is unavailable. Choose a dojo or class to continue.</p> : sections.length === 0 ? (
         <p className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 text-neutral-300">
-          No regular schedules for this {view}.
+          {category ? `No regular schedules for this ${view}.` : "No regular schedules available."}
         </p>
-      ) : (
+      ) : sections.map(category => (
             <section
               key={category.id}
               className="overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/60"
@@ -246,7 +260,7 @@ export default function SchedulesPage() {
               </div>
 
               <div className="divide-y divide-neutral-800">
-                {schedules.map((row) => (
+                {category.rows.map((row) => (
                   <CompactRecord alwaysCollapsible summary={<>{DAY_NAMES[row.day_of_week]} · {formatTime(row.start_time)} – {formatTime(row.finish_time)}</>} detail={view === "class" ? row.dojo_name : row.class_name} key={row.schedule_id} className="space-y-3 px-5 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       {view === "class" && <DojoLogo name={row.dojo_name} />}
@@ -281,7 +295,7 @@ export default function SchedulesPage() {
                 ))}
               </div>
             </section>
-      )}
+      ))}
     </div>
   );
 }

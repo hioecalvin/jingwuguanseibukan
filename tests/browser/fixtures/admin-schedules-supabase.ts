@@ -33,6 +33,10 @@ let schedules: Array<Record<string, unknown>> = (memberView || multiScope) ? sco
   is_active:true,can_manage:!memberView,venue:null,notes:null,updated_at:'',
 })) : [];
 
+if (new URLSearchParams(location.search).has('week-order')) {
+ schedules=[0,3,1,6,2,5,4].map(day=>({...schedules[0],schedule_id:`week-${day}`,day_of_week:day}));
+}
+
 
 function timeMinutes(value: unknown) {
   if (typeof value !== 'string' || !/^\d{2}:\d{2}$/.test(value)) return Number.NaN;

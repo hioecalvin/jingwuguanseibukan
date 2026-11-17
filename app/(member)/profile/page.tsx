@@ -4,6 +4,7 @@ import { isAikidoYudansha } from "@/lib/aikikai";
 import ProfilePhotoCrop from "@/components/profile-photo-crop";
 import MemberEmergencyContact from "@/components/member-emergency-contact";
 import MemberTrainingSummary from "@/components/member-training-summary";
+import MemberRankDuration from "@/components/member-rank-duration";
 
 
 import MemberIdLink from "@/components/member-id-link";
@@ -2111,6 +2112,7 @@ export default function ProfilePage() {
                       />
                     </div>
 
+                    <MemberRankDuration key={`${membership.id}:${membership.rank_id}`} membershipId={membership.id} rankId={membership.rank_id} />
                     <MemberTrainingSummary membershipId={membership.id} />
 
                     {/* BREAK MANAGEMENT */}
