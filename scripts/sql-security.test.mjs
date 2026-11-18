@@ -242,7 +242,7 @@ test("browser ACL migration is explicit, policy-backed, and covers application R
     "get_member_administrative_status", "set_member_administrative_status", "get_bulk_assessment_candidates_with_member_ids",
     "get_my_emergency_contact", "update_my_emergency_contact",
     // Follow-up migrations 078–080 explicitly grant these authenticated entry points.
-    "get_training_session_roster", "save_training_session", "get_training_sessions",
+    "get_training_session_roster", "save_training_session", "get_training_sessions", "get_training_instructor_options", "save_training_session_with_instructor",
     "get_training_session_audit", "get_membership_training_totals",
     "get_member_profile_by_js_id", "get_my_member_directory_v3", "get_verified_member_accounts",
     "update_member_personal_details", "get_member_personal_details", "get_member_personal_detail_audit",

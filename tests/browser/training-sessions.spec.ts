@@ -3,6 +3,8 @@ import { NAV_ORIGIN } from '../../scripts/browser-smoke-config.mjs';
 test('instructor submits same-class visitor attendance and edits with history', async ({ page }) => {
   await page.goto(NAV_ORIGIN + '/training-sessions');
   await page.getByLabel('Class and host dojo').selectOption('host');
+  await expect(page.getByRole('combobox', {name:'Instructor',exact:true})).toHaveValue('primary');
+  await page.getByRole('combobox', {name:'Instructor',exact:true}).selectOption('replacement');
   await page.getByLabel('Session details').fill('Footwork and partner practice');
   await page.getByLabel('Duration (minutes)').fill('90');
   await page.getByRole('checkbox', { name: /JS-0001/ }).check();
@@ -14,8 +16,11 @@ test('instructor submits same-class visitor attendance and edits with history', 
   const history = page.getByRole('region', { name: 'Training session history' });
   await history.locator('summary').filter({ hasText: '2 attendees' }).click();
   await expect(history).toContainText('90 minutes');
+  await expect(history).toContainText('Instructor: Active Member Replacement');
+  await expect(history).toContainText('Recorded by: Recording Admin');
   await history.getByRole('button', { name: 'Edit session' }).click();
   await expect(page.getByLabel('Class and host dojo')).toBeDisabled();
+  await expect(page.getByRole('combobox', {name:'Instructor',exact:true})).toHaveValue('replacement');
   await page.getByRole('checkbox', { name: /Visiting Member/ }).uncheck();
   await page.getByLabel('Session details').fill('Corrected attendance');
   await page.getByRole('button', { name: 'Save changes' }).click();
@@ -26,6 +31,18 @@ test('instructor submits same-class visitor attendance and edits with history', 
   await history.locator('summary').filter({ hasText: 'Training days' }).click();
   await expect(history).toContainText('Current grade: 1 training days');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('a session without one scheduled primary requires an explicit instructor', async ({page}) => {
+  await page.goto(NAV_ORIGIN + '/training-sessions?no-primary=1');
+  await page.getByLabel('Class and host dojo').selectOption('host');
+  await expect(page.getByRole('combobox', {name:'Instructor',exact:true})).toBeEnabled();
+  await expect(page.getByRole('combobox', {name:'Instructor',exact:true})).toHaveValue('');
+  await page.getByLabel('Session details').fill('Substitute-led training');
+  await page.getByRole('checkbox', {name:/Home Member/}).check();
+  await expect(page.getByRole('button',{name:'Submit session'})).toBeDisabled();
+  await page.getByRole('combobox', {name:'Instructor',exact:true}).selectOption('replacement');
+  await expect(page.getByRole('button',{name:'Submit session'})).toBeEnabled();
 });
 test('attendance failure blocks submit and retries without exposing internals', async ({ page }) => {
   await page.goto(NAV_ORIGIN + '/training-sessions?roster-fail=1');

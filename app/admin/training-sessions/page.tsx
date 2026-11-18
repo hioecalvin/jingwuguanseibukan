@@ -9,8 +9,9 @@ import { createClient } from "@/lib/supabase/client";
 
 type Scope = { dojo_id: string; dojo_name: string; class_id: string; class_name: string };
 type Attendee = { membership_id: string; member_id: string; full_name: string; dojo_name: string | null; rank_name: string | null };
-type Session = { id: string; dojo_id: string; dojo_name: string; class_name: string; session_date: string; details: string; duration_minutes: number; version: number; instructor_name: string; participants: Attendee[] };
-type Revision = { version: number; recorded_at: string; new_values: { session_date: string; details: string; duration_minutes: number; attendees: unknown[] } };
+type Instructor = { id: string; name: string; member_id: string };
+type Session = { id: string; dojo_id: string; dojo_name: string; class_name: string; session_date: string; details: string; duration_minutes: number; version: number; instructor_id: string | null; instructor_name: string | null; recorded_by_name: string; participants: Attendee[] };
+type Revision = { version: number; recorded_at: string; new_values: { session_date: string; details: string; duration_minutes: number; instructor_name_snapshot?: string; attendees: unknown[] } };
 const field = "w-full rounded-lg border border-neutral-700 bg-neutral-900 p-2 text-sm text-white";
 function jakartaToday() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
 
@@ -23,6 +24,12 @@ export default function TrainingSessionsPage() {
   const [roster, setRoster] = useState<Attendee[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [dojo, setDojo] = useState("");
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [instructor, setInstructor] = useState("");
+  const [primaryInstructor, setPrimaryInstructor] = useState("");
+  const [instructorReady, setInstructorReady] = useState("");
+  const [instructorError, setInstructorError] = useState(false);
+  const [instructorReload, setInstructorReload] = useState(0);
   const [date, setDate] = useState(jakartaToday);
   const [details, setDetails] = useState("");
   const [minutes, setMinutes] = useState("60");
@@ -57,6 +64,24 @@ export default function TrainingSessionsPage() {
     setLoading(false);
   }, [client]);
   useEffect(() => { void load(); }, [load]);
+  const instructorScope = `${dojo}:${date}`;
+  useEffect(() => {
+    let active = true;
+    setInstructorReady(""); setInstructorError(false); setInstructor(""); setInstructors([]); setPrimaryInstructor("");
+    if (!dojo) return;
+    void (async () => {
+      try {
+        const result = await client.rpc("get_training_instructor_options", { target_dojo_id: dojo, training_date: date });
+        if (!active) return;
+        if (result.error || !result.data) throw new Error();
+        setInstructors(result.data.instructors ?? []);
+        setPrimaryInstructor(result.data.primary_instructor_id ?? "");
+        setInstructor(editing ? editing.instructor_id ?? "" : result.data.primary_instructor_id ?? "");
+        setInstructorReady(`${dojo}:${date}`);
+      } catch { if (active) setInstructorError(true); }
+    })();
+    return () => { active = false; };
+  }, [client, dojo, date, editing, instructorReload]);
   const loadRoster = useCallback(async (host: string, retained: Attendee[] = []) => {
     const generation = ++rosterGeneration.current;
     setRoster([]); setRosterFailed(false); setRosterLoading(Boolean(host));
@@ -80,14 +105,15 @@ export default function TrainingSessionsPage() {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   const submit = async (event: FormEvent) => {
-    event.preventDefault(); if (saving || rosterLoading || rosterFailed) return;
+    event.preventDefault(); if (saving || rosterLoading || rosterFailed || !instructor || instructorReady !== instructorScope) return;
     setSaving(true); setError(""); setNotice("");
     requestId.current ??= crypto.randomUUID();
     try {
-      const result = await client.rpc("save_training_session", {
+      const result = await client.rpc("save_training_session_with_instructor", {
         target_session_id: requestId.current, target_dojo_id: dojo, training_date: date,
         training_details: details.trim(), minutes: Number(minutes), attendee_membership_ids: selected,
         expected_version: editing?.version ?? 0,
+        target_instructor_id: instructor,
       });
       if (result.error) {
         setError(result.error.code === "40001" ? "This session changed or a previous submit succeeded. Reload the history before editing it again." : "The session could not be saved. Check the date, attendance and dojo access. Backdated attendance needs a known rank on that date.");
@@ -117,6 +143,16 @@ export default function TrainingSessionsPage() {
           <label className="text-sm">Training date<input className={field} type="date" required max={jakartaToday()} value={date} onChange={(event) => setDate(event.target.value)} /></label>
           <label className="text-sm">Duration (minutes)<input className={field} type="number" required min={1} max={1440} step={1} value={minutes} onChange={(event) => setMinutes(event.target.value)} /></label>
         </div>
+        <section aria-label="Session instructor" className="space-y-2 rounded-lg border border-neutral-800 p-3">
+          <label className="block text-sm">Instructor<select className={field} required value={instructor} disabled={!dojo || instructorReady !== instructorScope} onChange={event => setInstructor(event.target.value)}>
+            <option value="">{dojo && !instructorError && instructorReady !== instructorScope ? "Loading instructors…" : "Select the member who taught"}</option>
+            {editing?.instructor_id && !instructors.some(person => person.id === editing.instructor_id) && <option value={editing.instructor_id}>{editing.instructor_name ?? "Recorded instructor"} · historical record</option>}
+            {instructors.map(person => <option key={person.id} value={person.id}>{person.name} · {person.member_id}{person.id === primaryInstructor ? " · Primary instructor" : ""}</option>)}
+          </select></label>
+          <p className="text-xs text-neutral-400">The scheduled primary instructor is selected automatically when there is one for this day. Choose any active member if someone else taught. This does not grant instructor or admin access.</p>
+          {dojo && instructorReady === instructorScope && !primaryInstructor && !editing && <p className="text-xs text-neutral-400">No single primary instructor is scheduled for this day. Select who taught.</p>}
+          {instructorError && <p role="alert">Instructors could not be loaded. <button type="button" className="underline" onClick={() => setInstructorReload(value => value + 1)}>Retry instructors</button></p>}
+        </section>
         <label className="block text-sm">Session details<textarea className={field} required maxLength={4000} rows={3} value={details} onChange={(event) => setDetails(event.target.value)} /></label>
         <fieldset className="space-y-2"><legend className="text-sm font-semibold">Attendance — {selected.length} selected</legend>
           <input className={field} aria-label="Find attendees" placeholder="Name, JS ID or home dojo" value={search} onChange={(event) => setSearch(event.target.value)} />
@@ -129,7 +165,7 @@ export default function TrainingSessionsPage() {
           {dojo && !rosterLoading && !rosterFailed && !visibleRoster.length && <p className="text-sm text-neutral-400">No matching attendees.</p>}
         </fieldset>
         <p className="text-xs text-neutral-400">Each training date counts once per rank. Multiple sessions retain their duration. Clearing an existing session’s attendance removes its contribution but preserves the edit history.</p>
-        <div className="flex gap-3"><button className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={!dojo || rosterLoading || rosterFailed || (!editing && !selected.length)} type="submit">{saving ? "Saving…" : editing ? "Save changes" : "Submit session"}</button><button type="button" className="rounded-lg border border-neutral-700 px-4 py-2 text-sm" onClick={reset}>Cancel / clear</button></div>
+        <div className="flex gap-3"><button className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold disabled:opacity-50" disabled={!dojo || !instructor || instructorReady !== instructorScope || rosterLoading || rosterFailed || (!editing && !selected.length)} type="submit">{saving ? "Saving…" : editing ? "Save changes" : "Submit session"}</button><button type="button" className="rounded-lg border border-neutral-700 px-4 py-2 text-sm" onClick={reset}>Cancel / clear</button></div>
       </fieldset>
     </form>
     <section aria-label="Training session history" className="space-y-3">
@@ -138,10 +174,10 @@ export default function TrainingSessionsPage() {
       <p className="text-xs text-neutral-400">Latest 200 sessions for this date filter. Use Load older sessions to continue through the history.</p>
       {sessions.map((session) => <details key={`${session.id}:${session.version}`} className="rounded-lg border border-neutral-800 p-3">
         <summary className="cursor-pointer text-sm font-medium">{session.session_date} · {session.class_name} · {session.dojo_name} · {session.participants.length} attendees</summary>
-        <div className="mt-3 space-y-3 text-sm"><p className="whitespace-pre-wrap break-words">{session.details}</p><p>{session.duration_minutes} minutes · Instructor: {session.instructor_name} · Revision {session.version}</p>
+        <div className="mt-3 space-y-3 text-sm"><p className="whitespace-pre-wrap break-words">{session.details}</p><p>{session.duration_minutes} minutes · Instructor: {session.instructor_name ?? "Not recorded"} · Revision {session.version}</p><p>Recorded by: {session.recorded_by_name}</p>
           {session.participants.map((person) => <div key={`${person.membership_id}:${session.version}`}><MemberIdLink memberId={person.member_id} /> · {person.full_name}<MemberTrainingSummary membershipId={person.membership_id} /></div>)}
           <div className="flex gap-3"><button type="button" disabled={saving} className="rounded border border-neutral-700 px-3 py-2" onClick={() => edit(session)}>Edit session</button><button type="button" className="rounded border border-neutral-700 px-3 py-2" onClick={() => void loadAudit(session.id)}>View edit history</button></div>
-          {revisions[session.id]?.map((revision) => <div key={revision.version} className="border-t border-neutral-800 pt-2"><p>Revision {revision.version} · {new Date(revision.recorded_at).toLocaleString()}</p><p className="whitespace-pre-wrap break-words">{revision.new_values.session_date} · {revision.new_values.duration_minutes} minutes · {revision.new_values.attendees.length} attendees — {revision.new_values.details}</p></div>)}
+          {revisions[session.id]?.map((revision) => <div key={revision.version} className="border-t border-neutral-800 pt-2"><p>Revision {revision.version} · {new Date(revision.recorded_at).toLocaleString()}</p><p className="whitespace-pre-wrap break-words">{revision.new_values.session_date} · {revision.new_values.duration_minutes} minutes · Instructor: {revision.new_values.instructor_name_snapshot ?? "Not recorded"} · {revision.new_values.attendees.length} attendees — {revision.new_values.details}</p></div>)}
         </div>
       </details>)}
       {hasMore && <button type="button" disabled={loading || saving} className="rounded border border-neutral-700 px-3 py-2 text-sm" onClick={() => { const last = sessions[sessions.length - 1]; void load(last.session_date, last.id); }}>Load older sessions</button>}
